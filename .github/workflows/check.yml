@@ -47,6 +47,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # The suite never calls Claude: the API runs with CLAUDE_STUB=true and no ANTHROPIC_API_KEY.
       - run: supabase start --workdir apps/e2e
+      # The db tests run in their own database on the same local Supabase, never in the check job.
+      - run: pnpm test:db
       - run: pnpm --filter @mediwise/e2e exec playwright install --with-deps chromium
       - run: pnpm e2e
       - if: failure()
