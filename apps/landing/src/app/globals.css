@@ -36,6 +36,22 @@
   --container-content: 68.75rem;
 }
 
+/*
+ * The Hindi page. Inter draws the Latin text and Noto Sans Devanagari the rest, so marker names look
+ * the same on both pages. Devanagari letters join along a top line, so letter spacing would cut the
+ * line, and the tight hero leading would clip the vowel signs above and below it.
+ */
+:root:lang(hi) {
+  --font-sans:
+    "Rupee", var(--font-inter), var(--font-devanagari), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Rupee", var(--font-jetbrains-mono), var(--font-devanagari), ui-monospace, monospace;
+  --font-display: var(--font-devanagari), ui-sans-serif, sans-serif;
+  --text-hero--line-height: 1.25;
+  --text-hero--letter-spacing: 0;
+  --tracking-tight: 0;
+  --tracking-wider: 0;
+}
+
 @theme inline {
   --shadow-2xs: var(--shadow-flat);
   --shadow-xs: var(--shadow-flat);

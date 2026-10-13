@@ -1,18 +1,19 @@
 import { SectionHeader } from "@/components/section-header";
+import { messages, type Locale } from "@/config/messages";
 import { facts, packs } from "@/lib/facts";
 import { appLinks, buttonStyles } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
-export function Pricing() {
+export function Pricing({ locale }: { locale: Locale }) {
+  const { site, pricing: t } = messages[locale];
   return (
     <section
       id="pricing"
       aria-labelledby="pricing-title"
       className="mx-auto max-w-content px-4 py-12 md:px-8 md:py-20"
     >
-      <SectionHeader id="pricing-title" eyebrow="Pricing" title="Pay for each report you read">
-        One credit reads one report, with up to {facts.maxFiles} files. Prices are in Indian rupees
-        and include GST.
+      <SectionHeader id="pricing-title" eyebrow={t.eyebrow} title={t.title}>
+        {t.body(facts.maxFiles)}
       </SectionHeader>
       <ul className="mt-12 grid gap-4 md:grid-cols-3">
         {packs.map((pack) => {
@@ -26,32 +27,28 @@ export function Pricing() {
               )}
             >
               <div className="flex items-center justify-between gap-2">
-                <h3 className="font-semibold">
-                  {pack.credits} {pack.credits === 1 ? "report" : "reports"}
-                </h3>
+                <h3 className="font-semibold">{t.pack(pack.credits)}</h3>
                 {best && (
                   <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
-                    Lowest price per report
+                    {t.best}
                   </span>
                 )}
               </div>
               <p className="mt-6 font-mono text-4xl tracking-tight">{pack.price}</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                {pack.credits === 1 ? "For one report" : `${pack.perReport} a report`}
+                {pack.credits === 1 ? t.forOneReport : t.perReport(pack.perReport)}
               </p>
               <a
                 href={appLinks.signUp}
                 className={cn("mt-8", best ? buttonStyles.primary : buttonStyles.outline)}
               >
-                Read my report
+                {site.readReport}
               </a>
             </li>
           );
         })}
       </ul>
-      <p className="mt-6 text-sm text-muted-foreground">
-        You can get a refund for a credit that you did not use. Ask within 7 days of the payment.
-      </p>
+      <p className="mt-6 text-sm text-muted-foreground">{t.refund}</p>
     </section>
   );
 }

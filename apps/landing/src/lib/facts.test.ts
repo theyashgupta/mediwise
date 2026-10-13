@@ -29,7 +29,7 @@ test("the marquee shows only marker names from the catalog", () => {
   const known = new Set(
     [...markers, ...derived].flatMap((marker) => [marker.name, marker.shortName]),
   );
-  const names = marqueeRows()
+  const names = marqueeRows("en")
     .flat()
     .flatMap((group) => group.names);
   expect(names.length).toBeGreaterThan(40);
