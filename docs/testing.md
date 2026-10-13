@@ -193,9 +193,10 @@ Update the baseline only when the growth is necessary, or when a chunk is new, r
 - It needs the local Supabase of the e2e suite (`supabase start --workdir apps/e2e`). The API is the same as in `pnpm e2e`: `CLAUDE_STUB=true` and no Claude key.
 - It builds the web and the landing for production and serves them with gzip from `apps/e2e/perf/serve.ts`: the web on port 5174, the landing on port 3200. A dev server or an uncompressed build gives scores that are too low.
 - It makes a new user with the dense history fixture (12 reports in 10 weeks, `db:seed-history`).
-- Lighthouse 12.8.2 runs 3 times on Home, the latest report, `/trends` and the landing, with its default mobile settings: a phone screen, simulated slow 4G and a 4x CPU slowdown. The test uses the median of the 3 scores in each category.
-- The budgets are `appBudget` and `landingBudget` in the spec. The numbers and the reason for each are in [DESIGN.md](DESIGN.md#performance-budgets-medi-88).
-- INP: with a 4x CPU throttle, the test clicks every category chip and both sort buttons on `/trends` two times, at 1440 by 900. INP is the slowest interaction (Event Timing). The test does this on 3 page loads and fails when the median is 200 ms or more.
+- Lighthouse 12.8.2 runs 3 times on Home, the latest report, `/trends` and the landing, with mobile emulation and simulated slow 4G. The test uses the median of the 3 scores in each category.
+- The CPU slowdown is 4x on a machine with a Lighthouse benchmark index of 2000, and scales with the index of the machine. The log shows the index and the slowdown. The reason is in [DESIGN.md](DESIGN.md#performance-budgets-medi-88).
+- The budgets are in the list of pages in the spec. The numbers and the reason for each are in [DESIGN.md](DESIGN.md#performance-budgets-medi-88).
+- INP: with a 4x CPU throttle, the test clicks every category chip and both sort buttons on `/trends` two times, at 1440 by 900. It waits for the paint after each click, as a person does. INP is the slowest interaction (Event Timing). The test does this on 3 page loads and fails when the median is 200 ms or more.
 
 ### Read a failing budget
 

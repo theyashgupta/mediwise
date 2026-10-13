@@ -480,3 +480,26 @@ Two changes came from the measurement:
 
 - **Dialogs have no blur of their own.** With a 24 px dialog blur, opening and closing the shortcuts dialog took 120 to 136 ms against about 80 ms before.
 - **The sidebar has the glass tint but no blur.** With the blur, dark was 92 ms against 80 ms before (18 runs each). Only the fixed wash sits behind the sidebar, so the blur did not change how it looks. It cost a full-height filter on every frame of the collapse animation and under the dialog scrim.
+
+## Performance budgets (MEDI-88)
+
+CI runs Lighthouse and an INP check on every push, in the `perf` job. How to read a failure and how to change a budget is in [testing.md](testing.md#performance-budgets). The bundle size check is in [testing.md](testing.md#bundle-size).
+
+The ticket targets were performance 85, accessibility 100, best practices 95 and SEO 95 on the app, and performance 95 on the landing. Where today's number is lower, the budget is 5 points under it.
+
+**The budgets are provisional.** This Mac stayed loaded by another session, so the first commit sets each budget 10 points under the best local pass. The first CI run on a quiet runner gives the numbers, and the budgets then go to 5 points under them.
+
+| Page | Performance | Accessibility | Best practices | SEO |
+| - | - | - | - | - |
+| Home | 57 (measured 56, 66, 67) | 90 (100) | 90 (100) | 53 (63) |
+| Report | 51 (measured 44, 58, 61) | 90 (100) | 90 (100) | 53 (63) |
+| Trends | 60 (measured 61, 64, 70) | 90 (100) | 90 (100) | 53 (63) |
+| Landing | 82 (measured 92, 92, 92) | 90 (100) | 90 (100) | 90 (100) |
+
+How it was measured on 2026-10-13: production builds served with gzip, the dense history fixture (12 reports in 10 weeks), Lighthouse 12.8.2 with mobile emulation and simulated slow 4G, 3 runs per page. Each measured number is the median of one pass of 3 runs. Another session loaded the 8 GB Mac (load average 5 to 29), so the passes differ by up to 17 points.
+
+- **The CPU slowdown is calibrated.** Lighthouse simulates CPU time as the real CPU time times the slowdown, so with a fixed 4x the same build scored 34 on Home in a busy pass and 68 in a quiet one. The test measures the machine with the Lighthouse benchmark (best of 3) and uses 4x at an index of 2000, scaled in proportion. This Mac measured 2500 to 2900 (5.0x to 5.9x). A CI runner with a lower index gets a lower slowdown, so a budget measured here holds there.
+- **SEO 63 on the app is on purpose.** `robots.txt` closes the signed-in pages to crawlers, so the `is-crawlable` audit fails. Do not open them to raise the score.
+- **Why the app scores low.** Home loads 473 kB of gzipped JavaScript and CSS before the first render, with the `trends` chunk (141 kB, it holds Recharts) in the first load. FCP is about 3.9 s and LCP about 4.2 s on simulated slow 4G. Splitting Recharts out of the first load is the next step, and the budgets go up with it.
+- **INP on trends** must stay under 200 ms with a 4x CPU throttle (the ticket limit, not a measured budget). The CI number is recorded here after the first run. A Chrome trace on this Mac showed 7 to 47 ms of click handling and 10 to 30 ms of style, layout and paint per chip click.
+- **Raise the budgets from CI.** The CI runner is not loaded by other sessions. After the first green runs on `main`, set each budget 5 under the CI median and update this table.
