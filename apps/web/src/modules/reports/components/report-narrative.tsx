@@ -47,7 +47,7 @@ export function ReportNarrative({ reportId, narrative, detail }: ReportNarrative
           .map((section) => (
             <div key={section.heading} className="max-w-measure space-y-1.5">
               <h3 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
-                {section.heading}
+                {t.report.narrative.headings[section.heading]}
               </h3>
               <p className="leading-7">
                 {section.sentences.map((sentence, index) => (

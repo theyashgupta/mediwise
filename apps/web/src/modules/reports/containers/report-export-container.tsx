@@ -9,6 +9,7 @@ import { useProfiles } from "@/modules/profiles";
 import { useComparison } from "@/modules/trends";
 import { ReportExport } from "../components/report-export";
 import { dateOptions, previousReport, previousValues, profileDetails } from "../config/export";
+import { useReportTranslation } from "../hooks/use-report-translation";
 import { useReport } from "../hooks/use-reports";
 import { ShareReportContainer } from "./share-report-container";
 
@@ -41,8 +42,13 @@ function Content() {
   const paired = useComparison({ a: previous?.id, b: previous ? reportId : undefined });
   const comparing = reports.isPending || (previous !== undefined && paired.isPending);
   const comparisonFailed = reports.isError || paired.isError;
+  const { translating } = useReportTranslation(reportId, report.data?.translation);
   const ready =
-    report.data?.status === "done" && profiles.isSuccess && !comparing && !comparisonFailed;
+    report.data?.status === "done" &&
+    profiles.isSuccess &&
+    !comparing &&
+    !comparisonFailed &&
+    !translating;
   usePrintWhenReady(ready);
 
   if (report.isPending || profiles.isPending) return <LoadingState variant="page" />;
