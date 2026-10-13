@@ -1,16 +1,12 @@
 import { Logo } from "../../../web/src/common/components/brand/logo";
-import { appLinks, buttonStyles, disclaimer } from "@/lib/site";
-
-const policyLinks = [
-  { href: appLinks.terms, label: "Terms of use" },
-  { href: appLinks.privacy, label: "Privacy policy" },
-  { href: appLinks.refunds, label: "Refund policy" },
-  { href: appLinks.contact, label: "Contact" },
-];
+import { LanguageSwitch } from "@/components/language-switch";
+import { messages, type Locale } from "@/config/messages";
+import { appLinks, buttonStyles } from "@/lib/site";
 
 const socialLinks: { href: string; label: string }[] = [];
 
-export function FinalCta() {
+export function FinalCta({ locale }: { locale: Locale }) {
+  const t = messages[locale].site;
   return (
     <section
       aria-labelledby="cta-title"
@@ -21,18 +17,15 @@ export function FinalCta() {
           id="cta-title"
           className="text-3xl font-semibold tracking-tight text-balance md:text-4xl"
         >
-          Know what your next lab report says.
+          {t.finalCta.title}
         </h2>
-        <p className="mx-auto mt-4 max-w-lg text-lg text-muted-foreground">
-          Upload it to MediWise. You get every marker explained, a score and questions for your
-          doctor.
-        </p>
+        <p className="mx-auto mt-4 max-w-lg text-lg text-muted-foreground">{t.finalCta.body}</p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <a href={appLinks.signUp} className={buttonStyles.primary}>
-            Read my report
+            {t.readReport}
           </a>
           <a href={appLinks.signIn} className={buttonStyles.outline}>
-            Sign in
+            {t.signIn}
           </a>
         </div>
       </div>
@@ -40,13 +33,20 @@ export function FinalCta() {
   );
 }
 
-export function Footer() {
+export function Footer({ locale }: { locale: Locale }) {
+  const t = messages[locale].site;
+  const policyLinks = [
+    { href: appLinks.terms, label: t.footer.terms },
+    { href: appLinks.privacy, label: t.footer.privacy },
+    { href: appLinks.refunds, label: t.footer.refunds },
+    { href: appLinks.contact, label: t.footer.contact },
+  ];
   return (
     <footer className="border-t">
       <div className="mx-auto flex max-w-content flex-col gap-8 px-4 py-10 md:px-8">
         <div className="flex flex-wrap items-center justify-between gap-6">
           <Logo />
-          <nav aria-label="Policies">
+          <nav aria-label={t.footer.policies}>
             <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
               {[...policyLinks, ...socialLinks].map((link) => (
                 <li key={link.href}>
@@ -61,8 +61,11 @@ export function Footer() {
             </ul>
           </nav>
         </div>
-        <p className="text-sm text-muted-foreground">{disclaimer}</p>
-        <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} MediWise</p>
+        <p className="text-sm text-muted-foreground">{t.disclaimer}</p>
+        <div className="flex flex-wrap items-center justify-between gap-4 text-xs text-muted-foreground">
+          <p>© {new Date().getFullYear()} MediWise</p>
+          <LanguageSwitch current={locale} className="text-sm" />
+        </div>
       </div>
     </footer>
   );

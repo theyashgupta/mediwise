@@ -1,48 +1,38 @@
 import { Check, Minus } from "lucide-react";
 import { SectionHeader } from "@/components/section-header";
+import { messages, type Locale } from "@/config/messages";
 import { facts } from "@/lib/facts";
 
-const rows = [
-  { label: "Explained", pdf: "Test names and numbers", us: "Every marker in plain English or Hindi" },
-  { label: "Scored", pdf: "The lab's printed range", us: "Ranges for your age, sex and ancestry" },
-  { label: "Tracked", pdf: "One visit in each file", us: "Each marker across your visits" },
-  {
-    label: "Family",
-    pdf: "A file for each person",
-    us: `Up to ${facts.maxProfiles} profiles in one account`,
-  },
-  {
-    label: "Flags for your doctor",
-    pdf: "Easy to miss in a long report",
-    us: "Scan lines and questions to take to your doctor",
-  },
-  { label: "Cost", pdf: "Comes with the test", us: `From ${facts.cheapest.perReport} a report` },
-];
-
-export function Comparison() {
+export function Comparison({ locale }: { locale: Locale }) {
+  const t = messages[locale].comparison;
+  const { explained, scored, tracked, family, flags, cost } = t.rows;
+  const rows = [
+    explained,
+    scored,
+    tracked,
+    { ...family, us: family.us(facts.maxProfiles) },
+    flags,
+    { ...cost, us: cost.us(facts.cheapest.perReport) },
+  ];
   return (
     <section
       aria-labelledby="compare-title"
       className="mx-auto max-w-content px-4 py-12 md:px-8 md:py-20"
     >
-      <SectionHeader
-        id="compare-title"
-        eyebrow="Compare"
-        title="A lab PDF gives you numbers. MediWise tells you what they mean."
-      />
+      <SectionHeader id="compare-title" eyebrow={t.eyebrow} title={t.title} />
       <div className="reveal mt-12 overflow-hidden rounded-xl border bg-card">
         <table className="w-full table-fixed text-left text-sm md:text-base">
-          <caption className="sr-only">A standard lab PDF compared with MediWise</caption>
+          <caption className="sr-only">{t.caption}</caption>
           <thead>
             <tr className="border-b">
               <th
                 scope="col"
                 className="w-[28%] px-4 py-4 font-normal text-muted-foreground md:px-6"
               >
-                <span className="sr-only">Feature</span>
+                <span className="sr-only">{t.feature}</span>
               </th>
               <th scope="col" className="px-4 py-4 font-medium text-muted-foreground md:px-6">
-                A standard lab PDF
+                {t.pdf}
               </th>
               <th scope="col" className="bg-primary/6 px-4 py-4 font-semibold text-primary md:px-6">
                 MediWise

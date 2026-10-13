@@ -1,13 +1,15 @@
 import { Logo } from "../../../web/src/common/components/brand/logo";
+import { LanguageSwitch } from "@/components/language-switch";
+import { messages, type Locale } from "@/config/messages";
 import { appLinks } from "@/lib/site";
 
-const links = [
-  { href: "#how-it-works", label: "How it works" },
-  { href: "#pricing", label: "Pricing" },
-  { href: "#faq", label: "FAQ" },
-];
-
-export function Nav() {
+export function Nav({ locale }: { locale: Locale }) {
+  const t = messages[locale].site;
+  const links = [
+    { href: "#how-it-works", label: t.nav.howItWorks },
+    { href: "#pricing", label: t.nav.pricing },
+    { href: "#faq", label: t.nav.faq },
+  ];
   return (
     <header className="sticky top-0 z-40">
       <div
@@ -16,7 +18,7 @@ export function Nav() {
       />
       <div aria-hidden className="scroll-progress absolute inset-x-0 bottom-0 h-px bg-primary" />
       <nav
-        aria-label="Main"
+        aria-label={t.nav.label}
         className="relative mx-auto flex h-13 max-w-content items-center gap-8 px-4 text-sm md:h-14 md:px-8"
       >
         <a
@@ -35,17 +37,18 @@ export function Nav() {
           ))}
         </ul>
         <div className="ml-auto flex items-center gap-4">
+          <LanguageSwitch current={locale} />
           <a
             href={appLinks.signIn}
             className="inline-flex h-8 items-center rounded-md font-medium transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4"
           >
-            Sign in
+            {t.signIn}
           </a>
           <a
             href={appLinks.signUp}
             className="inline-flex h-8 items-center rounded-md bg-primary px-3 font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2"
           >
-            Read my report
+            {t.readReport}
           </a>
         </div>
       </nav>

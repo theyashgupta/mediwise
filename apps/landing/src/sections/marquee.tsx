@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { PauseMotionButton } from "@/components/motion";
+import { messages, type Locale } from "@/config/messages";
 import { facts, marqueeRows } from "@/lib/facts";
 import { cn } from "@/lib/utils";
 
@@ -43,23 +44,21 @@ function Track({
   );
 }
 
-export function MarkerMarquee() {
+export function MarkerMarquee({ locale }: { locale: Locale }) {
+  const { site, marquee: t } = messages[locale];
   return (
     <section aria-labelledby="markers-title" className="border-y bg-card py-12 md:py-16">
       <div className="mx-auto flex max-w-content flex-wrap items-end justify-between gap-4 px-4 md:px-8">
         <div>
           <h2 id="markers-title" className="text-xl font-semibold tracking-tight">
-            {facts.markers} lab markers that MediWise knows
+            {t.title(facts.markers)}
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            MediWise matches each printed test name to its catalog. A name it does not know shows as
-            not recognised.
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">{t.body}</p>
         </div>
-        <PauseMotionButton />
+        <PauseMotionButton label={site.pauseMotion} />
       </div>
       <div className="mt-8 flex flex-col gap-3">
-        {marqueeRows().map((groups, index) => (
+        {marqueeRows(locale).map((groups, index) => (
           <div
             key={index}
             className="marquee flex gap-(--gap) overflow-hidden"
