@@ -29,12 +29,14 @@ export function ComparePicker({ reports, a, b, onChange }: ComparePickerProps) {
       id: "report-a",
       label: t.trends.compare.reportA,
       value: a,
+      other: b,
       set: (id: string) => onChange({ a: id, b }),
     },
     {
       id: "report-b",
       label: t.trends.compare.reportB,
       value: b,
+      other: a,
       set: (id: string) => onChange({ a, b: id }),
     },
   ];
@@ -44,12 +46,17 @@ export function ComparePicker({ reports, a, b, onChange }: ComparePickerProps) {
         <div key={picker.id} className="min-w-0 space-y-2">
           <Label htmlFor={picker.id}>{picker.label}</Label>
           <Select value={picker.value ?? ""} onValueChange={picker.set}>
-            <SelectTrigger id={picker.id} className="w-full">
+            <SelectTrigger id={picker.id} className="w-full" data-testid={picker.id}>
               <SelectValue placeholder={t.trends.compare.select} />
             </SelectTrigger>
             <SelectContent>
               {reports.toReversed().map((report) => (
-                <SelectItem key={report.id} value={report.id}>
+                <SelectItem
+                  key={report.id}
+                  value={report.id}
+                  disabled={report.id === picker.other}
+                  data-testid={`${picker.id}-option`}
+                >
                   {reportLabel(report)}
                 </SelectItem>
               ))}

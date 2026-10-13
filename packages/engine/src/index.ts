@@ -61,7 +61,7 @@ export { isPopulationRow, joinWrappedNames } from "./printed-names.js";
 export { toCanonical } from "./normalise.js";
 export { rankMoveFirst } from "./rank.js";
 export { retestDueDate } from "./retest.js";
-export { coverageCap, scoreFormula } from "./score.js";
+export { coverageCap, sameScoreScale, scoreFormula } from "./score.js";
 export { deviation, matchRange, trendDirection } from "./status.js";
 export type * from "./types.js";
 export { alertHeadline, alertHeadlineStart, buildFindings } from "./findings.js";

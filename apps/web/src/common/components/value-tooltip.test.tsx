@@ -33,3 +33,24 @@ test("a result without a lab name or ranges says so, and a result from the same 
   expect(html).toContain("None");
   expect(html).not.toContain("The lab changed");
 });
+
+test("a day with two reports lists the other value and its lab under the shown value", () => {
+  const html = renderToStaticMarkup(
+    <ValueTooltip
+      date="6 Oct 2026"
+      value="104"
+      lab={lab}
+      sameDay={[{ value: "98", labName: "Second Lab" }]}
+      unit="mg/dL"
+    />,
+  );
+  expect(html).toContain("Other values on this day");
+  expect(html).toContain("98 mg/dL");
+  expect(html).toContain("Second Lab");
+});
+
+test("a point without lab details shows the date and the value only", () => {
+  const html = renderToStaticMarkup(<ValueTooltip date="6 Oct 2026" value="104" unit="mg/dL" />);
+  expect(html).toContain("104 mg/dL");
+  expect(html).not.toContain("Lab");
+});

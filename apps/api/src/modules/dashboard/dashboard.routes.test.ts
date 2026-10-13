@@ -64,6 +64,20 @@ const store = vi.hoisted(() => {
           ? reports.filter((report) => ["queued", "processing"].includes(report.status)).length
           : 0,
       listAssessedMarkers: async (reportId: string) => markers.get(reportId) ?? [],
+      listLatestAssessedByMarker: async (owner: string, id: string) => {
+        if (!owned(owner, id)) return [];
+        const worst = { risk: 0, watch: 1, optimal: 2 };
+        const rows = newestFirst()
+          .filter((report) => report.status === "done" && report.collectedAt)
+          .flatMap((report) =>
+            (markers.get(report.id) ?? [])
+              .toSorted((a, b) => worst[a.status] - worst[b.status])
+              .map((row) => ({ ...row, collectedAt: report.collectedAt })),
+          );
+        return rows.filter(
+          (row, i) => rows.findIndex((other) => other.markerKey === row.markerKey) === i,
+        );
+      },
       listFamilyDoneReports: async (owner: string) => (owner === "alice" ? family : []),
       countRiskMarkers: async (reportIds: string[]) =>
         reportIds.flatMap((reportId) => {
@@ -159,6 +173,31 @@ test("the latest done report carries its counts and the score change since the p
   expect(data.recent.map((report) => report.id)).toEqual(["new", "old"]);
 });
 
+test("the score change skips a narrow report and compares with the last report on the same scale", async () => {
+  store.reports.push(
+    done("full", "2026-08-04", 70),
+    { ...done("glucose-only", "2026-09-29", 50), coverage: 6 },
+    done("new", "2026-10-06", 74),
+  );
+  const data = await body();
+  expect(data.latest?.deltaSincePrevious).toEqual({ score: 4, since: "2026-08-04" });
+});
+
+test("a narrow latest report gets no score change against a full panel", async () => {
+  store.reports.push(done("full", "2026-09-29", 80), {
+    ...done("glucose-only", "2026-10-06", 50),
+    coverage: 6,
+  });
+  const data = await body();
+  expect(data.latest?.deltaSincePrevious).toBeNull();
+});
+
+test("a report one week after the last one gives a score change", async () => {
+  store.reports.push(done("week-1", "2026-09-29", 71), done("week-2", "2026-10-06", 73));
+  const data = await body();
+  expect(data.latest?.deltaSincePrevious).toEqual({ score: 2, since: "2026-09-29" });
+});
+
 test("a second report from the same collection date is not the previous visit", async () => {
   store.reports.push(
     done("old", "2026-03-12", 70),
@@ -212,8 +251,13 @@ test("retest dates come from the collection date and the status, soonest first",
   ]);
   const data = await body();
   expect(data.retests).toEqual([
-    { markerKey: "hba1c", name: "HbA1c", dueOn: "2025-05-03" },
-    { markerKey: "urine_acr", name: "Urine albumin to creatinine ratio", dueOn: "2026-01-31" },
+    { markerKey: "hba1c", name: "HbA1c", dueOn: "2025-05-03", measuredOn: "2025-02-01" },
+    {
+      markerKey: "urine_acr",
+      name: "Urine albumin to creatinine ratio",
+      dueOn: "2026-01-31",
+      measuredOn: "2025-02-01",
+    },
   ]);
 });
 
@@ -221,7 +265,29 @@ test("a marker printed twice keeps its soonest retest date", async () => {
   store.reports.push(done("r", "2025-02-01", 60));
   store.markers.set("r", [marker("hba1c", 6, "watch"), marker("hba1c", 8, "risk")]);
   const data = await body();
-  expect(data.retests).toEqual([{ markerKey: "hba1c", name: "HbA1c", dueOn: "2025-05-03" }]);
+  expect(data.retests).toEqual([
+    { markerKey: "hba1c", name: "HbA1c", dueOn: "2025-05-03", measuredOn: "2025-02-01" },
+  ]);
+});
+
+test("a marker the latest report did not measure keeps the retest date of its last value", async () => {
+  store.reports.push(done("full", "2026-08-04", 70), done("glucose-only", "2026-10-06", 74));
+  store.markers.set("full", [marker("hba1c", 8, "risk")]);
+  store.markers.set("glucose-only", [marker("glucose_fasting", 95, "optimal")]);
+  const data = await body();
+  expect(data.retests).toEqual([
+    { markerKey: "hba1c", name: "HbA1c", dueOn: "2026-11-03", measuredOn: "2026-08-04" },
+  ]);
+});
+
+test("a newer value of a marker replaces the retest date of the older one", async () => {
+  store.reports.push(done("old", "2026-02-03", 70), done("new", "2026-10-06", 74));
+  store.markers.set("old", [marker("hba1c", 8, "risk")]);
+  store.markers.set("new", [marker("hba1c", 6, "watch")]);
+  const data = await body();
+  expect(data.retests).toEqual([
+    { markerKey: "hba1c", name: "HbA1c", dueOn: "2027-10-05", measuredOn: "2026-10-06" },
+  ]);
 });
 
 test("a report with no collection date gives no retest date", async () => {
@@ -281,13 +347,15 @@ test("the family lists each profile with its latest done report and its markers 
       id: "p-self",
       name: "Arjun",
       relation: "self",
+      typicalGapDays: null,
       latest: { id: "self-new", date: "2026-09-01", score: 74, tier: "silver", riskCount: 2 },
     },
-    { id: "p-parent", name: "Meena", relation: "parent", latest: null },
+    { id: "p-parent", name: "Meena", relation: "parent", typicalGapDays: null, latest: null },
     {
       id: "p-child",
       name: "Kabir",
       relation: "child",
+      typicalGapDays: null,
       latest: { id: "child-old", date: "2025-02-10", score: 81, tier: "silver", riskCount: 0 },
     },
   ]);
@@ -313,4 +381,43 @@ test("two done reports from the same date pick the one uploaded last", async () 
   );
   const [row] = await (await client.dashboard.family.$get()).json();
   expect(row?.latest?.id).toBe("late");
+});
+
+test("a profile with weekly reports has a typical gap of 7 days", async () => {
+  const self = { profileId: "p-self", name: "Arjun", relation: "self" as const, tier: "gold" };
+  const dates = [
+    "2026-08-04",
+    "2026-09-01",
+    "2026-09-08",
+    "2026-09-15",
+    "2026-09-22",
+    "2026-09-29",
+  ];
+  store.family.push(
+    ...dates.map((date, i) => ({
+      ...self,
+      reportId: `r${i}`,
+      date,
+      uploadedAt: new Date(date),
+      score: 70,
+    })),
+  );
+  const [row] = await (await client.dashboard.family.$get()).json();
+  expect(row?.typicalGapDays).toBe(7);
+});
+
+test("a profile with yearly reports has a typical gap of about a year", async () => {
+  const self = { profileId: "p-self", name: "Arjun", relation: "self" as const, tier: "gold" };
+  const dates = ["2024-02-10", "2025-02-08", "2026-02-14"];
+  store.family.push(
+    ...dates.map((date, i) => ({
+      ...self,
+      reportId: `r${i}`,
+      date,
+      uploadedAt: new Date(date),
+      score: 70,
+    })),
+  );
+  const [row] = await (await client.dashboard.family.$get()).json();
+  expect(row?.typicalGapDays).toBe(371);
 });

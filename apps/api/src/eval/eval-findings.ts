@@ -6,7 +6,7 @@ import { reports } from "../db/schema.js";
 import { log } from "../middleware/logger.js";
 import { reportUsage, stepUsage } from "../modules/extraction/index.js";
 import {
-  findPreviousVisit,
+  findEarlierVisits,
   findVisit,
   type FindingRule,
   type FindingsUsage,
@@ -44,10 +44,10 @@ async function evalFindings() {
     if (only && id !== only) continue;
     const found = await findVisit(id);
     if (!found) continue;
-    const previous = await findPreviousVisit(found.profileId, id, found.visit.date);
-    const { findings: drafts } = buildFindings(found.visit, previous, found.patterns);
+    const earlier = await findEarlierVisits(found.profileId, id, found.visit.date);
+    const { findings: drafts } = buildFindings(found.visit, earlier, found.patterns);
     log.info(
-      `== report ${id} ${found.visit.date}, previous ${previous?.date ?? "none"}, ${drafts.length} drafts`,
+      `== report ${id} ${found.visit.date}, earlier visits ${earlier.length}, ${drafts.length} drafts`,
     );
     if (drafts.length === 0) continue;
     reportCount++;
@@ -59,7 +59,7 @@ async function evalFindings() {
         return;
       }
       const usage: FindingsUsage = stepUsage(model);
-      const findings = await writeFindings(drafts, [found.visit, previous], usage);
+      const findings = await writeFindings(drafts, [found.visit], usage);
       const cost = claudeCostCents({
         usage: { ...reportUsage(), findings: usage },
         inputTokens: null,

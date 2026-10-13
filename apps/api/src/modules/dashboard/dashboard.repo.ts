@@ -67,6 +67,41 @@ export async function countReportsInProgress(ownerUserId: string, profileId: str
   return row?.total ?? 0;
 }
 
+/**
+ * Lists the newest assessed row of each marker across a profile's done reports that have a collection date.
+ *
+ * @remarks
+ * Reports come at any cadence, so a narrow latest report must not hide the last value of a marker measured before it.
+ * Within one date the newest upload wins, then the worst status.
+ */
+export async function listLatestAssessedByMarker(ownerUserId: string, profileId: string) {
+  return db
+    .selectDistinctOn([reportMarkers.markerKey], {
+      markerKey: reportMarkers.markerKey,
+      rawName: reportMarkers.rawName,
+      status: reportMarkers.status,
+      collectedAt: reports.collectedAt,
+    })
+    .from(reportMarkers)
+    .innerJoin(reports, eq(reports.id, reportMarkers.reportId))
+    .innerJoin(profiles, eq(profiles.id, reports.profileId))
+    .where(
+      and(
+        ofProfile(ownerUserId, profileId),
+        eq(reports.status, "done"),
+        isNotNull(reports.collectedAt),
+        isNotNull(reportMarkers.markerKey),
+        isNotNull(reportMarkers.status),
+      ),
+    )
+    .orderBy(
+      reportMarkers.markerKey,
+      desc(reports.collectedAt),
+      desc(reports.createdAt),
+      desc(reportMarkers.status),
+    );
+}
+
 export async function listAssessedMarkers(reportId: string) {
   return db
     .select({

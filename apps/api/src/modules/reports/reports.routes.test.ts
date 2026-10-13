@@ -822,6 +822,37 @@ test("a marker page returns the row, its South Asian watch band and source, hist
   });
 });
 
+test("on a date with two reports, the marker page history keeps the point of the open report", async () => {
+  const { body } = await create([pdf]);
+  const report = store.reports.find((r) => r.id === body.id);
+  if (report) report.status = "done";
+  store.markerRows.push(stored({ markerKey: "tsh", value: 2, unit: "uIU/mL", status: "optimal" }));
+  const createdAt = new Date("2026-01-01T00:00:00Z");
+  const sameDay = "6f9c1d2e-0b7a-4c55-8f3e-1a2b3c4d5e6f";
+  store.historyRows.push(
+    {
+      reportId: body.id,
+      collectedAt: "2026-03-01",
+      createdAt,
+      value: 2,
+      unit: "uIU/mL",
+      status: "optimal",
+    },
+    {
+      reportId: sameDay,
+      collectedAt: "2026-03-01",
+      createdAt,
+      value: 2.4,
+      unit: "uIU/mL",
+      status: "optimal",
+    },
+  );
+
+  const res = await call("GET", `/reports/${body.id}/markers/tsh`);
+
+  expect(await res.json()).toMatchObject({ history: [{ reportId: body.id, value: 2 }] });
+});
+
 test("a marker that is not in the report, or a report of another user, returns 404", async () => {
   const { body } = await create([pdf]);
   const report = store.reports.find((r) => r.id === body.id);

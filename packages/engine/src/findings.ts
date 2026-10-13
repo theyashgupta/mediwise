@@ -72,6 +72,17 @@ function dayMonthYear(date: string) {
   return `${Number(date.slice(8, 10))} ${monthYear(date)}`;
 }
 
+/**
+ * Writes the two dates of a change, with the day when both fall in one month.
+ *
+ * @remarks
+ * Reports can come weeks apart, and "Oct 2026, Oct 2026" would not tell the reader which value came first.
+ */
+function changeDates(from: string, to: string) {
+  if (from.slice(0, 7) !== to.slice(0, 7)) return [`in ${monthYear(from)}`, `in ${monthYear(to)}`];
+  return [`on ${dayMonthYear(from)}`, `on ${dayMonthYear(to)}`];
+}
+
 export const alertHeadlineStart = "Ask your doctor about a line in your ";
 
 function preference({ row, value }: Pick<Picked, "row" | "value">) {
@@ -151,11 +162,12 @@ function changeFinding(
   const severity =
     is ?? (direction === "worsening" ? (was === "risk" ? "risk" : "watch") : "optimal");
   const [a, b] = [withUnit(before.value, entry.unit), withUnit(now.value, entry.unit)];
+  const [from, to] = changeDates(previous.date, current.date);
   return {
     kind: "change",
     severity,
     direction,
-    title: `${entry.name} ${direction}: ${a} in ${monthYear(previous.date)}, ${b} in ${monthYear(current.date)}`,
+    title: `${entry.name} ${direction}: ${a} ${from}, ${b} ${to}`,
     citedKeys: [entry.key],
     citedStudyIds: [],
     facts: [
@@ -348,33 +360,48 @@ function goodNews(optimal: Picked[]): Draft[] {
 }
 
 /**
- * Picks the findings of one visit, with the previous visit for changes, the questions for the doctor and an alert headline.
+ * Finds the last earlier value of each marker, with the visit it comes from.
+ *
+ * @remarks
+ * Reports come at any cadence and a narrow report measures few markers, so each marker looks back to its own last value.
+ */
+function lastValues(earlier: Visit[]) {
+  const found = new Map<string, { item: Picked; visit: Visit }>();
+  for (const visit of earlier) {
+    for (const [key, item] of pickMarkers(visit)) {
+      if (!found.has(key) && item.value !== undefined) found.set(key, { item, visit });
+    }
+  }
+  return found;
+}
+
+/**
+ * Picks the findings of one visit, with earlier visits for changes, the questions for the doctor and an alert headline.
  *
  * @remarks
  * Pure: the same visits give the same findings, titles and cited keys. Claude writes only the body of each finding.
+ * `earlier` is newest first, and each change compares a marker with its last value in it.
  * A marker that a link or a change finding cites gets no risk or good news finding of its own.
  * Past 12 findings only core marker changes are kept, so every core marker that moved stays in the list.
  * A finding that a later report settles goes last and outside the 12, with no question and no headline.
  */
 export function buildFindings(
   current: Visit,
-  previous: Visit | undefined,
+  earlier: Visit[],
   patterns: PatternMatch[],
   later: LaterVisit[] = [],
 ) {
   const now = pickMarkers(current);
-  const before = previous ? pickMarkers(previous) : new Map<string, Picked>();
+  const before = lastValues(earlier);
   const links = runLinks(
     { markers: [...now.values()].map(toResult), derived: [] },
     current.studies,
   ).map((match) => linkFinding(match, current));
-  const changes = previous
-    ? [...now.values()].flatMap((item) => {
-        const earlier = before.get(item.entry.key);
-        const found = earlier && changeFinding(earlier, item, previous, current);
-        return found ? [found] : [];
-      })
-    : [];
+  const changes = [...now.values()].flatMap((item) => {
+    const last = before.get(item.entry.key);
+    const found = last && changeFinding(last.item, item, last.visit, current);
+    return found ? [found] : [];
+  });
   const cited = new Set([...links, ...changes].flatMap(({ citedKeys }) => citedKeys));
   const free = [...now.values()].filter(({ entry }) => !cited.has(entry.key));
   const drafts = [

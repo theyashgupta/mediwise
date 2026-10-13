@@ -13,7 +13,8 @@ export type LabInfo = {
 type ValueTooltipProps = {
   date: string;
   value: string;
-  lab: LabInfo;
+  lab?: LabInfo;
+  sameDay?: { value: string; labName: string | null }[];
   unit?: string;
 };
 
@@ -22,21 +23,21 @@ function rangeText(range: Bounds | null, unit: string | undefined, empty: string
   return formatRange({ low: range.low ?? undefined, high: range.high ?? undefined }, unit);
 }
 
-export function ValueTooltip({ date, value, lab, unit }: ValueTooltipProps) {
+export function ValueTooltip({ date, value, lab, sameDay = [], unit }: ValueTooltipProps) {
   const t = useT();
   const { chart, range } = t.common;
-  const rows = [
-    [chart.lab, lab.name ?? chart.notPrinted],
-    [range.lab, rangeText(lab.range, unit, chart.notPrinted)],
-    [range.optimal, rangeText(lab.optimalRange, unit, chart.none)],
-  ];
+  const withUnit = (text: string) => `${text}${unit ? ` ${unit}` : ""}`;
+  const rows = lab
+    ? [
+        [chart.lab, lab.name ?? chart.notPrinted],
+        [range.lab, rangeText(lab.range, unit, chart.notPrinted)],
+        [range.optimal, rangeText(lab.optimalRange, unit, chart.none)],
+      ]
+    : [];
   return (
     <div className="grid min-w-48 gap-1.5 rounded-lg border bg-background px-3 py-2 text-xs shadow-xl">
       <p className="font-medium">{date}</p>
-      <p className="font-mono text-sm font-medium">
-        {value}
-        {unit ? ` ${unit}` : ""}
-      </p>
+      <p className="font-mono text-sm font-medium">{withUnit(value)}</p>
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
         {rows.map(([term, detail]) => (
           <div key={term} className="contents">
@@ -45,7 +46,18 @@ export function ValueTooltip({ date, value, lab, unit }: ValueTooltipProps) {
           </div>
         ))}
       </dl>
-      {lab.change && <p className="text-muted-foreground">{chart.labChangedSentence}</p>}
+      {lab?.change && <p className="text-muted-foreground">{chart.labChangedSentence}</p>}
+      {sameDay.length > 0 && (
+        <div className="grid gap-1 border-t pt-1.5">
+          <p className="text-muted-foreground">{chart.sameDay}</p>
+          {sameDay.map((other, index) => (
+            <p key={index} className="flex justify-between gap-3">
+              <span className="font-mono">{withUnit(other.value)}</span>
+              <span className="text-muted-foreground">{other.labName ?? chart.notPrinted}</span>
+            </p>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

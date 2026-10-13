@@ -83,8 +83,10 @@ export function TrendContainer() {
         )}
         <div className="space-y-3 rounded-xl border bg-card p-5">
           <ValueChart
+            key={data.markerKey}
             points={points.map((point) => ({
               key: point.reportId,
+              day: point.collectedAt ?? point.createdAt,
               date: point.date,
               value: point.value,
               status: point.status,
@@ -95,11 +97,13 @@ export function TrendContainer() {
                 optimalRange: point.calibratedRange,
                 change: point.labChange,
               },
+              sameDay: point.sameDay,
             }))}
             band={data.calibratedRange}
             bandLabel={t.trends.detail.band}
             unit={displayUnit(data.unit)}
             precision={data.precision}
+            today={new Date()}
           />
           <LabNote labCount={data.labCount} />
         </div>

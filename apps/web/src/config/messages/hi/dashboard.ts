@@ -40,7 +40,7 @@ export const dashboard: Messages["dashboard"] = {
   latest: {
     coverage: (percent: number) => review(`मुख्य मार्कर में से ${percent}% मापे गए`),
     fallbackTitle: "आपकी सबसे नई रिपोर्ट",
-    since: (date: string) => `${date} की जाँच के बाद से`,
+    since: (date: string) => `${date} की रिपोर्ट के बाद से`,
     noChange: "कोई बदलाव नहीं",
     byStatus: review("स्थिति के हिसाब से मार्कर"),
     open: "रिपोर्ट खोलें",
@@ -51,7 +51,7 @@ export const dashboard: Messages["dashboard"] = {
     none: review("स्कोर किए गए सभी मार्कर अपनी सबसे अच्छी रेंज में हैं।"),
   },
   recent: {
-    title: "हाल की जाँचें",
+    title: "हाल की रिपोर्ट",
     all: "सभी रिपोर्ट",
     fallbackTitle: "रिपोर्ट",
     files: (n: number) => `${n} फ़ाइलें`,
@@ -78,6 +78,7 @@ export const dashboard: Messages["dashboard"] = {
     noReport: "अभी कोई रिपोर्ट नहीं।",
     atRisk: (n: number) => review(`${n} मार्कर जोखिम में`),
     stale: "पिछले 12 महीनों में कोई रिपोर्ट नहीं।",
+    staleFrequent: "पिछले 3 महीनों में कोई रिपोर्ट नहीं।",
     upload: "रिपोर्ट अपलोड करें",
   },
 };
