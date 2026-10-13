@@ -89,6 +89,7 @@ vi.mock("../links/links.repo.js", () => ({
   listProfileLinks: async () => store.links,
   listLinks: async () => [],
   listReportsAfter: async () => [],
+  listVisitDates: async () => [],
 }));
 vi.mock("../profiles/profiles.repo.js", () => store.profilesRepo);
 
@@ -489,4 +490,34 @@ test("the 12-report fixture gives one glucose point per day, with the same-day v
     sameDay: [{ value: 95, labName: "Moon Labs" }],
   });
   expect(body.change).toEqual({ absolute: -3, percent: -3.2 });
+});
+
+test("in the weekly 12-report fixture only rechecks of a watch or risk glucose value are linked", async () => {
+  store.reports.splice(0, store.reports.length);
+  store.rows.splice(0, store.rows.length);
+  denseHistoryReports("2026-10-13").forEach((report, index) => {
+    const id = `0b4c2a51-6666-4e0f-9a51-6f2b8c1d0e${String(index).padStart(2, "0")}`;
+    store.reports.push({ id, profileId: ids.profile, collectedAt: report.collectedAt });
+    store.rows.push(...report.markers.map((marker) => ({ ...marker, reportId: id })));
+  });
+  const linked = async () => {
+    const { body } = await json(`/trends/glucose_fasting?profileId=${ids.profile}`);
+    return (body.points as { status: string; linked: boolean }[]).map(
+      ({ status, linked }) => `${status}:${linked}`,
+    );
+  };
+
+  expect(await linked()).toEqual([
+    "watch:true",
+    "watch:true",
+    "watch:true",
+    "optimal:true",
+    ...Array<string>(7).fill("optimal:false"),
+  ]);
+  const october = store.reports.find(({ collectedAt }) => collectedAt === "2026-10-06")!;
+  const row = store.rows.find(
+    (item) => item.reportId === october.id && item.markerKey === "glucose_fasting",
+  )!;
+  row.status = "risk";
+  expect((await linked()).slice(-3)).toEqual(["optimal:false", "risk:true", "optimal:true"]);
 });
