@@ -30,6 +30,7 @@
     "eval:extraction": "tsx --conditions=development --env-file-if-exists=.env src/eval/eval-extraction.ts",
     "eval:narrative": "tsx --conditions=development --env-file-if-exists=.env src/eval/eval-narrative.ts",
     "eval:findings": "tsx --conditions=development --env-file-if-exists=.env src/eval/eval-findings.ts",
+    "eval:assistant": "tsx --conditions=development --env-file-if-exists=.env src/eval/eval-assistant.ts",
     "review:hindi": "UPDATE_REVIEW=1 vitest run src/eval/hindi-review.test.ts"
   },
   "dependencies": {
