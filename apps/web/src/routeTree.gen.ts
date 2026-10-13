@@ -16,6 +16,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RefundsRouteImport } from './routes/refunds'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AppAdminRouteImport } from './routes/_app/admin'
 import { Route as AppCompareRouteImport } from './routes/_app/compare'
 import { Route as AppCreditsRouteImport } from './routes/_app/credits'
 import { Route as AppDesignRouteImport } from './routes/_app/design'
@@ -69,6 +70,11 @@ const TermsRoute = TermsRouteImport.update({
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAdminRoute = AppAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
 const AppCompareRoute = AppCompareRouteImport.update({
@@ -184,6 +190,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/refunds': typeof RefundsRoute
   '/terms': typeof TermsRoute
+  '/admin': typeof AppAdminRoute
   '/compare': typeof AppCompareRoute
   '/credits': typeof AppCreditsRoute
   '/design': typeof AppDesignRoute
@@ -212,6 +219,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/refunds': typeof RefundsRoute
   '/terms': typeof TermsRoute
+  '/admin': typeof AppAdminRoute
   '/compare': typeof AppCompareRoute
   '/credits': typeof AppCreditsRoute
   '/design': typeof AppDesignRoute
@@ -242,6 +250,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/refunds': typeof RefundsRoute
   '/terms': typeof TermsRoute
+  '/_app/admin': typeof AppAdminRoute
   '/_app/compare': typeof AppCompareRoute
   '/_app/credits': typeof AppCreditsRoute
   '/_app/design': typeof AppDesignRoute
@@ -273,6 +282,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/refunds'
     | '/terms'
+    | '/admin'
     | '/compare'
     | '/credits'
     | '/design'
@@ -301,6 +311,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/refunds'
     | '/terms'
+    | '/admin'
     | '/compare'
     | '/credits'
     | '/design'
@@ -330,6 +341,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/refunds'
     | '/terms'
+    | '/_app/admin'
     | '/_app/compare'
     | '/_app/credits'
     | '/_app/design'
@@ -415,6 +427,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/admin': {
+      id: '/_app/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/compare': {
@@ -568,6 +587,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppAdminRoute: typeof AppAdminRoute
   AppCompareRoute: typeof AppCompareRoute
   AppCreditsRoute: typeof AppCreditsRoute
   AppDesignRoute: typeof AppDesignRoute
@@ -586,6 +606,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAdminRoute: AppAdminRoute,
   AppCompareRoute: AppCompareRoute,
   AppCreditsRoute: AppCreditsRoute,
   AppDesignRoute: AppDesignRoute,

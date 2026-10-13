@@ -56,7 +56,7 @@ Never commit a secret. Put API values in the Render dashboard only. The web valu
 | `ANTHROPIC_FINDINGS_MODEL` | no | Default `claude-haiku-5-5`. Writes the text of each finding. |
 | `CLAUDE_MONTHLY_CAP_CENTS` | no | Default `2000` (20 USD). Over the cap, the worker pauses every read and logs one warning per hour. Raise it and restart the service to resume the paused reads. |
 | `CLAUDE_HARD_STOP` | no | Default `false`. Set `true` to refuse every new upload with a 503. Reads already in the queue still run. |
-| `ADMIN_USER_ID` | no | Supabase user id that can call `GET /admin/spend` and that gets `costCents` in `GET /reports/:id`. Empty means the route answers 404 for everyone and no report shows a cost. |
+| `ADMIN_USER_ID` | no | Supabase user id that can open `/admin`, call `GET /admin/spend` and `GET /admin/overview`, and that gets `costCents` in `GET /reports/:id`. Empty means the route answers 404 for everyone and no report shows a cost. |
 | `PAYMENTS_ENABLED` | no | Default `false`. When `false`, every `/payments` route answers 404. Set `true` only when the maintainer says enable. |
 | `CASHFREE_APP_ID` | when payments are on | Cashfree app id. The API does not start with `PAYMENTS_ENABLED=true` and no app id. |
 | `CASHFREE_SECRET_KEY` | when payments are on | Cashfree secret key. It also verifies the webhook signature. Server only. |
@@ -501,6 +501,16 @@ Each read uses one credit. A new account has 0 credits. To give credits, run thi
 2. Read the log line. It shows the user id and the number of credits.
 
 To see this month's Claude spend, call `GET /admin/spend` with the access token of the `ADMIN_USER_ID` account. The response also has `purchases` (orders paid this month) and `revenuePaise` (their amounts in paise, before refunds).
+
+## Operator page
+
+Sign in as the `ADMIN_USER_ID` account and open `/admin`. The link is not in the navigation. Every other account gets the not found page, and `GET /admin/overview` answers 404.
+
+- The page shows Claude spend today, this week and this month against `CLAUDE_MONTHLY_CAP_CENTS`, reads per day for 30 days with the mean cost per read, the queue, credits granted and spent, and profiles and users.
+- Days are UTC. A week starts on Monday. "Active" means a report added in the last 30 days.
+- Failed reads show the date, the start of the report id and an error class. They show no title, lab, profile name or error text.
+- "Re-read" calls `POST /admin/reports/:id/retry`. The report goes to the queue again and uses one credit of its owner, the same as the owner's own retry.
+- Two alerts show on the page: spend at 80% of the monthly cap or more, and a job that waits more than 30 minutes. The worker checks them every 15 minutes and writes `alert kind=spend ...` or `alert kind=queue ...` as a warning in the log. No email is sent.
 
 ## Payments (Cashfree)
 

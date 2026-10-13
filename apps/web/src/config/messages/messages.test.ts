@@ -48,6 +48,7 @@ const src = join(import.meta.dirname, "../..");
 const skipped = [
   "components/ui/",
   "config/messages/",
+  "modules/admin/",
   "modules/design-system/",
   "modules/health/",
   "modules/kitchen-sink/",
