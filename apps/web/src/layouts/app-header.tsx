@@ -2,6 +2,7 @@ import { Link, useMatches } from "@tanstack/react-router";
 import { Upload } from "lucide-react";
 import { useEffect, useState } from "react";
 import { LogoMark } from "@/common/components/brand/logo";
+import { useT } from "@/common/hooks/use-locale";
 import { ThemeToggle } from "@/common/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,7 @@ function useScrolled() {
 
 export function AppHeader() {
   const scrolled = useScrolled();
+  const t = useT();
   const routeId = useMatches({ select: (matches) => matches.at(-1)?.routeId });
   const upload =
     routeId !== undefined && routeId in pages && pages[routeId as keyof typeof pages].upload;
@@ -39,7 +41,7 @@ export function AppHeader() {
     >
       <Link
         to="/"
-        aria-label="MediWise home"
+        aria-label={t.shell.home}
         className={cn("-m-1 rounded-md p-1 md:hidden", focusRing)}
       >
         <LogoMark />
@@ -54,7 +56,7 @@ export function AppHeader() {
           <Button asChild size="sm" className="mr-2 hidden md:inline-flex">
             <Link to="/reports/upload">
               <Upload aria-hidden />
-              Upload a report
+              {t.shell.upload}
             </Link>
           </Button>
         )}

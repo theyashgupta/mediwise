@@ -1,3 +1,5 @@
+import { getT } from "@/common/hooks/use-locale";
+
 const shareCache = "mediwise-share";
 const shareKey = "/share-target/files";
 
@@ -23,6 +25,5 @@ export async function takeSharedFiles(): Promise<File[]> {
 
 /** Tells the user how many shared files we added and what to do next. */
 export function sharedFilesLine(count: number) {
-  const files = count === 1 ? "1 file" : `${count} files`;
-  return `We added ${files} from another app. Check the profile. Then select Read my report.`;
+  return getT().reports.upload.shared(count);
 }

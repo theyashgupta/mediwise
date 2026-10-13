@@ -1,3 +1,4 @@
+import { useT } from "@/common/hooks/use-locale";
 import type { ReportDetail } from "../types";
 
 type UnmeasuredListProps = {
@@ -5,15 +6,13 @@ type UnmeasuredListProps = {
 };
 
 export function UnmeasuredList({ items }: UnmeasuredListProps) {
+  const t = useT();
   if (items.length === 0) {
-    return <p className="text-muted-foreground">This report has every core marker.</p>;
+    return <p className="text-muted-foreground">{t.report.unmeasured.empty}</p>;
   }
   return (
     <div className="space-y-3">
-      <p className="text-muted-foreground">
-        This report does not have these markers. A report with more markers makes your score more
-        accurate.
-      </p>
+      <p className="text-muted-foreground">{t.report.unmeasured.intro}</p>
       <ul className="grid gap-px overflow-hidden rounded-xl border bg-border sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         {items.map((item) => (
           <li key={item.markerKey} className="space-y-1 bg-card px-4 py-3 sm:odd:last:col-span-2">

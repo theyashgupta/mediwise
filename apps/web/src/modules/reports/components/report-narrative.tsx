@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { useT } from "@/common/hooks/use-locale";
 import { Section } from "@/common/components/section";
 import { chipClass } from "../config/report";
 import type { ReportDetail } from "../types";
@@ -11,6 +12,7 @@ type ReportNarrativeProps = {
 };
 
 export function ReportNarrative({ reportId, narrative, detail }: ReportNarrativeProps) {
+  const t = useT();
   const markerNames = new Map(
     [...detail.categories.flatMap((category) => category.markers), ...detail.derived].map(
       (marker) => [marker.markerKey, marker.name],
@@ -38,7 +40,7 @@ export function ReportNarrative({ reportId, narrative, detail }: ReportNarrative
   }
 
   return (
-    <Section id="narrative" title="What your report says">
+    <Section id="narrative" title={t.report.narrative.title}>
       <div className="space-y-6 rounded-xl border bg-card p-6 sm:p-8">
         {narrative.sections
           .filter((section) => section.sentences.length > 0)

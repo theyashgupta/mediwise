@@ -2,8 +2,10 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ErrorState } from "@/common/components/error-state";
+import { LanguageSelect } from "@/common/components/language-select";
 import { LoadingState } from "@/common/components/loading-state";
 import { PageHeader } from "@/common/components/page-header";
+import { useT } from "@/common/hooks/use-locale";
 import { type Theme, useTheme } from "@/common/hooks/use-theme";
 import { SecurityContainer, useSignOut } from "@/modules/auth";
 import { creditsLeftLabel } from "@/modules/credits";
@@ -21,12 +23,14 @@ export function SettingsContainer() {
   const { theme, setTheme } = useTheme();
   const signOut = useSignOut();
   const [deleting, setDeleting] = useState(false);
+  const t = useT();
+  const copy = t.settings;
 
   function confirmDelete() {
     remove.mutate(undefined, {
       onSuccess: () => {
         setDeleting(false);
-        toast.success("We deleted your account.");
+        toast.success(copy.accountDeleted);
         signOut.mutate();
       },
     });
@@ -34,13 +38,11 @@ export function SettingsContainer() {
 
   return (
     <>
-      <PageHeader title="Settings" description="Your account and your own profile." />
+      <PageHeader title={copy.title} description={copy.description} />
       <div className="max-w-5xl space-y-8">
-        <SettingsSection title="Identity" description="The name shown across MediWise.">
+        <SettingsSection title={copy.identity.title} description={copy.identity.description}>
           {me.isPending && <LoadingState variant="card" />}
-          {me.isError && (
-            <ErrorState message="We could not load your account." onRetry={() => me.refetch()} />
-          )}
+          {me.isError && <ErrorState message={copy.loadError} onRetry={() => me.refetch()} />}
           {me.data && (
             <NameForm
               key={me.data.name}
@@ -49,21 +51,15 @@ export function SettingsContainer() {
               submitting={update.isPending}
               error={update.error?.message}
               onSubmit={(input) =>
-                update.mutate(input, { onSuccess: () => toast.success("We saved your name.") })
+                update.mutate(input, { onSuccess: () => toast.success(copy.nameSaved) })
               }
             />
           )}
         </SettingsSection>
-        <SettingsSection
-          title="Your profile"
-          description="Age, sex and ancestry decide which ranges MediWise uses to score your markers."
-        >
+        <SettingsSection title={copy.profile.title} description={copy.profile.description}>
           <SelfProfileContainer />
         </SettingsSection>
-        <SettingsSection
-          title="Report credits"
-          description="Each report that MediWise reads uses one report credit."
-        >
+        <SettingsSection title={copy.credits.title} description={copy.credits.description}>
           {me.data && (
             <div className="flex flex-wrap items-center gap-4">
               <p className="font-medium">{creditsLeftLabel(me.data.credits)}</p>
@@ -71,24 +67,21 @@ export function SettingsContainer() {
                 to="/credits"
                 className="text-sm font-medium text-primary underline-offset-4 hover:underline"
               >
-                How to get more credits
+                {copy.credits.more}
               </Link>
             </div>
           )}
         </SettingsSection>
-        <SettingsSection title="Security" description="Your password and how you sign in.">
+        <SettingsSection title={copy.security.title} description={copy.security.description}>
           <SecurityContainer />
         </SettingsSection>
-        <SettingsSection
-          title="Appearance"
-          description="MediWise saves this choice on this device."
-        >
+        <SettingsSection title={copy.appearance.title} description={copy.appearance.description}>
           <ThemeSelect theme={theme} onThemeChange={(value) => setTheme(value as Theme)} />
         </SettingsSection>
-        <SettingsSection
-          title="Your data"
-          description="Download a copy of your profiles, reports and markers, or delete all of it."
-        >
+        <SettingsSection title={copy.language.title} description={copy.language.description}>
+          <LanguageSelect />
+        </SettingsSection>
+        <SettingsSection title={copy.data.title} description={copy.data.description}>
           <div className="space-y-6">
             <ProfileCsvContainer />
             <DataActions

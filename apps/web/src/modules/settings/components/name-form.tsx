@@ -1,6 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type UpdateMeInput, updateMeSchema } from "@mediwise/shared";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { getT, useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -13,6 +15,20 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+/**
+ * The shared name schema with its messages read from the active locale.
+ *
+ * @remarks
+ * The shared schema carries English messages, and zod lets a schema message win over any error map.
+ */
+const nameSchema = updateMeSchema.extend({
+  name: z
+    .string()
+    .trim()
+    .min(1, { error: () => getT().settings.nameForm.nameRequired })
+    .max(80, { error: () => getT().settings.nameForm.nameTooLong }),
+});
+
 type NameFormProps = {
   email: string;
   name: string;
@@ -22,8 +38,10 @@ type NameFormProps = {
 };
 
 export function NameForm({ email, name, submitting, error, onSubmit }: NameFormProps) {
+  const t = useT();
+  const copy = t.settings.nameForm;
   const form = useForm<UpdateMeInput>({
-    resolver: zodResolver(updateMeSchema),
+    resolver: zodResolver(nameSchema),
     defaultValues: { name },
   });
 
@@ -35,7 +53,7 @@ export function NameForm({ email, name, submitting, error, onSubmit }: NameFormP
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>{copy.name}</FormLabel>
               <FormControl>
                 <Input autoComplete="name" {...field} />
               </FormControl>
@@ -44,7 +62,7 @@ export function NameForm({ email, name, submitting, error, onSubmit }: NameFormP
           )}
         />
         <div className="space-y-2">
-          <Label htmlFor="account-email">Email</Label>
+          <Label htmlFor="account-email">{copy.email}</Label>
           <Input id="account-email" value={email} readOnly disabled />
         </div>
         {error && (
@@ -53,7 +71,7 @@ export function NameForm({ email, name, submitting, error, onSubmit }: NameFormP
           </p>
         )}
         <Button type="submit" disabled={submitting} className="w-full sm:w-auto">
-          {submitting ? "Saving" : "Save name"}
+          {submitting ? copy.saving : copy.save}
         </Button>
       </form>
     </Form>

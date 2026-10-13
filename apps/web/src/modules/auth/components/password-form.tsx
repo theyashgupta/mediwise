@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -22,6 +23,7 @@ type PasswordFormProps = {
 };
 
 export function PasswordForm({ submitting, error, fullWidth, onSubmit }: PasswordFormProps) {
+  const t = useT();
   const form = useForm<NewPassword>({
     resolver: zodResolver(newPasswordSchema),
     defaultValues: { password: "", confirm: "" },
@@ -35,7 +37,7 @@ export function PasswordForm({ submitting, error, fullWidth, onSubmit }: Passwor
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>New password</FormLabel>
+              <FormLabel>{t.auth.fields.newPassword}</FormLabel>
               <FormControl>
                 <Input type="password" autoComplete="new-password" {...field} />
               </FormControl>
@@ -48,7 +50,7 @@ export function PasswordForm({ submitting, error, fullWidth, onSubmit }: Passwor
           name="confirm"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Type the new password again</FormLabel>
+              <FormLabel>{t.auth.fields.confirmPassword}</FormLabel>
               <FormControl>
                 <Input type="password" autoComplete="new-password" {...field} />
               </FormControl>
@@ -62,7 +64,7 @@ export function PasswordForm({ submitting, error, fullWidth, onSubmit }: Passwor
           disabled={submitting}
           className={cn(fullWidth ? "w-full" : "w-full sm:w-auto")}
         >
-          {submitting ? "Saving" : "Save password"}
+          {submitting ? t.auth.buttons.saving : t.auth.buttons.savePassword}
         </Button>
       </form>
     </Form>

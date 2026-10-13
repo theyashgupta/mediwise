@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { FileText, Upload } from "lucide-react";
+import { useT } from "@/common/hooks/use-locale";
 import { EmptyState } from "@/common/components/empty-state";
 import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
@@ -10,17 +11,19 @@ import { ReportList } from "../components/report-list";
 import { useReports } from "../hooks/use-reports";
 
 function UploadButton() {
+  const t = useT();
   return (
     <Button asChild>
       <Link to="/reports/upload">
         <Upload aria-hidden />
-        Upload a report
+        {t.reports.list.upload}
       </Link>
     </Button>
   );
 }
 
 export function ReportsContainer() {
+  const t = useT();
   const { profile } = useActiveProfile();
   const reports = useReports(profile?.id);
   const items = reports.data?.pages.flatMap((page) => page.items) ?? [];
@@ -28,18 +31,18 @@ export function ReportsContainer() {
   return (
     <>
       <PageHeader
-        title="Reports"
-        description={profile ? `Reports for ${profile.name}, newest first.` : undefined}
+        title={t.reports.list.title}
+        description={profile ? t.reports.list.description(profile.name) : undefined}
       />
       {(!profile || reports.isPending) && <LoadingState variant="list" />}
       {reports.isError && (
-        <ErrorState message="We could not load your reports." onRetry={() => reports.refetch()} />
+        <ErrorState message={t.reports.list.loadError} onRetry={() => reports.refetch()} />
       )}
       {reports.isSuccess && items.length === 0 && (
         <EmptyState
           icon={FileText}
-          title="No reports yet"
-          body="Upload a PDF or photos of a report. We explain and score every marker."
+          title={t.reports.list.emptyTitle}
+          body={t.reports.list.emptyBody}
           action={<UploadButton />}
         />
       )}
@@ -52,7 +55,7 @@ export function ReportsContainer() {
               onClick={() => reports.fetchNextPage()}
               disabled={reports.isFetchingNextPage}
             >
-              {reports.isFetchingNextPage ? "Loading" : "Show older reports"}
+              {reports.isFetchingNextPage ? t.common.loading : t.reports.list.showOlder}
             </Button>
           )}
         </div>

@@ -1,3 +1,4 @@
+import { useT } from "@/common/hooks/use-locale";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type LoadingStateProps = {
@@ -5,9 +6,10 @@ type LoadingStateProps = {
 };
 
 export function LoadingState({ variant }: LoadingStateProps) {
+  const t = useT();
   return (
     <div role="status" aria-live="polite" className="space-y-4">
-      <span className="sr-only">Loading</span>
+      <span className="sr-only">{t.common.loading}</span>
       {variant === "page" && (
         <div className="space-y-3 pb-6">
           <Skeleton className="h-9 w-56" />

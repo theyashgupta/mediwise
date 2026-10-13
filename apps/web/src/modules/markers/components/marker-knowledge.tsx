@@ -1,3 +1,4 @@
+import { useT } from "@/common/hooks/use-locale";
 import type { MarkerDetail } from "../types";
 
 type MarkerKnowledgeProps = {
@@ -5,10 +6,11 @@ type MarkerKnowledgeProps = {
 };
 
 export function MarkerKnowledge({ knowledge }: MarkerKnowledgeProps) {
+  const t = useT();
   const blocks = [
-    { title: "What it is", body: knowledge.whatItIs },
-    { title: "Why it matters", body: knowledge.whyItMatters },
-    { title: "What moves it", body: knowledge.whatMovesIt },
+    { title: t.markers.knowledge.whatItIs, body: knowledge.whatItIs },
+    { title: t.markers.knowledge.whyItMatters, body: knowledge.whyItMatters },
+    { title: t.markers.knowledge.whatMovesIt, body: knowledge.whatMovesIt },
   ];
   return (
     <div className="max-w-measure space-y-6">

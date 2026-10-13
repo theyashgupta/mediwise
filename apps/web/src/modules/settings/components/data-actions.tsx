@@ -1,4 +1,5 @@
 import { Download, Trash2 } from "lucide-react";
+import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 
 type DataActionsProps = {
@@ -9,16 +10,17 @@ type DataActionsProps = {
 };
 
 export function DataActions({ downloading, error, onDownload, onDelete }: DataActionsProps) {
+  const t = useT();
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-2 sm:flex-row">
         <Button variant="outline" onClick={onDownload} disabled={downloading}>
           <Download aria-hidden />
-          {downloading ? "Preparing download" : "Download my data"}
+          {downloading ? t.settings.data.preparing : t.settings.data.download}
         </Button>
         <Button variant="destructive" onClick={onDelete}>
           <Trash2 aria-hidden />
-          Delete account
+          {t.settings.data.delete}
         </Button>
       </div>
       {error && (

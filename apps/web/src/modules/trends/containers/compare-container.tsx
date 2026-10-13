@@ -5,6 +5,7 @@ import { EmptyState } from "@/common/components/empty-state";
 import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
 import { PageHeader } from "@/common/components/page-header";
+import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 import { useActiveProfile } from "@/modules/profiles";
 import { formatReportDate } from "@/modules/reports";
@@ -21,25 +22,21 @@ function Content() {
   const { profile } = useActiveProfile();
   const comparison = useComparison({ a, b, profileId: b ? undefined : profile?.id });
   const [changedOnly, setChangedOnly] = useState(false);
+  const t = useT();
 
   if (comparison.isPending) return <LoadingState variant="list" />;
   if (comparison.isError) {
-    return (
-      <ErrorState
-        message="We could not compare these reports."
-        onRetry={() => comparison.refetch()}
-      />
-    );
+    return <ErrorState message={t.trends.compare.loadError} onRetry={() => comparison.refetch()} />;
   }
   if (!comparison.data) {
     return (
       <EmptyState
         icon={GitCompareArrows}
-        title="We could not find these reports"
-        body="Select two reports of one profile."
+        title={t.trends.compare.notFoundTitle}
+        body={t.trends.compare.notFoundBody}
         action={
           <Button asChild variant="outline">
-            <Link to="/compare">Compare the latest two reports</Link>
+            <Link to="/compare">{t.trends.compare.latestTwo}</Link>
           </Button>
         }
       />
@@ -51,13 +48,13 @@ function Content() {
     return (
       <EmptyState
         icon={GitCompareArrows}
-        title="Nothing to compare yet"
-        body="Upload a second report to compare two reports."
+        title={t.trends.compare.emptyTitle}
+        body={t.trends.compare.emptyBody}
         action={
           <Button asChild>
             <Link to="/reports/upload">
               <Upload aria-hidden />
-              Upload a report
+              {t.trends.upload}
             </Link>
           </Button>
         }
@@ -82,9 +79,7 @@ function Content() {
         onChange={(next) => void navigate({ to: "/compare", search: next, replace: true })}
       />
       {!data.a || !data.b ? (
-        <p className="text-muted-foreground">
-          This report is the first report for this profile. Select an earlier report as report A.
-        </p>
+        <p className="text-muted-foreground">{t.trends.compare.firstReport}</p>
       ) : (
         <>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -96,11 +91,11 @@ function Content() {
               className="self-start"
               onClick={() => setChangedOnly(!changedOnly)}
             >
-              Changed only
+              {t.trends.compare.changedOnly}
             </Button>
           </div>
           {groups.length === 0 ? (
-            <p className="text-muted-foreground">No marker changed status between these reports.</p>
+            <p className="text-muted-foreground">{t.trends.compare.noChange}</p>
           ) : (
             <CompareGroups
               groups={groups}
@@ -115,9 +110,10 @@ function Content() {
 }
 
 export function CompareContainer() {
+  const t = useT();
   return (
     <>
-      <PageHeader title="Compare reports" description="See what changed between two reports." />
+      <PageHeader title={t.trends.compare.title} description={t.trends.compare.description} />
       <Content />
     </>
   );

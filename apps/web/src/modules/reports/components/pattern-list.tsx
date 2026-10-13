@@ -1,3 +1,4 @@
+import { useT } from "@/common/hooks/use-locale";
 import { Section } from "@/common/components/section";
 import { SourceList } from "@/common/components/source-list";
 import { StatusBadge } from "@/common/components/status-badge";
@@ -12,19 +13,20 @@ type PatternListProps = {
 };
 
 export function PatternList({ reportId, items }: PatternListProps) {
+  const t = useT();
   if (items.length === 0) return null;
   return (
     <Section
       id="patterns"
-      title="Patterns"
-      description="Signals that come from two or more markers."
+      title={t.report.patterns.title}
+      description={t.report.patterns.description}
     >
       <ul className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
         {items.map((item) => (
           <li key={item.key} id={`pattern-${item.key}`} className="scroll-mt-20">
             <InsightCard title={item.name} badge={<StatusBadge status={item.severity} />}>
               <p className="text-sm text-muted-foreground">{item.description}</p>
-              <ul className="flex flex-wrap gap-1.5" aria-label="Markers in this pattern">
+              <ul className="flex flex-wrap gap-1.5" aria-label={t.report.patterns.markers}>
                 {item.matched.map((condition) => (
                   <li key={condition.name}>
                     <MarkerChip
@@ -39,12 +41,12 @@ export function PatternList({ reportId, items }: PatternListProps) {
               </ul>
               <p className="text-sm">{item.whatItSuggests}</p>
               <p className="rounded-lg bg-muted px-3 py-2 text-sm">
-                <span className="font-medium">What to do: </span>
+                <span className="font-medium">{t.report.patterns.whatToDo}</span>
                 {item.whatToDo}
               </p>
               <details className="text-sm">
                 <summary className="cursor-pointer text-muted-foreground">
-                  Sources ({item.sources.length})
+                  {t.report.patterns.sources(item.sources.length)}
                 </summary>
                 <div className="pt-2">
                   <SourceList sources={item.sources} />

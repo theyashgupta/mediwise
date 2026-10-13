@@ -1,13 +1,13 @@
 import { getRouteApi, Link } from "@tanstack/react-router";
 import { FlaskConical } from "lucide-react";
 import { useCrumbLabel } from "@/common/hooks/use-crumb-label";
+import { useT } from "@/common/hooks/use-locale";
 import { EmptyState } from "@/common/components/empty-state";
 import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
 import { Section } from "@/common/components/section";
 import { SourceList } from "@/common/components/source-list";
 import { Button } from "@/components/ui/button";
-import { ancestryLabels, sexLabels } from "@/modules/profiles";
 import { FollowUpList, formatReportDate } from "@/modules/reports";
 import { MarkerHeader } from "../components/marker-header";
 import { MarkerKnowledge } from "../components/marker-knowledge";
@@ -22,6 +22,7 @@ const route = getRouteApi("/_app/reports/$reportId_/markers/$markerKey");
 export function MarkerContainer() {
   const { reportId, markerKey } = route.useParams();
   const query = useMarker(reportId, markerKey);
+  const t = useT();
   useCrumbLabel(`/reports/${reportId}`, query.data?.report.labName);
   useCrumbLabel(
     `/reports/${reportId}/markers/${markerKey}`,
@@ -30,18 +31,18 @@ export function MarkerContainer() {
 
   if (query.isPending) return <LoadingState variant="page" />;
   if (query.isError) {
-    return <ErrorState message="We could not load this marker." onRetry={() => query.refetch()} />;
+    return <ErrorState message={t.markers.page.loadError} onRetry={() => query.refetch()} />;
   }
   if (!query.data) {
     return (
       <EmptyState
         icon={FlaskConical}
-        title="This marker is not in this report"
-        body="Open the report to see the markers that it has."
+        title={t.markers.page.missingTitle}
+        body={t.markers.page.missingBody}
         action={
           <Button asChild variant="outline">
             <Link to="/reports/$reportId" params={{ reportId }}>
-              Open the report
+              {t.markers.page.openReport}
             </Link>
           </Button>
         }
@@ -53,7 +54,10 @@ export function MarkerContainer() {
   const unit = marker.unit && marker.unit !== "ratio" ? marker.unit : undefined;
   const showNote = query.data.southAsianNote && profile.ancestry === "south_asian";
   const sex = profile.sex === "male" || profile.sex === "female" ? profile.sex : undefined;
-  const calibratedFor = [ancestryLabels[profile.ancestry], sex && sexLabels[sex].toLowerCase()]
+  const calibratedFor = [
+    t.profiles.ancestry[profile.ancestry],
+    sex && t.profiles.sex[sex].toLowerCase(),
+  ]
     .filter(Boolean)
     .join(" ");
 
@@ -62,7 +66,7 @@ export function MarkerContainer() {
       <MarkerHeader marker={marker} />
       <div className="space-y-12">
         {marker.value !== null && (
-          <Section id="where-you-sit" title="Where you sit">
+          <Section id="where-you-sit" title={t.markers.page.whereYouSit}>
             <WhereYouSit
               value={marker.value}
               unit={unit}
@@ -75,7 +79,7 @@ export function MarkerContainer() {
             />
           </Section>
         )}
-        <Section id="trajectory" title="Trajectory">
+        <Section id="trajectory" title={t.markers.page.trajectory}>
           <Trajectory
             points={history.map((point) => ({
               key: point.reportId,
@@ -89,7 +93,7 @@ export function MarkerContainer() {
             precision={marker.precision}
           />
         </Section>
-        <Section id="meaning" title="What this means for you">
+        <Section id="meaning" title={t.markers.page.meaning}>
           <p className="max-w-measure text-lg text-balance">
             {statusSentence(
               marker.name,
@@ -100,17 +104,17 @@ export function MarkerContainer() {
           </p>
           {query.data.followUps.length > 0 && <FollowUpList items={query.data.followUps} />}
         </Section>
-        <Section id="knowledge" title="The knowledge">
+        <Section id="knowledge" title={t.markers.page.knowledge}>
           <MarkerKnowledge knowledge={query.data.knowledge} />
         </Section>
         {showNote && (
-          <Section id="calibration" title={`Calibrated for you, ${calibratedFor}`}>
+          <Section id="calibration" title={t.markers.page.calibratedFor(calibratedFor)}>
             <p className="max-w-measure rounded-xl border bg-card p-5 leading-7">
               {query.data.southAsianNote}
             </p>
           </Section>
         )}
-        <Section id="sources" title="Sources">
+        <Section id="sources" title={t.markers.page.sources}>
           <SourceList sources={query.data.sources} />
         </Section>
         <MarkerNav reportId={reportId} previous={query.data.previous} next={query.data.next} />

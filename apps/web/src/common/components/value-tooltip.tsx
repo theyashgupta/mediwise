@@ -1,3 +1,4 @@
+import { useT } from "../hooks/use-locale";
 import { formatRange } from "../utils/range-scale";
 
 type Bounds = { low: number | null; high: number | null };
@@ -22,10 +23,12 @@ function rangeText(range: Bounds | null, unit: string | undefined, empty: string
 }
 
 export function ValueTooltip({ date, value, lab, unit }: ValueTooltipProps) {
+  const t = useT();
+  const { chart, range } = t.common;
   const rows = [
-    ["Lab", lab.name ?? "Not printed"],
-    ["Lab range", rangeText(lab.range, unit, "Not printed")],
-    ["Optimal range", rangeText(lab.optimalRange, unit, "None")],
+    [chart.lab, lab.name ?? chart.notPrinted],
+    [range.lab, rangeText(lab.range, unit, chart.notPrinted)],
+    [range.optimal, rangeText(lab.optimalRange, unit, chart.none)],
   ];
   return (
     <div className="grid min-w-48 gap-1.5 rounded-lg border bg-background px-3 py-2 text-xs shadow-xl">
@@ -42,7 +45,7 @@ export function ValueTooltip({ date, value, lab, unit }: ValueTooltipProps) {
           </div>
         ))}
       </dl>
-      {lab.change && <p className="text-muted-foreground">The lab changed at this result.</p>}
+      {lab.change && <p className="text-muted-foreground">{chart.labChangedSentence}</p>}
     </div>
   );
 }

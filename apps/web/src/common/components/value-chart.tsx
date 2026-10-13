@@ -9,6 +9,7 @@ import {
   YAxis,
 } from "recharts";
 import { type ChartConfig, ChartContainer, ChartTooltip } from "@/components/ui/chart";
+import { getIntlTag, useT } from "@/common/hooks/use-locale";
 import { cn } from "@/lib/utils";
 import { chartDomain } from "../utils/chart-domain";
 import { type Status, statusStyles } from "../utils/status";
@@ -30,8 +31,6 @@ type ValueChartProps = {
   unit?: string;
   precision: number;
 };
-
-const config = { value: { label: "Value", color: "var(--chart-1)" } } satisfies ChartConfig;
 
 type DotProps = { cx?: number; cy?: number; payload?: ValuePoint };
 
@@ -61,7 +60,12 @@ function StatusDot({ cx, cy, payload }: DotProps) {
 }
 
 export function ValueChart({ points, band, bandLabel, unit, precision }: ValueChartProps) {
-  const format = (n: number) => n.toLocaleString("en-IN", { maximumFractionDigits: precision });
+  const t = useT();
+  const config = {
+    value: { label: t.common.chart.value, color: "var(--chart-1)" },
+  } satisfies ChartConfig;
+  const format = (n: number) =>
+    n.toLocaleString(getIntlTag(), { maximumFractionDigits: precision });
   const [low, high] = chartDomain(
     points.map((point) => point.value),
     band,
@@ -69,7 +73,7 @@ export function ValueChart({ points, band, bandLabel, unit, precision }: ValueCh
   const label = points
     .map(
       (point) =>
-        `${point.date}: ${format(point.value)}${unit ? ` ${unit}` : ""}${point.lab?.change ? " (lab changed)" : ""}`,
+        `${point.date}: ${format(point.value)}${unit ? ` ${unit}` : ""}${point.lab?.change ? ` (${t.common.chart.labChangedShort})` : ""}`,
     )
     .join(", ");
   const hasBand = band && (band.low !== null || band.high !== null);
@@ -167,7 +171,7 @@ export function ValueChart({ points, band, bandLabel, unit, precision }: ValueCh
           {labChanges.length > 0 && (
             <p className="flex items-center gap-1.5">
               <span className="size-3 rounded-full border-[1.5px] border-foreground" />
-              Lab changed at this result
+              {t.common.chart.labChanged}
             </p>
           )}
         </div>

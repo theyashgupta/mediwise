@@ -1,3 +1,4 @@
+import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,14 +25,13 @@ export function DeleteReportDialog({
   onConfirm,
   onOpenChange,
 }: DeleteReportDialogProps) {
+  const t = useT();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete this report?</DialogTitle>
-          <DialogDescription>
-            This deletes the report, its files and its values. You cannot undo this.
-          </DialogDescription>
+          <DialogTitle>{t.report.deleteDialog.title}</DialogTitle>
+          <DialogDescription>{t.report.deleteDialog.description}</DialogDescription>
         </DialogHeader>
         {error && (
           <p role="alert" className="text-sm text-destructive">
@@ -40,10 +40,10 @@ export function DeleteReportDialog({
         )}
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline">{t.report.deleteDialog.cancel}</Button>
           </DialogClose>
           <Button variant="destructive" onClick={onConfirm} disabled={deleting}>
-            {deleting ? "Deleting" : "Delete"}
+            {deleting ? t.report.deleteDialog.deleting : t.report.deleteDialog.confirm}
           </Button>
         </DialogFooter>
       </DialogContent>

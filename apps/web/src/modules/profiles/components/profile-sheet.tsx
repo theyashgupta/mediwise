@@ -1,4 +1,5 @@
 import type { ProfileInput } from "@mediwise/shared";
+import { useT } from "@/common/hooks/use-locale";
 import {
   Sheet,
   SheetContent,
@@ -26,14 +27,13 @@ export function ProfileSheet({
   onOpenChange,
   onSubmit,
 }: ProfileSheetProps) {
+  const text = useT().profiles.sheet;
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>{profile ? "Edit profile" : "Add a family member"}</SheetTitle>
-          <SheetDescription>
-            Age, sex and ancestry decide which ranges MediWise uses to score each marker.
-          </SheetDescription>
+          <SheetTitle>{profile ? text.editTitle : text.addTitle}</SheetTitle>
+          <SheetDescription>{text.description}</SheetDescription>
         </SheetHeader>
         <div className="px-4 pb-6">
           <ProfileForm
@@ -51,7 +51,7 @@ export function ProfileSheet({
             }
             isSelf={profile?.isSelf ?? false}
             approximateBirth={profile?.dateOfBirthApproximate}
-            submitLabel={profile ? "Save changes" : "Add profile"}
+            submitLabel={profile ? text.save : text.add}
             submitting={submitting}
             error={error}
             onSubmit={onSubmit}

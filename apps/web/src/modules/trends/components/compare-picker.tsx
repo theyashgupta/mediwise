@@ -1,3 +1,4 @@
+import { useT } from "@/common/hooks/use-locale";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -22,9 +23,20 @@ function reportLabel(report: ReportHeader) {
 }
 
 export function ComparePicker({ reports, a, b, onChange }: ComparePickerProps) {
+  const t = useT();
   const pickers = [
-    { id: "report-a", label: "Report A", value: a, set: (id: string) => onChange({ a: id, b }) },
-    { id: "report-b", label: "Report B", value: b, set: (id: string) => onChange({ a, b: id }) },
+    {
+      id: "report-a",
+      label: t.trends.compare.reportA,
+      value: a,
+      set: (id: string) => onChange({ a: id, b }),
+    },
+    {
+      id: "report-b",
+      label: t.trends.compare.reportB,
+      value: b,
+      set: (id: string) => onChange({ a, b: id }),
+    },
   ];
   return (
     <div className="grid gap-4 sm:grid-cols-2">
@@ -33,7 +45,7 @@ export function ComparePicker({ reports, a, b, onChange }: ComparePickerProps) {
           <Label htmlFor={picker.id}>{picker.label}</Label>
           <Select value={picker.value ?? ""} onValueChange={picker.set}>
             <SelectTrigger id={picker.id} className="w-full">
-              <SelectValue placeholder="Select a report" />
+              <SelectValue placeholder={t.trends.compare.select} />
             </SelectTrigger>
             <SelectContent>
               {reports.toReversed().map((report) => (

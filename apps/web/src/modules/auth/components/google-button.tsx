@@ -1,3 +1,4 @@
+import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 import { FormError } from "./form-error";
 
@@ -8,6 +9,7 @@ type GoogleButtonProps = {
 };
 
 export function GoogleButton({ pending, error, onClick }: GoogleButtonProps) {
+  const t = useT();
   return (
     <div className="space-y-4">
       <Button
@@ -35,12 +37,12 @@ export function GoogleButton({ pending, error, onClick }: GoogleButtonProps) {
             d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
           />
         </svg>
-        {pending ? "Opening Google" : "Continue with Google"}
+        {pending ? t.auth.google.opening : t.auth.google.continue}
       </Button>
       <FormError message={error} />
       <div className="flex items-center gap-3 text-xs text-muted-foreground">
         <span className="h-px flex-1 bg-border" />
-        or use your email
+        {t.auth.google.divider}
         <span className="h-px flex-1 bg-border" />
       </div>
     </div>

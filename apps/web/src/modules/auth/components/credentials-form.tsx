@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
+import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -22,6 +23,7 @@ type CredentialsFormProps = {
 };
 
 export function CredentialsForm({ mode, submitting, error, onSubmit }: CredentialsFormProps) {
+  const t = useT();
   const signIn = mode === "sign-in";
   const form = useForm<Credentials>({
     resolver: zodResolver(signIn ? signInSchema : signUpSchema),
@@ -36,7 +38,7 @@ export function CredentialsForm({ mode, submitting, error, onSubmit }: Credentia
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{t.auth.fields.email}</FormLabel>
               <FormControl>
                 <Input type="email" autoComplete="email" data-testid="auth-email" {...field} />
               </FormControl>
@@ -50,13 +52,13 @@ export function CredentialsForm({ mode, submitting, error, onSubmit }: Credentia
           render={({ field }) => (
             <FormItem>
               <div className="flex items-center justify-between">
-                <FormLabel>Password</FormLabel>
+                <FormLabel>{t.auth.fields.password}</FormLabel>
                 {signIn && (
                   <Link
                     to="/forgot-password"
                     className="text-sm text-muted-foreground underline-offset-4 hover:underline"
                   >
-                    Forgot your password?
+                    {t.auth.fields.forgotPassword}
                   </Link>
                 )}
               </div>
@@ -76,11 +78,11 @@ export function CredentialsForm({ mode, submitting, error, onSubmit }: Credentia
         <Button type="submit" disabled={submitting} className="w-full" data-testid="auth-submit">
           {signIn
             ? submitting
-              ? "Signing in"
-              : "Sign in"
+              ? t.auth.buttons.signingIn
+              : t.auth.buttons.signIn
             : submitting
-              ? "Creating account"
-              : "Create account"}
+              ? t.auth.buttons.creatingAccount
+              : t.auth.buttons.createAccount}
         </Button>
       </form>
     </Form>

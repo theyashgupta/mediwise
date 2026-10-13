@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { useT } from "@/common/hooks/use-locale";
 import { cn } from "@/lib/utils";
 import { type Band, formatRange, type Range, rangeScale } from "../utils/range-scale";
 import { type Status, statusStyles } from "../utils/status";
@@ -33,14 +34,15 @@ export function RangeBar({
   legend = true,
 }: RangeBarProps) {
   const clipId = useId();
+  const t = useT();
   const scale = rangeScale(value, labRange, calibratedRange);
   const lab = labRange && scale.lab ? formatRange(labRange, unit) : undefined;
   const calibrated =
     calibratedRange && scale.calibrated ? formatRange(calibratedRange, unit) : undefined;
   const label = [
-    `Value ${value}${unit ? ` ${unit}` : ""}, ${statusStyles[status].label}.`,
-    lab && `Lab range ${lab}.`,
-    calibrated && `Calibrated range ${calibrated}.`,
+    t.common.range.barLabel(`${value}${unit ? ` ${unit}` : ""}`, t.common.status[status]),
+    lab && t.common.range.labLabel(lab),
+    calibrated && t.common.range.calibratedLabel(calibrated),
   ]
     .filter(Boolean)
     .join(" ");
@@ -70,7 +72,7 @@ export function RangeBar({
             <div className="flex items-center gap-1.5">
               <dt className="flex items-center gap-1.5">
                 <span className="h-2 w-3 rounded-sm bg-muted-foreground/25" />
-                Lab range
+                {t.common.range.lab}
               </dt>
               <dd className="text-foreground">{lab}</dd>
             </div>
@@ -79,7 +81,7 @@ export function RangeBar({
             <div className="flex items-center gap-1.5">
               <dt className="flex items-center gap-1.5">
                 <span className="h-2 w-3 rounded-sm bg-optimal/45" />
-                Calibrated range
+                {t.common.range.calibrated}
               </dt>
               <dd className="text-foreground">{calibrated}</dd>
             </div>

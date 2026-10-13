@@ -1,4 +1,5 @@
 import { ArrowDown, ArrowRight, ArrowUp } from "lucide-react";
+import { useLocale } from "@/common/hooks/use-locale";
 import { cn } from "@/lib/utils";
 import { formatChange } from "../config/trends";
 import type { Change } from "../types";
@@ -11,6 +12,7 @@ type ChangeLabelProps = {
 };
 
 export function ChangeLabel({ change, precision, unit, className }: ChangeLabelProps) {
+  useLocale();
   const Arrow =
     !change || change.absolute === 0 ? ArrowRight : change.absolute > 0 ? ArrowUp : ArrowDown;
   return (

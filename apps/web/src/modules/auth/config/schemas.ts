@@ -1,11 +1,12 @@
 import { z } from "zod";
+import { getT } from "@/common/hooks/use-locale";
 
-const email = z.email("Enter a valid email.");
-const newPassword = z.string().min(8, "Use at least 8 characters.");
+const email = z.email({ error: () => getT().auth.validation.email });
+const newPassword = z.string().min(8, { error: () => getT().auth.validation.passwordMin });
 
 export const signInSchema = z.object({
   email,
-  password: z.string().min(1, "Enter your password."),
+  password: z.string().min(1, { error: () => getT().auth.validation.passwordRequired }),
 });
 export const signUpSchema = z.object({ email, password: newPassword });
 export const emailSchema = z.object({ email });
@@ -18,7 +19,7 @@ export const loginSearchSchema = z.object({
 export const newPasswordSchema = z
   .object({ password: newPassword, confirm: z.string() })
   .refine((values) => values.password === values.confirm, {
-    message: "The two passwords are not the same.",
+    error: () => getT().auth.validation.passwordMismatch,
     path: ["confirm"],
   });
 

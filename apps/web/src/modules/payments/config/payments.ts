@@ -1,3 +1,5 @@
+import { getIntlTag } from "@/common/hooks/use-locale";
+
 export const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === "true";
 
 export const cashfreeMode: "sandbox" | "production" =
@@ -10,7 +12,7 @@ export const orderPollLimitMs = 120_000;
 
 /** Formats an amount in paise as whole rupees, with paise only when there are some. */
 export function formatRupees(paise: number) {
-  return new Intl.NumberFormat("en-IN", {
+  return new Intl.NumberFormat(getIntlTag(), {
     style: "currency",
     currency: "INR",
     minimumFractionDigits: paise % 100 === 0 ? 0 : 2,

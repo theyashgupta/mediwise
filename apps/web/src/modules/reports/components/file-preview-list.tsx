@@ -1,10 +1,12 @@
 import { maxFiles, maxTotalBytes } from "@mediwise/shared";
 import { CircleCheck, Info, X } from "lucide-react";
 import { useCallback } from "react";
+import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { megabytes } from "../config/files";
 import { type PhotoFlags, photoWarnings } from "../config/photo-check";
+import { MonoNumbers } from "./drop-zone";
 import { FileTypeIcon } from "./file-type-icon";
 
 type FilePreviewListProps = {
@@ -41,17 +43,21 @@ export function FilePreviewList({
   uploading,
   onRemove,
 }: FilePreviewListProps) {
+  const t = useT();
   const total = files.reduce((sum, file) => sum + file.size, 0);
   return (
-    <section aria-label="Selected files" className="overflow-hidden rounded-xl border bg-card">
+    <section
+      aria-label={t.reports.upload.selected}
+      className="overflow-hidden rounded-xl border bg-card"
+    >
       <p className="flex justify-between gap-4 border-b px-4 py-2 text-xs text-muted-foreground">
         <span>
-          <span className="font-mono">{files.length}</span> of{" "}
-          <span className="font-mono">{maxFiles}</span> files
+          <MonoNumbers text={t.reports.upload.fileCount(files.length, maxFiles)} />
         </span>
         <span>
-          <span className="font-mono">{megabytes(total)}</span> of{" "}
-          <span className="font-mono">{maxTotalBytes / 1024 / 1024}</span> MB
+          <MonoNumbers
+            text={t.reports.upload.totalSize(megabytes(total), maxTotalBytes / 1024 / 1024)}
+          />
         </span>
       </p>
       <ul className="divide-y">
@@ -67,10 +73,15 @@ export function FilePreviewList({
                 <p className="flex items-baseline justify-between gap-3">
                   <span className="truncate text-sm font-medium">{file.name}</span>
                   <span className="shrink-0 font-mono text-xs text-muted-foreground">
-                    {uploading ? `${percent}%` : `${megabytes(file.size)} MB`}
+                    {uploading ? `${percent}%` : t.reports.upload.fileSize(megabytes(file.size))}
                   </span>
                 </p>
-                {uploading && <Progress value={percent} aria-label={`Uploading ${file.name}`} />}
+                {uploading && (
+                  <Progress
+                    value={percent}
+                    aria-label={t.reports.upload.uploadingFile(file.name)}
+                  />
+                )}
                 {photoWarnings(photoFlags[index]).map((warning) => (
                   <p
                     key={warning}
@@ -83,14 +94,17 @@ export function FilePreviewList({
               </div>
               {uploading ? (
                 percent === 100 && (
-                  <CircleCheck className="size-4 shrink-0 text-primary" aria-label="Uploaded" />
+                  <CircleCheck
+                    className="size-4 shrink-0 text-primary"
+                    aria-label={t.reports.upload.uploaded}
+                  />
                 )
               ) : (
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => onRemove(index)}
-                  aria-label={`Remove ${file.name}`}
+                  aria-label={t.reports.upload.remove(file.name)}
                 >
                   <X aria-hidden />
                 </Button>

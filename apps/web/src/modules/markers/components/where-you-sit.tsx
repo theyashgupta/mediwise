@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { useT } from "@/common/hooks/use-locale";
 import { formatRange, type Range, rangeScale } from "@/common/utils/range-scale";
 import { type Status, statusStyles } from "@/common/utils/status";
 import { cn } from "@/lib/utils";
@@ -47,14 +48,18 @@ export function WhereYouSit({
   source,
 }: WhereYouSitProps) {
   const clipId = useId();
+  const t = useT();
   const scale = rangeScale(value, toRange(lab), toRange(optimal), toRange(watch));
   const optimalBounds = finite(optimal);
   const watchBounds = finite(watch).filter((n) => !optimalBounds.includes(n));
   const label = [
-    `Value ${formatValue(value, precision)}${unit ? ` ${unit}` : ""}, ${statusStyles[status].label}.`,
-    optimal && `Optimal ${formatRange(toRange(optimal) ?? {}, unit)}.`,
-    watch && `Watch ${formatRange(toRange(watch) ?? {}, unit)}.`,
-    lab && `Lab range ${formatRange(toRange(lab) ?? {}, unit)}.`,
+    t.common.range.barLabel(
+      `${formatValue(value, precision)}${unit ? ` ${unit}` : ""}`,
+      t.common.status[status],
+    ),
+    optimal && t.markers.sit.optimal(formatRange(toRange(optimal) ?? {}, unit)),
+    watch && t.markers.sit.watch(formatRange(toRange(watch) ?? {}, unit)),
+    lab && t.common.range.labLabel(formatRange(toRange(lab) ?? {}, unit)),
   ]
     .filter(Boolean)
     .join(" ");
@@ -122,15 +127,15 @@ export function WhereYouSit({
         )}
       </svg>
       <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground" aria-hidden>
-        {optimal && <Swatch className="bg-optimal/55" label="Optimal" />}
-        {watch && <Swatch className="bg-watch/45" label="Watch" />}
-        {watch && <Swatch className="bg-risk/25" label="Risk" />}
-        {lab && <Swatch className="bg-muted-foreground/40" label="Lab range (thin bar)" />}
+        {optimal && <Swatch className="bg-optimal/55" label={t.common.status.optimal} />}
+        {watch && <Swatch className="bg-watch/45" label={t.common.status.watch} />}
+        {watch && <Swatch className="bg-risk/25" label={t.common.status.risk} />}
+        {lab && <Swatch className="bg-muted-foreground/40" label={t.markers.sit.labBar} />}
       </div>
       <p className="text-sm text-muted-foreground">
         {source ? (
           <>
-            Calibrated range source:{" "}
+            {t.markers.sit.source}{" "}
             {source.url ? (
               <a
                 href={source.url}
@@ -146,9 +151,9 @@ export function WhereYouSit({
             ({source.year}).
           </>
         ) : optimal ? (
-          "No calibrated range applies to your profile. MediWise uses the lab range."
+          t.markers.sit.noCalibrated
         ) : (
-          "No range applies to your profile."
+          t.markers.sit.noRange
         )}
       </p>
     </div>

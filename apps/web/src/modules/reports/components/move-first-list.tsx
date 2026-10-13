@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
+import { useT } from "@/common/hooks/use-locale";
 import { Section } from "@/common/components/section";
 import { StatusBadge } from "@/common/components/status-badge";
 import { markerLink } from "../config/report";
@@ -12,12 +13,13 @@ type MoveFirstListProps = {
 };
 
 export function MoveFirstList({ reportId, items }: MoveFirstListProps) {
+  const t = useT();
   if (items.length === 0) return null;
   return (
     <Section
       id="move-first"
-      title="Move first"
-      description="The markers to work on first, in order."
+      title={t.report.moveFirst.title}
+      description={t.report.moveFirst.description}
     >
       <ol className="divide-y overflow-hidden rounded-xl border bg-card">
         {items.map((item, index) => (

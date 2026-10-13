@@ -5,6 +5,7 @@ import { EmptyState } from "@/common/components/empty-state";
 import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
 import { PageHeader } from "@/common/components/page-header";
+import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 import { useActiveProfile } from "@/modules/profiles";
 import { TrendControls } from "../components/trend-controls";
@@ -18,22 +19,23 @@ function Content() {
   const trends = useTrends(profile?.id);
   const [category, setCategory] = useState<string | null>(null);
   const [sort, setSort] = useState<TrendSort>("change");
+  const t = useT();
 
   if (!profile || trends.isPending) return <LoadingState variant="list" />;
   if (trends.isError) {
-    return <ErrorState message="We could not load your trends." onRetry={() => trends.refetch()} />;
+    return <ErrorState message={t.trends.list.loadError} onRetry={() => trends.refetch()} />;
   }
   if (trends.data.reportCount < 2) {
     return (
       <EmptyState
         icon={TrendingUp}
-        title="No trends yet"
-        body="Upload a second report to see trends."
+        title={t.trends.list.noTrendsTitle}
+        body={t.trends.list.noTrendsBody}
         action={
           <Button asChild>
             <Link to="/reports/upload">
               <Upload aria-hidden />
-              Upload a report
+              {t.trends.upload}
             </Link>
           </Button>
         }
@@ -44,8 +46,8 @@ function Content() {
     return (
       <EmptyState
         icon={TrendingUp}
-        title="No shared markers yet"
-        body="A trend needs one marker in two reports. Your reports do not share a marker."
+        title={t.trends.list.noSharedTitle}
+        body={t.trends.list.noSharedBody}
       />
     );
   }
@@ -68,16 +70,17 @@ function Content() {
 }
 
 export function TrendsContainer() {
+  const t = useT();
   return (
     <>
       <PageHeader
-        title="Trends"
-        description="How each marker changes from one report to the next."
+        title={t.trends.list.title}
+        description={t.trends.list.description}
         actions={
           <Button asChild variant="outline">
             <Link to="/compare">
               <GitCompareArrows aria-hidden />
-              Compare reports
+              {t.trends.list.compare}
             </Link>
           </Button>
         }

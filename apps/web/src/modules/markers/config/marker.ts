@@ -1,8 +1,9 @@
+import { getIntlTag, getT } from "@/common/hooks/use-locale";
 import type { Status } from "@/common/utils/status";
 
 /** Formats a number with the marker's precision. */
 export function formatValue(value: number, precision: number) {
-  return value.toLocaleString("en-IN", { maximumFractionDigits: precision });
+  return value.toLocaleString(getIntlTag(), { maximumFractionDigits: precision });
 }
 
 /**
@@ -17,22 +18,23 @@ export function statusSentence(
   deviation: number | null,
   hasWatch: boolean,
 ) {
-  const side = !deviation ? "outside" : deviation > 0 ? "above" : "below";
+  const t = getT().markers;
+  const side = t.side[!deviation ? "outside" : deviation > 0 ? "above" : "below"];
   switch (status) {
     case "optimal":
-      return `Your ${name} is in the optimal range for your profile.`;
+      return t.sentence.optimal(name);
     case "watch":
-      return `Your ${name} is ${side} the optimal range, but in the watch range.`;
+      return t.sentence.watch(name, side);
     case "risk":
-      return `Your ${name} is ${side} the ${hasWatch ? "watch" : "lab"} range. Speak with a doctor about this value.`;
+      return t.sentence.risk(name, side, t.rangeName[hasWatch ? "watch" : "lab"]);
     case "unknown":
-      return "MediWise did not score this value. No calibrated range applies to your profile.";
+      return t.sentence.unknown;
   }
 }
 
 /** Formats the change from one value to the next with an explicit sign. */
 export function formatDelta(current: number, previous: number, precision: number) {
   const delta = Number((current - previous).toFixed(precision));
-  if (delta === 0) return "No change";
+  if (delta === 0) return getT().markers.noChange;
   return `${delta > 0 ? "+" : "−"}${formatValue(Math.abs(delta), precision)}`;
 }

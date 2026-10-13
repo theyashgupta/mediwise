@@ -1,7 +1,8 @@
 import { maxReportNoteLength } from "@mediwise/shared";
 import { useState } from "react";
+import { getIntlTag, useT } from "@/common/hooks/use-locale";
 import { cn } from "@/lib/utils";
-import { changedNote, noteHelp, noteLabel, noteStatus } from "../config/note";
+import { changedNote, noteStatus } from "../config/note";
 
 type ReportNoteProps = {
   note: string | null;
@@ -12,6 +13,7 @@ type ReportNoteProps = {
 };
 
 export function ReportNote({ note, saving, saved, failed, onSave }: ReportNoteProps) {
+  const t = useT();
   const [draft, setDraft] = useState(note ?? "");
   const changed = changedNote(draft, note) !== undefined;
   const status = noteStatus({ saving, failed, saved, changed });
@@ -19,17 +21,17 @@ export function ReportNote({ note, saving, saved, failed, onSave }: ReportNotePr
   return (
     <section className="max-w-measure space-y-2">
       <label htmlFor="report-note" className="text-xl font-semibold tracking-tight">
-        {noteLabel}
+        {t.report.note.label}
       </label>
       <p id="report-note-help" className="text-sm text-muted-foreground">
-        {noteHelp}
+        {t.report.note.help}
       </p>
       <textarea
         id="report-note"
         value={draft}
         maxLength={maxReportNoteLength}
         rows={3}
-        placeholder="Example: I felt tired for two weeks before this test."
+        placeholder={t.report.note.placeholder}
         aria-describedby="report-note-help report-note-status"
         onChange={(event) => setDraft(event.target.value)}
         onBlur={() => {
@@ -47,8 +49,10 @@ export function ReportNote({ note, saving, saved, failed, onSave }: ReportNotePr
           {status}
         </p>
         <p className="shrink-0 text-muted-foreground tabular-nums">
-          {draft.length.toLocaleString("en-IN")} of {maxReportNoteLength.toLocaleString("en-IN")}{" "}
-          characters
+          {t.report.note.characters(
+            draft.length.toLocaleString(getIntlTag()),
+            maxReportNoteLength.toLocaleString(getIntlTag()),
+          )}
         </p>
       </div>
     </section>

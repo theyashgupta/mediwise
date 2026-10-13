@@ -1,9 +1,10 @@
 import { Info } from "lucide-react";
 import { useState } from "react";
+import { useT } from "@/common/hooks/use-locale";
 import { ScoreRing } from "@/common/components/score-ring";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { panelLabel, tierLabels } from "../config/report";
+import { panelLabel } from "../config/report";
 import type { ReportDetail } from "../types";
 
 type ReportSummaryProps = {
@@ -12,8 +13,9 @@ type ReportSummaryProps = {
 };
 
 export function ReportSummary({ header, verdict }: ReportSummaryProps) {
+  const t = useT();
   const { measured, core } = header.coverage;
-  const tier = header.tier ? tierLabels[header.tier] : undefined;
+  const tier = header.tier ? t.report.summary.tiers[header.tier] : undefined;
   const [formulaOpen, setFormulaOpen] = useState(false);
   return (
     <section
@@ -22,7 +24,7 @@ export function ReportSummary({ header, verdict }: ReportSummaryProps) {
     >
       <div className="min-w-0 space-y-4">
         <h2 id="verdict" className="text-2xl font-semibold tracking-tight text-balance">
-          {verdict ?? `Your score is ${header.score}.`}
+          {verdict ?? t.report.summary.score(header.score)}
         </h2>
         <div className="flex flex-wrap items-center gap-2 text-sm">
           {tier && <Badge variant="secondary">{tier}</Badge>}
@@ -34,7 +36,11 @@ export function ReportSummary({ header, verdict }: ReportSummaryProps) {
               }}
               className="inline-flex items-center gap-1.5 rounded-sm text-left text-muted-foreground underline decoration-dotted underline-offset-4 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
-              {panelLabel(header.coverage, header.capped)}, {measured} of {core} core markers
+              {t.report.summary.coverage(
+                panelLabel(header.coverage, header.capped),
+                measured,
+                core,
+              )}
               <Info className="size-3.5 shrink-0" aria-hidden />
             </TooltipTrigger>
             <TooltipContent className="max-w-xs text-pretty">{header.formula}</TooltipContent>
@@ -43,7 +49,7 @@ export function ReportSummary({ header, verdict }: ReportSummaryProps) {
         {header.capped && (
           <p className="flex items-start gap-2 rounded-lg bg-muted px-3 py-2 text-sm">
             <Info className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
-            We capped the score. This report has {measured} of {core} core markers.
+            {t.report.summary.capped(measured, core)}
           </p>
         )}
       </div>

@@ -3,7 +3,16 @@
     "family": {
       "$type": "fontFamily",
       "sans": { "$value": ["Inter", "ui-sans-serif", "system-ui", "sans-serif"] },
-      "mono": { "$value": ["JetBrains Mono", "ui-monospace", "monospace"] },
+      "mono": {
+        "$value": [
+          "JetBrains Mono",
+          "Kohinoor Devanagari",
+          "Noto Sans Devanagari",
+          "Nirmala UI",
+          "ui-monospace",
+          "monospace"
+        ]
+      },
       "display": { "$value": ["Instrument Serif", "ui-serif", "Georgia", "serif"] }
     },
     "size": {

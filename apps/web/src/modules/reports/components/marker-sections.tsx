@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 import type { MarkerFilter, MarkerRow as MarkerRowData, ReportDetail } from "../types";
 import { MarkerRow } from "./marker-row";
@@ -11,10 +12,7 @@ type MarkerSectionsProps = {
   onFilterChange: (filter: MarkerFilter) => void;
 };
 
-const filters: { value: MarkerFilter; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "attention", label: "Watch and risk only" },
-];
+const filters: MarkerFilter[] = ["all", "attention"];
 
 type SectionProps = {
   id: string;
@@ -36,6 +34,7 @@ function Section({ id, title, count, children }: SectionProps) {
 }
 
 export function MarkerSections({ reportId, detail, filter, onFilterChange }: MarkerSectionsProps) {
+  const t = useT();
   const visible = (rows: MarkerRowData[]) =>
     filter === "all" ? rows : rows.filter((row) => row.status === "watch" || row.status === "risk");
   const sections = [
@@ -44,7 +43,7 @@ export function MarkerSections({ reportId, detail, filter, onFilterChange }: Mar
       label,
       markers: visible(markers),
     })),
-    { key: "ratios", label: "Ratios", markers: visible(detail.derived) },
+    { key: "ratios", label: t.report.markers.ratios, markers: visible(detail.derived) },
   ].filter((section) => section.markers.length > 0);
   const showUnmapped = filter === "all" && detail.unmapped.length > 0;
   const shown =
@@ -54,8 +53,12 @@ export function MarkerSections({ reportId, detail, filter, onFilterChange }: Mar
   return (
     <div className="space-y-6">
       <div className="sticky top-12 z-20 -mx-4 flex flex-wrap items-center justify-between gap-2 border-b bg-background/95 px-4 py-2 backdrop-blur-md md:-mx-8 md:px-8">
-        <div role="group" aria-label="Filter markers" className="flex flex-wrap gap-1">
-          {filters.map(({ value, label }) => (
+        <div
+          role="group"
+          aria-label={t.report.markers.filterLabel}
+          className="flex flex-wrap gap-1"
+        >
+          {filters.map((value) => (
             <Button
               key={value}
               size="sm"
@@ -63,16 +66,16 @@ export function MarkerSections({ reportId, detail, filter, onFilterChange }: Mar
               aria-pressed={filter === value}
               onClick={() => onFilterChange(value)}
             >
-              {label}
+              {t.report.markers.filters[value]}
             </Button>
           ))}
         </div>
         <p className="text-sm text-muted-foreground" aria-live="polite">
-          <span className="font-mono">{shown}</span> markers shown
+          <span className="font-mono">{shown}</span> {t.report.markers.shown}
         </p>
       </div>
       {sections.length === 0 && !showUnmapped && (
-        <p className="text-muted-foreground">No marker on this report is in watch or risk.</p>
+        <p className="text-muted-foreground">{t.report.markers.noneInAttention}</p>
       )}
       {sections.map((section) => (
         <Section
@@ -89,13 +92,13 @@ export function MarkerSections({ reportId, detail, filter, onFilterChange }: Mar
         </Section>
       ))}
       {showUnmapped && (
-        <Section id="unmapped" title="Not recognised" count={detail.unmapped.length}>
+        <Section id="unmapped" title={t.report.markers.unmapped} count={detail.unmapped.length}>
           {detail.unmapped.map((item, index) => (
             <li key={index} className="flex items-start justify-between gap-4 px-4 py-3">
               <span className="min-w-0 space-y-1">
                 <span className="block font-medium break-words">{item.rawName}</span>
                 <span className="block text-sm text-muted-foreground">
-                  We could not match this marker. We did not score it.
+                  {t.report.markers.unmappedNote}
                 </span>
               </span>
               <MarkerValue
