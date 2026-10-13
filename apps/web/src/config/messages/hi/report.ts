@@ -74,10 +74,18 @@ export const report: Messages["report"] = {
     description: review(
       "बाद की एक रिपोर्ट इन नतीजों का जवाब देती है। हर लाइन छपी हुई रिपोर्ट से ली गई है।",
     ),
-    settledBy: (date: string) => review(`${date} की रिपोर्ट ने इसे तय किया।`),
+    settledBy: (date: string, lab: string | null) =>
+      review(
+        lab ? `${date} की ${lab} रिपोर्ट ने इसे तय किया।` : `${date} की रिपोर्ट ने इसे तय किया।`,
+      ),
   },
   sequence: {
-    confirmedBy: (date: string) => review(`${date} की रिपोर्ट में यह नतीजा फिर से आया।`),
+    confirmedBy: (date: string, lab: string | null) =>
+      review(
+        lab
+          ? `${date} की ${lab} रिपोर्ट में यह नतीजा फिर से आया।`
+          : `${date} की रिपोर्ट में यह नतीजा फिर से आया।`,
+      ),
     steps: "तारीख के क्रम में नतीजे",
   },
   links: {
@@ -92,6 +100,10 @@ export const report: Messages["report"] = {
     proposed: review(
       "MediWise ने यह जोड़ी ढूँढी। अगर बाद की रिपोर्ट वही जाँच दोहराती है, तो इसकी पुष्टि करें।",
     ),
+    detected: review(
+      "दोनों रिपोर्ट में 90 दिन के अंदर एक ही जाँच है। इसलिए MediWise ने इन्हें जोड़ा।",
+    ),
+    undo: "वापस लें",
     confirm: "पुष्टि करें",
     dismiss: "खारिज करें",
     otherReport: "रिपोर्ट",

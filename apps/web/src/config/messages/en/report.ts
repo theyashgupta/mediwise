@@ -68,10 +68,14 @@ export const report = {
     title: "Settled",
     description:
       "A later report answers these results. Each line is copied from the printed reports.",
-    settledBy: (date: string) => `Settled by the report of ${date}.`,
+    settledBy: (date: string, lab: string | null) =>
+      lab ? `Settled by the ${lab} report of ${date}.` : `Settled by the report of ${date}.`,
   },
   sequence: {
-    confirmedBy: (date: string) => `The report of ${date} repeats this result.`,
+    confirmedBy: (date: string, lab: string | null) =>
+      lab
+        ? `The ${lab} report of ${date} repeats this result.`
+        : `The report of ${date} repeats this result.`,
     steps: "Results in date order",
   },
   links: {
@@ -83,6 +87,8 @@ export const report = {
     repeatedIn: (report: string, date: string) => `Repeated in ${report} on ${date}`,
     secondOpinionIn: (report: string, date: string) => `Second opinion in ${report} on ${date}`,
     proposed: "MediWise found this pair. Confirm it if the later report repeats the same test.",
+    detected: "MediWise linked these reports because both have the same study within 90 days.",
+    undo: "Undo",
     confirm: "Confirm",
     dismiss: "Dismiss",
     otherReport: "Report",
