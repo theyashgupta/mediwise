@@ -1,7 +1,9 @@
-import { Link, Outlet, useNavigate } from "@tanstack/react-router";
+import { Link, Outlet, useNavigate, useRouter } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useT } from "@/common/hooks/use-locale";
+import { useOnline } from "@/common/hooks/use-online";
 import { Logo } from "@/common/components/brand/logo";
+import { OfflineState } from "@/common/components/offline-state";
 import { cn } from "@/lib/utils";
 import { AppBreadcrumb } from "./app-breadcrumb";
 import { AppHeader } from "./app-header";
@@ -10,6 +12,7 @@ import { MobileTabBar } from "./mobile-tab-bar";
 import { focusRing, isTypingTarget, resolveShortcut } from "./nav";
 import { ShortcutsDialog } from "./shortcuts-dialog";
 import { SiteFooter } from "./site-footer";
+import { UpdateLine } from "./update-line";
 
 const sidebarKey = "sidebar";
 
@@ -71,15 +74,32 @@ function useShellShortcuts(onToggleSidebar: () => void, setShowShortcuts: (open:
   }, [navigate, onToggleSidebar, setShowShortcuts]);
 }
 
+/**
+ * Runs the route guards again when the connection comes back.
+ *
+ * @remarks
+ * The session guard lets an offline visitor into the shell, so the check it skipped runs on reconnect.
+ */
+function useRecheckOnReconnect() {
+  const router = useRouter();
+  useEffect(() => {
+    const recheck = () => void router.invalidate();
+    window.addEventListener("online", recheck);
+    return () => window.removeEventListener("online", recheck);
+  }, [router]);
+}
+
 export function AppShell() {
   const [collapsed, setCollapsed] = useSidebarCollapsed();
   const [showShortcuts, setShowShortcuts] = useState(false);
   const t = useT();
   const toggleSidebar = useCallback(() => setCollapsed((value) => !value), [setCollapsed]);
   useShellShortcuts(toggleSidebar, setShowShortcuts);
+  useRecheckOnReconnect();
+  const online = useOnline();
 
   return (
-    <div className="isolate min-h-svh md:grid md:grid-cols-[auto_minmax(0,1fr)]">
+    <div className="isolate min-h-svh pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)] md:grid md:grid-cols-[auto_minmax(0,1fr)]">
       <div className="ambient" aria-hidden />
       <a
         href="#content"
@@ -102,7 +122,11 @@ export function AppShell() {
           className="mx-auto w-full max-w-content flex-1 px-4 pt-6 pb-24 outline-none md:px-8 md:pt-10 md:pb-12 print:p-0"
         >
           <AppBreadcrumb innerOnly className="mb-4 md:hidden print:hidden" />
-          <Outlet />
+          <UpdateLine />
+          {!online && <OfflineState />}
+          <div hidden={!online}>
+            <Outlet />
+          </div>
           <SiteFooter className="mt-16" />
         </main>
       </div>

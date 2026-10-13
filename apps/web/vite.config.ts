@@ -1,6 +1,9 @@
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
+import { createHash } from "node:crypto";
+import { readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadEnv, type Plugin } from "vite";
 import { defineConfig } from "vitest/config";
@@ -32,6 +35,36 @@ function siteFilesPlugin(appOrigin: string): Plugin {
 }
 
 /**
+ * Writes the build version and the shell file list at the top of `sw.js`.
+ *
+ * @remarks
+ * Every asset name holds a content hash, so a deploy that changes any file changes `sw.js`. The browser then installs a new worker with a new cache.
+ */
+function serviceWorkerPlugin(): Plugin {
+  return {
+    name: "mediwise-service-worker",
+    apply: "build",
+    writeBundle({ dir = "dist" }, bundle) {
+      const names = Object.keys(bundle)
+        .filter((name) => name !== "index.html" && !name.endsWith(".map") && !name.startsWith("."))
+        .sort();
+      const html = bundle["index.html"];
+      const version = createHash("sha256")
+        .update(names.join("\n"))
+        .update(html?.type === "asset" ? html.source : "")
+        .digest("hex")
+        .slice(0, 12);
+      const files = ["/", ...names.map((name) => `/${name}`)];
+      const worker = readFileSync(new URL("./public/sw.js", import.meta.url), "utf8");
+      writeFileSync(
+        join(dir, "sw.js"),
+        `self.mediwiseBuild = ${JSON.stringify({ version, files })};\n${worker}`,
+      );
+    },
+  };
+}
+
+/**
  * Forces the test mode in Vitest when the shell exports `NODE_ENV=production`.
  *
  * @remarks
@@ -52,6 +85,7 @@ export default defineConfig(({ mode }) => {
       react(),
       tailwindcss(),
       siteFilesPlugin(appOrigin),
+      serviceWorkerPlugin(),
     ],
     define: { "import.meta.env.VITE_APP_ORIGIN": JSON.stringify(appOrigin) },
     resolve: {

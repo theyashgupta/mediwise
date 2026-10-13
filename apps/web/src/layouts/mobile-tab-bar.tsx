@@ -28,7 +28,7 @@ export function MobileTabBar() {
     <GlassSurface
       asChild
       layer="bar"
-      className="fixed inset-x-0 bottom-0 z-30 border-t pb-[env(safe-area-inset-bottom)] md:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 border-t pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] md:hidden"
     >
       <nav aria-label={t.shell.mainNav}>
         <ul className="grid grid-cols-6">

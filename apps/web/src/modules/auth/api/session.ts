@@ -2,10 +2,15 @@ import { type ParsedLocation, redirect } from "@tanstack/react-router";
 import { supabase } from "@/lib/supabase";
 import { readCallback } from "../config/callback";
 
-/** Route guard: sends a visitor without a session to `/login`, and keeps the page they asked for. */
+/**
+ * Route guard: sends a visitor without a session to `/login`, and keeps the page they asked for.
+ *
+ * @remarks
+ * Offline, an expired session cannot refresh, so the guard lets the visitor into the shell and its offline state. The shell runs the guard again on reconnect.
+ */
 export async function requireSession({ location }: { location: ParsedLocation }) {
   const { data } = await supabase.auth.getSession();
-  if (!data.session) {
+  if (!data.session && navigator.onLine !== false) {
     throw redirect({ to: "/login", search: location.href === "/" ? {} : { next: location.href } });
   }
 }

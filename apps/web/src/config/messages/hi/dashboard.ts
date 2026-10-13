@@ -24,6 +24,22 @@ export const dashboard: Messages["dashboard"] = {
     action: "तारीख डालें",
   },
   loadError: "हम आपका डैशबोर्ड लोड नहीं कर पाए।",
+  install: {
+    title: "MediWise इंस्टॉल करें",
+    body: "MediWise को अपनी होम स्क्रीन पर जोड़ें। फिर यह एक ऐप की तरह खुलेगा।",
+    action: "इंस्टॉल करें",
+    dismiss: "अभी नहीं",
+    ios: {
+      title: "MediWise को होम स्क्रीन पर जोड़ें",
+      body: "फिर MediWise एक ऐप की तरह खुलेगा।",
+      steps: [
+        "Safari में शेयर बटन पर टैप करें।",
+        review("Add to Home Screen (होम स्क्रीन में जोड़ें) पर टैप करें।"),
+        review("Add (जोड़ें) पर टैप करें।"),
+      ],
+      close: "बंद करें",
+    },
+  },
   readFailed: "हम आपकी सबसे नई रिपोर्ट नहीं पढ़ पाए।",
   empty: {
     title: "अपनी पहली रिपोर्ट अपलोड करें",
