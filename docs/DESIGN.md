@@ -480,3 +480,44 @@ Two changes came from the measurement:
 
 - **Dialogs have no blur of their own.** With a 24 px dialog blur, opening and closing the shortcuts dialog took 120 to 136 ms against about 80 ms before.
 - **The sidebar has the glass tint but no blur.** With the blur, dark was 92 ms against 80 ms before (18 runs each). Only the fixed wash sits behind the sidebar, so the blur did not change how it looks. It cost a full-height filter on every frame of the collapse animation and under the dialog scrim.
+
+## Performance budgets (MEDI-88)
+
+CI runs Lighthouse and an INP check on every push, in the `perf` job. How to read a failure and how to change a budget is in [testing.md](testing.md#performance-budgets). The bundle size check is in [testing.md](testing.md#bundle-size).
+
+The ticket targets were performance 85, accessibility 100, best practices 95 and SEO 95 on the app, and performance 95 on the landing. Today's numbers are lower on every page.
+
+- **Performance budget:** 10 points under the lowest CI median of two runs. Lighthouse performance on the GitHub runners moves by about 7 points between runs of the same build, so 5 under one median failed the second run (trends 65 against 67).
+- **Accessibility, best practices, SEO:** these did not move between runs. Accessibility stays at 100, best practices is the target of 95, and SEO is 5 under 63 on the app and the target of 95 on the landing.
+
+| Page | Performance | Accessibility | Best practices | SEO |
+| - | - | - | - | - |
+| Home | 58 | 100 | 95 | 58 |
+| Report | 51 | 100 | 95 | 58 |
+| Trends | 55 | 100 | 95 | 58 |
+| Landing | 75 | 100 | 95 | 95 |
+
+The two CI runs of 2026-10-13, GitHub `ubuntu-latest`. Each cell is the median of 3 Lighthouse runs, with the runs in brackets. Accessibility, best practices and SEO were the same in both runs: 100, 100, 63 on the app and 100, 100, 100 on the landing.
+
+| Page | Run 1, `b002947` (index 2378, 4.76x) | Run 2, `ee61446` (index 2636, 5.27x) | Lowest median |
+| - | - | - | - |
+| Home | 68 (70, 68, 68) | 68 (73, 68, 68) | 68 |
+| Report | 61 (61, 60, 63) | 62 (63, 62, 60) | 61 |
+| Trends | 72 (72, 73, 67) | 65 (65, 65, 67) | 65 |
+| Landing | 85 (85, 85, 85) | 85 (88, 85, 85) | 85 |
+| INP on `/trends`, 4x throttle | 192 ms (208, 192, 192) | 176 ms (184, 176, 168) | |
+
+INP: the ticket limit is 200 ms. The test fails at 250 ms, because run 1 had one page load at 208 ms, so 200 ms would fail on noise.
+
+The bundle sizes in both runs matched `scripts/bundle-size.json` within 0.1%: web first load 473.0 kB, landing first load 145.2 kB.
+
+Job times in run 1: `perf` 5 min 34 s, `e2e` 4 min 4 s, `check` 2 min 35 s. Run 2: `perf` 5 min 32 s, `e2e` 3 min 53 s, `check` 3 min 13 s.
+
+The same build on this 8 GB Mac on 2026-10-13, with another session loading it (load average 5 to 29): Home 56 to 67, report 44 to 61, trends 61 to 70, landing 92 in each pass. These numbers did not set the budgets.
+
+The `perf` job took 5 min 34 s, the `e2e` job 4 min 4 s and the `check` job 2 min 35 s.
+
+- **The CPU slowdown is calibrated.** Lighthouse simulates CPU time as the real CPU time times the slowdown, so with a fixed 4x the same build scored 34 on Home in a busy pass and 68 in a quiet one. The test measures the machine with the Lighthouse benchmark (best of 3) and uses 4x at an index of 2000, scaled in proportion. This Mac measured 2500 to 2900 (5.0x to 5.9x), the CI runners 2378 and 2636.
+- **SEO 63 on the app is a baseline for a signed-in app, not a target.** `robots.txt` closes the signed-in pages to crawlers, so the `is-crawlable` audit fails. Do not open them to raise the score.
+- **Why the app scores low.** Home loads 473 kB of gzipped JavaScript and CSS before the first render, with the `trends` chunk (141 kB, it holds Recharts) in the first load. FCP is about 3.9 s and LCP about 4.2 s on simulated slow 4G. Splitting Recharts out of the first load is the next step, and the budgets go up with it.
+- **Change a budget from CI numbers only.** The CI runner is not loaded by other sessions. Set a performance budget 10 under the lowest CI median of at least two runs, and update these tables.
