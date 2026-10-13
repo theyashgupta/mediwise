@@ -10,6 +10,7 @@ import {
   repeatsStudy,
   type Settlement,
   settleFinding,
+  typicalGapDays,
   type Visit,
 } from "@mediwise/engine";
 import type { Narrative, ReportLinkKind } from "@mediwise/shared";
@@ -56,19 +57,21 @@ export async function proposeLinks(
 }
 
 /**
- * Loads the reports that can settle a finding of this report: every linked later report, and every report of the next 30 days.
+ * Loads the reports that can settle a finding of this report, and the profile's typical gap between reports.
  *
  * @remarks
- * Only a linked report can settle a study alert. The 30 days serve marker repeats, which need no link.
+ * Every linked later report and every report of the next 30 days. Only a linked report can settle a study alert. The
+ * 30 days serve marker repeats, which need no link, and the gap tells `repeatsMarker` how often this person tests.
  */
-export async function listLaterVisits(
+export async function loadLaterVisits(
   profileId: string,
   reportId: string,
   date: string,
-): Promise<LaterVisit[]> {
-  const [links, soon] = await Promise.all([
+): Promise<{ later: LaterVisit[]; typicalGap: number | null }> {
+  const [links, soon, dates] = await Promise.all([
     repo.listLinks(reportId),
     repo.listReportsAfter(profileId, reportId, date, repeatMarkerDays),
+    repo.listVisitDates(profileId),
   ]);
   const linked = new Set(
     links.filter((link) => link.earlierReportId === reportId).map((link) => link.laterReportId),
@@ -80,7 +83,10 @@ export async function listLaterVisits(
       return found ? [{ ...found.visit, reportId: id, linked: linked.has(id) }] : [];
     }),
   );
-  return visits.flat().toSorted((a, b) => a.date.localeCompare(b.date));
+  return {
+    later: visits.flat().toSorted((a, b) => a.date.localeCompare(b.date)),
+    typicalGap: typicalGapDays([...dates, date]),
+  };
 }
 
 function step(reportId: string, date: string, text: string) {
@@ -96,13 +102,16 @@ function step(reportId: string, date: string, text: string) {
  */
 export function settleStored(
   reportId: string,
-  current: Visit,
-  later: LaterVisit[],
+  {
+    current,
+    later,
+    typicalGap,
+  }: { current: Visit; later: LaterVisit[]; typicalGap: number | null },
   stored: { findings: StoredFinding[]; doctorQuestions: string[]; narrative: Narrative | null },
 ) {
   const states = stored.findings.map((finding) => ({
     finding,
-    settlement: settleFinding(finding, current, later),
+    settlement: settleFinding(finding, current, later, typicalGap),
   }));
   const sequence = (settlement: Settlement) => ({
     state: settlement.state,
@@ -151,8 +160,8 @@ export function settleStored(
 export async function loadSequence(reportId: string) {
   const found = await findVisit(reportId);
   if (!found) return undefined;
-  const later = await listLaterVisits(found.profileId, reportId, found.visit.date);
-  return { current: found.visit, later };
+  const { later, typicalGap } = await loadLaterVisits(found.profileId, reportId, found.visit.date);
+  return { current: found.visit, later, typicalGap };
 }
 
 /** Lists the links of a report for its page, each named from this report's side. */

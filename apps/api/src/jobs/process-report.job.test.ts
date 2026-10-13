@@ -174,6 +174,7 @@ vi.mock("../modules/findings/findings.repo.js", () => ({
 vi.mock("../modules/links/links.repo.js", () => ({
   listNearReports: async () => edge.near,
   listReportsAfter: async () => [],
+  listVisitDates: async () => [],
   insertDetectedLinks: async (rows: typeof edge.links) => edge.links.push(...rows),
   listLinks: async (reportId: string) =>
     edge.links.map((link, index) => ({

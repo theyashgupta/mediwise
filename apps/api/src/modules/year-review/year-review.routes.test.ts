@@ -66,6 +66,7 @@ vi.mock("../links/links.repo.js", () => ({
   listProfileLinks: async () => [],
   listLinks: async () => [],
   listReportsAfter: async () => [],
+  listVisitDates: async () => [],
 }));
 vi.mock("../../lib/anthropic.js", () => ({ anthropic: { messages: { create: store.create } } }));
 

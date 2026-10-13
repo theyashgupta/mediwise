@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import fixture from "../fixtures/repeat-study.json";
 import { alertHeadlineStart, buildFindings } from "./findings.js";
-import { repeatsStudy, settleFinding } from "./sequence.js";
+import { repeatsMarker, repeatsStudy, settleFinding, typicalGapDays } from "./sequence.js";
 import type { LaterVisit, Visit } from "./types.js";
 
 const earlier = fixture.earlier as Visit;
@@ -14,6 +14,36 @@ function laterWith(changes: Partial<LaterVisit>, impression?: string): LaterVisi
   const studies = impression ? [{ ...laterStudy!, impression }] : later.studies;
   return { ...later, studies, ...changes };
 }
+
+describe("repeatsMarker", () => {
+  test("in a weekly history only a recheck of a watch or risk value within 30 days is a repeat", () => {
+    expect(repeatsMarker(7, "optimal", 7)).toBe(false);
+    expect(repeatsMarker(7, "unknown", 7)).toBe(false);
+    expect(repeatsMarker(7, "watch", 7)).toBe(true);
+    expect(repeatsMarker(7, "risk", 7)).toBe(true);
+    expect(repeatsMarker(31, "risk", 7)).toBe(false);
+  });
+
+  test("with a typical gap over 30 days or fewer than three dates, any value within 30 days is a repeat", () => {
+    expect(repeatsMarker(15, "optimal", 31)).toBe(true);
+    expect(repeatsMarker(15, "optimal", null)).toBe(true);
+    expect(repeatsMarker(15, "optimal", 30)).toBe(false);
+    expect(repeatsMarker(0, "risk", null)).toBe(false);
+  });
+
+  test("the typical gap is the median gap of the newest five report dates", () => {
+    const weekly = [
+      "2025-01-01",
+      "2026-08-04",
+      "2026-08-11",
+      "2026-08-18",
+      "2026-08-25",
+      "2026-09-01",
+    ];
+    expect(typicalGapDays(weekly)).toBe(7);
+    expect(typicalGapDays(["2026-08-04", "2026-08-11", "2026-08-11"])).toBeNull();
+  });
+});
 
 describe("repeatsStudy", () => {
   test("a study of the same kind and region 42 days later is a repeat", () => {
@@ -87,6 +117,21 @@ describe("settleFinding", () => {
       severity: "optimal",
     });
     expect(settleFinding(risk, earlier, [later])).toBeUndefined();
+  });
+
+  test("in a weekly history a risk value still settles, an optimal value does not", () => {
+    const soon = laterWith({ date: "2025-03-05", linked: false });
+    const risk = { kind: "risk" as const, citedKeys: ["tsh"], citedStudyIds: [] };
+    expect(settleFinding(risk, earlier, [soon], 7)?.state).toBe("settled");
+    const optimal = {
+      ...earlier,
+      markers: earlier.markers.map((row) =>
+        row.markerKey === "tsh" ? { ...row, value: 2.4, status: "optimal" as const } : row,
+      ),
+    };
+    const change = { kind: "change" as const, citedKeys: ["tsh"], citedStudyIds: [] };
+    expect(settleFinding(change, optimal, [soon], 7)).toBeUndefined();
+    expect(settleFinding(change, optimal, [soon], 60)?.state).toBe("settled");
   });
 });
 

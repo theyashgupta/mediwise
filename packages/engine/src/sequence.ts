@@ -5,6 +5,7 @@ import type {
   FindingDraft,
   FindingSeverity,
   LaterVisit,
+  MarkerStatus,
   Settlement,
   Visit,
   VisitMarker,
@@ -13,11 +14,49 @@ import type {
 
 export const repeatStudyDays = 90;
 export const repeatMarkerDays = 30;
+const cadenceDates = 5;
 
 const names = new Map(markers.map((entry) => [entry.key, entry.name]));
 
 export function daysBetween(from: string, to: string) {
   return Math.round((Date.parse(to) - Date.parse(from)) / 86_400_000);
+}
+
+/**
+ * Gives the median number of days between the newest report dates of a profile, or null with fewer than three dates.
+ *
+ * @remarks
+ * It tells a weekly history from a yearly one, so the stale line and the repeat rule fit how often this person tests.
+ */
+export function typicalGapDays(dates: string[]) {
+  const newest = [...new Set(dates)].sort().slice(-cadenceDates);
+  if (newest.length < 3) return null;
+  const gaps = newest
+    .slice(1)
+    .map((date, i) => daysBetween(newest[i]!, date))
+    .sort((a, b) => a - b);
+  return gaps[Math.floor(gaps.length / 2)]!;
+}
+
+/**
+ * Tells whether a marker measured again `days` after an earlier value repeats it, so the two values belong together.
+ *
+ * @remarks
+ * A person who tests every week or month measures the marker again by habit. For them only a recheck of a watch or risk
+ * value counts. An unknown gap (fewer than three report dates) counts as a long one.
+ */
+export function repeatsMarker(
+  days: number,
+  earlier: MarkerStatus | null,
+  typicalGap: number | null,
+) {
+  if (days <= 0 || days > repeatMarkerDays) return false;
+  return (
+    earlier === "watch" ||
+    earlier === "risk" ||
+    typicalGap === null ||
+    typicalGap > repeatMarkerDays
+  );
 }
 
 function region(study: Pick<VisitStudy, "bodyRegion">) {
@@ -97,14 +136,16 @@ function valueText(row: VisitMarker & { value: number; status: FindingSeverity }
   return `${withUnit(row.value, row.unit ?? "")} with ${row.status} status`;
 }
 
-function settleMarker(key: string, current: Visit, later: LaterVisit[]): Settlement | undefined {
+function settleMarker(
+  key: string,
+  current: Visit,
+  later: LaterVisit[],
+  typicalGap: number | null,
+): Settlement | undefined {
   const before = scored(current, key);
   if (!before) return undefined;
   const repeat = later
-    .filter(({ date }) => {
-      const days = daysBetween(current.date, date);
-      return days > 0 && days <= repeatMarkerDays;
-    })
+    .filter(({ date }) => repeatsMarker(daysBetween(current.date, date), before.status, typicalGap))
     .flatMap((visit) => {
       const row = scored(visit, key);
       return row ? [{ visit, row }] : [];
@@ -131,12 +172,13 @@ function settleMarker(key: string, current: Visit, later: LaterVisit[]): Settlem
  * @remarks
  * A study alert needs a linked later study of the same kind: no alert line there settles it, the same alert rule confirms it,
  * and a different alert leaves it open. A risk or change finding of one marker takes the status of the latest repeat of
- * that marker within 30 days, linked or not. `later` must be in date order.
+ * that marker by `repeatsMarker`, linked or not. `later` must be in date order.
  */
 export function settleFinding(
   finding: Pick<FindingDraft, "kind" | "citedKeys" | "citedStudyIds">,
   current: Visit,
   later: LaterVisit[],
+  typicalGap: number | null = null,
 ): Settlement | undefined {
   if (finding.kind === "study_alert") {
     const study = current.studies.find(({ id }) => id === finding.citedStudyIds[0]);
@@ -144,7 +186,7 @@ export function settleFinding(
   }
   const [key] = finding.citedKeys;
   if ((finding.kind === "risk" || finding.kind === "change") && key) {
-    return settleMarker(key, current, later);
+    return settleMarker(key, current, later, typicalGap);
   }
   return undefined;
 }
