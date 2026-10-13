@@ -54,6 +54,7 @@ const settlement = {
   reportId: "later-report",
   date: "2025-03-24",
   earlierDate: "2025-02-10",
+  earlierLabName: null,
   labName: null,
   earlier: "A 4.2 x 3.1 cm complex mass in the right adnexa.",
   later: "No adnexal mass is seen.",

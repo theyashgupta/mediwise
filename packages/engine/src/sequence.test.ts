@@ -114,6 +114,17 @@ describe("a pelvis study printed differently from an earlier abdomen and pelvis 
       later: "No adnexal mass is seen.",
     });
   });
+
+  test("a study with its own lab names that lab on both lines, and a study whose file prints none names no lab", () => {
+    const own = { ...after, studies: [breast, { ...pelvis, labName: "Riverside Scans" }] };
+    const first = { ...before, studies: [{ ...before.studies[0]!, labName: "Lakeview Imaging" }] };
+    expect(settleFinding(pelvisAlert, first, [own])).toMatchObject({
+      earlierLabName: "Lakeview Imaging",
+      labName: "Riverside Scans",
+    });
+    const unprinted = { ...after, studies: [breast, { ...pelvis, labName: null }] };
+    expect(settleFinding(pelvisAlert, before, [unprinted])).toMatchObject({ labName: null });
+  });
 });
 
 describe("settleFinding", () => {

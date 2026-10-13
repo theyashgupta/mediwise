@@ -577,6 +577,8 @@ export async function processReport(reportId: string, usage: ReportUsage, reclas
     };
   });
 
+  const labs = fileLabs(lab, labFiles, read?.extraction.lab?.name, studyLabs);
+  const labOf = new Map(labs.map((file) => [file.id, file.labName]));
   const current: Visit = {
     date: collectedAt ?? report.createdAt.toISOString().slice(0, 10),
     labName: read?.extraction.lab?.name ?? null,
@@ -591,6 +593,7 @@ export async function processReport(reportId: string, usage: ReportUsage, reclas
       kind: study.kind,
       bodyRegion: study.bodyRegion ?? null,
       performedAt: study.performedAt ?? null,
+      labName: labOf.get(study.reportFileId) ?? null,
       impression: study.impressionText ?? null,
       result: study.resultText ?? null,
       measurements: measurements.map(({ key, value, unit, status }) => ({
@@ -645,7 +648,7 @@ export async function processReport(reportId: string, usage: ReportUsage, reclas
     read?.followUpRows ?? [],
     studyRows,
     findings.map((finding) => ({ ...finding, reportId })),
-    fileLabs(lab, labFiles, read?.extraction.lab?.name, studyLabs),
+    labs,
   );
   if (read?.birth) {
     await repo.fillDateOfBirth(report.profileId, read.birth.dateOfBirth, read.birth.approximate);

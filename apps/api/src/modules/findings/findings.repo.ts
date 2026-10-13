@@ -1,7 +1,14 @@
 import type { Visit } from "@mediwise/engine";
 import { and, asc, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
-import { findings, reportMarkers, reports, studies, studyMeasurements } from "../../db/schema.js";
+import {
+  findings,
+  reportFiles,
+  reportMarkers,
+  reports,
+  studies,
+  studyMeasurements,
+} from "../../db/schema.js";
 
 const earlierVisitLimit = 12;
 const visitDate = sql<string>`coalesce(${reports.collectedAt}, ${reports.createdAt}::date)::text`;
@@ -37,10 +44,12 @@ export async function findVisit(reportId: string) {
         kind: studies.kind,
         bodyRegion: studies.bodyRegion,
         performedAt: studies.performedAt,
+        labName: reportFiles.labName,
         impression: studies.impressionText,
         result: studies.resultText,
       })
       .from(studies)
+      .innerJoin(reportFiles, eq(reportFiles.id, studies.reportFileId))
       .where(eq(studies.reportId, reportId))
       .orderBy(asc(studies.pageIndex)),
   ]);
