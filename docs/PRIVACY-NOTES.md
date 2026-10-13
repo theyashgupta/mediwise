@@ -23,7 +23,7 @@ This file records what MediWise does with the data of family members and childre
 ### Deletion log
 
 - Account deletion (`DELETE /me`) writes one row to `deletion_log` in the same transaction that deletes the profiles.
-- The row has the SHA-256 of the user id, the time, the scope (`account`) and the counts of profiles, reports and files.
+- The row has the SHA-256 of the user id, the time, the scope (`account`) and the counts of profiles, reports, files and assistant questions. Rows from before MEDI-75 have no question count.
 - The row has no name, email address, date of birth or report value.
 - Row level security is on, with no policies. Only the API role and the service role can read the table.
 - The app never deletes a row, so each row stays for at least one year.
@@ -35,6 +35,14 @@ This file records what MediWise does with the data of family members and childre
 - Claude never gets the note. The read job loads no note, and every prompt is built from engine output only. `process-report.job.test.ts` fails when a note reaches a Claude request.
 - The note shows on the report page, the doctor export, the share-with-doctor page, the JSON data download and the CSV download (one `note` row per report).
 - Account deletion and report deletion remove the note with its report row.
+
+### Assistant questions
+
+- A question to the assistant and its answer are health data. Each one is a row in `assistant_questions`, with row level security on and no policies.
+- The prompt holds the stored values, studies, findings, links and episodes of one profile. It never holds a report note, an episode note or name, family history, the doctor who signed a study, the profile name, the date of birth, a file name or another profile. `assistant.service.db.test.ts` fails when one of these fields reaches a Claude request.
+- The server log holds the question id, the outcome, the rule names, the tokens and the cost. It never holds the question, the answer, a marker key or a value.
+- The JSON data download holds every question with its answer. "Clear chat" deletes the questions of one profile. Account deletion and profile deletion remove them.
+- Questions go to Anthropic, the same as report text. MediWise is built to follow the DPDP Act 2023 and Rules 2025. This note gives no legal advice.
 
 ## Rule 10 timeline
 

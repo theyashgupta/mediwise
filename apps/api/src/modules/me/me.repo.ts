@@ -1,6 +1,7 @@
 import { and, count, eq, inArray, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import {
+  assistantQuestions,
   deletionLog,
   jobs,
   profiles,
@@ -50,7 +51,8 @@ export async function listStoragePathsByOwner(ownerUserId: string) {
  * Deletes the owner's unfinished jobs and profiles, and writes one deletion log row with the counts.
  *
  * @remarks
- * Reports, files, markers and follow-ups go with their profile through `on delete cascade`; jobs have no foreign key.
+ * Reports, files, markers, follow-ups and assistant questions go with their profile through `on delete cascade`; jobs
+ * have no foreign key.
  * Done and failed jobs stay, because their token counts are this month's Claude spend.
  * The log row is in the same transaction, so a logged deletion always happened.
  */
@@ -68,6 +70,10 @@ export async function deleteAllByOwner(
       .from(reports)
       .where(inArray(reports.profileId, ownedProfileIds(ownerUserId)));
     const ids = owned.map((row) => row.id);
+    const [questionCount] = await tx
+      .select({ total: count() })
+      .from(assistantQuestions)
+      .where(eq(assistantQuestions.userId, ownerUserId));
     if (ids.length > 0) {
       await tx
         .delete(jobs)
@@ -82,13 +88,18 @@ export async function deleteAllByOwner(
     await tx.insert(deletionLog).values({
       userIdHash: log.userIdHash,
       scope: "account",
-      counts: { profiles: profileCount?.total ?? 0, reports: ids.length, files: log.files },
+      counts: {
+        profiles: profileCount?.total ?? 0,
+        reports: ids.length,
+        files: log.files,
+        questions: questionCount?.total ?? 0,
+      },
     });
   });
 }
 
 export async function exportByOwner(ownerUserId: string) {
-  const [profileRows, reportRows, markerRows] = await Promise.all([
+  const [profileRows, reportRows, markerRows, questionRows] = await Promise.all([
     db.select().from(profiles).where(eq(profiles.ownerUserId, ownerUserId)),
     db
       .select()
@@ -98,6 +109,24 @@ export async function exportByOwner(ownerUserId: string) {
       .select()
       .from(reportMarkers)
       .where(inArray(reportMarkers.reportId, ownedReportIds(ownerUserId))),
+    db
+      .select({
+        id: assistantQuestions.id,
+        profileId: assistantQuestions.profileId,
+        focusReportId: assistantQuestions.focusReportId,
+        question: assistantQuestions.question,
+        answer: assistantQuestions.answer,
+        refusalKind: assistantQuestions.refusalKind,
+        flaggedAt: assistantQuestions.flaggedAt,
+        createdAt: assistantQuestions.createdAt,
+      })
+      .from(assistantQuestions)
+      .where(eq(assistantQuestions.userId, ownerUserId)),
   ]);
-  return { profiles: profileRows, reports: reportRows, markers: markerRows };
+  return {
+    profiles: profileRows,
+    reports: reportRows,
+    markers: markerRows,
+    questions: questionRows,
+  };
 }

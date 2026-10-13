@@ -461,7 +461,12 @@ export const assistantQuestions = pgTable(
   ],
 );
 
-export type DeletionCounts = { profiles: number; reports: number; files: number };
+export type DeletionCounts = {
+  profiles: number;
+  reports: number;
+  files: number;
+  questions?: number;
+};
 
 /**
  * One row per account deletion, kept after the user's data is gone.
