@@ -111,7 +111,7 @@ Rules:
 - **Two colour versions.** Teal: `text-primary` (`#176B6B` light, `#76C8C7` dark). Neutral: `text-foreground` (`#201C19` light, `#ECEBE8` dark). Use teal by default and neutral where a second colour would be noise.
 - **App icons** reverse the teal version: a mark in the background colour (`#FBFAF7`) on a full teal tile, so it shows on any wallpaper. The mark is 55% of the tile height, inside the safe zone of a maskable icon.
 - **favicon.svg** switches to the dark teal with `prefers-color-scheme`. `favicon.ico` cannot switch, so it uses the ring teal (`#2D8A8A`), which shows on light and dark tab bars.
-- **Theme colour.** `index.html` sets `theme-color` for light (`#FBFAF7`) and dark (`#181715`) from the system setting. `site.webmanifest` can hold one value only, so it uses the light background.
+- **Theme colour.** `index.html` sets `theme-color` for light (`#FBFAF7`) and dark (`#181715`) from the system setting. A theme that the user selects in the app sets both tags to its colour, so the status bar of the installed app follows the app theme. `site.webmanifest` can hold one value only, so it uses the light background.
 
 | Do | Do not |
 | - | - |

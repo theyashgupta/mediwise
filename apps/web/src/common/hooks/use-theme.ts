@@ -3,6 +3,7 @@ import { useSyncExternalStore } from "react";
 export type Theme = "light" | "dark" | "system";
 
 const storageKey = "theme";
+const themeColors = { light: "#FBFAF7", dark: "#181715" };
 const listeners = new Set<() => void>();
 let current: Theme | undefined;
 
@@ -22,6 +23,19 @@ function readTheme(): Theme {
 }
 
 /**
+ * Sets the browser bar and the status bar of the installed app to the colour of the theme.
+ *
+ * @remarks
+ * `index.html` has one theme-color tag per system scheme. "system" gives each tag its own colour back.
+ */
+function applyThemeColor(theme: Theme) {
+  document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]').forEach((meta) => {
+    const scheme = meta.media.includes("dark") ? "dark" : "light";
+    meta.content = themeColors[theme === "system" ? scheme : theme];
+  });
+}
+
+/**
  * Persists the theme and applies it to the document root.
  *
  * @remarks
@@ -36,6 +50,7 @@ export function setTheme(theme: Theme) {
   } catch {}
   if (theme === "system") delete document.documentElement.dataset.theme;
   else document.documentElement.dataset.theme = theme;
+  applyThemeColor(theme);
   listeners.forEach((listener) => listener());
 }
 
