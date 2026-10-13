@@ -90,6 +90,7 @@ export function UploadReportContainer() {
         <div className="flex flex-wrap items-center gap-4">
           <Button
             size="lg"
+            data-testid="upload-submit"
             onClick={submit}
             disabled={
               !profile || selected.files.length === 0 || selected.errors.length > 0 || uploading

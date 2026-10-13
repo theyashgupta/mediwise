@@ -93,7 +93,11 @@ export function ReportContainer() {
         glass
         actions={
           <>
-            {status !== "done" && <ReportStatusBadge status={status} />}
+            {status !== "done" && (
+              <span data-testid="report-status">
+                <ReportStatusBadge status={status} />
+              </span>
+            )}
             {status === "done" && (
               <GlassButton asChild>
                 <Link to="/compare" search={{ b: reportId }}>
@@ -104,7 +108,12 @@ export function ReportContainer() {
             )}
             {status === "done" && (
               <GlassButton asChild>
-                <Link to="/reports/$reportId/export" params={{ reportId }} target="_blank">
+                <Link
+                  to="/reports/$reportId/export"
+                  params={{ reportId }}
+                  target="_blank"
+                  data-testid="report-export-link"
+                >
                   <FileDown aria-hidden />
                   Export for doctor
                 </Link>
@@ -147,7 +156,7 @@ export function ReportContainer() {
         />
       )}
       {status === "done" && (
-        <div className="space-y-12">
+        <div className="space-y-12" data-testid="report-done">
           {header.score !== null && <ReportSummary header={header} verdict={report.data.verdict} />}
           <ReportNote
             key={reportId}

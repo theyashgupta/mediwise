@@ -153,7 +153,10 @@ export function ReportExport({
   ];
 
   return (
-    <article className="space-y-6 text-sm print:space-y-4 print:text-[9pt]">
+    <article
+      className="space-y-6 text-sm print:space-y-4 print:text-[9pt]"
+      data-testid="report-export"
+    >
       <header className="flex items-start justify-between gap-4 border-b pb-4 print:pb-2">
         <div>
           <Logo className="mb-1" />

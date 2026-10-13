@@ -55,7 +55,7 @@ export function ProfilesContainer() {
         description="You and the family members whose reports you manage."
         actions={
           profiles.data && (
-            <Button onClick={() => openSheet("new")} disabled={atLimit}>
+            <Button onClick={() => openSheet("new")} disabled={atLimit} data-testid="profile-add">
               <Plus aria-hidden />
               Add family member
             </Button>

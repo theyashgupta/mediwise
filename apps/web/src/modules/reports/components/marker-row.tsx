@@ -18,6 +18,7 @@ export function MarkerRow({ reportId, marker }: MarkerRowProps) {
   return (
     <Link
       {...markerLink(reportId, marker.markerKey)}
+      data-testid={`marker-row-${marker.markerKey}`}
       className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 gap-y-2 px-4 py-3 outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset sm:grid-cols-[minmax(0,1fr)_auto_10rem] sm:items-center"
     >
       <span className="min-w-0 space-y-0.5">
