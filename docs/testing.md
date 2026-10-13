@@ -1,11 +1,39 @@
 # Testing
 
-MediWise has two test layers. CI runs both on every push and every pull request.
+MediWise has three test layers. CI runs all three on every push and every pull request.
 
 | Layer | Command | What it covers |
 | --- | --- | --- |
 | Unit | `pnpm check` | Typecheck, lint and Vitest in every package. The rules are in [.claude/rules/testing.md](../.claude/rules/testing.md). |
+| Database | `pnpm test:db` | The money path SQL in `apps/api` against a real Postgres: credits ledger, purchases, the Claude spend cap. |
 | End-to-end | `pnpm e2e` | The main flow in a real browser, against a local Supabase and the real API and web. |
+
+## Database tests
+
+A file that ends in `.db.test.ts` runs only in the db project (`apps/api/vitest.db.config.ts`). `pnpm check` never runs it.
+
+- The project uses the local Supabase of the e2e suite. Before each run it drops and creates the database `mediwise_test` and applies every Drizzle migration. The e2e data in the `postgres` database is not touched.
+- It runs with `CLAUDE_STUB=true`, an empty `ANTHROPIC_API_KEY` and `CLAUDE_MONTHLY_CAP_CENTS=100`. It never calls Claude or Supabase auth.
+- Each test makes its own user id with `randomUUID()`, so tests do not share rows.
+- In CI the `e2e` job runs `pnpm test:db` after `supabase start` and before `pnpm e2e`.
+
+Run it on your machine:
+
+```sh
+supabase start --workdir apps/e2e
+pnpm test:db
+supabase stop --workdir apps/e2e
+```
+
+### When a test belongs in the db project
+
+Put a test in the db project when the behaviour lives in the SQL, not in TypeScript:
+
+- A unique index or constraint, for example one purchase per payment order (migration 0014).
+- A lock or a transaction that must hold under two concurrent calls, for example two webhooks for one order or two uploads for the last credit.
+- An aggregate the code trusts, for example the credit balance as the sum of the ledger, or this month's Claude spend.
+
+A fake repo is enough when the test checks a route, a service decision or an error mapping, and the SQL only stores and returns rows. Keep those tests in the unit layer, they run in every `pnpm check`.
 
 ## End-to-end suite
 
