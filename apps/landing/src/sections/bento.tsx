@@ -1,6 +1,7 @@
 import { FileText, HeartPulse, Printer, Upload, Users } from "lucide-react";
 import type { ReactNode } from "react";
 import { SectionHeader } from "@/components/section-header";
+import { messages, type Locale } from "@/config/messages";
 import { facts } from "@/lib/facts";
 import { cn } from "@/lib/utils";
 
@@ -35,23 +36,18 @@ function Cell({
 }
 
 const files = ["report.pdf", "page-1.jpg", "page-2.jpg", "ecg.pdf", "scan.heic"];
-const people = ["Me", "Partner", "Parent", "Child"];
-
-export function Bento() {
+export function Bento({ locale }: { locale: Locale }) {
+  const t = messages[locale].bento;
   return (
     <section aria-labelledby="bento-title" className="border-t bg-sidebar">
       <div className="mx-auto max-w-content px-4 py-12 md:px-8 md:py-20">
-        <SectionHeader
-          id="bento-title"
-          eyebrow="Features"
-          title="Built for the reports Indian labs print"
-        />
+        <SectionHeader id="bento-title" eyebrow={t.eyebrow} title={t.title} />
         <ul className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Cell
             className="md:col-span-2"
             icon={<Upload aria-hidden className="size-4" />}
-            title={`Up to ${facts.maxFiles} files in one report`}
-            body={`PDF, JPG, PNG, HEIC or WebP. Each file up to ${facts.maxFileMb} MB, ${facts.maxTotalMb} MB in total.`}
+            title={t.files.title(facts.maxFiles)}
+            body={t.files.body(facts.maxFileMb, facts.maxTotalMb)}
           >
             <div className="w-full rounded-lg border border-dashed p-4">
               <ul className="flex flex-wrap gap-2">
@@ -68,11 +64,11 @@ export function Bento() {
           </Cell>
           <Cell
             icon={<Users aria-hidden className="size-4" />}
-            title="Family profiles"
-            body={`Up to ${facts.maxProfiles} profiles. Each person gets ranges for their own age, sex and ancestry.`}
+            title={t.family.title}
+            body={t.family.body(facts.maxProfiles)}
           >
             <ul className="flex flex-wrap gap-2">
-              {people.map((person) => (
+              {t.family.people.map((person) => (
                 <li
                   key={person}
                   className="rounded-full border bg-background px-3 py-1 text-xs font-medium transition-transform duration-200 group-hover:-translate-y-0.5"
@@ -84,16 +80,20 @@ export function Bento() {
           </Cell>
           <Cell
             icon={<span className="font-mono text-sm">₹</span>}
-            title="Cost per report"
-            body={`${facts.firstPack.price} for one report. ${facts.cheapest.perReport} a report in the pack of ${facts.cheapest.credits}.`}
+            title={t.cost.title}
+            body={t.cost.body(
+              facts.firstPack.price,
+              facts.cheapest.perReport,
+              facts.cheapest.credits,
+            )}
           >
             <p className="font-mono text-4xl tracking-tight">{facts.cheapest.perReport}</p>
           </Cell>
           <Cell
             className="md:col-span-2"
             icon={<HeartPulse aria-hidden className="size-4" />}
-            title="Trends"
-            body="See each marker across visits, with your optimal range as a band."
+            title={t.trends.title}
+            body={t.trends.body}
           >
             <svg viewBox="0 0 200 60" aria-hidden className="h-16 w-full">
               <rect x="0" y="18" width="200" height="22" className="fill-optimal-soft" />
@@ -123,13 +123,13 @@ export function Bento() {
           </Cell>
           <Cell
             icon={<Printer aria-hidden className="size-4" />}
-            title="A summary for your doctor"
-            body="Print your results on one clean page, black on white, to take to your visit."
+            title={t.doctor.title}
+            body={t.doctor.body}
           />
           <Cell
             icon={<FileText aria-hidden className="size-4" />}
-            title="ECG, ultrasound and X-ray reports"
-            body="MediWise copies the printed words and values from each study. It does not read the scan images."
+            title={t.studies.title}
+            body={t.studies.body}
           />
         </ul>
       </div>

@@ -17,6 +17,7 @@ const referenceBenchmark = 2000;
 const maxInpMs = 250;
 
 const appBudget = { accessibility: 100, "best-practices": 95, seo: 58 };
+const landingBudget = { performance: 75, accessibility: 100, "best-practices": 95, seo: 95 };
 
 let context: BrowserContext;
 let page: Page;
@@ -154,11 +155,8 @@ for (const { name, url, budget } of [
     budget: { ...appBudget, performance: 78 },
   },
   { name: "trends", url: () => `${webOrigin}/trends`, budget: { ...appBudget, performance: 77 } },
-  {
-    name: "landing",
-    url: () => landingOrigin,
-    budget: { performance: 75, accessibility: 100, "best-practices": 95, seo: 95 },
-  },
+  { name: "landing", url: () => landingOrigin, budget: landingBudget },
+  { name: "landing-hi", url: () => `${landingOrigin}/hi`, budget: landingBudget },
 ]) {
   test(`Lighthouse on ${name} stays within its budget on a phone`, async () => {
     expectWithinBudget(await measure(name, url()), budget);
