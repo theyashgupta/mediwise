@@ -1,7 +1,8 @@
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
+    exclude: [...configDefaults.exclude, "**/*.db.test.ts"],
     env: {
       NODE_ENV: "test",
       CORS_ORIGINS: "https://app.mediwise.theyashgupta.me, https://mediwise.pages.dev/",
