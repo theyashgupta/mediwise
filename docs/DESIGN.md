@@ -197,7 +197,7 @@ Screenshots: the demo account (made-up profile "Arjun Mehta", the two sample rep
 | Trend detail | [after](design/pages/after-trend-light.jpg) | [after](design/pages/after-trend-dark.jpg) | [after](design/pages/after-trend-light-phone.jpg) |
 | Compare | [after](design/pages/after-compare-light.jpg) | [after](design/pages/after-compare-dark.jpg) | [after](design/pages/after-compare-light-phone.jpg) |
 | Reports | [after](design/pages/after-reports-light.jpg) | [after](design/pages/after-reports-dark.jpg) | [after](design/pages/after-reports-light-phone.jpg) |
-| Upload | [after](design/pages/after-upload-light.jpg) | [after](design/pages/after-upload-dark.jpg) | [after](design/pages/after-upload-light-phone.jpg) |
+| Upload; with a photo warning (MEDI-55): [light](design/pages/after-upload-warning-light.jpg), [phone](design/pages/after-upload-warning-light-phone.jpg) | [after](design/pages/after-upload-light.jpg) | [after](design/pages/after-upload-dark.jpg) | [after](design/pages/after-upload-light-phone.jpg) |
 | Profiles | [after](design/pages/after-profiles-light.jpg) | [after](design/pages/after-profiles-dark.jpg) | [after](design/pages/after-profiles-light-phone.jpg) |
 | Settings | [after](design/pages/after-settings-light.jpg) | [after](design/pages/after-settings-dark.jpg) | [after](design/pages/after-settings-light-phone.jpg) |
 | Credits | [after](design/pages/after-credits-light.jpg) | [after](design/pages/after-credits-dark.jpg) | [after](design/pages/after-credits-light-phone.jpg) |

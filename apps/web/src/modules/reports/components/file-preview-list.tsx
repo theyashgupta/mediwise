@@ -1,14 +1,16 @@
 import { maxFiles, maxTotalBytes } from "@mediwise/shared";
-import { CircleCheck, X } from "lucide-react";
+import { CircleCheck, Info, X } from "lucide-react";
 import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { megabytes } from "../config/files";
+import { type PhotoFlags, photoWarnings } from "../config/photo-check";
 import { FileTypeIcon } from "./file-type-icon";
 
 type FilePreviewListProps = {
   files: File[];
   progress: number[];
+  photoFlags: (PhotoFlags | undefined)[];
   uploading: boolean;
   onRemove: (index: number) => void;
 };
@@ -32,7 +34,13 @@ function Thumbnail({ file }: { file: File }) {
   );
 }
 
-export function FilePreviewList({ files, progress, uploading, onRemove }: FilePreviewListProps) {
+export function FilePreviewList({
+  files,
+  progress,
+  photoFlags,
+  uploading,
+  onRemove,
+}: FilePreviewListProps) {
   const total = files.reduce((sum, file) => sum + file.size, 0);
   return (
     <section aria-label="Selected files" className="overflow-hidden rounded-xl border bg-card">
@@ -63,6 +71,15 @@ export function FilePreviewList({ files, progress, uploading, onRemove }: FilePr
                   </span>
                 </p>
                 {uploading && <Progress value={percent} aria-label={`Uploading ${file.name}`} />}
+                {photoWarnings(photoFlags[index]).map((warning) => (
+                  <p
+                    key={warning}
+                    className="flex items-start gap-1.5 rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground"
+                  >
+                    <Info className="mt-px size-3.5 shrink-0" aria-hidden />
+                    {warning}
+                  </p>
+                ))}
               </div>
               {uploading ? (
                 percent === 100 && (
