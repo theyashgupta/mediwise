@@ -19,7 +19,7 @@ The suite is in `apps/e2e`. It uses Playwright with Chromium only. One spec file
 6. Download the profile CSV and check the vitamin D value.
 7. Sign out.
 
-A second spec file, `apps/e2e/tests/dense-history.spec.ts`, signs up another user and seeds a profile with 12 reports in 10 weeks with `db:seed-history` (no upload, no Claude call). It checks the Home score change and stale line, the glucose trend at 390 and 1440 px with no overlapping chart labels, and the compare page with the first and last report. The audit behind it is in [research/continuous-history.md](research/continuous-history.md).
+A second spec file, `apps/e2e/tests/dense-history.spec.ts`, signs up another user and seeds a profile with 12 reports in 10 weeks with `db:seed-history` (no upload, no Claude call). It checks that the Home score change compares two full panels, the New since strip with the narrow reports, the stale line, the glucose trend at 390 and 1440 px with no overlapping chart labels, and the compare page with the first and last report. The audit behind it is in [research/continuous-history.md](research/continuous-history.md).
 
 ### No Claude call
 

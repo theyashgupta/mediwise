@@ -60,12 +60,21 @@ test("a new user gets a profile with 12 reports in 10 weeks", async () => {
   await expect(switcher).toContainText(profileName);
 });
 
-test("Home compares the score with the report of one week before and shows no stale line", async () => {
-  const weekBefore = new Date(Date.now() - 7 * dayMs).toLocaleDateString("en-IN", {
+/** Formats the day `days` before today as Home prints it, for example "6 Oct". */
+function daysBefore(days: number) {
+  return new Date(Date.now() - days * dayMs).toLocaleDateString("en-IN", {
     day: "numeric",
     month: "short",
   });
-  await expect(page.getByTestId("latest-score-change")).toContainText(weekBefore);
+}
+
+test("Home compares the full panel with the previous full panel, lists the narrow reports since it and shows no stale line", async () => {
+  await expect(page.getByTestId("latest-score-change")).toContainText(daysBefore(70));
+  const newSince = page.getByTestId("new-since-row");
+  await expect(newSince).toHaveCount(3);
+  for (const [index, days] of [0, 7, 14].entries()) {
+    await expect(newSince.nth(index)).toContainText(daysBefore(days));
+  }
   await expect(page.getByTestId("retest-row-hba1c")).toHaveCount(0);
   const row = page.getByTestId("family-row").filter({ hasText: profileName });
   await expect(row).toBeVisible();
