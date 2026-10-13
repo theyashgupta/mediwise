@@ -2,8 +2,7 @@ import { expect, test } from "vitest";
 import {
   birthDateTerm,
   changeMark,
-  previousReport,
-  previousValues,
+  earlierSource,
   profileDetails,
   rangeText,
   sharedPersonDetails,
@@ -35,66 +34,24 @@ test("an approximate date of birth prints with its label, an exact one prints pl
   expect(birthDateTerm(false)).toBe("Date of birth");
 });
 
-test("the previous report is the latest one from an earlier date, not one from the same date", () => {
-  const earlier = { id: "earlier", collectedAt: "2025-02-01", createdAt: "2025-02-03T09:00:00Z" };
-  const sameDay = { id: "same-day", collectedAt: "2025-05-18", createdAt: "2025-05-20T09:00:00Z" };
-  const current = { id: "current", collectedAt: "2025-05-18", createdAt: "2025-05-21T09:00:00Z" };
-  const reports = [earlier, sameDay, current];
-  expect(previousReport(reports, current)).toBe(earlier);
-  expect(previousReport(reports, sameDay)).toBe(earlier);
-  expect(previousReport(reports, earlier)).toBeUndefined();
-});
-
-test("a report without a collection date uses its upload day", () => {
-  const uploaded = { id: "uploaded", collectedAt: null, createdAt: "2025-03-01T09:00:00Z" };
-  const current = { id: "current", collectedAt: "2025-05-18", createdAt: "2025-05-21T09:00:00Z" };
-  expect(previousReport([uploaded, current], current)).toBe(uploaded);
+test("earlier values from one report name that report, values from two reports name none", () => {
+  const value = (markerKey: string, reportId: string) => ({
+    markerKey,
+    value: 1,
+    reportId,
+    labName: "Made-up Labs",
+    collectedAt: "2025-02-01",
+    createdAt: "2025-02-03T09:00:00Z",
+  });
+  expect(earlierSource([value("ldl", "a"), value("hdl", "a")])?.reportId).toBe("a");
+  expect(earlierSource([value("ldl", "a"), value("hba1c", "b")])).toBeUndefined();
+  expect(earlierSource([])).toBeUndefined();
 });
 
 test("the change mark compares the printed values, and a text result has no mark", () => {
   expect(changeMark(5.4, 5.6, 1)?.label).toBe("Higher now");
   expect(changeMark(140, 120, 0)?.label).toBe("Lower now");
   expect(changeMark(5.44, 5.41, 1)).toBeUndefined();
-});
-
-test("previous values keep only markers the previous report measured", () => {
-  const row = { name: "", category: "lipids" as const, unit: "mg/dL", precision: 0, change: null };
-  const values = previousValues([
-    {
-      key: "lipids",
-      label: "Lipids",
-      rows: [
-        {
-          ...row,
-          markerKey: "ldl",
-          valueA: 140,
-          valueB: 120,
-          statusA: "watch",
-          statusB: "optimal",
-          verdictChange: "improved",
-        },
-        {
-          ...row,
-          markerKey: "hdl",
-          valueA: null,
-          valueB: 45,
-          statusA: null,
-          statusB: "optimal",
-          verdictChange: "new",
-        },
-        {
-          ...row,
-          markerKey: "tg",
-          valueA: null,
-          valueB: 90,
-          statusA: "optimal",
-          statusB: "optimal",
-          verdictChange: "same",
-        },
-      ],
-    },
-  ]);
-  expect([...values]).toEqual([["ldl", 140]]);
 });
 
 test("a shared export lists only the first name and the age", () => {

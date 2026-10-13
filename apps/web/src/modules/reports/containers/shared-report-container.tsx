@@ -31,7 +31,7 @@ function Content() {
     return <ErrorState message={t.reports.export.loadError} onRetry={() => shared.refetch()} />;
   }
 
-  const { report, previous, person, expiresAt } = shared.data;
+  const { report, earlier, person, expiresAt } = shared.data;
   return (
     <div className="space-y-4">
       <p className="rounded-lg border bg-muted px-3 py-2 text-sm print:hidden">
@@ -39,11 +39,7 @@ function Content() {
       </p>
       <ReportExport
         report={report}
-        previous={
-          previous
-            ? { report: previous, values: new Map(Object.entries(previous.values)) }
-            : undefined
-        }
+        earlier={earlier}
         person={sharedPersonDetails(person)}
         generatedOn={new Date().toLocaleDateString(getIntlTag(), dateOptions)}
         onPrint={() => window.print()}

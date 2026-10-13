@@ -254,6 +254,39 @@ export async function getTrend(userId: string, profileId: string, markerKey: str
   return series;
 }
 
+/**
+ * Finds each marker's newest value from a date before this report, in this report's unit.
+ *
+ * @remarks
+ * Each marker looks back on its own, so a glucose-only report in between never hides the full panel before it.
+ * A report of the same collection date is the same visit, so it never gives an earlier value.
+ */
+export async function listEarlierValues(userId: string, reportId: string) {
+  const notFound = new AppError(404, "We could not find this report");
+  const profileId = await repo.findReportProfileId(userId, reportId);
+  if (!profileId) throw notFound;
+  const [ordered, rows] = await Promise.all([
+    repo.listDoneReports(userId, profileId),
+    repo.listMarkerRows(userId, profileId),
+  ]);
+  const current = ordered.find((report) => report.id === reportId);
+  if (!current) throw notFound;
+  const picked = pickRows(rows);
+  const earlier = ordered.filter((report) => visitDate(report) < visitDate(current)).reverse();
+  return [...(picked.get(reportId) ?? [])].flatMap(([markerKey, row]) => {
+    const entry = catalog.get(markerKey)!.entry;
+    for (const report of earlier) {
+      const found = picked.get(report.id)?.get(markerKey);
+      const value = found ? valueInUnit(entry, found, row.unit) : null;
+      if (value !== null) {
+        const { id, labName, collectedAt, createdAt } = report;
+        return [{ markerKey, value, reportId: id, labName, collectedAt, createdAt }];
+      }
+    }
+    return [];
+  });
+}
+
 function toHeader(report: StoredReport) {
   const { id, labName, collectedAt, createdAt, score, tier } = report;
   return { id, labName, collectedAt, createdAt, score, tier };

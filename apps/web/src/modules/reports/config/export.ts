@@ -2,8 +2,7 @@ import { getIntlTag, getT } from "@/common/hooks/use-locale";
 import { formatPlainDate } from "@/common/utils/date";
 import { formatRange } from "@/common/utils/range-scale";
 import type { Profile } from "@/modules/profiles";
-import type { Comparison } from "@/modules/trends";
-import type { ExportDetail, MarkerRow } from "../types";
+import type { EarlierValue, ExportDetail, MarkerRow } from "../types";
 
 export const dateOptions = { day: "numeric", month: "short", year: "numeric" } as const;
 
@@ -60,29 +59,15 @@ export function unitText(unit: string | null) {
   return unit && unit !== "ratio" ? unit : "-";
 }
 
-type DatedReport = { collectedAt: string | null; createdAt: string };
-
-const visitDate = (report: DatedReport) => report.collectedAt ?? report.createdAt.slice(0, 10);
-
 /**
- * Finds the profile's report before this one in a list of done reports, oldest first.
+ * Returns the report every earlier value comes from, or nothing when they come from two or more reports.
  *
  * @remarks
- * Same rule as the dashboard score change: a report from the same collection date is the same visit, so it is skipped.
+ * One report gets one line above the tables. Values from several reports print their own date in each row.
  */
-export function previousReport<T extends DatedReport>(reports: T[], current: DatedReport) {
-  return reports.filter((report) => visitDate(report) < visitDate(current)).at(-1);
-}
-
-/** Keeps the previous value of each marker the previous report measured in this report's unit. */
-export function previousValues(groups: Comparison["groups"]) {
-  return new Map(
-    groups.flatMap(({ rows }) =>
-      rows.flatMap((row) =>
-        row.statusA !== null && row.valueA !== null ? [[row.markerKey, row.valueA] as const] : [],
-      ),
-    ),
-  );
+export function earlierSource(values: EarlierValue[]) {
+  const [first] = values;
+  return first && values.every((item) => item.reportId === first.reportId) ? first : undefined;
 }
 
 /**

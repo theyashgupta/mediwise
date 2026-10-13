@@ -81,7 +81,7 @@ export const reports = {
     print: "Print",
     loadError: "We could not load this report.",
     profileError: "We could not load the profile.",
-    previousError: "We could not load the previous report.",
+    previousError: "We could not load the previous values.",
     notReadyTitle: "This report is not ready",
     notReadyBody: "You can export a report only after MediWise reads it.",
     name: "Name",

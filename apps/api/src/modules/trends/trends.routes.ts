@@ -1,8 +1,13 @@
 import { Hono } from "hono";
 import { validate } from "../../common/validate.js";
 import type { AuthEnv } from "../../middleware/auth.js";
-import { compareQuerySchema, trendParamsSchema, trendsQuerySchema } from "./trends.schemas.js";
-import { compareReports, getTrend, listTrends } from "./trends.service.js";
+import {
+  compareQuerySchema,
+  earlierQuerySchema,
+  trendParamsSchema,
+  trendsQuerySchema,
+} from "./trends.schemas.js";
+import { compareReports, getTrend, listEarlierValues, listTrends } from "./trends.service.js";
 
 export const trendsRoutes = new Hono<AuthEnv>()
   .get("/", validate("query", trendsQuerySchema), async (c) =>
@@ -22,8 +27,10 @@ export const trendsRoutes = new Hono<AuthEnv>()
       ),
   );
 
-export const compareRoutes = new Hono<AuthEnv>().get(
-  "/",
-  validate("query", compareQuerySchema),
-  async (c) => c.json(await compareReports(c.var.userId, c.req.valid("query"))),
-);
+export const compareRoutes = new Hono<AuthEnv>()
+  .get("/", validate("query", compareQuerySchema), async (c) =>
+    c.json(await compareReports(c.var.userId, c.req.valid("query"))),
+  )
+  .get("/earlier", validate("query", earlierQuerySchema), async (c) =>
+    c.json(await listEarlierValues(c.var.userId, c.req.valid("query").reportId)),
+  );

@@ -86,7 +86,7 @@ export const reports: Messages["reports"] = {
     print: "प्रिंट करें",
     loadError: "हम यह रिपोर्ट लोड नहीं कर सके।",
     profileError: "हम प्रोफ़ाइल लोड नहीं कर सके।",
-    previousError: "हम पिछली रिपोर्ट लोड नहीं कर सके।",
+    previousError: "हम पिछले मान लोड नहीं कर सके।",
     notReadyTitle: "यह रिपोर्ट अभी तैयार नहीं है",
     notReadyBody: "MediWise के रिपोर्ट पढ़ने के बाद ही आप उसे एक्सपोर्ट कर सकते हैं।",
     name: "नाम",

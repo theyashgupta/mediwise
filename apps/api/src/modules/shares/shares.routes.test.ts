@@ -211,7 +211,7 @@ test("an open link returns the export without a session and counts each open", a
       header: { labName: "Made-up Labs", collectedAt: "2026-09-01" },
       note: "Started walking daily.",
     },
-    previous: null,
+    earlier: [],
   });
   const links = await (await call("GET", `/reports/${ids.done}/share`)).json();
   expect(links).toEqual([expect.objectContaining({ id: body.id, openCount: 2 })]);
