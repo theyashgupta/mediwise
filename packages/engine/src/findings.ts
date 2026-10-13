@@ -390,6 +390,7 @@ export function buildFindings(
   earlier: Visit[],
   patterns: PatternMatch[],
   later: LaterVisit[] = [],
+  typicalGap: number | null = null,
 ) {
   const now = pickMarkers(current);
   const before = lastValues(earlier);
@@ -413,7 +414,7 @@ export function buildFindings(
       .map(riskFinding),
     ...studyFindings(current),
     ...goodNews(free.filter(({ entry, row }) => core.has(entry.key) && row.status === "optimal")),
-  ].map((draft) => withSettlement(draft, settleFinding(draft, current, later)));
+  ].map((draft) => withSettlement(draft, settleFinding(draft, current, later, typicalGap)));
   const findings = drafts
     .toSorted(
       (a, b) =>

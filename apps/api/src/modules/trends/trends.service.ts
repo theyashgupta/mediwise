@@ -4,10 +4,11 @@ import {
   derived,
   type Marker,
   markers,
-  repeatMarkerDays,
+  repeatsMarker,
   studyMarkers,
   toCanonical,
   trendDirection,
+  typicalGapDays,
 } from "@mediwise/engine";
 import { AppError } from "../../common/errors.js";
 import { listLinkedPairs } from "../links/index.js";
@@ -136,7 +137,7 @@ export function visitDate(report: Pick<StoredReport, "collectedAt" | "createdAt"
  * Reports of one collection date are one visit, and the newest report's value wins that date. The other values of
  * that date ride along in `sameDay`, so the chart draws one point per day and the tooltip still shows each value.
  * Only points in the unit of the latest point are kept, so a series never mixes units.
- * A point is linked when it and the point next to it come from linked reports or lie 30 days or fewer apart.
+ * A point is linked when it and the point next to it come from linked reports or the next one repeats it by `repeatsMarker`.
  */
 function toSeries(
   entry: Marker,
@@ -144,6 +145,7 @@ function toSeries(
   picked: Map<string, Map<string, StoredRow>>,
   pairs: Set<string>,
 ) {
+  const typicalGap = typicalGapDays(ordered.map(visitDate));
   type Found = { report: StoredReport; row: StoredRow; value: number };
   const byDate = new Map<string, Found[]>();
   for (const report of ordered) {
@@ -162,12 +164,12 @@ function toSeries(
   const previous = days.at(-2);
   const change = last && previous ? computeChange(previous.value, last.value) : null;
   const labChange = labChanges(days.map(({ report }) => report.labName));
-  const joined = days.map(({ report }, index) => {
+  const joined = days.map(({ report, row }, index) => {
     const next = days[index + 1]?.report;
     return (
       next !== undefined &&
       (pairs.has(`${report.id}:${next.id}`) ||
-        daysBetween(visitDate(report), visitDate(next)) <= repeatMarkerDays)
+        repeatsMarker(daysBetween(visitDate(report), visitDate(next)), row.status, typicalGap))
     );
   });
   const optimal = { low: last?.row.calibratedLow ?? null, high: last?.row.calibratedHigh ?? null };

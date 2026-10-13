@@ -70,6 +70,15 @@ export async function listReportsAfter(
     );
 }
 
+/** Lists the visit dates of the profile's done reports. */
+export async function listVisitDates(profileId: string) {
+  const rows = await db
+    .selectDistinct({ date: visitDate })
+    .from(reports)
+    .where(and(eq(reports.profileId, profileId), eq(reports.status, "done")));
+  return rows.map(({ date }) => date);
+}
+
 export async function insertDetectedLinks(
   rows: { earlierReportId: string; laterReportId: string; kind: ReportLinkKind }[],
 ) {

@@ -76,7 +76,11 @@ const store = vi.hoisted(() => {
         return visit && { profileId: aliceProfile, patterns: [], visit };
       },
     },
-    linksRepo: { listLinks: async () => links, listReportsAfter: async () => [] },
+    linksRepo: {
+      listLinks: async () => links,
+      listReportsAfter: async () => [],
+      listVisitDates: async () => [],
+    },
     profilesRepo: {
       findProfileById: async (owner: string, id: string) =>
         owner === "alice" && id === aliceProfile ? { id, isSelf: true } : undefined,

@@ -128,6 +128,7 @@ vi.mock("../links/links.repo.js", () => ({
   listProfileLinks: async () => [],
   listLinks: async () => [],
   listReportsAfter: async () => [],
+  listVisitDates: async () => [],
 }));
 
 const app = new Hono<AuthEnv>()

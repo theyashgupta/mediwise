@@ -70,8 +70,10 @@ export {
   openQuestions,
   repeatMarkerDays,
   repeatStudyDays,
+  repeatsMarker,
   repeatsStudy,
   settleFinding,
+  typicalGapDays,
 } from "./sequence.js";
 export { patterns } from "./patterns/catalog.js";
 export { alertKeys } from "./patterns/study-alerts.js";
