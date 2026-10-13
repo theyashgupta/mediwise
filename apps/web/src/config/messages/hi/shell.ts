@@ -9,6 +9,7 @@ export const shell: Messages["shell"] = {
     settings: "सेटिंग",
   },
   pages: {
+    ask: "पूछें",
     home: "होम",
     reports: "रिपोर्ट",
     upload: "रिपोर्ट अपलोड करें",

@@ -4,7 +4,7 @@ import { queryClient } from "@/config/query-client";
 import { supabase } from "@/lib/supabase";
 import { routeTree } from "@/routeTree.gen";
 
-export const router = createRouter({ routeTree });
+export const router = createRouter({ routeTree, scrollRestoration: true });
 
 supabase.auth.onAuthStateChange((event, session) => {
   if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) void syncLocale(session);

@@ -1,4 +1,5 @@
 import { common } from "./common";
+import { assistant } from "./assistant";
 import { shell } from "./shell";
 import { auth } from "./auth";
 import { credits } from "./credits";
@@ -16,6 +17,7 @@ import { yearReview } from "./year-review";
 
 export const en = {
   common,
+  assistant,
   shell,
   auth,
   credits,
