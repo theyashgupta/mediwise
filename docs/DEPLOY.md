@@ -175,6 +175,105 @@ skip_nonce_check = false
 2. Open Settings. The name is the name on the Google account. Security says "Your account is linked to Google."
 3. Sign out. Click Continue with Google, then close the Google page with Cancel or Back. The sign-in page shows "You stopped the Google sign-in." The browser console shows no error.
 
+## Auth email
+
+Supabase Auth sends the sign-up, sign-in link, password reset, email change and invite emails through Resend SMTP. The sender is `MediWise <no-reply@mediwise.theyashgupta.me>`. The templates are in `supabase/templates`. `node scripts/render-email-previews.mjs` checks each template and writes the previews to `docs/design/emails`.
+
+Limits: Resend free sends 100 emails a day and 3,000 a month. Dev and prod use the same Resend account, so they share this limit. Supabase sends at most 30 auth emails an hour per project (`email_sent` below).
+
+### Env-vault names
+
+| Name | Value |
+|---|---|
+| `SMTP_HOST` | `smtp.resend.com` |
+| `SMTP_PORT` | `465` |
+| `SMTP_USER` | `resend` |
+| `SMTP_PASS` | A Resend API key with Sending access for the domain `mediwise.theyashgupta.me` only |
+
+### 1. Resend domain (maintainer)
+
+1. Open resend.com. Make an account. Open Domains and click Add Domain.
+2. Enter `mediwise.theyashgupta.me`. Select the region Tokyo (`ap-northeast-1`), the nearest region to the Supabase projects in Mumbai.
+3. Open the domain settings. Make sure that Click tracking and Open tracking are off.
+4. Open API Keys. Make a key named `mediwise-supabase`, with permission Sending access and the domain `mediwise.theyashgupta.me`. Put it in `SMTP_PASS` in the env vault. Do not paste it in chat.
+5. Put the other three values from the table above in the env vault.
+
+### 2. DNS at GoDaddy (orchestrator)
+
+Add these records in the zone `theyashgupta.me`. Copy the MX and DKIM values exactly from the Resend domain page. The values below show the form for the Tokyo region.
+
+| Type | Name | Value | Priority |
+|---|---|---|---|
+| MX | `send.mediwise` | `feedback-smtp.ap-northeast-1.amazonses.com` | 10 |
+| TXT | `send.mediwise` | `v=spf1 include:amazonses.com ~all` | |
+| TXT | `resend._domainkey.mediwise` | `p=<public key from the Resend domain page>` | |
+| TXT | `_dmarc.mediwise` | `v=DMARC1; p=none;` | |
+
+- SPF: the `send.mediwise` records cover the bounce address. Resend sends with that return path, so SPF passes for the subdomain.
+- DKIM: the `resend._domainkey.mediwise` key signs every email for `mediwise.theyashgupta.me`.
+- DMARC: `p=none` reports only. After one week with no failed emails, change it to `v=DMARC1; p=quarantine;`.
+- Do not add a record with the name `mediwise`. That name is a CNAME to the landing page, and a CNAME cannot share its name with another record.
+- Do not change a record on the apex `theyashgupta.me` (`@`). The apex carries iCloud Mail.
+
+Click Verify DNS Records on the Resend domain page. Wait until the domain shows Verified.
+
+### 3. Push the settings to Supabase (orchestrator)
+
+Make a scratch folder outside the repository. Copy the templates into it with `mkdir -p <scratch>/supabase && cp -R supabase/templates <scratch>/supabase/`. Then add the file `<scratch>/supabase/config.toml`:
+
+```toml
+project_id = "mediwise"
+
+[auth.rate_limit]
+email_sent = 30
+
+[auth.email]
+otp_expiry = 3600
+
+[auth.email.smtp]
+enabled = true
+host = "env(SMTP_HOST)"
+port = "env(SMTP_PORT)"
+user = "env(SMTP_USER)"
+pass = "env(SMTP_PASS)"
+admin_email = "no-reply@mediwise.theyashgupta.me"
+sender_name = "MediWise"
+
+[auth.email.template.confirmation]
+subject = "Confirm your MediWise account"
+content_path = "./supabase/templates/confirm-signup.html"
+
+[auth.email.template.magic_link]
+subject = "Your MediWise sign-in link"
+content_path = "./supabase/templates/magic-link.html"
+
+[auth.email.template.recovery]
+subject = "Reset your MediWise password"
+content_path = "./supabase/templates/recovery.html"
+
+[auth.email.template.email_change]
+subject = "Confirm your new MediWise email address"
+content_path = "./supabase/templates/email-change.html"
+
+[auth.email.template.invite]
+subject = "You are invited to MediWise"
+content_path = "./supabase/templates/invite.html"
+```
+
+The emails say "The link expires after 1 hour", so `otp_expiry` stays `3600`. Both projects had `3600` on 2026-10-13. The push fails with a parse error when an `SMTP_*` value is missing from the environment.
+
+1. Preview dev: `~/.claude/scripts/with-env.sh supabase config diff --workdir <scratch> --project-ref wjdbyuzwefmsmnbvgrdt`. Make sure that only `auth.email.smtp.*`, `auth.email.template.*.subject` and `auth.rate_limit.email_sent` show as `update` or `local_only`. Lines that show as `remote_only` do not change.
+2. Push dev: `~/.claude/scripts/with-env.sh supabase config push --workdir <scratch> --project-ref wjdbyuzwefmsmnbvgrdt`. Answer yes only for the auth change.
+3. Do steps 1 and 2 again with `--project-ref adnvhcharmqykmlyrepq` for prod.
+
+### 4. Verify
+
+1. On dev, sign up with a new address that you can read. The email comes from `MediWise <no-reply@mediwise.theyashgupta.me>` and looks like `docs/design/emails/confirm-signup.png`.
+2. Click the button in the same browser. The app opens and you are signed in.
+3. On the sign-in page, click "Forgot your password?" and enter the same address. The email looks like `docs/design/emails/recovery.png`.
+4. In Gmail, open the email menu and click Show original. SPF, DKIM and DMARC each show `PASS`.
+5. Do steps 1 to 4 again on prod.
+
 ## Smoke test
 
 `scripts/smoke.sh` checks: `/health` (it waits up to 2 minutes for Render to wake), CORS for the web origin, the SPA rewrite, sign in through Supabase, `GET /me`, create a profile, list its reports, delete the profile. It needs `curl` and `jq`.
