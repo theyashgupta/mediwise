@@ -159,6 +159,36 @@ export const reportLinkKinds = ["repeat", "second_opinion"] as const;
 export type ReportLinkKind = (typeof reportLinkKinds)[number];
 export const reportLinkStates = ["proposed", "confirmed", "dismissed"] as const;
 
+export const assistantRefusalKinds = [
+  "diagnosis",
+  "treatment",
+  "worry",
+  "prediction",
+  "not_in_data",
+  "other_person",
+  "off_topic",
+  "emergency",
+  "fallback",
+] as const;
+export type AssistantRefusalKind = (typeof assistantRefusalKinds)[number];
+export const assistantCiteKinds = [
+  "value",
+  "report",
+  "finding",
+  "study",
+  "pattern",
+  "follow_up",
+  "link",
+  "episode",
+  "catalog",
+] as const;
+export type AssistantCite = {
+  kind: (typeof assistantCiteKinds)[number];
+  reportId: string | null;
+  target: string | null;
+};
+export type AssistantAnswer = { sentences: { text: string; cites: AssistantCite[] }[] };
+
 export const reportStatuses = [
   "draft",
   "queued",

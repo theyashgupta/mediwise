@@ -126,6 +126,12 @@ async function seedRows(userId: string) {
         })
         .returning(),
     ),
+    assistant_questions: idOf(
+      await db
+        .insert(schema.assistantQuestions)
+        .values({ userId, profileId: profile, question: "Test", answer: { sentences: [] } })
+        .returning(),
+    ),
     report_links: idOf(
       await db
         .insert(schema.reportLinks)
