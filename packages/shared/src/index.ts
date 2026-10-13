@@ -269,5 +269,10 @@ export const deleteMeSchema = z.object({
   confirm: z.literal("DELETE", 'Type "DELETE" to confirm'),
 });
 
+/** Removes zero-width characters and outer whitespace, so a question of only invisible characters reads as empty. */
+export function cleanQuestion(text: string) {
+  return text.replace(/[\u200B-\u200D\u2060\uFEFF]/g, "").trim();
+}
+
 export * from "./extraction.js";
 export * from "./narrative.js";
