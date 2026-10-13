@@ -9,6 +9,7 @@ const status = JSON.parse(
 
 export const webOrigin = "http://localhost:5174";
 export const shellOrigin = "http://localhost:5175";
+export const landingOrigin = "http://localhost:3200";
 export const apiPort = 3101;
 
 export const apiEnv = {

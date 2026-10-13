@@ -1,6 +1,6 @@
 # Testing
 
-MediWise has three test layers. CI runs all three on every push and every pull request.
+MediWise has these test layers. CI runs each of them on every push and every pull request.
 
 | Layer | Command | What it covers |
 | --- | --- | --- |
@@ -8,6 +8,8 @@ MediWise has three test layers. CI runs all three on every push and every pull r
 | Coverage | `pnpm coverage` | The unit tests again with V8 coverage. It prints a summary per package and fails below the package threshold. |
 | Database | `pnpm test:db` | The SQL in `apps/api` against a real Postgres: credits ledger, purchases, the Claude spend cap, and the history queries (earlier values, same-day order, trends, compare, retests). |
 | End-to-end | `pnpm e2e` | The main flow in a real browser, against a local Supabase and the real API and web. |
+| Bundle size | `pnpm size` | The gzip size of each web chunk and of the landing first load, against a committed baseline. |
+| Performance | `pnpm perf` | Lighthouse budgets and INP on production builds, with the dense history fixture. |
 
 ## Rendered page tests
 
@@ -152,4 +154,62 @@ The `e2e` job in `.github/workflows/check.yml` runs after the `check` job.
 - It installs the Supabase CLI from a cache, runs `supabase start --workdir apps/e2e`, installs Chromium and runs `pnpm e2e`.
 - The job stops after 10 minutes.
 - When the job fails, it uploads the Playwright report and the traces as the `playwright-report` artifact.
-- The deploy workflows call `check.yml`, so a deploy waits for the `check` job and the `e2e` job.
+- The deploy workflows call `check.yml`, so a deploy waits for the `check`, `e2e` and `perf` jobs.
+- The `perf` job runs in parallel with the `e2e` job. See [Performance budgets](#performance-budgets).
+
+## Bundle size
+
+`pnpm size` builds the landing and the web, then runs `scripts/bundle-size.mjs`. The CI `check` job runs it after `pnpm coverage`.
+
+- It measures the gzip size of each chunk in the Vite manifest of `apps/web`, and `web first load`, the sum of the files that `index.html` loads.
+- It measures `landing first load`, the scripts in `apps/landing/out/index.html` without the `nomodule` polyfill.
+- A chunk has a name from its source path (a route) or its chunk name (a shared chunk), never from its hash.
+- The baseline is `scripts/bundle-size.json`, in bytes.
+
+The check fails when:
+
+- A chunk grows more than 10% and more than 500 bytes over its baseline. The 500 bytes stop an 85 byte route chunk from failing on a renamed import.
+- `landing first load` is more than 150 kB (150,000 bytes).
+- A chunk is in the build and not in the baseline, or in the baseline and not in the build.
+
+### Read a failing size check
+
+The job log shows a table with the baseline, the new size and the change of each chunk. The lines under "Bundle size check failed" name each chunk that failed.
+
+1. Find the chunk in the list. A route chunk names its route file. A shared chunk names the first module in it, for example `trends` holds Recharts.
+2. Build the web with `pnpm --filter @mediwise/web exec vite build`. Vite prints each file with its gzip size.
+3. Find the import that added the bytes. Make it smaller, or load it with a dynamic `import()` from the route that needs it.
+
+### Update the baseline
+
+Update the baseline only when the growth is necessary, or when a chunk is new, renamed or removed.
+
+1. Run `pnpm size --update`. It builds and writes the current sizes to `scripts/bundle-size.json`.
+2. Commit `scripts/bundle-size.json` in a commit of its own, for example `chore(web): bundle size baseline for the charts page`.
+3. In the pull request, give the reason for the growth.
+
+## Performance budgets
+
+`pnpm perf` runs `apps/e2e/perf/budgets.spec.ts` with `apps/e2e/playwright.perf.config.ts`. The CI `perf` job runs it in parallel with the `e2e` job, after the `check` job.
+
+- It needs the local Supabase of the e2e suite (`supabase start --workdir apps/e2e`). The API is the same as in `pnpm e2e`: `CLAUDE_STUB=true` and no Claude key.
+- It builds the web and the landing for production and serves them with gzip from `apps/e2e/perf/serve.ts`: the web on port 5174, the landing on port 3200. A dev server or an uncompressed build gives scores that are too low.
+- It makes a new user with the dense history fixture (12 reports in 10 weeks, `db:seed-history`).
+- Lighthouse 12.8.2 runs 3 times on Home, the latest report, `/trends` and the landing, with mobile emulation and simulated slow 4G. The test uses the median of the 3 scores in each category.
+- The CPU slowdown is 4x on a machine with a Lighthouse benchmark index of 2000, and scales with the index of the machine. The log shows the index and the slowdown. The reason is in [DESIGN.md](DESIGN.md#performance-budgets-medi-88).
+- The budgets are in the list of pages in the spec. The numbers and the reason for each are in [DESIGN.md](DESIGN.md#performance-budgets-medi-88).
+- INP: with a 4x CPU throttle, the test clicks every category chip and both sort buttons on `/trends` two times, at 1440 by 900. It waits for the paint after each click, as a person does. INP is the slowest interaction (Event Timing). The test does this on 3 page loads and fails when the median is 250 ms or more. The ticket limit is 200 ms. The reason for 250 ms is in [DESIGN.md](DESIGN.md#performance-budgets-medi-88).
+
+### Read a failing budget
+
+1. The job log shows one line for each page, for example `lighthouse home: {"performance":61,...}, performance runs 58 61 64`. The failure names the category, the score and the budget.
+2. Download the `perf-report` artifact and open `playwright-report/index.html`. Each Lighthouse test has the 3 HTML reports attached. Open one and read the failed audits.
+3. A drop in performance comes from more JavaScript (see [Bundle size](#bundle-size)), a slower first render or more main thread work. Compare LCP and Total Blocking Time with a run on `main`.
+4. For INP, the log line names the control of the slowest interaction, for example `248 (trend-category-lipids)`. Open `/trends` in Chrome, set a 4x CPU slowdown in the DevTools Performance panel, record a click on that control and find the long task after the click.
+5. One run can be slow because the CI machine is busy. When the scores of the 3 runs differ by more than 20 points, run the job again before you change code.
+
+### Update a budget
+
+- Raise a budget when the scores stay higher in CI. Set a performance budget 10 points under the lowest CI median of at least two runs, because one run moves by about 7 points. Record the numbers in DESIGN.md. Do not use numbers from a laptop.
+- Never lower a budget to make a change pass. When a change must make a page slower, write the reason in the pull request and in DESIGN.md, in the same commit as the new budget.
+- On a machine with 8 GB of RAM, do not run `pnpm perf` together with `pnpm check`, `pnpm dev` or `pnpm e2e`. Other work on the machine makes the scores lower.
