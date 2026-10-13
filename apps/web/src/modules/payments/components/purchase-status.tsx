@@ -9,7 +9,12 @@ type PurchaseStatusProps = {
 export function PurchaseStatus({ status, credits }: PurchaseStatusProps) {
   const t = useT();
   return (
-    <p role="status" aria-live="polite" className="flex items-start gap-2">
+    <p
+      role="status"
+      aria-live="polite"
+      className="flex items-start gap-2"
+      data-testid={`purchase-status-${status}`}
+    >
       {status === "paid" ? (
         <CircleCheck className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden />
       ) : (

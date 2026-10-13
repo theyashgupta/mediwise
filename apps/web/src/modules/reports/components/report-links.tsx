@@ -58,6 +58,7 @@ export function ReportLinks({
           {links.map((link) => (
             <li
               key={link.id}
+              data-testid={`report-link-${link.role}`}
               className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card p-4"
             >
               <div className="space-y-1">
@@ -72,7 +73,11 @@ export function ReportLinks({
                 {link.state === "proposed" && (
                   <p className="text-sm text-muted-foreground">{text.proposed}</p>
                 )}
-                {detected(link) && <p className="text-sm text-muted-foreground">{text.detected}</p>}
+                {detected(link) && (
+                  <p className="text-sm text-muted-foreground" data-testid="report-link-detected">
+                    {text.detected}
+                  </p>
+                )}
               </div>
               <div className="flex gap-2">
                 {link.state === "proposed" && (
@@ -85,6 +90,7 @@ export function ReportLinks({
                   variant="outline"
                   disabled={busy}
                   onClick={() => onUpdate(link.id, "dismissed")}
+                  data-testid="report-link-dismiss"
                 >
                   {detected(link) ? text.undo : text.dismiss}
                 </Button>

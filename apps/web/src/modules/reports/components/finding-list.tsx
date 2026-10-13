@@ -28,7 +28,7 @@ export function FindingList({ reportId, detail }: FindingListProps) {
         {detail.findings.slice(0, maxFindingCards).map((finding) => {
           const chips = findingChips(finding, detail);
           return (
-            <li key={finding.title}>
+            <li key={finding.title} data-testid={`finding-${finding.kind}`}>
               <InsightCard title={finding.title} badge={<StatusBadge status={finding.severity} />}>
                 <p className="text-sm">{finding.body}</p>
                 {finding.sequence && <SequenceSteps sequence={finding.sequence} />}

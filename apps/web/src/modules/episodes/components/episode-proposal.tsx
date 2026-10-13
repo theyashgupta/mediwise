@@ -27,6 +27,7 @@ export function EpisodeProposal({
   return (
     <form
       aria-labelledby="episode-proposal"
+      data-testid="episode-proposal"
       className="space-y-4 rounded-xl border bg-card p-6"
       onSubmit={(event) => {
         event.preventDefault();
@@ -56,7 +57,7 @@ export function EpisodeProposal({
         onNoteChange={setNote}
       />
       <div className="flex flex-wrap gap-2">
-        <Button type="submit" disabled={busy || !name.trim()}>
+        <Button type="submit" disabled={busy || !name.trim()} data-testid="episode-proposal-save">
           {busy ? t.saving : t.save}
         </Button>
         <Button type="button" variant="outline" disabled={busy} onClick={onDismiss}>

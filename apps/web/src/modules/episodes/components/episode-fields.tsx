@@ -19,6 +19,7 @@ export function EpisodeFields({ id, name, note, onNameChange, onNoteChange }: Ep
         <Label htmlFor={`${id}-name`}>{t.name}</Label>
         <Input
           id={`${id}-name`}
+          data-testid={`${id}-name`}
           value={name}
           required
           maxLength={80}

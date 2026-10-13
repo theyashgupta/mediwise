@@ -23,12 +23,17 @@ export function LanguageSelect({ className }: { className?: string }) {
         {t.common.language.label}
       </Label>
       <Select value={locale} onValueChange={(value) => isLocale(value) && void setLocale(value)}>
-        <SelectTrigger id={id} className="w-full sm:w-60">
+        <SelectTrigger id={id} className="w-full sm:w-60" data-testid="language-select">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
           {locales.map((option) => (
-            <SelectItem key={option} value={option} lang={option}>
+            <SelectItem
+              key={option}
+              value={option}
+              lang={option}
+              data-testid={`language-option-${option}`}
+            >
               {localeNames[option]}
             </SelectItem>
           ))}

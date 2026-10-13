@@ -59,6 +59,7 @@ export function ShareDialog({
                 readOnly
                 value={link.url}
                 aria-label={t.reports.share.linkLabel}
+                data-testid="share-link"
                 onFocus={(event) => event.currentTarget.select()}
               />
               <Button variant="outline" onClick={onCopy}>
