@@ -21,10 +21,10 @@ export function FinalCta({ locale }: { locale: Locale }) {
         </h2>
         <p className="mx-auto mt-4 max-w-lg text-lg text-muted-foreground">{t.finalCta.body}</p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <a href={appLinks.signUp} className={buttonStyles.primary}>
+          <a href={appLinks.signUp(locale)} className={buttonStyles.primary}>
             {t.readReport}
           </a>
-          <a href={appLinks.signIn} className={buttonStyles.outline}>
+          <a href={appLinks.signIn(locale)} className={buttonStyles.outline}>
             {t.signIn}
           </a>
         </div>

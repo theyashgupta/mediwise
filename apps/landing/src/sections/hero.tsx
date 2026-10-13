@@ -22,7 +22,7 @@ export function Hero({ locale }: { locale: Locale }) {
           </h1>
           <p className="mt-6 max-w-xl text-lg text-pretty text-muted-foreground">{t.body}</p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <a href={appLinks.signUp} className={buttonStyles.primary}>
+            <a href={appLinks.signUp(locale)} className={buttonStyles.primary}>
               {site.readReport}
             </a>
             <a href="#how-it-works" className={buttonStyles.outline}>
