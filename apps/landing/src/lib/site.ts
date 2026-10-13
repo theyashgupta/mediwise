@@ -1,9 +1,11 @@
+import type { Locale } from "@/config/messages";
+
 export const siteUrl = new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").origin;
 export const appUrl = new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:5173").origin;
 
 export const appLinks = {
-  signIn: `${appUrl}/login`,
-  signUp: `${appUrl}/signup`,
+  signIn: (locale: Locale) => `${appUrl}/login?lang=${locale}`,
+  signUp: (locale: Locale) => `${appUrl}/signup?lang=${locale}`,
   terms: `${appUrl}/terms`,
   privacy: `${appUrl}/privacy`,
   refunds: `${appUrl}/refunds`,

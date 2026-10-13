@@ -5,11 +5,12 @@ afterEach(() => {
   vi.resetModules();
 });
 
-test("every link to the app uses NEXT_PUBLIC_APP_URL without a trailing slash", async () => {
+test("every link to the app uses NEXT_PUBLIC_APP_URL without a trailing slash, and sign-in and sign-up carry the page language", async () => {
   vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://app.mediwise.theyashgupta.me/");
   const { appLinks } = await import("./site");
-  expect(appLinks.signIn).toBe("https://app.mediwise.theyashgupta.me/login");
-  expect(appLinks.signUp).toBe("https://app.mediwise.theyashgupta.me/signup");
+  expect(appLinks.signIn("hi")).toBe("https://app.mediwise.theyashgupta.me/login?lang=hi");
+  expect(appLinks.signUp("en")).toBe("https://app.mediwise.theyashgupta.me/signup?lang=en");
+  expect(appLinks.terms).toBe("https://app.mediwise.theyashgupta.me/terms");
 });
 
 test("the sitemap lists the English and Hindi pages with hreflang links under NEXT_PUBLIC_SITE_URL", async () => {

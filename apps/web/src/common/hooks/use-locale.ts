@@ -61,6 +61,21 @@ export async function setLocale(locale: Locale) {
 }
 
 /**
+ * Adopts a supported `lang` search parameter as the device locale and removes it from the URL.
+ *
+ * @remarks
+ * The landing is another origin and cannot share `localStorage`, so its links carry the choice as `?lang=`.
+ * It only sets the device value, so `syncLocale` still lets the account value win after sign-in.
+ */
+export function adoptLangParam(url: URL) {
+  const lang = url.searchParams.get("lang");
+  if (!isLocale(lang)) return false;
+  url.searchParams.delete("lang");
+  applyLocale(lang);
+  return true;
+}
+
+/**
  * Reconciles this device with the account after sign-in.
  *
  * @remarks
