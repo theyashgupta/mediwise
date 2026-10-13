@@ -1,0 +1,54 @@
+{
+  "earlier": {
+    "date": "2025-02-10",
+    "labName": "Lakeview Imaging",
+    "markers": [
+      {
+        "markerKey": "tsh",
+        "value": 6.1,
+        "valueText": null,
+        "unit": "µIU/mL",
+        "status": "risk",
+        "calibratedLow": 0.5,
+        "calibratedHigh": 2.5
+      }
+    ],
+    "studies": [
+      {
+        "id": "7a0f5d0e-1c3b-4a51-9a52-1f0c2f6b9a01",
+        "kind": "ultrasound",
+        "bodyRegion": "Pelvis",
+        "impression": "Uterus is normal in size.\nA 4.2 x 3.1 cm complex mass in the right adnexa. Suggest clinical correlation.",
+        "result": null,
+        "measurements": []
+      }
+    ]
+  },
+  "later": {
+    "reportId": "c3e1a6f2-8d4b-4f0e-b7a1-2d9e5c4b8f02",
+    "linked": true,
+    "date": "2025-03-24",
+    "labName": "Riverside Diagnostics",
+    "markers": [
+      {
+        "markerKey": "tsh",
+        "value": 2.1,
+        "valueText": null,
+        "unit": "µIU/mL",
+        "status": "optimal",
+        "calibratedLow": 0.5,
+        "calibratedHigh": 2.5
+      }
+    ],
+    "studies": [
+      {
+        "id": "0b6f3c2a-5e1d-4c7b-8a9f-3e2d1c0b9a03",
+        "kind": "ultrasound",
+        "bodyRegion": "pelvis",
+        "impression": "Uterus and both ovaries are normal.\nNo adnexal mass is seen.",
+        "result": null,
+        "measurements": []
+      }
+    ]
+  }
+}
