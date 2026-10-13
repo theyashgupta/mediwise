@@ -7,6 +7,7 @@ import { statusStyles } from "@/common/utils/status";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { changeMark, dateOptions, rangeText, unitText, valueText } from "../config/export";
+import { noteLabel } from "../config/note";
 import { conditionValue, formatReportDate } from "../config/report";
 import { printedLines, studyTitle } from "../config/studies";
 import type { ExportDetail, ExportReport, MarkerRow } from "../types";
@@ -176,6 +177,12 @@ export function ReportExport({
             </div>
           ))}
         </dl>
+        {report.note && (
+          <div className="break-inside-avoid">
+            <p className="text-muted-foreground">{noteLabel}, written by the patient</p>
+            <p className="whitespace-pre-line">{report.note}</p>
+          </div>
+        )}
         {previous && (
           <p>
             Previous values are from{" "}
