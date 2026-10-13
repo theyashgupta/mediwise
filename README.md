@@ -4,7 +4,7 @@
 
 **Upload a lab report. Understand every marker.**
 
-MediWise reads a lab report and explains each marker in plain English.
+MediWise reads a lab report and explains each marker in plain English or Hindi.
 It scores each marker against ranges for your age, sex and ancestry.
 It tracks every marker across reports for your whole family.
 
@@ -13,11 +13,11 @@ It tracks every marker across reports for your whole family.
 [![Node](https://img.shields.io/badge/node-24-brightgreen)](https://nodejs.org)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-![MediWise demo: upload a PDF lab report, wait for the read, then scroll through the score, the patterns and the findings](docs/assets/demo.gif)
+![MediWise demo: upload a repeat ultrasound, see it linked to the earlier scan, open the Settled block, then switch the app to Hindi](docs/assets/demo.gif)
 
 </div>
 
-The demo uses a made-up person and a made-up report. You can upload the same file: `apps/api/fixtures/golden/sample-2025.pdf`.
+The demo uses a made-up person and made-up reports. The four earlier reports and the repeat scan are in `apps/api/fixtures/episode`. You can upload the same files.
 
 MediWise is for information. It does not give a diagnosis and it does not replace a doctor.
 
@@ -30,8 +30,21 @@ MediWise is for information. It does not give a diagnosis and it does not replac
 - **Finds patterns.** Rules join two or more markers into one signal, such as B12 with homocysteine.
 - **Reads scans and forms.** Ultrasound, X-ray and ECG pages become studies with their impression and measurements.
 - **Tracks trends.** Two reports are enough to compare values and see each marker move over time.
+- **Settles a line with a repeat scan.** MediWise links two reports when both have the same study within 90 days. You can undo the link. When the later report has no alert line, the earlier line moves to Settled.
+- **Groups a workup into an episode.** MediWise finds reports that may belong together. An episode shows its reports in date order, the markers that repeat and the scans.
+- **Names each report.** A report gets a title from its dates and contents, such as "29 Mar 2025 · blood panel (109 markers), ultrasound". You can rename it.
+- **Reads in English or Hindi.** Choose the language in Settings or on the sign-in page. Marker names and printed lines stay as the lab prints them.
+- **Shows the year in review.** With two reports or more, one page shows the markers that moved and the markers still at risk.
 - **Keeps family profiles.** One account holds reports for you, your parents, your partner and your children.
 - **Exports for your doctor.** Each report has a print-ready page, black on white.
+
+## Screens
+
+Every screen is from the app. The people and the reports are made up. The landing page uses the same files.
+
+| Report | Settled | Episode | Hindi |
+| - | - | - | - |
+| <img src="apps/landing/public/screens/report-light.webp" width="200" alt="The score card: 67 of 81 markers sit in the calibrated ranges, score 89"> | <img src="apps/landing/public/screens/settled-light.webp" width="200" alt="The Settled block: a cyst line settled by a repeat ultrasound"> | <img src="apps/landing/public/screens/episode-light.webp" width="200" alt="An episode timeline with five reports, oldest first"> | <img src="apps/landing/public/screens/hindi-light.webp" width="200" alt="The report summary in Hindi"> |
 
 ## How a report becomes a score
 
