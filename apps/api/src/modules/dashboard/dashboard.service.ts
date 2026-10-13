@@ -83,8 +83,9 @@ async function listReportMarkers(newer: { id: string; date: string; labName: str
  * and recent reports.
  *
  * @remarks
- * The newest scored report with at least `leadMinMarkers` mapped markers leads, so a weekly glucose-only report does not
- * replace the last full panel. The reports after it come back in `newSince`. With no such report, the newest one leads.
+ * The newest scored full panel (`leadMinMarkers` mapped markers or more) leads, and its score change compares with the
+ * previous scored full panel only, never with a narrow report. The narrow reports after the lead come back in
+ * `newSince` with their own markers. With no full panel, the newest report leads and compares with a narrow one.
  */
 export async function getDashboard(userId: string, profileId: string, locale: TextLocale = "en") {
   await getOwnedProfile(userId, profileId);
@@ -94,8 +95,9 @@ export async function getDashboard(userId: string, profileId: string, locale: Te
     repo.countReportsInProgress(userId, profileId),
     repo.listLatestAssessedByMarker(userId, profileId),
   ]);
+  const isFullPanel = (report: { mappedCount: number }) => report.mappedCount >= leadMinMarkers;
   const leadIndex = Math.max(
-    done.findIndex((report) => report.score !== null && report.mappedCount >= leadMinMarkers),
+    done.findIndex((report) => report.score !== null && isFullPanel(report)),
     0,
   );
   const latest = done[leadIndex];
@@ -107,6 +109,7 @@ export async function getDashboard(userId: string, profileId: string, locale: Te
       (report) =>
         report.date !== latest.date &&
         report.score !== null &&
+        isFullPanel(report) === isFullPanel(latest) &&
         sameScoreScale(report.coverage ?? 100, latest.coverage ?? 100),
     );
 

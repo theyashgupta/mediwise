@@ -15,7 +15,11 @@ export function NewSinceStrip({ since, reports }: NewSinceStripProps) {
   const text = useT().dashboard.newSince;
   const sinceDate = formatPlainDate(since, { day: "numeric", month: "short", year: "numeric" });
   return (
-    <section aria-labelledby="new-since" className="space-y-3 rounded-xl border bg-card p-4 sm:p-5">
+    <section
+      aria-labelledby="new-since"
+      data-testid="new-since-strip"
+      className="space-y-3 rounded-xl border bg-card p-4 sm:p-5"
+    >
       <div className="space-y-1">
         <h2 id="new-since" className="font-semibold">
           {text.title(sinceDate)}
@@ -24,7 +28,7 @@ export function NewSinceStrip({ since, reports }: NewSinceStripProps) {
       </div>
       <ul className="divide-y overflow-hidden rounded-lg border bg-background">
         {reports.map((report) => (
-          <li key={report.id}>
+          <li key={report.id} data-testid="new-since-row">
             <Link
               to="/reports/$reportId"
               params={{ reportId: report.id }}

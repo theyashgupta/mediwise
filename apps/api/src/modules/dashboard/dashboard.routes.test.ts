@@ -180,7 +180,7 @@ test("the latest done report carries its counts and the score change since the p
   expect(data.recent.map((report) => report.id)).toEqual(["new", "old"]);
 });
 
-test("the score change skips a narrow report and compares with the last report on the same scale", async () => {
+test("the score change skips a narrow report and compares with the previous full panel", async () => {
   store.reports.push(
     done("full", "2026-08-04", 70),
     glucoseOnly("glucose-only", "2026-09-29"),
@@ -188,6 +188,25 @@ test("the score change skips a narrow report and compares with the last report o
   );
   const data = await body();
   expect(data.latest?.deltaSincePrevious).toEqual({ score: 4, since: "2026-08-04" });
+});
+
+test("a narrow report on the same score scale is not compared with a full panel", async () => {
+  store.reports.push(
+    done("full", "2026-08-04", 70),
+    { ...done("narrow", "2026-09-29", 90), mappedCount: 9 },
+    done("new", "2026-10-06", 74),
+  );
+  const data = await body();
+  expect(data.latest?.deltaSincePrevious).toEqual({ score: 4, since: "2026-08-04" });
+});
+
+test("narrow reports with no full panel compare with each other", async () => {
+  store.reports.push(glucoseOnly("week-1", "2026-09-22"), {
+    ...glucoseOnly("week-2", "2026-09-29"),
+    score: 53,
+  });
+  const data = await body();
+  expect(data.latest?.deltaSincePrevious).toEqual({ score: 3, since: "2026-09-22" });
 });
 
 test("a narrow report after a full panel leaves the full panel on top and lists itself as new since", async () => {
