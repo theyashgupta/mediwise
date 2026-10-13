@@ -6,7 +6,14 @@ import type { AuthEnv } from "../../middleware/auth.js";
 import { reportsRoutes } from "./reports.routes.js";
 
 const store = vi.hoisted(() => {
-  type Report = { id: string; owner: string; profileId: string; status: string; createdAt: Date };
+  type Report = {
+    id: string;
+    owner: string;
+    profileId: string;
+    status: string;
+    createdAt: Date;
+    note?: string | null;
+  };
   type File = {
     id?: string;
     reportId: string;
@@ -27,11 +34,12 @@ const store = vi.hoisted(() => {
   const findingRows: object[] = [];
   const insights: { current?: object } = {};
   const credits = new Map<string, { balance: number; readsToday: number }>();
-  const view = ({ id, profileId, status, createdAt }: Report) => ({
+  const view = ({ id, profileId, status, createdAt, note }: Report) => ({
     id,
     profileId,
     status,
     createdAt,
+    note: note ?? null,
     markerCount: 0,
   });
   const find = (owner: string, id: string) =>
@@ -115,6 +123,12 @@ const store = vi.hoisted(() => {
         find(owner, id) && { id: aliceProfile, sex: "male", ancestry: "south_asian" },
       listMarkerHistory: async () => historyRows,
       findReadJobTokens: async () => ({ usage: null, inputTokens: 10_000, outputTokens: 1_000 }),
+      updateReportNote: async (owner: string, id: string, note: string | null) => {
+        const report = find(owner, id);
+        if (!report) return undefined;
+        report.note = note;
+        return { note };
+      },
       requeueFailedReport: async (owner: string, id: string) => {
         const report = find(owner, id);
         if (report?.status !== "failed") return;
@@ -333,6 +347,33 @@ test("an unfinished report returns its status and profile with empty sections", 
     narrative: null,
     header: { capped: false },
   });
+});
+
+test("a saved note comes back with the report, and an empty note clears it", async () => {
+  const { body } = await create([pdf]);
+  const note = "  Tired for two weeks. Started walking daily.  ";
+
+  const saved = await call("PUT", `/reports/${body.id}/note`, "alice", { note });
+  expect(saved.status).toBe(200);
+  expect(await saved.json()).toEqual({ note: note.trim() });
+  expect(await (await call("GET", `/reports/${body.id}`)).json()).toMatchObject({
+    note: note.trim(),
+  });
+
+  await call("PUT", `/reports/${body.id}/note`, "alice", { note: " " });
+  expect(await (await call("GET", `/reports/${body.id}`)).json()).toMatchObject({ note: null });
+});
+
+test("a note of 1,001 characters returns 400, and another user's report returns 404", async () => {
+  const { body } = await create([pdf]);
+
+  expect(
+    (await call("PUT", `/reports/${body.id}/note`, "alice", { note: "a".repeat(1000) })).status,
+  ).toBe(200);
+  const long = await call("PUT", `/reports/${body.id}/note`, "alice", { note: "a".repeat(1001) });
+  expect(long.status).toBe(400);
+  expect(JSON.stringify(await long.json())).toContain("Write 1,000 characters or fewer");
+  expect((await call("PUT", `/reports/${body.id}/note`, "bob", { note: "Hi" })).status).toBe(404);
 });
 
 test("only ADMIN_USER_ID sees the Claude cost of a report, in cents", async () => {

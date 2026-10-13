@@ -196,6 +196,14 @@ export type ReportFile = z.infer<typeof reportFileSchema>;
 export const createReportSchema = z.object({ profileId: z.uuid(), files: reportFilesSchema });
 export type CreateReportInput = z.infer<typeof createReportSchema>;
 
+export const maxReportNoteLength = 1000;
+
+/** Body of `PUT /reports/:id/note`. An empty note clears it. */
+export const reportNoteSchema = z.object({
+  note: z.string().trim().max(maxReportNoteLength, "Write 1,000 characters or fewer"),
+});
+export type ReportNoteInput = z.infer<typeof reportNoteSchema>;
+
 /** Body of `PATCH /me`. The name is the self profile's name. */
 export const updateMeSchema = profileFieldsSchema.pick({ name: true });
 export type UpdateMeInput = z.infer<typeof updateMeSchema>;

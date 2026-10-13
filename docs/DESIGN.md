@@ -211,6 +211,9 @@ Screenshots: the demo account (made-up profile "Arjun Mehta", the two sample rep
 | Settings | [after](design/pages/after-settings-light.jpg) | [after](design/pages/after-settings-dark.jpg) | [after](design/pages/after-settings-light-phone.jpg) |
 | Credits | [after](design/pages/after-credits-light.jpg) | [after](design/pages/after-credits-dark.jpg) | [after](design/pages/after-credits-light-phone.jpg) |
 | Doctor export with previous values (29 Mar 2025, previous 9 Mar 2024, MEDI-53) | [after](design/pages/after-export-light.jpg) | [after](design/pages/after-export-dark.jpg) | [after](design/pages/after-export-light-phone.jpg) |
+| Report, Notes for this visit after a save (MEDI-63), 29 Mar 2025 | [after](design/pages/after-visit-note-report-light.jpg) | | |
+| Doctor export with the visit note under the visit dates (MEDI-63) | [after](design/pages/after-visit-note-export-light.jpg) | | |
+| Share-with-doctor page with the visit note (MEDI-63). The link was ended after the capture | [after](design/pages/after-visit-note-share-light.jpg) | | |
 | Sign in | [before](design/pages/before-login-light.jpg), [after](design/pages/after-login-light.jpg) | [before](design/pages/before-login-dark.jpg), [after](design/pages/after-login-dark.jpg) | [after](design/pages/after-login-light-phone.jpg) |
 | Create account | [before](design/pages/before-signup-light.jpg), [after](design/pages/after-signup-light.jpg) | [before](design/pages/before-signup-dark.jpg), [after](design/pages/after-signup-dark.jpg) | [after](design/pages/after-signup-light-phone.jpg) |
 | Forgot password | [before](design/pages/before-forgot-password-light.jpg), [after](design/pages/after-forgot-password-light.jpg) | [before](design/pages/before-forgot-password-dark.jpg), [after](design/pages/after-forgot-password-dark.jpg) | [after](design/pages/after-forgot-password-light-phone.jpg) |

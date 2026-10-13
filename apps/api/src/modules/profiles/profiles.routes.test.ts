@@ -20,7 +20,13 @@ const store = vi.hoisted(() => {
     guardianConfirmedAt: Date | null;
   };
   const rows: Row[] = [];
-  const exportRows: { markerRows: object[]; studyRows: object[]; measurementRows: object[] } = {
+  const exportRows: {
+    noteRows: object[];
+    markerRows: object[];
+    studyRows: object[];
+    measurementRows: object[];
+  } = {
+    noteRows: [],
     markerRows: [],
     studyRows: [],
     measurementRows: [],
@@ -116,6 +122,7 @@ async function createMember(user = "alice") {
 
 beforeEach(() => {
   store.rows.length = 0;
+  store.exportRows.noteRows = [];
   store.exportRows.markerRows = [];
   store.exportRows.studyRows = [];
   store.exportRows.measurementRows = [];
@@ -345,6 +352,33 @@ test("the CSV quotes a lab name with a comma and quotes, and types vitals and st
     `study,2025-02-14,${lab},xray,Chest,'=No active lesion,,,,,visit-2025-02-14,r1`,
     "",
   ]);
+});
+
+test("a visit note is one note row before the values of its report, quoted and guarded like any text", async () => {
+  const { id } = await createMember();
+  store.exportRows.markerRows = [
+    {
+      ...report,
+      markerKey: "hba1c",
+      rawName: "HbA1c",
+      value: 5.4,
+      valueText: null,
+      unit: "%",
+      status: "optimal",
+      labRangeLow: null,
+      labRangeHigh: null,
+      calibratedLow: null,
+      calibratedHigh: null,
+    },
+  ];
+  store.exportRows.noteRows = [
+    { ...report, labName: null, note: '=Tired for two weeks, "started walking daily"' },
+  ];
+  const lines = (await (await call("GET", `/profiles/${id}/export.csv`)).text()).split("\r\n");
+  expect(lines[1]).toBe(
+    `note,2025-02-14,,,,"'=Tired for two weeks, ""started walking daily""",,,,,visit-2025-02-14,r1`,
+  );
+  expect(lines[2]).toMatch(/^marker,2025-02-14,/);
 });
 
 test("another user's profile export returns 404", async () => {

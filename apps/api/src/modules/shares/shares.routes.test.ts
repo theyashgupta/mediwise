@@ -75,6 +75,7 @@ const store = vi.hoisted(() => {
             labName: "Made-up Labs",
             collectedAt: "2026-09-01",
             reportedAt: "2026-09-02",
+            note: "Started walking daily.",
             createdAt: new Date("2026-09-02T00:00:00Z"),
             markerCount: 0,
           }
@@ -201,7 +202,10 @@ test("an open link returns the export without a session and counts each open", a
   expect(await res.json()).toMatchObject({
     expiresAt: body.expiresAt,
     person: { firstName: "Arjun", age: 36 },
-    report: { header: { labName: "Made-up Labs", collectedAt: "2026-09-01" } },
+    report: {
+      header: { labName: "Made-up Labs", collectedAt: "2026-09-01" },
+      note: "Started walking daily.",
+    },
     previous: null,
   });
   const links = await (await call("GET", `/reports/${ids.done}/share`)).json();

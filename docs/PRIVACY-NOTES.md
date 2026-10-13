@@ -29,6 +29,13 @@ This file records what MediWise does with the data of family members and childre
 - The app never deletes a row, so each row stays for at least one year.
 - The data download (`GET /me/export`) reads nothing from this table.
 
+### Visit notes
+
+- The owner can write one note per report, 1,000 characters or fewer, in `reports.note`. The note is free text and can hold health data.
+- Claude never gets the note. The read job loads no note, and every prompt is built from engine output only. `process-report.job.test.ts` fails when a note reaches a Claude request.
+- The note shows on the report page, the doctor export, the share-with-doctor page, the JSON data download and the CSV download (one `note` row per report).
+- Account deletion and report deletion remove the note with its report row.
+
 ## Rule 10 timeline
 
 Rule 10 covers the data of a child, which is a person under 18.
