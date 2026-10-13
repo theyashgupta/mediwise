@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { useActiveProfile } from "@/modules/profiles";
 import { formatReportDate } from "@/modules/reports";
 import { ChangeLabel } from "../components/change-label";
+import { LabNote } from "../components/lab-note";
 import { TrendPoints } from "../components/trend-points";
 import { directionStyles, displayUnit } from "../config/trends";
 import { useTrend } from "../hooks/use-trends";
@@ -75,19 +76,26 @@ export function TrendContainer() {
             </span>
           </p>
         )}
-        <div className="rounded-xl border bg-card p-5">
+        <div className="space-y-3 rounded-xl border bg-card p-5">
           <ValueChart
             points={points.map((point) => ({
               key: point.reportId,
               date: point.date,
               value: point.value,
               status: point.status,
+              lab: {
+                name: point.labName,
+                range: point.labRange,
+                optimalRange: point.calibratedRange,
+                change: point.labChange,
+              },
             }))}
             band={data.calibratedRange}
             bandLabel="Optimal range for your profile"
             unit={displayUnit(data.unit)}
             precision={data.precision}
           />
+          <LabNote labCount={data.labCount} />
         </div>
         <TrendPoints
           markerKey={data.markerKey}

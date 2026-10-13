@@ -37,7 +37,7 @@ export async function listDoneReports(ownerUserId: string, profileId: string) {
  * Lists the stored marker rows of a profile's done reports, with study measurements in the same shape.
  *
  * @remarks
- * A study measurement has no calibrated band stored, so its trend shows the status of each point without a band.
+ * A study measurement has no calibrated band or numeric lab range stored, so its trend shows the status of each point without a band.
  */
 export async function listMarkerRows(ownerUserId: string, profileId: string, markerKey?: string) {
   const [markers, measurements] = await Promise.all([
@@ -49,6 +49,8 @@ export async function listMarkerRows(ownerUserId: string, profileId: string, mar
         valueText: reportMarkers.valueText,
         unit: reportMarkers.unit,
         status: reportMarkers.status,
+        labRangeLow: reportMarkers.labRangeLow,
+        labRangeHigh: reportMarkers.labRangeHigh,
         calibratedLow: reportMarkers.calibratedLow,
         calibratedHigh: reportMarkers.calibratedHigh,
       })
@@ -69,6 +71,8 @@ export async function listMarkerRows(ownerUserId: string, profileId: string, mar
         valueText: studyMeasurements.valueText,
         unit: studyMeasurements.unit,
         status: studyMeasurements.status,
+        labRangeLow: sql<number | null>`null`,
+        labRangeHigh: sql<number | null>`null`,
         calibratedLow: sql<number | null>`null`,
         calibratedHigh: sql<number | null>`null`,
       })

@@ -14,7 +14,7 @@ const ids = vi.hoisted(() => ({
 }));
 
 const store = vi.hoisted(() => {
-  type Report = { id: string; profileId: string; collectedAt: string; labName?: string };
+  type Report = { id: string; profileId: string; collectedAt: string; labName?: string | null };
   type Row = {
     reportId: string;
     markerKey: string | null;
@@ -22,6 +22,8 @@ const store = vi.hoisted(() => {
     valueText?: string | null;
     unit: string | null;
     status: "optimal" | "watch" | "risk" | null;
+    labRangeLow?: number | null;
+    labRangeHigh?: number | null;
     calibratedLow?: number | null;
     calibratedHigh?: number | null;
   };
@@ -59,6 +61,8 @@ const store = vi.hoisted(() => {
           .filter((row) => (markerKey ? row.markerKey === markerKey : row.markerKey !== null))
           .map((row) => ({
             valueText: null,
+            labRangeLow: null,
+            labRangeHigh: null,
             calibratedLow: null,
             calibratedHigh: null,
             ...row,
@@ -232,6 +236,61 @@ test("two reports with one collection date give one point, the newest value with
     { reportId: ids.third, value: 110, labName: "Second lab" },
   ]);
   expect(body.change).toEqual({ absolute: -50, percent: -31.3 });
+});
+
+test("a point is marked as a lab change only where its lab differs from the last named lab", async () => {
+  store.reports.splice(0, 2);
+  const labs = ["Lab A", " lab  a ", null, "Lab B", "Lab B"];
+  labs.forEach((labName, index) => {
+    const id = `0b4c2a51-5555-4e0f-9a51-6f2b8c1d0e1${index}`;
+    store.reports.push({
+      id,
+      profileId: ids.profile,
+      collectedAt: `2025-0${index + 1}-10`,
+      labName,
+    });
+    store.rows.push({
+      reportId: id,
+      markerKey: "ldl_cholesterol",
+      value: 100 + index,
+      unit: "mg/dL",
+      status: "optimal",
+    });
+  });
+  const { body } = await json(`/trends/ldl_cholesterol?profileId=${ids.profile}`);
+  const points = body.points as { labChange: boolean }[];
+  expect(points.map((point) => point.labChange)).toEqual([false, false, false, true, false]);
+  expect(body.labCount).toBe(2);
+});
+
+test("each point carries the lab range and the optimal range of its own report", async () => {
+  store.reports[1] = { ...store.reports[1]!, labName: "Second lab" };
+  store.rows[0] = { ...store.rows[0]!, labRangeLow: null, labRangeHigh: 130 };
+  store.rows[1] = {
+    ...store.rows[1]!,
+    labRangeLow: null,
+    labRangeHigh: 100,
+    calibratedLow: null,
+    calibratedHigh: 90,
+  };
+  const { body } = await json(`/trends/ldl_cholesterol?profileId=${ids.profile}`);
+  expect(body.points).toMatchObject([
+    { labName: "Lab", labChange: false, labRange: { low: null, high: 130 }, calibratedRange: null },
+    {
+      labName: "Second lab",
+      labChange: true,
+      labRange: { low: null, high: 100 },
+      calibratedRange: { low: null, high: 90 },
+    },
+  ]);
+  expect(body.labCount).toBe(2);
+});
+
+test("a series from one lab has no lab change and a lab count of one", async () => {
+  const { body } = await json(`/trends/ldl_cholesterol?profileId=${ids.profile}`);
+  const points = body.points as { labChange: boolean }[];
+  expect(points.some((point) => point.labChange)).toBe(false);
+  expect(body.labCount).toBe(1);
 });
 
 test("a marker without results, or not in the catalog, returns 404", async () => {

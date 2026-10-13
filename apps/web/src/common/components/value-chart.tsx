@@ -1,8 +1,18 @@
-import { CartesianGrid, LabelList, Line, LineChart, ReferenceArea, XAxis, YAxis } from "recharts";
-import { type ChartConfig, ChartContainer } from "@/components/ui/chart";
+import {
+  CartesianGrid,
+  LabelList,
+  Line,
+  LineChart,
+  ReferenceArea,
+  ReferenceLine,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { type ChartConfig, ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
 import { chartDomain } from "../utils/chart-domain";
 import { type Status, statusStyles } from "../utils/status";
+import { type LabInfo, ValueTooltip } from "./value-tooltip";
 
 type ValuePoint = {
   key: string;
@@ -10,6 +20,7 @@ type ValuePoint = {
   value: number;
   status: Status;
   current?: boolean;
+  lab?: LabInfo;
 };
 
 type ValueChartProps = {
@@ -26,14 +37,26 @@ type DotProps = { cx?: number; cy?: number; payload?: ValuePoint };
 
 function StatusDot({ cx, cy, payload }: DotProps) {
   if (cx === undefined || cy === undefined || !payload) return null;
+  const r = payload.current ? 7 : 5;
   return (
-    <circle
-      cx={cx}
-      cy={cy}
-      r={payload.current ? 7 : 5}
-      strokeWidth="2"
-      className={cn("stroke-card", statusStyles[payload.status].fill)}
-    />
+    <g>
+      {payload.lab?.change && (
+        <circle
+          cx={cx}
+          cy={cy}
+          r={r + 4}
+          strokeWidth="1.5"
+          className="fill-none stroke-foreground"
+        />
+      )}
+      <circle
+        cx={cx}
+        cy={cy}
+        r={r}
+        strokeWidth="2"
+        className={cn("stroke-card", statusStyles[payload.status].fill)}
+      />
+    </g>
   );
 }
 
@@ -44,9 +67,14 @@ export function ValueChart({ points, band, bandLabel, unit, precision }: ValueCh
     band,
   );
   const label = points
-    .map((point) => `${point.date}: ${format(point.value)}${unit ? ` ${unit}` : ""}`)
+    .map(
+      (point) =>
+        `${point.date}: ${format(point.value)}${unit ? ` ${unit}` : ""}${point.lab?.change ? " (lab changed)" : ""}`,
+    )
     .join(", ");
   const hasBand = band && (band.low !== null || band.high !== null);
+  const hasLabs = points.some((point) => point.lab);
+  const labChanges = points.filter((point) => point.lab?.change);
 
   return (
     <div className="space-y-3">
@@ -83,6 +111,31 @@ export function ValueChart({ points, band, bandLabel, unit, precision }: ValueCh
               tickFormatter={format}
               className="font-mono"
             />
+            {labChanges.map((point) => (
+              <ReferenceLine
+                key={point.key}
+                x={point.date}
+                stroke="var(--muted-foreground)"
+                strokeDasharray="4 4"
+              />
+            ))}
+            {hasLabs && (
+              <ChartTooltip
+                cursor={false}
+                content={({ active, payload }) => {
+                  const point = payload?.[0]?.payload as ValuePoint | undefined;
+                  if (!active || !point?.lab) return null;
+                  return (
+                    <ValueTooltip
+                      date={point.date}
+                      value={format(point.value)}
+                      lab={point.lab}
+                      unit={unit}
+                    />
+                  );
+                }}
+              />
+            )}
             <Line
               dataKey="value"
               type="linear"
@@ -103,11 +156,21 @@ export function ValueChart({ points, band, bandLabel, unit, precision }: ValueCh
           </LineChart>
         </ChartContainer>
       </div>
-      {hasBand && (
-        <p className="flex items-center gap-1.5 text-xs text-muted-foreground" aria-hidden>
-          <span className="h-2 w-3 rounded-sm bg-optimal/15" />
-          {bandLabel}
-        </p>
+      {(hasBand || labChanges.length > 0) && (
+        <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground" aria-hidden>
+          {hasBand && (
+            <p className="flex items-center gap-1.5">
+              <span className="h-2 w-3 rounded-sm bg-optimal/15" />
+              {bandLabel}
+            </p>
+          )}
+          {labChanges.length > 0 && (
+            <p className="flex items-center gap-1.5">
+              <span className="size-3 rounded-full border-[1.5px] border-foreground" />
+              Lab changed at this result
+            </p>
+          )}
+        </div>
       )}
     </div>
   );
