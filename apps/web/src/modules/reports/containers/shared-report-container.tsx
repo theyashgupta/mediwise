@@ -42,6 +42,7 @@ function Content() {
         earlier={earlier}
         person={sharedPersonDetails(person)}
         generatedOn={new Date().toLocaleDateString(getIntlTag(), dateOptions)}
+        firstName={person.firstName}
         onPrint={() => window.print()}
       />
     </div>

@@ -23,6 +23,9 @@
   }
 }
 
+/* `paged:` styles the doctor export page boxes, on screen while they are measured and in print. */
+@custom-variant paged (&:where([data-paged] *));
+
 @theme {
   --font-heading: var(--font-sans);
 
@@ -211,8 +214,8 @@
   }
 }
 
+/* No page size: the doctor export page boxes fit A4 and Letter, so the paper the user picks wins. */
 @page {
-  size: A4;
   margin: 12mm;
 }
 
