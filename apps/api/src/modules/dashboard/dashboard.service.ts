@@ -14,6 +14,7 @@ import * as repo from "./dashboard.repo.js";
 const recentLimit = 5;
 const moveFirstLimit = 3;
 const latestLimit = 60;
+const leadMinMarkers = 10;
 const catalogByKey = new Map([...markers, ...derived].map((entry) => [entry.key, entry]));
 
 type AssessedMarker = Awaited<ReturnType<typeof repo.listAssessedMarkers>>[number];
@@ -58,30 +59,60 @@ function listRetests(rows: LatestByMarker[]) {
     .sort((a, b) => a.dueOn.localeCompare(b.dueOn));
 }
 
+/** Lists the assessed markers of each report with their catalog names. */
+async function listReportMarkers(newer: { id: string; date: string; labName: string | null }[]) {
+  return Promise.all(
+    newer.map(async ({ id, date, labName }) => ({
+      id,
+      date,
+      labName,
+      markers: (await repo.listAssessedMarkers(id)).map((row) => ({
+        markerKey: row.markerKey,
+        name: catalogByKey.get(row.markerKey ?? "")?.name ?? row.rawName,
+        value: row.value,
+        unit: row.unit,
+        status: row.status,
+      })),
+    })),
+  );
+}
+
 /**
- * Builds the dashboard for one profile: latest done report, what to move first, and recent reports.
+ * Builds the dashboard for one profile: the report that leads Home, the narrow reports since it, what to move first,
+ * and recent reports.
  *
  * @remarks
- * The score change compares with the newest report of an earlier date on the same score scale, so a glucose-only
- * report never reads as a drop from a full panel.
+ * The newest scored report with at least `leadMinMarkers` mapped markers leads, so a weekly glucose-only report does not
+ * replace the last full panel. The reports after it come back in `newSince`. With no such report, the newest one leads.
  */
 export async function getDashboard(userId: string, profileId: string, locale: TextLocale = "en") {
   await getOwnedProfile(userId, profileId);
-  const [recent, [latest, ...older], processingCount, newestByMarker] = await Promise.all([
+  const [recent, done, processingCount, newestByMarker] = await Promise.all([
     repo.listRecentReports(userId, profileId, recentLimit),
     repo.listLatestDoneReports(userId, profileId, latestLimit),
     repo.countReportsInProgress(userId, profileId),
     repo.listLatestAssessedByMarker(userId, profileId),
   ]);
-  if (!latest) return { latest: null, moveFirst: [], retests: [], recent, processingCount };
-  const previous = older.find(
-    (report) =>
-      report.date !== latest.date &&
-      report.score !== null &&
-      sameScoreScale(report.coverage ?? 100, latest.coverage ?? 100),
+  const leadIndex = Math.max(
+    done.findIndex((report) => report.score !== null && report.mappedCount >= leadMinMarkers),
+    0,
   );
+  const latest = done[leadIndex];
+  if (!latest)
+    return { latest: null, newSince: [], moveFirst: [], retests: [], recent, processingCount };
+  const previous = done
+    .slice(leadIndex + 1)
+    .find(
+      (report) =>
+        report.date !== latest.date &&
+        report.score !== null &&
+        sameScoreScale(report.coverage ?? 100, latest.coverage ?? 100),
+    );
 
-  const rows = await repo.listAssessedMarkers(latest.id);
+  const [rows, newSince] = await Promise.all([
+    repo.listAssessedMarkers(latest.id),
+    listReportMarkers(done.slice(0, leadIndex).slice(0, recentLimit)),
+  ]);
   const counts = { optimal: 0, watch: 0, risk: 0 };
   rows.forEach((row) => row.status && counts[row.status]++);
   const deltaSincePrevious =
@@ -102,6 +133,7 @@ export async function getDashboard(userId: string, profileId: string, locale: Te
   });
   return {
     latest: { ...latest, counts, deltaSincePrevious },
+    newSince,
     moveFirst,
     retests: listRetests(newestByMarker),
     recent,
