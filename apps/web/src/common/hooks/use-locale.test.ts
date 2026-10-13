@@ -81,3 +81,22 @@ test("at sign-in an account without a locale takes the device choice", async () 
   expect(store.getLocale()).toBe("hi");
   expect(auth.updates).toEqual([{ data: { locale: "hi" } }]);
 });
+
+test("a lang parameter from the landing becomes the device locale and leaves the URL", async () => {
+  const { store, storage } = await load("en");
+  const url = new URL("https://app.example.com/login?lang=hi&next=%2Freports");
+  expect(store.adoptLangParam(url)).toBe(true);
+  expect(url.search).toBe("?next=%2Freports");
+  expect(store.getLocale()).toBe("hi");
+  expect(storage.get("locale")).toBe("hi");
+});
+
+test("an unknown or missing lang parameter changes neither the locale nor the URL", async () => {
+  const { store } = await load("hi");
+  for (const href of ["https://app.example.com/login?lang=fr", "https://app.example.com/login"]) {
+    const url = new URL(href);
+    expect(store.adoptLangParam(url)).toBe(false);
+    expect(url.href).toBe(href);
+  }
+  expect(store.getLocale()).toBe("hi");
+});
