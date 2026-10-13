@@ -60,10 +60,12 @@ function CheckboxField({
   checked,
   onChange,
   label,
+  testId,
 }: {
   checked?: boolean;
   onChange: (checked: boolean) => void;
   label: string;
+  testId: string;
 }) {
   return (
     <FormItem className="flex items-start gap-3">
@@ -71,6 +73,7 @@ function CheckboxField({
         <input
           type="checkbox"
           className="mt-0.5 size-4 shrink-0 accent-primary"
+          data-testid={testId}
           checked={checked ?? false}
           onChange={(event) => onChange(event.target.checked)}
         />
@@ -88,22 +91,28 @@ function SelectField({
   onChange,
   placeholder,
   options,
+  testId,
 }: {
   value?: string;
   onChange: (value: string) => void;
   placeholder: string;
   options: Option[];
+  testId: string;
 }) {
   return (
     <Select value={value ?? ""} onValueChange={onChange}>
       <FormControl>
-        <SelectTrigger className="w-full">
+        <SelectTrigger className="w-full" data-testid={testId}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
       </FormControl>
       <SelectContent>
         {options.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
+          <SelectItem
+            key={option.value}
+            value={option.value}
+            data-testid={`${testId}-${option.value}`}
+          >
             {option.label}
           </SelectItem>
         ))}
@@ -145,7 +154,11 @@ export function ProfileForm({
               <FormItem>
                 <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input autoComplete={isSelf ? "name" : "off"} {...field} />
+                  <Input
+                    autoComplete={isSelf ? "name" : "off"}
+                    data-testid="profile-name"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -163,6 +176,7 @@ export function ProfileForm({
                   value={field.value}
                   onChange={field.onChange}
                   placeholder="Choose a relation"
+                  testId="profile-relation"
                   options={memberRelations.map((value) => ({
                     value,
                     label: relationLabels[value],
@@ -183,7 +197,7 @@ export function ProfileForm({
                 {approximateBirth && <Badge variant="secondary">Approximate</Badge>}
               </FormLabel>
               <FormControl>
-                <Input type="date" min="1900-01-01" {...field} />
+                <Input type="date" min="1900-01-01" data-testid="profile-dob" {...field} />
               </FormControl>
               {approximateBirth && <FormDescription>{approximateBirthNote}</FormDescription>}
               <FormMessage />
@@ -200,6 +214,7 @@ export function ProfileForm({
                 value={field.value}
                 onChange={field.onChange}
                 placeholder="Choose a sex"
+                testId="profile-sex"
                 options={sexes.map((value) => ({ value, label: sexLabels[value] }))}
               />
               <FormDescription>Many lab ranges differ by sex.</FormDescription>
@@ -217,6 +232,7 @@ export function ProfileForm({
                 value={field.value}
                 onChange={field.onChange}
                 placeholder="Choose an ancestry"
+                testId="profile-ancestry"
                 options={ancestries.map((value) => ({ value, label: ancestryLabels[value] }))}
               />
               <FormDescription>
@@ -236,6 +252,7 @@ export function ProfileForm({
                 checked={field.value}
                 onChange={field.onChange}
                 label={permissionLabel}
+                testId="profile-permission"
               />
             )}
           />
@@ -249,6 +266,7 @@ export function ProfileForm({
                 checked={field.value}
                 onChange={field.onChange}
                 label={guardianLabel}
+                testId="profile-guardian"
               />
             )}
           />
@@ -258,7 +276,12 @@ export function ProfileForm({
             {error}
           </p>
         )}
-        <Button type="submit" disabled={submitting} className="w-full sm:w-auto">
+        <Button
+          type="submit"
+          disabled={submitting}
+          className="w-full sm:w-auto"
+          data-testid="profile-submit"
+        >
           {submitting ? "Saving" : submitLabel}
         </Button>
       </form>

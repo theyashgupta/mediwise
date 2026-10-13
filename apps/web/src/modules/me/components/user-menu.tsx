@@ -32,7 +32,13 @@ export function UserMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-full" aria-label="Open user menu">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full"
+          aria-label="Open user menu"
+          data-testid="user-menu"
+        >
           <Avatar className="size-8">
             <AvatarFallback className="bg-secondary text-sm font-medium uppercase">
               {account ? account.charAt(0) : <User className="size-4" aria-hidden />}
@@ -66,7 +72,7 @@ export function UserMenu({
           </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem disabled={signingOut} onSelect={onSignOut}>
+        <DropdownMenuItem disabled={signingOut} onSelect={onSignOut} data-testid="sign-out">
           <LogOut aria-hidden />
           {signingOut ? "Signing out" : "Sign out"}
         </DropdownMenuItem>

@@ -34,7 +34,10 @@ export function ProfileCard({
     profile.reportCount === 0 ? "No reports" : plural(profile.reportCount, "report"),
   ];
   return (
-    <article className="flex h-full flex-col gap-4 rounded-xl border bg-card px-4 py-4">
+    <article
+      className="flex h-full flex-col gap-4 rounded-xl border bg-card px-4 py-4"
+      data-testid="profile-card"
+    >
       <div className="flex items-center gap-3">
         <span
           className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 font-medium text-primary uppercase"

@@ -32,7 +32,10 @@ export function ScoreRing({ score, tier, className }: ScoreRingProps) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center" aria-hidden>
-        <span className="font-mono text-[24cqw] leading-none font-medium tracking-tight">
+        <span
+          className="font-mono text-[24cqw] leading-none font-medium tracking-tight"
+          data-testid="score-value"
+        >
           {value}
         </span>
         <span className="mt-1 text-[max(0.75rem,9cqw)] text-muted-foreground">{tier}</span>

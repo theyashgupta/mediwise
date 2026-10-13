@@ -16,6 +16,7 @@
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
     "test": "turbo run test",
+    "e2e": "pnpm --filter @mediwise/e2e e2e",
     "format": "prettier --write .",
     "eval:mapping": "pnpm --filter @mediwise/api eval:mapping",
     "eval:extraction": "pnpm --filter @mediwise/api eval:extraction",
