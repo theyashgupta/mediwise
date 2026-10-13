@@ -3,6 +3,8 @@ name: check
 on:
   push:
   pull_request:
+  # The deploy workflows call this one, so a deploy runs only after the same checks pass.
+  workflow_call:
 
 jobs:
   check:

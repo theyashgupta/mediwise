@@ -4,14 +4,14 @@ Production costs zero until users arrive. It runs in three places:
 
 | Part | Where | Source |
 |---|---|---|
-| Web (`apps/web`) | Cloudflare Pages project `mediwise`, `https://mediwise.pages.dev`, static Vite build uploaded with `wrangler pages deploy` | `apps/web/public/_redirects` |
-| Landing page (`apps/landing`) | Cloudflare Pages project `mediwise-landing`, `https://mediwise-landing.pages.dev`, static Next.js export uploaded with `wrangler pages deploy` | `apps/landing/next.config.ts` |
+| Web (`apps/web`) | Cloudflare Pages project `mediwise`, `https://mediwise.pages.dev`, static Vite build that GitHub Actions uploads with `wrangler pages deploy` | `apps/web/public/_redirects`, `.github/workflows/deploy-web.yml` |
+| Landing page (`apps/landing`) | Cloudflare Pages project `mediwise-landing`, `https://mediwise-landing.pages.dev`, static Next.js export that GitHub Actions uploads with `wrangler pages deploy` | `apps/landing/next.config.ts`, `.github/workflows/deploy-landing.yml` |
 | API and job worker (`apps/api`) | Render free web service `mediwise-api` (`srv-db6atpg473hc73dqkuo0`), `https://mediwise-api-ij2v.onrender.com`, Docker, region Singapore | `apps/api/Dockerfile`, `render.yaml` |
 | Postgres, Auth, Storage | Supabase project `mediwise-prod` (ref `adnvhcharmqykmlyrepq`, `ap-south-1` Mumbai) | `apps/api/src/db/migrations` |
 
-CI (`.github/workflows/check.yml`) runs `pnpm check` on every push and pull request.
+CI (`.github/workflows/check.yml`) runs `pnpm check` on every push and pull request. On a push to `main`, `deploy-web.yml` and `deploy-landing.yml` deploy the web and the landing page (see Deploy the web).
 
-Never commit a secret. Put API values in the Render dashboard only. The web values live in `apps/web/.env.prod` in the main checkout, and git ignores it. `apps/api/.env.prod` is the local copy of the API values.
+Never commit a secret. Put API values in the Render dashboard only. The web values live in the GitHub repository secrets and variables. `apps/web/.env.prod` in the main checkout holds a copy for the manual deploy, and git ignores it. `apps/api/.env.prod` is the local copy of the API values.
 
 ## Build
 
@@ -65,17 +65,23 @@ Never commit a secret. Put API values in the Render dashboard only. The web valu
 | `NODE_ENV`, `NO_COLOR` | no | The Dockerfile sets `production` and `1`. |
 | `DEV_USER_ID` | no | Used only when `NODE_ENV=test`. Do not set it. |
 
-### Web (`apps/web/.env.prod`, read by the local build)
+### Web and landing page (GitHub, Settings, Secrets and variables, Actions)
 
-Vite reads the `VITE_` variables at build time on your machine. The Pages project has no build of its own, so variables set in the Cloudflare dashboard do nothing. Build and deploy again after you change one.
+Vite reads the `VITE_` variables when the web builds. The deploy workflows build on GitHub Actions, so the values live in the repository secrets and variables. The Pages projects have no build of their own, so variables set in the Cloudflare dashboard do nothing. After you change a value, run the deploy again (Actions, `deploy-web`, Run workflow).
 
-| Variable | Required | Value in production |
-|---|---|---|
-| `VITE_API_URL` | yes | `https://mediwise-api-ij2v.onrender.com`. No trailing slash. |
-| `VITE_SUPABASE_URL` | yes | `https://adnvhcharmqykmlyrepq.supabase.co` |
-| `VITE_SUPABASE_ANON_KEY` | yes | Anon (publishable) key of `mediwise-prod`. |
-| `VITE_PAYMENTS_ENABLED` | no | Default `false`. `true` shows the credit packs and the Buy button. Set it with `PAYMENTS_ENABLED=true` on the API, never alone. |
-| `VITE_CASHFREE_MODE` | no | `sandbox` (default) or `production`. Must match `CASHFREE_ENV`. |
+The orchestrator sets these. Use the exact names. A workflow never prints a secret.
+
+| Name | Kind | Required | Value in production |
+|---|---|---|---|
+| `CLOUDFLARE_API_TOKEN` | secret | yes | Cloudflare API token with the Cloudflare Pages Edit permission. Both workflows use it. |
+| `CLOUDFLARE_ACCOUNT_ID` | secret | yes | Cloudflare account id that owns `mediwise` and `mediwise-landing`. |
+| `VITE_API_URL` | secret | yes | `https://mediwise-api-ij2v.onrender.com`. No trailing slash. |
+| `VITE_SUPABASE_URL` | secret | yes | `https://adnvhcharmqykmlyrepq.supabase.co` |
+| `VITE_SUPABASE_ANON_KEY` | secret | yes | Anon (publishable) key of `mediwise-prod`. |
+| `VITE_PAYMENTS_ENABLED` | variable | no | Default `false`. `true` shows the credit packs and the Buy button. Set it with `PAYMENTS_ENABLED=true` on the API, never alone. |
+| `VITE_CASHFREE_MODE` | variable | no | `sandbox` (default) or `production`. Must match `CASHFREE_ENV`. |
+
+The landing page reads no variable. Its workflow uses the two Cloudflare secrets only.
 
 ## First deploy (runbook)
 
@@ -98,13 +104,12 @@ Do the steps in this order. The API URL must exist before the web build, and the
 
 ### 3. Cloudflare Pages (web)
 
-The web deploys with `wrangler pages deploy` from a local build, not from a Cloudflare git build. The project `mediwise` has no Git provider connected.
+GitHub Actions builds the web and deploys it with `wrangler pages deploy`. Cloudflare does not build from git. The project `mediwise` has no Git provider connected.
 
-1. Log in once: `npx wrangler login`.
-2. Make sure `apps/web/.env.prod` holds the web variables from the table above.
-3. From the repository root, build and deploy (see "Deploy the web" below for the exact command).
-4. The first deploy creates the project if it does not exist. Wrangler asks for the production branch. Enter `main`.
-5. `apps/web/public/_redirects` sends every path to `index.html`, so a deep link such as `/reports/upload` loads the app.
+1. Set the GitHub secrets and variables from the table above.
+2. Create the project with one manual deploy (see "Manual fallback" in Deploy the web). Log in first with `npx wrangler login`. Wrangler asks for the production branch. Enter `main`. The workflow cannot answer this question, so it needs a project that exists.
+3. After that, each push to `main` deploys the web.
+4. `apps/web/public/_redirects` sends every path to `index.html`, so a deep link such as `/reports/upload` loads the app.
 
 ### 4. Connect the parts
 
@@ -188,14 +193,26 @@ Do not type a secret into a shared terminal log. Load the values from a git-igno
 ## Deploy a change
 
 - Merge to `main` and push. Render builds and deploys `main` on its own.
-- The web does not deploy on push. Deploy it by hand after the merge (next section).
+- GitHub Actions deploys the web and the landing page when the push changes their files (next sections).
 - Render waits for `/health` to answer 200 before it moves traffic to the new deploy. A failed health check keeps the old deploy live.
 - On `SIGTERM` the API lets the job in hand finish, then exits.
 - A wrangler deploy with `--branch` set to any name other than `main` is a preview. CORS blocks preview URLs, because `WEB_ORIGIN` names the production origin only.
 
 ## Deploy the web
 
-Run from the repository root of the main checkout, on an up-to-date `main`:
+`.github/workflows/deploy-web.yml` deploys the web on GitHub Actions:
+
+- It starts on a push to `main` that changes `apps/web`, `packages` or `pnpm-lock.yaml`. To start it by hand, open Actions, `deploy-web`, Run workflow.
+- It runs only on `theyashgupta/mediwise`. A fork does not deploy.
+- The `check` job runs `.github/workflows/check.yml` first. The deploy starts only when `pnpm check` passes. A `workflow_run` trigger cannot filter by path, so the deploy calls the check workflow directly. Thus `check` runs twice on these pushes.
+- It builds with `pnpm turbo run build --filter @mediwise/web` and the values from the table in Environment variables. Then `cloudflare/wrangler-action` uploads `apps/web/dist` to the project `mediwise`, branch `main`.
+- A newer push cancels a deploy that is still running.
+- The job summary shows the production URL and the URL of this deploy.
+- The last step loads `https://mediwise.pages.dev` and fails when the page has no `MediWise` title.
+
+### Manual fallback
+
+Use this when GitHub Actions is down. Run from the repository root of the main checkout, on an up-to-date `main`:
 
 ```sh
 (cd apps/web && set -a && . ./.env.prod && set +a && VITE_API_URL=https://mediwise-api-ij2v.onrender.com pnpm build)
@@ -205,6 +222,14 @@ npx wrangler pages deploy apps/web/dist --project-name mediwise --branch main
 The first line builds with the production variables. It sets `VITE_API_URL` on the command line, because an empty value in `.env.prod` makes the web call `http://localhost:3001`. The second line uploads `apps/web/dist` as the production deploy of `https://mediwise.pages.dev`. Wrangler prints a URL for the new deploy.
 
 ## Deploy the landing page
+
+`.github/workflows/deploy-landing.yml` deploys the landing page with the same steps as the web. These are the differences:
+
+- It starts on a push to `main` that changes `apps/landing`, `packages`, `pnpm-lock.yaml`, `apps/api/src/modules/payments/payments.config.ts` or the brand files in `apps/web/public` (favicons, `apple-touch-icon.png`, `og-image.png`).
+- It uploads `apps/landing/out` to the project `mediwise-landing`, branch `main`.
+- The last step loads `https://mediwise-landing.pages.dev` and fails when the page has no `MediWise` title.
+
+### Manual fallback
 
 The landing page is a static Next.js export. It has no environment variables. Run from the repository root of the main checkout, on an up-to-date `main`:
 
@@ -256,7 +281,7 @@ Run these from `apps/api` with the target environment loaded.
 
 - API: Render, `mediwise-api`, Logs. Every request log line starts with `[<request id>]`. The API returns the same id in the `X-Request-Id` response header, so a user report can be matched to its log lines.
 - Worker lines start with `worker job=<id>` or `process_report report=<id>`.
-- Web: the web is static and built on your machine, so there are no build or runtime logs on Cloudflare. `npx wrangler pages deployment list --project-name mediwise` lists the deploys.
+- Web and landing page: the build and deploy logs are in GitHub, Actions, `deploy-web` or `deploy-landing`. Cloudflare has no build or runtime logs, because the pages are static. `npx wrangler pages deployment list --project-name mediwise` lists the deploys.
 
 ## Production limits in the API
 
@@ -304,7 +329,7 @@ Do the steps in this order. Do not set a flag to `true` before step 5 is complet
    Without this step, a refund does not remove credits. `PAYMENTS_WEBHOOK_URL` sends payment events only.
 5. Database. Make sure that `0013` and `0014` are on `mediwise-prod` (see Before you merge MEDI-33).
 6. API flag. On the Render service, set `PAYMENTS_ENABLED=true`. Restart the service.
-7. Web flag. In `apps/web/.env.prod`, set `VITE_PAYMENTS_ENABLED=true` and `VITE_CASHFREE_MODE=production`. Build and deploy the web (see Deploy the web).
+7. Web flag. In GitHub, Settings, Secrets and variables, Actions, Variables, set `VITE_PAYMENTS_ENABLED` to `true` and `VITE_CASHFREE_MODE` to `production`. Run the deploy again: Actions, `deploy-web`, Run workflow.
 8. Check. Sign in on `https://mediwise.pages.dev/credits`. Buy the 1-credit pack with a real payment. Make sure that the balance increases by 1. Refund the payment in the Cashfree dashboard. Make sure that the balance decreases by 1. Call `GET /admin/spend` and make sure that `purchases` is 1.
 
 To turn off payments, set both flags to `false`. A payment that arrives while the API flag is `false` gets a 404. Cashfree retries it 3 times in about 45 minutes and then stops. Give those credits with `credits:grant`.
