@@ -82,6 +82,13 @@ const settled: Settlement[] = [
     alertKeys: ["mass"],
   },
 ];
+refs.set("L2", {
+  cite: { kind: "link", reportId: "r1", target: "r2" },
+  fact: 'L2: the report of 24 Mar 2025 settles a result of R1 (10 Feb 2025). Later line as printed: "No adnexal mass is seen."',
+  dates: ["2025-02-10", "2025-03-24"],
+  quotes: [settled[0]!.earlier, settled[0]!.later],
+  settlement: settled[0],
+});
 const context = { refs, settled };
 
 function rules(text: string, cites: string[], kind: "answer" | "refuse" = "answer", open = false) {
@@ -138,6 +145,23 @@ describe("validateAnswer", () => {
     ).toEqual([]);
   });
 
+  test("a quote of two printed sentences stays one sentence", () => {
+    expect(
+      rules(
+        'Your pelvis ultrasound of 10 Feb 2025 reads "Uterus is normal in size. Uterus is normal in size."',
+        ["R1:S1"],
+      ),
+    ).toEqual([]);
+  });
+
+  test("a quote opened straight and closed curly still counts as a quote", () => {
+    expect(
+      rules('Your pelvis ultrasound of 10 Feb 2025 reads "Uterus is normal in size.\u201d', [
+        "R1:S1",
+      ]),
+    ).toEqual([]);
+  });
+
   test("semicolon: a semicolon fails", () => {
     expect(rules("Your HbA1c was 5.9% on 4 Aug 2026; it is watch.", ["R6:hba1c"])).toContain(
       "semicolon",
@@ -150,6 +174,7 @@ describe("validateAnswer", () => {
 
   test("unknown_ref: a reference that is not in the map fails", () => {
     expect(rules("Your HbA1c was 5.9% on 4 Aug 2026.", ["R9:hba1c"])).toContain("unknown_ref");
+    expect(rules("Report R6 holds your HbA1c.", ["R6"])).toContain("unknown_ref");
   });
 
   test("number_not_in_fact: a number the facts do not hold fails, also a number the user typed", () => {
@@ -169,6 +194,12 @@ describe("validateAnswer", () => {
 
   test("unknown_marker: a catalog marker that is not in these reports fails", () => {
     expect(rules("Your ApoB is not in report R6.", ["R6"])).toContain("unknown_marker");
+  });
+
+  test("diagnosis_word: a lab name with Diagnostics passes", () => {
+    expect(
+      rules("Your HbA1c was 5.9% on 4 Aug 2026 at Sunrise Diagnostics.", ["R6:hba1c"]),
+    ).toEqual([]);
   });
 
   test("diagnosis_word: a diagnosis word fails, a cited pattern name with its hedge passes", () => {
@@ -226,7 +257,21 @@ describe("validateAnswer", () => {
 
   test("settled_as_current: a settled alert stated as current fails, one the later report settles passes", () => {
     expect(rules("Your scan shows an adnexal mass.", ["R1:S1"])).toContain("settled_as_current");
-    expect(rules("The later scan settles the earlier adnexal mass.", ["R1:S1"])).not.toContain(
+    expect(rules("The report of 24 Mar 2025 settles the earlier result.", ["L2"])).not.toContain(
+      "settled_as_current",
+    );
+  });
+
+  test("settled_as_current: the earlier printed line quoted with its settling L reference passes", () => {
+    expect(
+      rules('The scan of 10 Feb 2025 read "A 4.2 x 3.1 cm complex mass in the right adnexa."', [
+        "L2",
+      ]),
+    ).toEqual([]);
+  });
+
+  test("settled_as_current: settles with no cited settled result fails", () => {
+    expect(rules("The report of 4 Aug 2026 settles the earlier result.", ["R6:hba1c"])).toContain(
       "settled_as_current",
     );
   });

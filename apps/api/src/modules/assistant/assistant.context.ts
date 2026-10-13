@@ -131,7 +131,7 @@ export type AssistantContext = {
 };
 
 export const maxContextTokens = 60_000;
-const charsPerToken = 3.5;
+const charsPerToken = 2.2;
 const studyFindingsChars = 1_500;
 const oldValueDays = 730;
 const keptReports = 48;
@@ -147,7 +147,13 @@ export function day(date: string) {
   return `${dayOfMonth} ${months[(month ?? 1) - 1]} ${year}`;
 }
 
-/** Estimates the tokens of a text from its length. */
+/**
+ * Estimates the tokens of a text from its length.
+ *
+ * @remarks
+ * `messages.countTokens` on the two eval profiles gave 2.3 and 2.4 characters per token on claude-haiku-5-5, so 2.2
+ * keeps the estimate on the high side of the cap.
+ */
 export function estimateTokens(text: string) {
   return Math.ceil(text.length / charsPerToken);
 }

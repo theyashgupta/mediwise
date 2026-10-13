@@ -75,7 +75,7 @@ const monthYear = new RegExp(String.raw`\b${month},? (\d{4})\b`, "gi");
 const isoDate = /\b(\d{4})-(\d{2})-(\d{2})\b/g;
 const bareYear = /\b(19|20)\d{2}\b/g;
 const diagnosisWords =
-  /\byou have\b|\bdiagnos|\bdisease|\bdisorder|\bsyndrome|\bcancer|\btumou?r|\bmalignan|\bdiabetic|\bdiabetes|\bprediabetes|\bhypothyroid|\bhyperthyroid|\banaemi|\banemi|\bdeficien|\bfailure\b|\binfection/i;
+  /\byou have\b|\bdiagnos(?!tics?\b)|\bdisease|\bdisorder|\bsyndrome|\bcancer|\btumou?r|\bmalignan|\bdiabetic|\bdiabetes|\bprediabetes|\bhypothyroid|\bhyperthyroid|\banaemi|\banemi|\bdeficien|\bfailure\b|\binfection/i;
 const treatmentWords =
   /\bdos(e|es|age)\b|\bmg of\b|\btablets?\b|\bcapsules?\b|\btake\b|\btaking\b|\bprescri\w*|\bmedicines?\b|\bmedications?\b|\binsulin\b|\bstatins?\b|\bmetformin\b|\blevothyroxine\b|\bsupplements?\b|\binjections?\b/gi;
 const statusWords = /\b(normal|abnormal|fine|healthy|safe|dangerous|good|bad)\b/i;
@@ -83,7 +83,7 @@ const certaintyWords =
   /\b(definitely|certainly|clearly|confirms?|confirmed|proves?|proven)\b|\bnothing to worry about\b/i;
 const hedgeWords = /\b(may|might|can|could|suggests?|possible|possibly)\b/i;
 const causeWords = /\bbecause\b|\bdue to\b|\bcaused by\b|\bthe reason\b/gi;
-const quotePattern = /"([^"]+)"|“([^”]+)”/g;
+const quotePattern = /["“]([^"“”]+)["”]/g;
 const genericWords = new Set(
   "about also and are ask asks been both doctor dated earlier explain findings from have impression into later line lines more printed read reads report reports result says scan settle settled settles show shown shows study test that the their there this what when which with your".split(
     " ",
@@ -187,16 +187,22 @@ function checkSentence(
     .map(({ text: own }) => own ?? "")
     .join(" ")
     .toLowerCase();
-  const quotes = [...text.matchAll(quotePattern)].map((match) => match[1] ?? match[2] ?? "");
+  const quotes = [...text.matchAll(quotePattern)].map((match) => match[1] ?? "");
   const badQuotes = quotes.filter(
     (quote) =>
       !printed.some((line) => line.includes(normal(quote)) || normal(quote).includes(line)),
   );
-  let bare = text.replace(quotePattern, (match, a?: string, b?: string) =>
-    badQuotes.includes(a ?? b ?? "") ? match : " ",
+  let bare = text.replace(quotePattern, (match, quote: string) =>
+    badQuotes.includes(quote) ? match : " ",
   );
 
   if (bare.includes(";")) add("semicolon", `"${text}" has a semicolon.`);
+  if (/\b(R\d+(:S\d+)?|[FLE]\d+|[PUC]:\w+)\b/.test(bare)) {
+    add(
+      "unknown_ref",
+      `"${text}" writes a reference in the text. Put references in cites only, and name the report by its date.`,
+    );
+  }
   if (/\d/.test(text) && cited.length === 0) {
     add("uncited_number", `"${text}" states a number and cites no reference.`);
   }
@@ -274,10 +280,19 @@ function checkSentence(
     add("cause_word", `"${text}" uses "${cause[0]}". Do not state a cause.`);
   }
 
+  if (/\bsettle/i.test(bare) && !cited.some(({ settlement }) => settlement)) {
+    add(
+      "settled_as_current",
+      `"${text}" says that a report settles a result, but cites no settled result. Use "settles" only with its L reference.`,
+    );
+  }
   if (
     statesSettledAsCurrent(
       text,
-      context.settled.filter(({ markerKey }) => !markerKey),
+      context.settled.filter(
+        (settlement) =>
+          !settlement.markerKey && !cited.some((ref) => ref.settlement === settlement),
+      ),
     )
   ) {
     add(
@@ -311,7 +326,8 @@ function checkSentence(
  *
  * @remarks
  * Only the sentences a user sees are checked. Only settled study alerts count for `settled_as_current`, because a
- * value with its date stays a true fact after a later report settles it.
+ * value with its date stays a true fact after a later report settles it, and a sentence that cites the settling L
+ * reference states it as settled. The same rule rejects "settles" when no cited reference holds a settled result.
  */
 export function validateAnswer(
   raw: unknown,

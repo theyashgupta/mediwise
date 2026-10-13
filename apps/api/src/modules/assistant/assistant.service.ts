@@ -35,16 +35,27 @@ function toItem({ answer, refusalKind, flaggedAt, ...row }: StoredQuestion) {
   };
 }
 
-function historyText(rows: StoredQuestion[]) {
-  if (rows.length === 0) return "";
-  const pairs = rows.toReversed().map(({ question, answer, refusalKind }) => {
+/** Writes the question turn: the last pairs of the chat, oldest first, the open report and the new question. */
+export function askText(
+  question: string,
+  history: Pick<StoredQuestion, "question" | "answer" | "refusalKind">[],
+  focus?: string,
+) {
+  const pairs = history.toReversed().map(({ question: earlier, answer, refusalKind }) => {
     const said = [
       ...answer.sentences.map(({ text }) => text),
       ...(refusalKind ? [refusalCopy[refusalKind]] : []),
     ].join(" ");
-    return `Question: ${question}\nAnswer: ${said}`;
+    return `Question: ${earlier}\nAnswer: ${said}`;
   });
-  return `Earlier questions of this chat, oldest first:\n${pairs.join("\n")}\n\n`;
+  return [
+    ...(pairs.length > 0
+      ? [`Earlier questions of this chat, oldest first:\n${pairs.join("\n")}\n`]
+      : []),
+    ...(focus ? [`The person has ${focus} open.`] : []),
+    `New question: ${question}`,
+    "Answer with the answer_question tool.",
+  ].join("\n");
 }
 
 /**
@@ -54,27 +65,29 @@ function historyText(rows: StoredQuestion[]) {
  * The profile block carries a cache breakpoint, so a follow-up question within 5 minutes reads it from the cache. A
  * second failure returns no input, and the caller shows the fixed fallback copy.
  */
-async function writeAnswer(
+export async function writeAnswer(
   context: AssistantContext,
   ask: string,
   usage: StepUsage,
-): Promise<{ input?: AnswerInput; rules: string[] }> {
+): Promise<{ input?: AnswerInput; rules: string[]; problems: AnswerProblem[] }> {
   const profile: Anthropic.TextBlockParam = {
     type: "text",
     text: context.text,
     cache_control: { type: "ephemeral" },
   };
   const rules: string[] = [];
+  const problems: AnswerProblem[] = [];
   const attempt = async (text: string) => {
     const raw = await callTool(answerTool, answerSystem, [profile, { type: "text", text }], usage);
-    const { input, problems } = validateAnswer(raw, context);
-    rules.push(...problems.map(({ rule }) => rule));
-    return { raw, input, problems };
+    const { input, problems: found } = validateAnswer(raw, context);
+    rules.push(...found.map(({ rule }) => rule));
+    problems.push(...found);
+    return { raw, input, problems: found };
   };
   const first = await attempt(ask);
-  if (first.problems.length === 0) return { input: first.input, rules };
+  if (first.problems.length === 0) return { input: first.input, rules, problems };
   const second = await attempt(retryText(ask, first.raw, first.problems));
-  return { input: second.problems.length === 0 ? second.input : undefined, rules };
+  return { input: second.problems.length === 0 ? second.input : undefined, rules, problems };
 }
 
 function retryText(ask: string, raw: unknown, problems: AnswerProblem[]) {
@@ -146,7 +159,7 @@ export async function askQuestion(userId: string, profileId: string, body: AskQu
   );
   const focus = body.reportId && number.get(body.reportId);
   const history = await repo.listQuestions(userId, profileId, historyPairs);
-  const ask = `${historyText(history)}${focus ? `The person has ${focus} open.\n` : ""}New question: ${body.question}\nAnswer with the answer_question tool.`;
+  const ask = askText(body.question, history, focus || undefined);
 
   const usage = stepUsage(env.ANTHROPIC_ASSISTANT_MODEL);
   const { input, rules } = await writeAnswer(context, ask, usage);
