@@ -84,6 +84,9 @@ export const reports: Messages["reports"] = {
   export: {
     title: "रिपोर्ट का सारांश",
     print: "प्रिंट करें",
+    downloadPdf: "PDF डाउनलोड करें",
+    pdfHint: "प्रिंट विंडो में Save as PDF चुनें। फ़ोन पर Share चुनें।",
+    pageLabs: (labs: string) => `लैब: ${labs}`,
     loadError: "हम यह रिपोर्ट लोड नहीं कर सके।",
     profileError: "हम प्रोफ़ाइल लोड नहीं कर सके।",
     previousError: "हम पिछले मान लोड नहीं कर सके।",

@@ -63,4 +63,6 @@ test("the shared page renders the export without a session", async () => {
   expect(html).toContain("Should I repeat the HbA1c test in three months?");
   expect(html).toContain("It does not replace a doctor.");
   expect(html).not.toContain("<nav");
+  expect(html).toContain('data-testid="export-download-pdf"');
+  expect(html).toContain("Download PDF");
 });

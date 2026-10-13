@@ -119,6 +119,8 @@ test("a share link opens the doctor export with no session", async ({ browser })
   const shared = await guest.newPage();
   await shared.goto(url);
   await expect(shared.getByTestId("report-export")).toContainText("Sunrise Diagnostics");
+  await expect(shared.getByTestId("export-download-pdf")).toBeVisible();
+  await expect(shared).toHaveTitle(/-mediwise$/);
   await expect(shared.getByTestId("user-menu")).toHaveCount(0);
   await guest.close();
 });

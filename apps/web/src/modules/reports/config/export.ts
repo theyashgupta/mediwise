@@ -83,3 +83,14 @@ export function changeMark(previous: number, current: number, precision: number)
   if (delta < 0) return { symbol: "↓", label: t.lower };
   return undefined;
 }
+
+/**
+ * Names the PDF of an export: the first name, the report title and "mediwise", joined by hyphens.
+ *
+ * @remarks
+ * Only letters, marks and digits of any script stay, so a Devanagari name keeps its vowel signs and no character is unsafe in a file name.
+ */
+export function pdfFileName(name: string | undefined, title: string | null) {
+  const words = (text: string) => text.match(/[\p{L}\p{M}\p{N}]+/gu) ?? [];
+  return `${[...words(name ?? "").slice(0, 1), ...words(title ?? ""), "mediwise"].join("-")}.pdf`;
+}
