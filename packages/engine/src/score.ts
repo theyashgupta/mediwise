@@ -71,3 +71,13 @@ export function scorePanel(assessed: Assessed[]): Score {
     formula: scoreFormula,
   };
 }
+
+/**
+ * Tells whether two stored scores share one coverage cap, so their difference reflects health and not the panel size.
+ *
+ * @remarks
+ * Takes the stored coverage percent. A glucose-only report next to a full panel would otherwise read as a large score drop.
+ */
+export function sameScoreScale(coverageA: number, coverageB: number) {
+  return coverageCap(coverageA, 100) === coverageCap(coverageB, 100);
+}
