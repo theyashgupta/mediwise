@@ -38,6 +38,7 @@ const store = vi.hoisted(() => {
     questionsLeft: 5,
     freeCredits: 0,
     today: 0,
+    payments: false,
   };
   const create = vi.fn();
   const pick = ({
@@ -133,7 +134,9 @@ vi.mock("../../config/env.js", async (importOriginal) => {
       get: (target, key) =>
         key === "ASSISTANT_ENABLED"
           ? store.state.enabled
-          : (target as Record<string | symbol, unknown>)[key],
+          : key === "PAYMENTS_ENABLED"
+            ? store.state.payments
+            : (target as Record<string | symbol, unknown>)[key],
     }),
   };
 });
@@ -234,6 +237,7 @@ beforeEach(() => {
   store.state.questionsLeft = 5;
   store.state.freeCredits = 0;
   store.state.today = 0;
+  store.state.payments = false;
   store.state.snapshot = structuredClone(snapshot);
   store.owners[ids.profile] = "alice";
   store.owners[ids.bobProfile] = "bob";
@@ -296,6 +300,10 @@ describe("assistant routes", () => {
     store.state.freeCredits = 0;
     expect(await (await ask({ question: "What was my HbA1c?" })).json()).toMatchObject({
       title: "You have no questions left. Add a report to get 5 more questions.",
+    });
+    store.state.payments = true;
+    expect(await (await ask({ question: "What was my HbA1c?" })).json()).toMatchObject({
+      title: "You have no questions left. Buy credits to ask more questions.",
     });
     expect(store.create).not.toHaveBeenCalled();
     expect(store.rows).toHaveLength(0);
