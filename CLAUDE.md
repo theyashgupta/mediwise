@@ -19,6 +19,7 @@ Upload a lab report, get every marker explained, scored and tracked. Turborepo +
 - `pnpm eval:findings [runs] [model] [reportId]` - writes the findings of every done report in the database `runs` times (default 3) and prints the first-try pass rate, the rejection reasons, the findings cost and whether each run kept the same set. It reads stored visits, so it pays for no extraction. It calls Claude and stops past $1. Never run it in CI.
 - `pnpm eval:assistant [runs] [model] [question numbers]` - runs the 30 red-team questions of `docs/research/assistant.md` on two made-up profiles built in memory, `runs` times (default 3), and prints the pass rate per question, the first-try rate, the rule names, the cost and the measured context size. It needs no database. It calls Claude and stops past $1. Never run it in CI.
 - `pnpm eval:narrative [runs] [sample.pdf]` - reads the two made-up samples and the real ones listed in `~/Work/mediwise-samples/narrative.json` once, writes each narrative `runs` times (default 3) and prints the first-try pass rate, the rejection reasons and the narrative cost. It calls Claude and stops past $1. Never run it in CI.
+- `pnpm --filter @mediwise/api assistant:review [YYYY-MM-DD]` - walks the review-month sample of one UTC day with the cited facts. The sample holds every refusal, fallback and flagged answer, and 1 in 5 of the rest. Keys p, m and c store `pass`, `minor` or `critical` in `assistant_reviews`. It never prints a profile name or an email.
 
 ## Read before you write code
 
