@@ -8,7 +8,8 @@
     "build": "node scripts/copy-brand.mjs && next build",
     "typecheck": "next typegen && tsc --noEmit",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "coverage": "vitest run --coverage --coverage.include=src/**/*.{ts,tsx} --coverage.reporter=text-summary --coverage.thresholds.statements=17 --coverage.thresholds.branches=17 --coverage.thresholds.functions=15 --coverage.thresholds.lines=17"
   },
   "dependencies": {
     "@mediwise/design-tokens": "workspace:*",

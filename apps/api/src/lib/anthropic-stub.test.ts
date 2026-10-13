@@ -27,3 +27,31 @@ test("the stubbed read of the 2025 sample returns its golden values and mapping"
   );
   expect(mapping.filter(({ markerKey }) => markerKey).length).toBe(want.mapped);
 });
+
+test("the stubbed read of a study fixture classifies its page and returns its study", async () => {
+  const { classifyPages } = await import("../modules/classification/index.js");
+  const { readStudies } = await import("../modules/studies/index.js");
+  const pages = await readPages({
+    mime: "application/pdf",
+    data: await readFile(
+      new URL("../../fixtures/studies/usg-pelvis-2025-03-18.pdf", import.meta.url),
+    ),
+  });
+
+  const classes = await classifyPages(pages, stepUsage("stub"));
+  const read = await readStudies(
+    pages.map((page, pageIndex) => ({ page, pageClass: classes[pageIndex]!, pageIndex })),
+    stepUsage("stub"),
+  );
+
+  expect(classes).toEqual(["imaging_report"]);
+  expect(read.labName).toBe("Lakeview Imaging Centre");
+  expect(read.studies).toMatchObject([
+    {
+      kind: "ultrasound",
+      bodyRegion: "Pelvis",
+      performedAt: "2025-03-18",
+      impressionText: "A 4.2 x 3.1 cm complex mass in the right adnexa.",
+    },
+  ]);
+});

@@ -9,12 +9,19 @@ type GoldenMarker = {
   unit: string | null;
 };
 type Golden = { sample: string; labName: string; markers: GoldenMarker[] };
+type StudyGolden = { labId: string; labName: string; ageYears: number; studies: unknown[] };
 
 const goldens = ["sample-2024", "sample-2025"].map(
   (name) =>
     JSON.parse(
       readFileSync(new URL(`../../fixtures/golden/${name}.json`, import.meta.url), "utf8"),
     ) as Golden,
+);
+const studyGoldens = ["usg-pelvis-2025-03-18", "usg-pelvis-2025-03-22"].map(
+  (name) =>
+    JSON.parse(
+      readFileSync(new URL(`../../fixtures/studies/${name}.json`, import.meta.url), "utf8"),
+    ) as StudyGolden,
 );
 const keyByRawName = new Map(
   goldens.flatMap(({ markers }) => markers.map((m) => [m.rawName, m.markerKey] as const)),
@@ -49,12 +56,28 @@ function collectedAt(text: string) {
   return new Date(`${day} ${month} ${year} UTC`).toISOString().slice(0, 10);
 }
 
+/**
+ * Picks the study golden whose lab id the page prints.
+ *
+ * @remarks
+ * The 2025 lab sample also prints an ultrasound page, so a study is known by its lab id, never by the word "ultrasound".
+ */
+function studyGoldenFor(text: string) {
+  return studyGoldens.find(({ labId }) => text.includes(labId));
+}
+
 /** Answers each tool the report read offers. Prose tools get no call, so the read keeps the engine text. */
 function toolInput(tool: string, text: string): unknown {
   switch (tool) {
     case "classify_pages": {
       const pages = Number(/This file has (\d+) pages/.exec(text)?.[1] ?? 0);
-      return { pages: Array.from({ length: pages }, () => "lab_panel") };
+      const pageClass = studyGoldenFor(text) ? "imaging_report" : "lab_panel";
+      return { pages: Array.from({ length: pages }, () => pageClass) };
+    }
+    case "record_studies": {
+      const golden = studyGoldenFor(text);
+      if (!golden) throw new Error("The Claude stub reads only the study fixtures");
+      return { labName: golden.labName, ageYears: golden.ageYears, studies: golden.studies };
     }
     case "record_extraction": {
       const { labName, markers } = goldenFor(text);

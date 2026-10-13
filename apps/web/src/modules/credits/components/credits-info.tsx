@@ -12,7 +12,7 @@ export function CreditsInfo({ credits, canBuy }: CreditsInfoProps) {
   const t = useT();
   return (
     <div className="max-w-measure space-y-4">
-      <p className="text-lg font-semibold">
+      <p className="text-lg font-semibold" data-testid="credits-balance">
         {credits > 0 ? creditsLeftLabel(credits) : t.credits.none}
       </p>
       <p>{t.credits.eachReport}</p>
