@@ -216,7 +216,6 @@ export async function insertQuestion(row: typeof assistantQuestions.$inferInsert
   return inserted!;
 }
 
-/** Lists the newest questions of one profile of the owner, newest first. */
 export async function listQuestions(ownerUserId: string, profileId: string, limit: number) {
   return db
     .select(questionColumns)

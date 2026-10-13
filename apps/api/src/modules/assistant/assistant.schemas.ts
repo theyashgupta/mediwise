@@ -2,7 +2,6 @@ import { z } from "zod";
 
 export const assistantParamsSchema = z.object({ id: z.uuid() });
 
-/** Body of `POST /profiles/:id/questions`. */
 export const askQuestionSchema = z.object({
   question: z
     .string()

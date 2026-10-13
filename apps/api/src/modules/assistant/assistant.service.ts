@@ -63,8 +63,7 @@ export function askText(
  * Asks Claude for a cited answer and checks it, with one retry that lists the problems.
  *
  * @remarks
- * The profile block carries a cache breakpoint, so a follow-up question within 5 minutes reads it from the cache. A
- * second failure returns no input, and the caller shows the fixed fallback copy.
+ * The profile block carries a cache breakpoint, so a follow-up question within 5 minutes reads it from the cache.
  */
 export async function writeAnswer(
   context: AssistantContext,
@@ -137,8 +136,7 @@ function logQuestion(
  * Answers one question about one profile and stores it in the chat.
  *
  * @remarks
- * The gate runs before the spend cap, so an emergency always gets its copy. A Claude error stores the fallback copy
- * with the tokens already spent, so the question is never lost.
+ * The gate runs before the spend cap, so an emergency always gets its copy.
  */
 export async function askQuestion(userId: string, profileId: string, body: AskQuestionInput) {
   const started = Date.now();
@@ -216,7 +214,6 @@ export async function askQuestion(userId: string, profileId: string, body: AskQu
   return toItem(row);
 }
 
-/** Lists the chat of one profile, newest first. */
 export async function listQuestions(userId: string, profileId: string) {
   await getOwnedProfile(userId, profileId);
   return (await repo.listQuestions(userId, profileId, chatLimit)).map(toItem);

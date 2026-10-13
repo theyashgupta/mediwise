@@ -48,9 +48,7 @@ export function absentMarkerNames(text: string, allowed: Set<string>) {
   ];
 }
 
-/**
- * Tells whether a sentence states a settled alert line or names a settled marker without saying that it is settled.
- */
+/** Tells whether a sentence states a settled alert line or names a settled marker without saying that it is settled. */
 export function statesSettledAsCurrent(
   sentence: string,
   settled: Pick<Settlement, "alertKeys" | "subject" | "markerKey">[],

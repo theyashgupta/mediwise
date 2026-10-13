@@ -358,8 +358,7 @@ function checkSentence(
  * Lists every reason an answer breaks the copy rules or states something the cited facts do not hold.
  *
  * @remarks
- * Only the sentences a user sees are checked, and every one of them must cite, apart from three fixed lines. A
- * settled study alert counts as current unless the sentence says "settles" or cites the L reference that settles it.
+ * A settled study alert counts as current unless the sentence says "settles" or cites the L reference that settles it.
  */
 export function validateAnswer(
   raw: unknown,

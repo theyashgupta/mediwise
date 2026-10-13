@@ -6,8 +6,7 @@ const dose = /\bdos(e|es|age|ing)\b|\bhow (much|many)\b[^?.!]*\btake\b|\b\d+\s*m
  * Answers an emergency or a dose question with a fixed refusal kind before any Claude call.
  *
  * @remarks
- * Curly apostrophes and runs of spaces are normalised first, because phone keyboards type "can’t". The lists err to the
- * fixed copy, and an emergency wins over a dose because its copy carries the helpline numbers.
+ * An emergency wins over a dose because its copy carries the helpline numbers.
  */
 export function gateQuestion(question: string): "emergency" | "treatment" | undefined {
   const text = question.replace(/[’‘]/g, "'").replace(/\s+/g, " ");

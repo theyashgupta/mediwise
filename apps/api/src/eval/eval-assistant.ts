@@ -29,8 +29,7 @@ const capCents = 100;
  *
  * @remarks
  * The profiles are built in memory, so it needs no database. Every run calls Claude, so it never runs in CI, and it
- * stops past $1. Pass the number of runs (default 3), the model (default `ANTHROPIC_ASSISTANT_MODEL`) and optionally a
- * comma list of question numbers.
+ * stops past $1.
  */
 async function evalAssistant() {
   const runs = Number(process.argv[2] ?? 3);
