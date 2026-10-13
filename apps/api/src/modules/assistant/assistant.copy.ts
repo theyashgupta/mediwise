@@ -17,3 +17,10 @@ export const refusalCopy: Record<AssistantRefusalKind, string> = {
 };
 
 export const unavailableCopy = "The assistant is not available now. Try again later.";
+
+export const questionsPerMinute = 6;
+export const questionsPerDay = 30;
+
+export const minuteLimitCopy = `You can ask ${questionsPerMinute} questions in one minute. Try again later.`;
+
+export const dailyCapCopy = `You can ask ${questionsPerDay} questions in one day. Try again tomorrow.`;

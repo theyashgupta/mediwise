@@ -1,7 +1,8 @@
-import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import {
   assistantQuestions,
+  clearedQuestion,
   episodes,
   findings,
   followUps,
@@ -13,6 +14,7 @@ import {
   studies,
   studyMeasurements,
 } from "../../db/schema.js";
+import { findQuestionCounts, lockUserCredits, type QuestionCounts } from "../credits/index.js";
 import type { Snapshot } from "./assistant.context.js";
 
 const visitDate = sql<string>`coalesce(${reports.collectedAt}, ${reports.createdAt}::date)::text`;
@@ -211,9 +213,52 @@ export async function isProfileReport(profileId: string, reportId: string) {
   return row !== undefined;
 }
 
-export async function insertQuestion(row: typeof assistantQuestions.$inferInsert) {
-  const [inserted] = await db.insert(assistantQuestions).values(row).returning(questionColumns);
-  return inserted!;
+/**
+ * Stores one question, charged when `canCharge` allows it under the account's credit lock.
+ *
+ * @remarks
+ * The recount happens under the lock, so two parallel answers cannot both take the last question.
+ */
+export async function insertQuestion(
+  row: Omit<typeof assistantQuestions.$inferInsert, "charged">,
+  canCharge?: (counts: QuestionCounts) => boolean,
+) {
+  if (!canCharge) {
+    const [inserted] = await db.insert(assistantQuestions).values(row).returning(questionColumns);
+    return inserted!;
+  }
+  return db.transaction(async (tx) => {
+    await lockUserCredits(tx, row.userId);
+    const charged = canCharge(await findQuestionCounts(row.userId, tx));
+    const [inserted] = await tx
+      .insert(assistantQuestions)
+      .values({ ...row, charged })
+      .returning(questionColumns);
+    return inserted!;
+  });
+}
+
+/**
+ * Stores the usage of a question whose profile is gone, without text and not charged.
+ *
+ * @remarks
+ * The Claude call already happened, so its tokens must still reach the spend cap.
+ */
+export async function insertClearedQuestion(row: Parameters<typeof insertQuestion>[0]) {
+  await db.insert(assistantQuestions).values({ ...row, ...clearedQuestion, profileId: null });
+}
+
+export async function countQuestionsToday(ownerUserId: string) {
+  const [row] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(assistantQuestions)
+    .where(
+      and(
+        eq(assistantQuestions.userId, ownerUserId),
+        gt(assistantQuestions.createdAt, sql`now() - interval '1 day'`),
+      ),
+    );
+  return row?.count ?? 0;
 }
 
 export async function listQuestions(ownerUserId: string, profileId: string, limit: number) {
@@ -221,17 +266,27 @@ export async function listQuestions(ownerUserId: string, profileId: string, limi
     .select(questionColumns)
     .from(assistantQuestions)
     .where(
-      and(eq(assistantQuestions.userId, ownerUserId), eq(assistantQuestions.profileId, profileId)),
+      and(
+        eq(assistantQuestions.userId, ownerUserId),
+        eq(assistantQuestions.profileId, profileId),
+        isNull(assistantQuestions.clearedAt),
+      ),
     )
     .orderBy(desc(assistantQuestions.createdAt), desc(assistantQuestions.id))
     .limit(limit);
 }
 
-export async function deleteQuestions(ownerUserId: string, profileId: string) {
+/** Wipes the text of a profile's questions and keeps the rows, so the quota and the spend still count them. */
+export async function clearQuestions(ownerUserId: string, profileId: string) {
   await db
-    .delete(assistantQuestions)
+    .update(assistantQuestions)
+    .set(clearedQuestion)
     .where(
-      and(eq(assistantQuestions.userId, ownerUserId), eq(assistantQuestions.profileId, profileId)),
+      and(
+        eq(assistantQuestions.userId, ownerUserId),
+        eq(assistantQuestions.profileId, profileId),
+        isNull(assistantQuestions.clearedAt),
+      ),
     );
 }
 
@@ -240,7 +295,13 @@ export async function flagQuestion(ownerUserId: string, id: string) {
   const [row] = await db
     .update(assistantQuestions)
     .set({ flaggedAt: sql`coalesce(${assistantQuestions.flaggedAt}, now())` })
-    .where(and(eq(assistantQuestions.id, id), eq(assistantQuestions.userId, ownerUserId)))
+    .where(
+      and(
+        eq(assistantQuestions.id, id),
+        eq(assistantQuestions.userId, ownerUserId),
+        isNull(assistantQuestions.clearedAt),
+      ),
+    )
     .returning(questionColumns);
   return row;
 }

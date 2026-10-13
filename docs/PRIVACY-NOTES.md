@@ -41,7 +41,10 @@ This file records what MediWise does with the data of family members and childre
 - A question to the assistant and its answer are health data. Each one is a row in `assistant_questions`, with row level security on and no policies.
 - The prompt holds the stored values, studies, findings, links and episodes of one profile. It never holds a report note, an episode note or name, family history, the doctor who signed a study, the profile name, the date of birth, a file name or another profile. `assistant.service.db.test.ts` fails when one of these fields reaches a Claude request.
 - The server log holds the question id, the outcome, the rule names, the tokens and the cost. It never holds the question, the answer, a marker key or a value.
-- The JSON data download holds every question with its answer. "Clear chat" deletes the questions of one profile. Account deletion and profile deletion remove them.
+- The JSON data download holds every question with its answer that the user did not clear.
+- "Clear chat", profile deletion and account deletion remove the question text, the answer text and the refusal kind.
+- The row stays with the user id, the model, the token counts, the cost, the charged flag and the time. Profile and account deletion also remove the profile from the row.
+- These counts keep the question quota, the daily limit and the monthly Claude spend correct. The kept row holds no text.
 - Questions go to Anthropic, the same as report text. MediWise is built to follow the DPDP Act 2023 and Rules 2025. This note gives no legal advice.
 
 ## Rule 10 timeline

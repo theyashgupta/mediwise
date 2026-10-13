@@ -9,6 +9,11 @@ vi.mock("./spend.repo.js", () => {
   const step = { inputTokens: 0, cachedInputTokens: 0, cacheWriteTokens: 0, outputTokens: 0 };
   return {
     findPurchasesThisMonth: async () => ({ purchases: 3, revenuePaise: 29700 }),
+    listQuestionsThisMonth: async () => [
+      { userId: "bob", usage: { ...step, model: "claude-haiku-5-5", outputTokens: 4_000_000 } },
+      { userId: "bob", usage: null },
+      { userId: "carol", usage: { ...step, model: "claude-haiku-5-5", inputTokens: 1_000_000 } },
+    ],
     listJobsThisMonth: async () => [
       {
         userId: "alice",
@@ -52,20 +57,22 @@ test("GET /admin/spend returns 404 to everyone but ADMIN_USER_ID", async () => {
   expect((await app.request("/admin/spend", { headers: { "x-user": "alice" } })).status).toBe(404);
 });
 
-test("GET /admin/spend prices each job by model and cache use, counts failed jobs, lists the top users and this month's purchases", async () => {
+test("GET /admin/spend prices each job and question by model and cache use, counts failed jobs, lists the top users and this month's purchases", async () => {
   env.ADMIN_USER_ID = "admin-user";
   env.CLAUDE_MONTHLY_CAP_CENTS = 2000;
   const res = await app.request("/admin/spend", { headers: { "x-user": "admin-user" } });
 
   expect(await res.json()).toMatchObject({
-    costCents: 521,
+    costCents: 731,
     capCents: 2000,
     reads: 2,
+    questions: 3,
     purchases: 3,
     revenuePaise: 29700,
     topUsers: [
-      { userId: "alice", costCents: 400, reads: 1 },
-      { userId: "bob", costCents: 121, reads: 1 },
+      { userId: "alice", costCents: 400, reads: 1, questions: 0 },
+      { userId: "bob", costCents: 321, reads: 1, questions: 2 },
+      { userId: "carol", costCents: 10, reads: 0, questions: 1 },
     ],
   });
 });

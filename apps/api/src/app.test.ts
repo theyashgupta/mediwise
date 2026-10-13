@@ -6,7 +6,10 @@ vi.mock("./modules/profiles/profiles.repo.js", () => ({
 }));
 
 vi.mock("./modules/me/me.repo.js", () => ({ findSelfName: async () => undefined }));
-vi.mock("./modules/credits/credits.repo.js", () => ({ findBalance: async () => 0 }));
+vi.mock("./modules/credits/credits.repo.js", () => ({
+  findBalance: async () => 0,
+  findQuestionCounts: async () => ({ reads: 0, packs: 0, charged: 0 }),
+}));
 
 test("the health module is mounted at /health", async () => {
   expect((await app.request("/health")).status).toBe(200);
@@ -27,6 +30,7 @@ test("GET /me runs as the dev user under NODE_ENV=test", async () => {
     email: "dev-user@example.com",
     name: "dev-user",
     credits: 0,
+    questionsLeft: 0,
   });
 });
 

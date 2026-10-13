@@ -7,7 +7,15 @@ import { callTool, type StepUsage, stepUsage } from "../extraction/index.js";
 import { getOwnedProfile } from "../profiles/index.js";
 import { isOverBudget, stepCostCents } from "../spend/index.js";
 import { type AssistantContext, buildContext } from "./assistant.context.js";
-import { refusalCopy, unavailableCopy } from "./assistant.copy.js";
+import { assertQuestionLeft, type QuestionCounts, questionsLeftOf } from "../credits/index.js";
+import {
+  dailyCapCopy,
+  minuteLimitCopy,
+  questionsPerDay,
+  questionsPerMinute,
+  refusalCopy,
+  unavailableCopy,
+} from "./assistant.copy.js";
 import { gateQuestion } from "./assistant.gate.js";
 import { answerSystem, answerTool } from "./assistant.prompt.js";
 import * as repo from "./assistant.repo.js";
@@ -22,6 +30,8 @@ import {
 const chatLimit = 50;
 const historyPairs = 3;
 const historyRows = 10;
+const minuteMs = 60 * 1000;
+const askedAt = new Map<string, number[]>();
 
 type StoredQuestion = Awaited<ReturnType<typeof repo.insertQuestion>>;
 
@@ -110,14 +120,22 @@ function toAnswer(input: AnswerInput, context: AssistantContext): AssistantAnswe
  * A Drizzle error message carries the query parameters, which are the question and the answer, so it never reaches the
  * shared error handler.
  */
-async function store(row: Parameters<typeof repo.insertQuestion>[0]) {
+async function store(
+  row: Parameters<typeof repo.insertQuestion>[0],
+  canCharge?: Parameters<typeof repo.insertQuestion>[1],
+): Promise<StoredQuestion> {
   try {
-    return await repo.insertQuestion(row);
+    return await repo.insertQuestion(row, canCharge);
   } catch (error) {
     const code = (error as { cause?: { code?: string } }).cause?.code ?? "unknown";
-    if (code === "23503" && row.focusReportId) return store({ ...row, focusReportId: null });
+    if (code === "23503" && row.focusReportId) {
+      return store({ ...row, focusReportId: null }, canCharge);
+    }
     log.error(`assistant insert failed code=${code}`);
-    if (code === "23503") throw new AppError(404, "We could not find this profile");
+    if (code === "23503") {
+      await repo.insertClearedQuestion(row).catch(() => log.error("assistant usage insert failed"));
+      throw new AppError(404, "We could not find this profile");
+    }
     throw new AppError(500, "We could not save this question. Try again.");
   }
 }
@@ -135,10 +153,67 @@ function logQuestion(
 }
 
 /**
+ * Returns the user's questions of the last minute.
+ *
+ * @remarks
+ * ponytail: counts live in this process like `reportCreateLimit`, move them to Postgres if the API runs more than one
+ * instance.
+ */
+function recentAsks(userId: string) {
+  return (askedAt.get(userId) ?? []).filter((at) => at > Date.now() - minuteMs);
+}
+
+function recordAsk(userId: string) {
+  const at = Date.now();
+  askedAt.set(userId, [...recentAsks(userId), at]);
+  return at;
+}
+
+function releaseAsk(userId: string, at: number) {
+  const asks = askedAt.get(userId) ?? [];
+  const index = asks.indexOf(at);
+  if (index >= 0) asks.splice(index, 1);
+}
+
+/**
+ * Refuses a question that is over a cap or has no quota left, before any Claude call.
+ *
+ * @remarks
+ * The minute slot is taken before the awaited checks, so a parallel burst cannot pass the limit. A refused question
+ * gives the slot back, so a 402 retried 7 times never turns into a 429.
+ */
+async function assertCanAsk(userId: string) {
+  if (recentAsks(userId).length >= questionsPerMinute) throw new AppError(429, minuteLimitCopy);
+  const at = recordAsk(userId);
+  try {
+    if ((await repo.countQuestionsToday(userId)) >= questionsPerDay) {
+      throw new AppError(429, dailyCapCopy);
+    }
+    if (await isOverBudget()) throw new AppError(503, unavailableCopy);
+    await assertQuestionLeft(userId);
+  } catch (error) {
+    releaseAsk(userId, at);
+    throw error;
+  }
+}
+
+/**
+ * Charges a stored answer only when it cites a fact and the account still has a question left.
+ *
+ * @returns undefined for a free answer, so the row is stored without the credit lock.
+ */
+function chargeRule(answer: AssistantAnswer, refusalKind: AssistantRefusalKind | null) {
+  const cited = answer.sentences.some(({ cites }) => cites.length > 0);
+  if (!cited || refusalKind === "fallback") return undefined;
+  return (counts: QuestionCounts) => questionsLeftOf(counts) >= 1;
+}
+
+/**
  * Answers one question about one profile and stores it in the chat.
  *
  * @remarks
- * The gate runs before the focus report check and the spend cap, so an emergency always gets its copy.
+ * The gate runs before the focus report check, the caps and the quota, so an emergency always gets its copy. A gated
+ * question still counts toward the per-minute limit and the daily cap.
  */
 export async function askQuestion(userId: string, profileId: string, body: AskQuestionInput) {
   const started = Date.now();
@@ -156,11 +231,12 @@ export async function askQuestion(userId: string, profileId: string, body: AskQu
     throw new AppError(404, "We could not find this report");
   }
   if (gated) {
+    recordAsk(userId);
     const row = await store({ ...base, answer: { sentences: [] }, refusalKind: gated });
     logQuestion(row.id, `gate:${gated}`, [], null, started);
     return toItem(row);
   }
-  if (await isOverBudget()) throw new AppError(503, unavailableCopy);
+  await assertCanAsk(userId);
 
   const snapshot = await repo.findSnapshot(profileId);
   if (!snapshot) throw new AppError(404, "We could not find this profile");
@@ -197,15 +273,19 @@ export async function askQuestion(userId: string, profileId: string, body: AskQu
     : input.kind === "refuse"
       ? (input.refuseKind ?? "fallback")
       : null;
-  const row = await store({
-    ...base,
-    answer: input ? toAnswer(input, context) : { sentences: [] },
-    refusalKind,
-    rules,
-    model: usage.model,
-    usage,
-    costCents: stepCostCents(usage),
-  });
+  const answer = input ? toAnswer(input, context) : { sentences: [] };
+  const row = await store(
+    {
+      ...base,
+      answer,
+      refusalKind,
+      rules,
+      model: usage.model,
+      usage,
+      costCents: stepCostCents(usage),
+    },
+    chargeRule(answer, refusalKind),
+  );
   const outcome = failure
     ? `error:${failure}`
     : !input
@@ -224,7 +304,7 @@ export async function listQuestions(userId: string, profileId: string) {
 
 export async function clearQuestions(userId: string, profileId: string) {
   await getOwnedProfile(userId, profileId);
-  await repo.deleteQuestions(userId, profileId);
+  await repo.clearQuestions(userId, profileId);
 }
 
 /** Marks one answer as wrong. Only the time is kept, never a reason. */

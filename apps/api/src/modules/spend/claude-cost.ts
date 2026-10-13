@@ -1,26 +1,27 @@
 import type { ReportUsage, StepUsage } from "../extraction/index.js";
 
-const sonnet = { input: 200, output: 1000 };
-const centsPerMTok: Record<string, { input: number; output: number }> = {
-  "claude-haiku-5-5": { input: 10, output: 50 },
+const sonnet = { input: 200, output: 1000, cacheRead: 0.05 };
+const unknownModel = { ...sonnet, cacheRead: 0.1 };
+const centsPerMTok: Record<string, { input: number; output: number; cacheRead: number }> = {
+  "claude-haiku-5-5": { input: 10, output: 50, cacheRead: 0.1 },
   "claude-sonnet-5-5": sonnet,
 };
 const cacheWriteRate = 1.25;
-const cacheReadRate = 0.1;
 
 /**
  * Prices one pipeline step in US cents from its model's list price per million tokens.
  *
  * @remarks
- * Cache writes cost 1.25 times input and cache reads 0.1 times. A model with no price here is charged at Sonnet 5.5, so the guard errs high.
+ * Cache writes cost 1.25 times input, and cache reads the model's own rate times input. A model with no price here is
+ * charged at Sonnet 5.5 with the higher 0.1 read rate, so the guard errs high.
  * ponytail: Haiku 5.5 charges more above 100K prompt tokens, add that tier if a report ever gets that long.
  */
 export function stepCostCents(step: StepUsage) {
-  const price = centsPerMTok[step.model] ?? sonnet;
+  const price = centsPerMTok[step.model] ?? unknownModel;
   const input =
     step.inputTokens +
     step.cacheWriteTokens * cacheWriteRate +
-    step.cachedInputTokens * cacheReadRate;
+    step.cachedInputTokens * price.cacheRead;
   return (input * price.input + step.outputTokens * price.output) / 1_000_000;
 }
 

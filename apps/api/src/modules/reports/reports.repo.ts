@@ -525,7 +525,7 @@ export async function insertDraftReport(
 ) {
   await db.transaction(async (tx) => {
     await lockUserCredits(tx, ownerUserId);
-    check(await findCreditUsage(tx, ownerUserId));
+    check(await findCreditUsage(ownerUserId, tx));
     await tx.insert(reports).values({ ...report, status: "draft" });
     await tx.insert(reportFiles).values(files.map((file) => ({ ...file, reportId: report.id })));
   });

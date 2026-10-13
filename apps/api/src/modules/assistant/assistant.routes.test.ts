@@ -25,12 +25,21 @@ const store = vi.hoisted(() => {
     rules?: string[];
     model?: string | null;
     costCents?: number;
+    charged?: boolean;
     flaggedAt: Date | null;
     createdAt: Date;
   };
   const rows: Row[] = [];
   const owners: Record<string, string> = {};
-  const state = { enabled: true, overCap: false, snapshot: undefined as unknown };
+  const state = {
+    enabled: true,
+    overCap: false,
+    snapshot: undefined as unknown,
+    questionsLeft: 5,
+    freeCredits: 0,
+    today: 0,
+    payments: false,
+  };
   const create = vi.fn();
   const pick = ({
     id,
@@ -63,9 +72,11 @@ const store = vi.hoisted(() => {
         row: Omit<Row, "id" | "flaggedAt" | "createdAt" | "refusalKind"> & {
           refusalKind?: string | null;
         },
+        canCharge?: (counts: { reads: number; packs: number; charged: number }) => boolean,
       ) => {
         const stored = {
           ...row,
+          charged: canCharge?.({ reads: 1, packs: 0, charged: 5 - state.questionsLeft }) ?? false,
           refusalKind: row.refusalKind ?? null,
           id: `0000000${rows.length}-0000-4000-8000-000000000000`,
           flaggedAt: null,
@@ -80,7 +91,9 @@ const store = vi.hoisted(() => {
           .toSorted((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
           .slice(0, limit)
           .map(pick),
-      deleteQuestions: async (userId: string, profileId: string) => {
+      countQuestionsToday: async () => state.today,
+      insertClearedQuestion: async () => undefined,
+      clearQuestions: async (userId: string, profileId: string) => {
         const keep = rows.filter((row) => row.userId !== userId || row.profileId !== profileId);
         rows.splice(0, rows.length, ...keep);
       },
@@ -91,11 +104,16 @@ const store = vi.hoisted(() => {
         return pick(row);
       },
     },
+    creditsRepo: {
+      findQuestionCounts: async () => ({ reads: 1, packs: 0, charged: 5 - state.questionsLeft }),
+      findCreditUsage: async () => ({ balance: state.freeCredits, readsToday: 0, waiting: 0 }),
+    },
     profilesRepo: {
       findProfileById: async (owner: string, id: string) =>
         owners[id] === owner ? { id, isSelf: true } : undefined,
     },
     spendRepo: {
+      listQuestionsThisMonth: async () => [],
       listJobsThisMonth: async () =>
         state.overCap
           ? [{ userId: "alice", status: "done", usage: null, inputTokens: 2e9, outputTokens: 0 }]
@@ -106,6 +124,7 @@ const store = vi.hoisted(() => {
 
 vi.mock("./assistant.repo.js", () => store.repo);
 vi.mock("../profiles/profiles.repo.js", () => store.profilesRepo);
+vi.mock("../credits/credits.repo.js", () => store.creditsRepo);
 vi.mock("../spend/spend.repo.js", () => store.spendRepo);
 vi.mock("../../lib/anthropic.js", () => ({ anthropic: { messages: { create: store.create } } }));
 vi.mock("../../config/env.js", async (importOriginal) => {
@@ -115,7 +134,9 @@ vi.mock("../../config/env.js", async (importOriginal) => {
       get: (target, key) =>
         key === "ASSISTANT_ENABLED"
           ? store.state.enabled
-          : (target as Record<string | symbol, unknown>)[key],
+          : key === "PAYMENTS_ENABLED"
+            ? store.state.payments
+            : (target as Record<string | symbol, unknown>)[key],
     }),
   };
 });
@@ -204,11 +225,19 @@ function ask(body: unknown, profile = ids.profile, user = "alice") {
   });
 }
 
+let minute = 0;
+
 beforeEach(() => {
+  minute += 1;
+  vi.spyOn(Date, "now").mockReturnValue(Date.UTC(2026, 9, 14) + minute * 61_000);
   store.rows.splice(0);
   store.create.mockReset();
   store.state.enabled = true;
   store.state.overCap = false;
+  store.state.questionsLeft = 5;
+  store.state.freeCredits = 0;
+  store.state.today = 0;
+  store.state.payments = false;
   store.state.snapshot = structuredClone(snapshot);
   store.owners[ids.profile] = "alice";
   store.owners[ids.bobProfile] = "bob";
@@ -260,7 +289,38 @@ describe("assistant routes", () => {
     expect(store.rows).toHaveLength(0);
   });
 
-  test("an owner gets cited sentences, stored with report ids, model, usage, cost and charged false", async () => {
+  test("with no question left the question answers 402 with the copy for the next step and stores nothing", async () => {
+    store.state.questionsLeft = 0;
+    store.state.freeCredits = 1;
+    const response = await ask({ question: "What was my HbA1c?" });
+    expect(response.status).toBe(402);
+    expect(await response.json()).toMatchObject({
+      title: "You have no questions left. Use 1 credit to get 20 more questions.",
+    });
+    store.state.freeCredits = 0;
+    expect(await (await ask({ question: "What was my HbA1c?" })).json()).toMatchObject({
+      title: "You have no questions left. Add a report to get 5 more questions.",
+    });
+    store.state.payments = true;
+    expect(await (await ask({ question: "What was my HbA1c?" })).json()).toMatchObject({
+      title: "You have no questions left. Buy credits to ask more questions.",
+    });
+    expect(store.create).not.toHaveBeenCalled();
+    expect(store.rows).toHaveLength(0);
+  });
+
+  test("at the daily cap the question answers 429 with the daily copy and stores nothing", async () => {
+    store.state.today = 30;
+    const response = await ask({ question: "What was my HbA1c?" });
+    expect(response.status).toBe(429);
+    expect(await response.json()).toMatchObject({
+      title: "You can ask 30 questions in one day. Try again tomorrow.",
+    });
+    expect(store.create).not.toHaveBeenCalled();
+    expect(store.rows).toHaveLength(0);
+  });
+
+  test("an owner gets cited sentences, stored with report ids, model, usage, cost and charged true", async () => {
     store.create.mockResolvedValueOnce(toolUse(good));
     const response = await ask({ question: "What was my HbA1c?", reportId: ids.report });
     expect(response.status).toBe(201);
@@ -277,7 +337,7 @@ describe("assistant routes", () => {
     });
     const [row] = store.rows;
     expect(row).toMatchObject({ model: "claude-haiku-5-5", rules: [] });
-    expect(row).not.toHaveProperty("charged", true);
+    expect(row).toHaveProperty("charged", true);
     expect(row?.costCents).toBeGreaterThan(0);
   });
 

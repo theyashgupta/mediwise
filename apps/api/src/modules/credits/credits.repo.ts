@@ -1,6 +1,6 @@
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
-import { creditsLedger, profiles, reports } from "../../db/schema.js";
+import { assistantQuestions, creditsLedger, profiles, reports } from "../../db/schema.js";
 
 export type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -30,7 +30,7 @@ export async function findBalance(userId: string) {
  * @remarks
  * A report is debited only when its job starts, so drafts, queued and paused reports still hold a claim on the balance.
  */
-export async function findCreditUsage(tx: Tx, userId: string) {
+export async function findCreditUsage(userId: string, tx: Tx | typeof db = db) {
   const [ledger] = await tx
     .select({
       balance,
@@ -106,6 +106,50 @@ export async function refundReportCredit(reportId: string) {
     await tx
       .insert(creditsLedger)
       .values({ userId: debit.userId, delta: 1, reason: "refund", reportId });
+  });
+}
+
+/**
+ * Counts what questions left is made of: reads not refunded, question packs, and charged questions.
+ *
+ * @remarks
+ * Reads come from the ledger, not from `reports`, so a deleted report keeps its free questions. A purchase refund has
+ * no report id, so it never takes back free questions.
+ */
+export async function findQuestionCounts(userId: string, executor: Tx | typeof db = db) {
+  const [ledger] = await executor
+    .select({
+      reads: sql<number>`(count(*) filter (where ${creditsLedger.reason} = 'upload') - count(*) filter (where ${creditsLedger.reason} = 'refund' and ${creditsLedger.reportId} is not null))::int`,
+      packs: sql<number>`(count(*) filter (where ${creditsLedger.reason} = 'questions'))::int`,
+    })
+    .from(creditsLedger)
+    .where(eq(creditsLedger.userId, userId));
+  const [questions] = await executor
+    .select({ charged: sql<number>`count(*)::int` })
+    .from(assistantQuestions)
+    .where(and(eq(assistantQuestions.userId, userId), eq(assistantQuestions.charged, true)));
+  return {
+    reads: ledger?.reads ?? 0,
+    packs: ledger?.packs ?? 0,
+    charged: questions?.charged ?? 0,
+  };
+}
+
+export type CreditUsage = Awaited<ReturnType<typeof findCreditUsage>>;
+export type QuestionCounts = Awaited<ReturnType<typeof findQuestionCounts>>;
+
+/** Debits 1 credit for a pack of questions under the credit lock, and returns the new balance, or undefined when `canDebit` refuses. */
+export async function debitQuestionPack(
+  userId: string,
+  note: string,
+  canDebit: (usage: CreditUsage) => boolean,
+) {
+  return db.transaction(async (tx) => {
+    await lockUserCredits(tx, userId);
+    const usage = await findCreditUsage(userId, tx);
+    if (!canDebit(usage)) return undefined;
+    await tx.insert(creditsLedger).values({ userId, delta: -1, reason: "questions", note });
+    return usage.balance - 1;
   });
 }
 

@@ -42,8 +42,24 @@ test("the data download holds the owner's questions with their answers and no qu
   );
 });
 
-test("account deletion removes the questions and the deletion log counts them", async () => {
-  const userId = await ownerWithQuestions(["One?", "Two?", "Three?"]);
+test("the data download leaves out cleared questions", async () => {
+  const alice = await ownerWithQuestions(["Kept?", "Cleared?"]);
+  await db
+    .update(assistantQuestions)
+    .set({ clearedAt: new Date() })
+    .where(eq(assistantQuestions.question, "Cleared?"));
+
+  const { questions } = await exportByOwner(alice);
+
+  expect(questions.map(({ question }) => question)).toEqual(["Kept?"]);
+});
+
+test("account deletion wipes the text of every question, keeps usage, cost and charge, and the deletion log counts them", async () => {
+  const userId = await ownerWithQuestions(["One?", "Two?", "Should I worry?"]);
+  await db
+    .update(assistantQuestions)
+    .set({ charged: true, costCents: 0.17, model: "claude-haiku-5-5" })
+    .where(eq(assistantQuestions.userId, userId));
   const userIdHash = `hash-${userId}`;
 
   await deleteAllByOwner(userId, { userIdHash, files: 0 });
@@ -52,7 +68,19 @@ test("account deletion removes the questions and the deletion log counts them", 
     .select()
     .from(assistantQuestions)
     .where(eq(assistantQuestions.userId, userId));
-  expect(left).toHaveLength(0);
+  expect(left).toHaveLength(3);
+  for (const row of left) {
+    expect(row).toMatchObject({
+      profileId: null,
+      question: "",
+      answer: { sentences: [] },
+      refusalKind: null,
+      charged: true,
+      costCents: 0.17,
+      model: "claude-haiku-5-5",
+    });
+    expect(row.clearedAt).not.toBeNull();
+  }
   const [row] = await db.select().from(deletionLog).where(eq(deletionLog.userIdHash, userIdHash));
   expect(row?.counts).toEqual({ profiles: 1, reports: 0, files: 0, questions: 3 });
 });

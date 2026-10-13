@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { AppError } from "../../common/errors.js";
 import { remove } from "../../lib/storage.js";
 import { supabase } from "../../lib/supabase.js";
-import { getCreditBalance } from "../credits/index.js";
+import { getCreditBalance, getQuestionsLeft } from "../credits/index.js";
 import { ensureSelfProfile } from "../profiles/index.js";
 import * as repo from "./me.repo.js";
 
@@ -11,8 +11,12 @@ const removeBatchSize = 1000;
 
 export async function getMe(userId: string, email: string, googleName?: string) {
   await ensureSelfProfile(userId, email, googleName);
-  const [name, credits] = await Promise.all([repo.findSelfName(userId), getCreditBalance(userId)]);
-  return { userId, email, name: name ?? userId, credits };
+  const [name, credits, questionsLeft] = await Promise.all([
+    repo.findSelfName(userId),
+    getCreditBalance(userId),
+    getQuestionsLeft(userId),
+  ]);
+  return { userId, email, name: name ?? userId, credits, questionsLeft };
 }
 
 export async function updateMe(userId: string, email: string, input: UpdateMeInput) {
