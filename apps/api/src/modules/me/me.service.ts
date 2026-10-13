@@ -4,6 +4,7 @@ import { AppError } from "../../common/errors.js";
 import { remove } from "../../lib/storage.js";
 import { supabase } from "../../lib/supabase.js";
 import { env } from "../../config/env.js";
+import { hasReviewConsent, isReviewRequired } from "../assistant/index.js";
 import { getCreditBalance, getQuestionsLeft, getQuestionState } from "../credits/index.js";
 import { ensureSelfProfile } from "../profiles/index.js";
 import * as repo from "./me.repo.js";
@@ -13,12 +14,14 @@ const removeBatchSize = 1000;
 export async function getMe(userId: string, email: string, googleName?: string) {
   await ensureSelfProfile(userId, email, googleName);
   const enabled = env.ASSISTANT_ENABLED;
-  const [name, credits, { questionsLeft, nextStep }] = await Promise.all([
+  const reviewRequired = isReviewRequired();
+  const [name, credits, { questionsLeft, nextStep }, consented] = await Promise.all([
     repo.findSelfName(userId),
     getCreditBalance(userId),
     enabled
       ? getQuestionState(userId)
       : getQuestionsLeft(userId).then((left) => ({ questionsLeft: left, nextStep: null })),
+    reviewRequired ? hasReviewConsent(userId) : false,
   ]);
   return {
     userId,
@@ -26,7 +29,7 @@ export async function getMe(userId: string, email: string, googleName?: string) 
     name: name ?? userId,
     credits,
     questionsLeft,
-    assistant: { enabled, outOfQuestions: nextStep },
+    assistant: { enabled, outOfQuestions: nextStep, reviewRequired, consented },
   };
 }
 

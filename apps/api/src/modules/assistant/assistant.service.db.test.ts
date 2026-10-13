@@ -13,9 +13,17 @@ vi.mock("../spend/index.js", async (importOriginal) => ({
   isOverBudget: async () => edge.overBudget,
 }));
 
-const { askQuestion, clearQuestions, flagQuestion, listQuestions } =
-  await import("./assistant.service.js");
+const {
+  askQuestion,
+  clearQuestions,
+  flagQuestion,
+  giveReviewConsent,
+  listQuestions,
+  loadReviewDay,
+  storeReview,
+} = await import("./assistant.service.js");
 const { getQuestionsLeft } = await import("../credits/index.js");
+const { env } = await import("../../config/env.js");
 
 const marker = "ZORBEL";
 const userId = randomUUID();
@@ -609,4 +617,95 @@ test("a cited finding or follow-up of another account comes back with its report
     { labName: "Sunrise Diagnostics", deleted: false },
   ]);
   expect(JSON.stringify(cited)).not.toContain(`${marker}-other-`);
+});
+
+test("during the review month a question without consent answers 403 and stores nothing, and consent lets it through", async () => {
+  edge.create.mockResolvedValue(answer(good));
+  const { owner, profile } = await newAsker(1);
+  const enabled = env.ASSISTANT_ENABLED;
+  env.ASSISTANT_ENABLED = true;
+  env.ASSISTANT_REVIEW = true;
+  try {
+    await expect(
+      askQuestion(owner, profile, { question: "What was my HbA1c?" }),
+    ).rejects.toMatchObject({
+      status: 403,
+      message: "Agree to the review before you ask a question.",
+    });
+    expect(edge.create).not.toHaveBeenCalled();
+    expect(await listQuestions(owner, profile)).toHaveLength(0);
+
+    await giveReviewConsent(owner);
+    expect(
+      (await askQuestion(owner, profile, { question: "What was my HbA1c?" })).refusalKind,
+    ).toBeNull();
+
+    env.ASSISTANT_REVIEW = false;
+    const other = await newAsker(1);
+    expect(
+      (await askQuestion(other.owner, other.profile, { question: "And now?" })).refusalKind,
+    ).toBeNull();
+  } finally {
+    env.ASSISTANT_ENABLED = enabled;
+    env.ASSISTANT_REVIEW = false;
+  }
+});
+
+test("the review day lists the kept questions of that UTC day from consenting accounts, with chips and cited values, and a second verdict replaces the first", async () => {
+  const { owner, profile, report } = await newAsker(0);
+  const stranger = await newAsker(0);
+  await giveReviewConsent(owner);
+  const cite = { kind: "value" as const, reportId: report, target: "hba1c" };
+  await db.insert(schema.assistantQuestions).values({
+    userId: stranger.owner,
+    profileId: stranger.profile,
+    question: `${marker}-no-consent`,
+    answer: { sentences: [] },
+    createdAt: new Date("2031-03-03T09:00:00Z"),
+  });
+  const [kept] = await db
+    .insert(schema.assistantQuestions)
+    .values([
+      {
+        userId: owner,
+        profileId: profile,
+        question: `${marker}-kept`,
+        answer: { sentences: [{ text: "Your HbA1c was 5.9 % on 4 Aug 2026.", cites: [cite] }] },
+        createdAt: new Date("2031-03-03T10:00:00Z"),
+      },
+      {
+        userId: owner,
+        profileId: profile,
+        question: "",
+        answer: { sentences: [] },
+        clearedAt: new Date("2031-03-03T11:00:00Z"),
+        createdAt: new Date("2031-03-03T11:00:00Z"),
+      },
+      {
+        userId: owner,
+        profileId: profile,
+        question: `${marker}-other-day`,
+        answer: { sentences: [] },
+        createdAt: new Date("2031-03-04T00:30:00Z"),
+      },
+    ])
+    .returning();
+
+  const day = await loadReviewDay("2031-03-03", () => true);
+  expect(day.map(({ question }) => question)).toEqual([`${marker}-kept`]);
+  expect(day[0]!.sentences[0]!.cites[0]).toMatchObject({ label: "HbA1c", deleted: false });
+  expect(day[0]!.facts).toMatchObject([
+    { markerKey: "hba1c", value: 5.9, unit: "%", status: "watch", calibratedHigh: 5.6 },
+  ]);
+  expect(JSON.stringify(day)).not.toContain(owner);
+
+  await storeReview(kept!.id, "minor");
+  await storeReview(kept!.id, "pass");
+  expect((await loadReviewDay("2031-03-03", () => true))[0]!.verdict).toBe("pass");
+  expect(
+    await db
+      .select({ verdict: schema.assistantReviews.verdict })
+      .from(schema.assistantReviews)
+      .where(eq(schema.assistantReviews.questionId, kept!.id)),
+  ).toEqual([{ verdict: "pass" }]);
 });

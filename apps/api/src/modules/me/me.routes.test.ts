@@ -62,7 +62,16 @@ const store = vi.hoisted(() => {
   };
 });
 
+const consents = vi.hoisted(() => new Map<string, Date>());
+
 vi.mock("./me.repo.js", () => store.repo);
+vi.mock("../assistant/assistant.repo.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../assistant/assistant.repo.js")>()),
+  hasConsent: async (owner: string) => consents.has(owner),
+  insertConsent: async (owner: string) => {
+    if (!consents.has(owner)) consents.set(owner, new Date());
+  },
+}));
 vi.mock("../credits/credits.repo.js", () => ({
   findBalance: async () => store.state.credits,
   findQuestionCounts: async () => ({
@@ -124,7 +133,9 @@ beforeEach(() => {
   store.state.deletionLog.length = 0;
   Object.assign(store.state, { credits: 3, freeCredits: 3, packs: 0, charged: 2 });
   env.ASSISTANT_ENABLED = true;
+  env.ASSISTANT_REVIEW = false;
   env.PAYMENTS_ENABLED = false;
+  consents.clear();
 });
 
 test("GET /me returns the email, the self profile name, defaulting to the email name, the credit balance and the questions left", async () => {
@@ -134,14 +145,19 @@ test("GET /me returns the email, the self profile name, defaulting to the email 
     name: "alice",
     credits: 3,
     questionsLeft: 3,
-    assistant: { enabled: true, outOfQuestions: null },
+    assistant: { enabled: true, outOfQuestions: null, reviewRequired: false, consented: false },
   });
 });
 
 async function getMeBody() {
   return (await (await call("GET", "/me")).json()) as {
     questionsLeft: number;
-    assistant: { enabled: boolean; outOfQuestions: string | null };
+    assistant: {
+      enabled: boolean;
+      outOfQuestions: string | null;
+      reviewRequired: boolean;
+      consented: boolean;
+    };
   };
 }
 
@@ -149,7 +165,7 @@ test("GET /me at 0 questions with a free credit names use_credit as the next ste
   store.state.charged = 5;
   const body = await getMeBody();
   expect(body.questionsLeft).toBe(0);
-  expect(body.assistant).toEqual({ enabled: true, outOfQuestions: "use_credit" });
+  expect(body.assistant).toMatchObject({ enabled: true, outOfQuestions: "use_credit" });
 });
 
 test("GET /me at 0 questions with the only credit held by a waiting report names add_report while payments are off", async () => {
@@ -169,6 +185,8 @@ test("GET /me while the assistant is off says so and names no next step", async 
   expect((await getMeBody()).assistant).toEqual({
     enabled: false,
     outOfQuestions: null,
+    reviewRequired: false,
+    consented: false,
   });
 });
 
@@ -302,4 +320,20 @@ test("GET /me/export answers a JSON attachment with the user's data", async () =
     "questions",
     "reports",
   ]);
+});
+
+test("during the review month GET /me asks for consent until POST /me/assistant-consent stores it", async () => {
+  env.ASSISTANT_REVIEW = true;
+  expect((await getMeBody()).assistant).toMatchObject({ reviewRequired: true, consented: false });
+
+  expect((await call("POST", "/me/assistant-consent")).status).toBe(204);
+  expect((await getMeBody()).assistant).toMatchObject({ reviewRequired: true, consented: true });
+});
+
+test("the review month needs the assistant on, and the consent route answers 404 while it is off", async () => {
+  env.ASSISTANT_REVIEW = true;
+  env.ASSISTANT_ENABLED = false;
+  expect((await getMeBody()).assistant).toMatchObject({ reviewRequired: false, consented: false });
+  expect((await call("POST", "/me/assistant-consent")).status).toBe(404);
+  expect(consents.size).toBe(0);
 });

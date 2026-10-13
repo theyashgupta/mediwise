@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { patterns } from "@mediwise/engine";
 import type { AssistantAnswer, AssistantCite, AssistantRefusalKind } from "@mediwise/shared";
+import type { AssistantReviewVerdict } from "../../db/schema.js";
 import { AppError } from "../../common/errors.js";
 import { env } from "../../config/env.js";
 import { log } from "../../middleware/logger.js";
@@ -15,6 +16,7 @@ import {
   questionsPerDay,
   questionsPerMinute,
   refusalCopy,
+  reviewConsentCopy,
   unavailableCopy,
 } from "./assistant.copy.js";
 import { gateQuestion } from "./assistant.gate.js";
@@ -306,6 +308,9 @@ function chargeRule(answer: AssistantAnswer, refusalKind: AssistantRefusalKind |
 export async function askQuestion(userId: string, profileId: string, body: AskQuestionInput) {
   const started = Date.now();
   await getOwnedProfile(userId, profileId);
+  if (isReviewRequired() && !(await repo.hasConsent(userId))) {
+    throw new AppError(403, reviewConsentCopy);
+  }
   const focusFound = body.reportId ? await repo.isProfileReport(profileId, body.reportId) : false;
   const base = {
     userId,
@@ -400,4 +405,59 @@ export async function flagQuestion(userId: string, id: string) {
   const row = await repo.flagQuestion(userId, id);
   if (!row) throw new AppError(404, "We could not find this question");
   return withChip(userId, row);
+}
+
+export function isReviewRequired() {
+  return env.ASSISTANT_ENABLED && env.ASSISTANT_REVIEW;
+}
+
+export function hasReviewConsent(userId: string) {
+  return repo.hasConsent(userId);
+}
+
+export function giveReviewConsent(userId: string) {
+  return repo.insertConsent(userId);
+}
+
+/**
+ * Loads the sampled questions of one UTC day with their chips and the stored values their value cites name.
+ *
+ * @remarks
+ * Each item is resolved as its own owner, so a cite never shows a row of another account. The owner id stays here and
+ * never reaches the item.
+ */
+export async function loadReviewDay(
+  day: string,
+  sampled: (row: { id: string; refusalKind: string | null; flagged: boolean }) => boolean,
+) {
+  const rows = (await repo.listReviewDay(day)).filter((row) =>
+    sampled({ id: row.id, refusalKind: row.refusalKind, flagged: row.flaggedAt !== null }),
+  );
+  return Promise.all(
+    rows.map(async ({ userId, ...row }) => {
+      const [item] = await withChips(userId, [toItem({ ...row, focusReportId: null })]);
+      const values = item!.sentences
+        .flatMap(({ cites }) => cites)
+        .filter((cite) => cite.kind === "value" && cite.reportId && cite.target && !cite.deleted);
+      const facts = await repo.findMarkerFacts(
+        userId,
+        values.map((cite) => ({ reportId: cite.reportId!, markerKey: cite.target! })),
+      );
+      return {
+        ...item!,
+        verdict: row.verdict,
+        facts: facts.filter((fact) =>
+          values.some((cite) => cite.reportId === fact.reportId && cite.target === fact.markerKey),
+        ),
+      };
+    }),
+  );
+}
+
+export function storeReview(questionId: string, verdict: AssistantReviewVerdict) {
+  return repo.upsertReview(questionId, verdict);
+}
+
+export function countReviews() {
+  return repo.countReviews();
 }

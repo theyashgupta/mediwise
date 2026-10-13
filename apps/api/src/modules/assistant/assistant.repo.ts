@@ -1,7 +1,10 @@
-import { and, asc, desc, eq, gt, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import {
+  type AssistantReviewVerdict,
+  assistantConsents,
   assistantQuestions,
+  assistantReviews,
   clearedQuestion,
   episodes,
   findings,
@@ -379,4 +382,103 @@ export async function findCiteRows(
     followUps: followUpRows,
     episodes: episodeRows,
   };
+}
+
+export async function hasConsent(ownerUserId: string) {
+  const [row] = await db
+    .select({ userId: assistantConsents.userId })
+    .from(assistantConsents)
+    .where(eq(assistantConsents.userId, ownerUserId));
+  return row !== undefined;
+}
+
+export async function insertConsent(ownerUserId: string) {
+  await db.insert(assistantConsents).values({ userId: ownerUserId }).onConflictDoNothing();
+}
+
+/**
+ * Lists the kept questions of one UTC day from accounts that agreed to the review before they asked, oldest first.
+ *
+ * @remarks
+ * The consent join keeps a question asked before the review month, or by an account that never agreed, out of the
+ * reviewer's sight.
+ */
+export async function listReviewDay(day: string) {
+  const start = sql`(${day}::timestamp at time zone 'UTC')`;
+  return db
+    .select({
+      id: assistantQuestions.id,
+      userId: assistantQuestions.userId,
+      question: assistantQuestions.question,
+      answer: assistantQuestions.answer,
+      refusalKind: assistantQuestions.refusalKind,
+      flaggedAt: assistantQuestions.flaggedAt,
+      createdAt: assistantQuestions.createdAt,
+      verdict: assistantReviews.verdict,
+    })
+    .from(assistantQuestions)
+    .innerJoin(assistantConsents, eq(assistantConsents.userId, assistantQuestions.userId))
+    .leftJoin(assistantReviews, eq(assistantReviews.questionId, assistantQuestions.id))
+    .where(
+      and(
+        isNull(assistantQuestions.clearedAt),
+        gte(assistantQuestions.createdAt, assistantConsents.agreedAt),
+        sql`${assistantQuestions.createdAt} >= ${start}`,
+        sql`${assistantQuestions.createdAt} < ${start} + interval '1 day'`,
+      ),
+    )
+    .orderBy(asc(assistantQuestions.createdAt));
+}
+
+export async function findMarkerFacts(
+  ownerUserId: string,
+  pairs: { reportId: string; markerKey: string }[],
+) {
+  if (pairs.length === 0) return [];
+  return db
+    .select({
+      reportId: reportMarkers.reportId,
+      markerKey: reportMarkers.markerKey,
+      value: reportMarkers.value,
+      valueText: reportMarkers.valueText,
+      unit: reportMarkers.unit,
+      labRangeLow: reportMarkers.labRangeLow,
+      labRangeHigh: reportMarkers.labRangeHigh,
+      calibratedLow: reportMarkers.calibratedLow,
+      calibratedHigh: reportMarkers.calibratedHigh,
+      status: reportMarkers.status,
+    })
+    .from(reportMarkers)
+    .innerJoin(reports, eq(reports.id, reportMarkers.reportId))
+    .innerJoin(profiles, eq(profiles.id, reports.profileId))
+    .where(
+      and(
+        eq(profiles.ownerUserId, ownerUserId),
+        inArray(
+          reportMarkers.reportId,
+          pairs.map(({ reportId }) => reportId),
+        ),
+        inArray(
+          reportMarkers.markerKey,
+          pairs.map(({ markerKey }) => markerKey),
+        ),
+      ),
+    );
+}
+
+export async function upsertReview(questionId: string, verdict: AssistantReviewVerdict) {
+  await db
+    .insert(assistantReviews)
+    .values({ questionId, verdict })
+    .onConflictDoUpdate({
+      target: assistantReviews.questionId,
+      set: { verdict, reviewedAt: sql`now()` },
+    });
+}
+
+export async function countReviews() {
+  return db
+    .select({ verdict: assistantReviews.verdict, total: sql<number>`count(*)::int` })
+    .from(assistantReviews)
+    .groupBy(assistantReviews.verdict);
 }

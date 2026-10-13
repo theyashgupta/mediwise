@@ -99,6 +99,12 @@ async function seedRows(userId: string) {
       })
       .returning(),
   );
+  const question = idOf(
+    await db
+      .insert(schema.assistantQuestions)
+      .values({ userId, profileId: profile, question: "Test", answer: { sentences: [] } })
+      .returning(),
+  );
   return {
     profiles: profile,
     episodes: episode,
@@ -126,10 +132,14 @@ async function seedRows(userId: string) {
         })
         .returning(),
     ),
-    assistant_questions: idOf(
+    assistant_questions: question,
+    assistant_consents: idOf(
+      await db.insert(schema.assistantConsents).values({ userId }).returning(),
+    ),
+    assistant_reviews: idOf(
       await db
-        .insert(schema.assistantQuestions)
-        .values({ userId, profileId: profile, question: "Test", answer: { sentences: [] } })
+        .insert(schema.assistantReviews)
+        .values({ questionId: question, verdict: "pass" })
         .returning(),
     ),
     report_links: idOf(
