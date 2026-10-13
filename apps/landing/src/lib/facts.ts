@@ -1,5 +1,5 @@
 import {
-  categories,
+  categoryLabel,
   derived,
   markers,
   patterns,
@@ -9,6 +9,7 @@ import {
 } from "@mediwise/engine";
 import { maxFileBytes, maxFiles, maxProfilesPerUser, maxTotalBytes } from "@mediwise/shared";
 import { paymentPacks } from "../../../api/src/modules/payments/payments.config";
+import type { Locale } from "../config/messages";
 
 /**
  * Writes an amount in paise as rupees, with paise only when the amount has them.
@@ -53,17 +54,17 @@ const marqueeCategories: Category[][] = [
 ];
 
 /**
- * Picks up to five short marker names per category for the two marquee rows.
+ * Picks up to five short marker names per category for the two marquee rows, with category labels in the locale.
  *
  * @remarks
  * The names come from the engine catalog, so the marquee never shows a marker MediWise does not know.
  */
-export function marqueeRows() {
+export function marqueeRows(locale: Locale) {
   const all = [...markers, ...derived];
   return marqueeCategories.map((row) =>
     row.map((category, index) => ({
       category,
-      label: categories.find(({ key }) => key === category)?.label ?? category,
+      label: categoryLabel(category, locale),
       colour: index % 5,
       names: all
         .filter((marker) => marker.category === category)

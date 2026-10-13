@@ -1,13 +1,7 @@
 "use client";
 
 import { Pause, Play } from "lucide-react";
-import {
-  useEffect,
-  useRef,
-  useState,
-  useSyncExternalStore,
-  type RefObject,
-} from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type RefObject } from "react";
 import { cn } from "@/lib/utils";
 
 const reducedMotionQuery = "(prefers-reduced-motion: reduce)";
@@ -95,7 +89,7 @@ function setPaused(paused: boolean) {
   }
 }
 
-export function PauseMotionButton({ className }: { className?: string }) {
+export function PauseMotionButton({ label, className }: { label: string; className?: string }) {
   const paused = useMotionPaused();
   const Icon = paused ? Play : Pause;
   return (
@@ -109,7 +103,7 @@ export function PauseMotionButton({ className }: { className?: string }) {
       )}
     >
       <Icon aria-hidden className="size-3.5" />
-      Pause motion
+      {label}
     </button>
   );
 }
