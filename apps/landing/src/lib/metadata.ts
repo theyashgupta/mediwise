@@ -48,6 +48,13 @@ export function pageMetadata(locale: Locale): Metadata {
   };
 }
 
+/**
+ * Builds the title of one language's 404 page and keeps the page out of search results.
+ */
+export function notFoundMetadata(locale: Locale): Metadata {
+  return { title: messages[locale].site.notFound.title, robots: { index: false } };
+}
+
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#FBFAF7" },

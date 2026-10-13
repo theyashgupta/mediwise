@@ -8,6 +8,7 @@ export default defineConfig(
     files: [
       "src/app/**/page.tsx",
       "src/app/**/layout.tsx",
+      "src/app/**/not-found.tsx",
       "src/app/sitemap.ts",
       "src/app/robots.ts",
     ],
