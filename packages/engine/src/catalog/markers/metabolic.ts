@@ -2,7 +2,15 @@ import { range } from "../range.js";
 import type { Marker } from "../schema.js";
 import { sources } from "../sources.js";
 
-const { ada2025, icmrDiabetes2018, icmrIndiab2023, misra2009, tietz2022 } = sources;
+const {
+  aafpAda2018,
+  ada2025,
+  icmrDiabetes2018,
+  icmrIndiab2023,
+  misra2009,
+  tietz2022,
+  usPharmacistAda2022,
+} = sources;
 
 const glucoseConversions = [{ from: "mmol/L", factor: 18.016 }];
 
@@ -136,9 +144,13 @@ export const metabolicMarkers: Marker[] = [
     whatMovesIt:
       "Diet, activity, weight and sleep move it over months. Iron deficiency anaemia can make the value falsely high. Recent blood loss or some hemoglobin variants can make it falsely low.",
     ranges: [range(ada2025, [null, 5.6], [null, 6.4])],
+    retest: [
+      { status: "watch", weeks: 52, source: aafpAda2018.id },
+      { status: "risk", weeks: 13, source: usPharmacistAda2022.id },
+    ],
     southAsianNote:
       "South Asians develop diabetes at a lower body weight, so ADA advises screening Asian Americans from a BMI of 23. Iron deficiency is common in India and can raise HbA1c, so read it with hemoglobin.",
-    sources: [ada2025, icmrIndiab2023, icmrDiabetes2018],
+    sources: [ada2025, icmrIndiab2023, icmrDiabetes2018, aafpAda2018, usPharmacistAda2022],
     core: true,
     direction: "high_is_bad",
   },

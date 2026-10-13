@@ -7,6 +7,7 @@ const {
   ada2025,
   camaschella2015,
   ckdEpi2021,
+  clevelandDkd2026,
   endukuru2020,
   gayosoDiz2013,
   kdigo2024,
@@ -314,7 +315,11 @@ export const derived: Derived[] = [
     whatMovesIt:
       "Diabetes, high blood pressure, some painkillers and dehydration lower it. It falls slowly with age, and very muscular people can show a value below their true function.",
     ranges: [range(kdigo2024, [90, null], [60, null])],
-    sources: [kdigo2024, ckdEpi2021],
+    retest: [
+      { status: "watch", weeks: 52, source: clevelandDkd2026.id },
+      { status: "risk", weeks: 52, source: clevelandDkd2026.id },
+    ],
+    sources: [kdigo2024, ckdEpi2021, clevelandDkd2026],
     core: false,
     direction: "low_is_bad",
     formula: { kind: "ckd_epi_2021" },
