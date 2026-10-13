@@ -19,7 +19,7 @@ test.afterAll(async () => {
   await page.close();
 });
 
-/** Fails when two of the visible text boxes in a chart overlap. */
+/** Fails when two of the text boxes in a chart overlap: value labels, date ticks and value ticks. */
 async function expectNoOverlap(texts: Locator) {
   const boxes = (await texts.evaluateAll((nodes) =>
     nodes
@@ -32,7 +32,10 @@ async function expectNoOverlap(texts: Locator) {
   for (const [i, a] of boxes.entries()) {
     for (const b of boxes.slice(i + 1)) {
       const apart =
-        a.x + a.width <= b.x || b.x + b.width <= a.x || a.y + a.height <= b.y || b.y + b.height <= a.y;
+        a.x + a.width <= b.x ||
+        b.x + b.width <= a.x ||
+        a.y + a.height <= b.y ||
+        b.y + b.height <= a.y;
       expect(apart, `labels at x=${a.x} and x=${b.x} overlap`).toBe(true);
     }
   }
@@ -51,7 +54,7 @@ test("a new user gets a profile with 12 reports in 10 weeks", async () => {
   });
 
   await page.goto("/");
-  const switcher = page.locator("main").getByTestId("profile-switcher-inline");
+  const switcher = page.getByTestId("profile-switcher-sidebar");
   await switcher.click();
   await page.getByTestId("profile-option").filter({ hasText: profileName }).click();
   await expect(switcher).toContainText(profileName);
@@ -77,8 +80,9 @@ for (const width of [390, 1440]) {
     await expect(page.locator('[data-testid^="trend-point-"]')).toHaveCount(12);
     const chart = page.getByTestId("value-chart");
     await expect(chart.locator(".recharts-line-dots circle").first()).toBeVisible();
-    await expectNoOverlap(chart.locator(".recharts-label-list text"));
-    await expectNoOverlap(chart.locator(".recharts-xAxis .recharts-cartesian-axis-tick text"));
+    const texts = chart.locator("text");
+    expect(await texts.count()).toBeGreaterThan(8);
+    await expectNoOverlap(texts);
   });
 }
 
