@@ -1,5 +1,7 @@
 import fixture from "@mediwise/engine/fixtures/dense-history.json" with { type: "json" };
 import { derived, type EngineProfile, type EngineValue, runEngine } from "@mediwise/engine";
+import { db } from "./client.js";
+import { profiles, reportMarkers, reports } from "./schema.js";
 
 const dayMs = 86_400_000;
 const derivedNames = new Map(derived.map((entry) => [entry.key, entry.name]));
@@ -52,5 +54,38 @@ export function denseHistoryReports(lastDate: string) {
       verdict: output.verdict,
       markers: rows,
     };
+  });
+}
+
+/** Inserts a dense history profile with its done reports for one owner, and returns the ids in report order. */
+export async function insertDenseHistory(
+  ownerUserId: string,
+  seeded: ReturnType<typeof denseHistoryReports>,
+) {
+  return db.transaction(async (tx) => {
+    const [profile] = await tx
+      .insert(profiles)
+      .values({
+        ownerUserId,
+        name: denseHistoryProfile.name,
+        relation: "other",
+        dateOfBirth: denseHistoryProfile.dateOfBirth,
+        sex: "male",
+        ancestry: "south_asian",
+        permissionConfirmedAt: new Date(),
+      })
+      .returning({ id: profiles.id });
+    const reportIds: string[] = [];
+    for (const { markers, ...report } of seeded) {
+      const [row] = await tx
+        .insert(reports)
+        .values({ ...report, profileId: profile!.id, status: "done", sourceKind: "pdf" })
+        .returning({ id: reports.id });
+      await tx
+        .insert(reportMarkers)
+        .values(markers.map((marker) => ({ ...marker, reportId: row!.id })));
+      reportIds.push(row!.id);
+    }
+    return { profileId: profile!.id, reportIds };
   });
 }
