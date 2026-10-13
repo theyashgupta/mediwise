@@ -15,7 +15,7 @@ const cacheReadRate = 0.1;
  * Cache writes cost 1.25 times input and cache reads 0.1 times. A model with no price here is charged at Sonnet 5.5, so the guard errs high.
  * ponytail: Haiku 5.5 charges more above 100K prompt tokens, add that tier if a report ever gets that long.
  */
-function stepCostCents(step: StepUsage) {
+export function stepCostCents(step: StepUsage) {
   const price = centsPerMTok[step.model] ?? sonnet;
   const input =
     step.inputTokens +
