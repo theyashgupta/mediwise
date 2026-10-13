@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "coverage": "vitest run --coverage --coverage.include=src/**/*.{ts,tsx} --coverage.reporter=text-summary --coverage.thresholds.statements=27 --coverage.thresholds.branches=25 --coverage.thresholds.functions=22 --coverage.thresholds.lines=28"
   },
   "dependencies": {
     "@hookform/resolvers": "5.9.1",

@@ -18,6 +18,9 @@
     "test": {
       "dependsOn": ["transit"]
     },
+    "coverage": {
+      "dependsOn": ["transit"]
+    },
     "dev": {
       "cache": false,
       "persistent": true
