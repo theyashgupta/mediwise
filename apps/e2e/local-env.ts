@@ -8,12 +8,13 @@ const status = JSON.parse(
 ) as Record<"API_URL" | "DB_URL" | "ANON_KEY" | "SERVICE_ROLE_KEY" | "JWT_SECRET", string>;
 
 export const webOrigin = "http://localhost:5174";
+export const shellOrigin = "http://localhost:5175";
 export const apiPort = 3101;
 
 export const apiEnv = {
   NODE_ENV: "development",
   PORT: String(apiPort),
-  CORS_ORIGINS: webOrigin,
+  CORS_ORIGINS: `${webOrigin},${shellOrigin}`,
   DATABASE_URL: status.DB_URL,
   SUPABASE_URL: status.API_URL,
   SUPABASE_SERVICE_ROLE_KEY: status.SERVICE_ROLE_KEY,
