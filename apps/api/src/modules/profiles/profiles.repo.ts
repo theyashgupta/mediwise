@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, isNotNull, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import { profiles, reportMarkers, reports, studies, studyMeasurements } from "../../db/schema.js";
 
@@ -16,13 +16,15 @@ const profileColumns = {
 };
 
 /**
- * Counts the rows of a profile's CSV export: one per marker, study and study measurement of its done reports.
+ * Counts the rows of a profile's CSV export: one per note, marker, study and study measurement of its done reports.
  *
  * @remarks
  * Plain table names keep the inner `reports` apart from the outer join, and must stay in step with `listExportRows`.
  */
 const valueCount = sql<number>`(
-  (select count(*) from report_markers m join reports r on r.id = m.report_id
+  (select count(*) from reports r
+    where r.profile_id = ${profiles.id} and r.status = 'done' and r.note is not null)
+  + (select count(*) from report_markers m join reports r on r.id = m.report_id
     where r.profile_id = ${profiles.id} and r.status = 'done')
   + (select count(*) from studies s join reports r on r.id = s.report_id
     where r.profile_id = ${profiles.id} and r.status = 'done')
@@ -111,9 +113,15 @@ const doneReportsOf = (ownerUserId: string, profileId: string) =>
     eq(reports.status, "done"),
   );
 
-/** Loads every marker, study and study measurement of a profile's done reports, for the CSV export. */
+/** Loads every note, marker, study and study measurement of a profile's done reports, for the CSV export. */
 export async function listExportRows(ownerUserId: string, profileId: string) {
-  const [markerRows, studyRows, measurementRows] = await Promise.all([
+  const [noteRows, markerRows, studyRows, measurementRows] = await Promise.all([
+    db
+      .select({ ...exportReportColumns, note: reports.note })
+      .from(reports)
+      .innerJoin(profiles, eq(profiles.id, reports.profileId))
+      .where(and(doneReportsOf(ownerUserId, profileId), isNotNull(reports.note)))
+      .orderBy(reportDate, asc(reports.createdAt)),
     db
       .select({
         ...exportReportColumns,
@@ -164,5 +172,5 @@ export async function listExportRows(ownerUserId: string, profileId: string) {
       .where(doneReportsOf(ownerUserId, profileId))
       .orderBy(reportDate, asc(reports.createdAt), asc(studies.pageIndex)),
   ]);
-  return { markerRows, studyRows, measurementRows };
+  return { noteRows, markerRows, studyRows, measurementRows };
 }

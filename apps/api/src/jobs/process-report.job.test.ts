@@ -104,6 +104,7 @@ const edge = vi.hoisted(() => ({
   dateOfBirth: "1986-05-20" as string | null,
   filledBirths: [] as unknown[][],
   previous: undefined as Visit | undefined,
+  note: null as string | null,
 }));
 
 vi.mock("../lib/anthropic.js", () => ({ anthropic: { messages: { create: edge.create } } }));
@@ -150,6 +151,7 @@ vi.mock("../modules/reports/reports.repo.js", () => ({
     dateOfBirth: edge.dateOfBirth,
     sex: "female",
     ancestry: "south_asian",
+    note: edge.note,
     files: edge.files,
   }),
   listProfileFileHashes: async () => edge.hashes,
@@ -258,6 +260,7 @@ beforeEach(() => {
   edge.dateOfBirth = "1986-05-20";
   edge.filledBirths.length = 0;
   edge.previous = undefined;
+  edge.note = null;
   addFile(0, labPdf);
 });
 
@@ -467,6 +470,54 @@ test("a marker that moved status since the previous visit is stored as a change 
     rank: expect.any(Number),
   });
   expect(report.doctorQuestions.length).toBeLessThanOrEqual(6);
+});
+
+test("the visit note never reaches any Claude prompt, narrative and findings included", async () => {
+  const note = "Zorbel note: tired for two weeks, started walking daily";
+  edge.note = note;
+  edge.previous = {
+    date: "2023-02-01",
+    labName: "Lakeview Lab",
+    note,
+    markers: [
+      {
+        markerKey: "hemoglobin",
+        value: 10.2,
+        valueText: null,
+        unit: "g/dL",
+        status: "risk",
+        calibratedLow: 12,
+        calibratedHigh: 15.5,
+      },
+    ],
+    studies: [],
+  } as Visit;
+  edge.create
+    .mockResolvedValueOnce(classified("lab_panel"))
+    .mockResolvedValueOnce(toolUse("record_extraction", compact(extraction)))
+    .mockResolvedValueOnce(toolUse("map_markers", mappings))
+    .mockResolvedValueOnce(toolUse("write_narrative", draft))
+    .mockResolvedValueOnce(
+      toolUse("write_findings", {
+        findings: [{ number: 1, body: "It moved.", citedKeys: ["hemoglobin"] }],
+      }),
+    );
+
+  await read();
+
+  const tools = edge.create.mock.calls.map(
+    ([request]) => (request as { tools: { name: string }[] }).tools[0]?.name,
+  );
+  expect(tools).toEqual([
+    "classify_pages",
+    "record_extraction",
+    "map_markers",
+    "write_narrative",
+    "write_findings",
+  ]);
+  const prompts = JSON.stringify(edge.create.mock.calls);
+  expect(prompts).toContain("10.2");
+  expect(prompts).not.toContain("Zorbel");
 });
 
 test("a urine panel line never stores a blood marker, by alias or by Claude", async () => {

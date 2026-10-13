@@ -92,6 +92,7 @@ export const reports = pgTable(
     doctorQuestions: jsonb("doctor_questions").$type<string[]>(),
     narrative: jsonb().$type<Narrative>(),
     narrativeStatus: text("narrative_status", { enum: ["done", "failed"] }),
+    note: text(),
     error: text(),
     createdAt: createdAt(),
   },

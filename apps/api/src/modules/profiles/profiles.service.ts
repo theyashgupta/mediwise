@@ -182,15 +182,29 @@ function reportCells(report: ExportReport) {
 }
 
 /**
- * Writes a profile's stored values as a CSV file: UTF-8 with a BOM, CRLF line ends, one row per value.
+ * Writes a profile's stored values and visit notes as a CSV file: UTF-8 with a BOM, CRLF line ends, one row per value.
  *
  * @remarks
  * The file is built in memory. A profile holds a few thousand values at most, so a stream would add code and save nothing.
  */
 export async function exportProfileCsv(userId: string, id: string) {
   await getOwnedProfile(userId, id);
-  const { markerRows, studyRows, measurementRows } = await repo.listExportRows(userId, id);
+  const { noteRows, markerRows, studyRows, measurementRows } = await repo.listExportRows(
+    userId,
+    id,
+  );
   const rows = [
+    ...noteRows.map((row) => ({
+      ...reportCells(row),
+      type: "note",
+      key: null,
+      name: null,
+      value: row.note,
+      unit: null,
+      status: null,
+      printedRange: null,
+      calibratedRange: null,
+    })),
     ...markerRows.map((row) => ({
       ...reportCells(row),
       type: row.markerKey && isVital(row.markerKey) ? "vital" : "marker",
