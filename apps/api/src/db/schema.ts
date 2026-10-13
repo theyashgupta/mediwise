@@ -76,6 +76,13 @@ export const profiles = pgTable(
   ],
 );
 
+/**
+ * One upload of a profile: lab panels and studies, which can come from several labs.
+ *
+ * @remarks
+ * `lab_name` is the lab of the lab panel pages. A study and a marker take the lab of their own file, so `title` never
+ * names a lab. `title_edited` keeps a re-read from replacing a title the user wrote.
+ */
 export const reports = pgTable(
   "reports",
   {
@@ -85,6 +92,8 @@ export const reports = pgTable(
       .references(() => profiles.id, { onDelete: "cascade" }),
     status: reportStatus().notNull().default("queued"),
     labName: text("lab_name"),
+    title: text(),
+    titleEdited: boolean("title_edited").notNull().default(false),
     collectedAt: date("collected_at"),
     reportedAt: date("reported_at"),
     sourceKind: sourceKind("source_kind").notNull(),
@@ -107,6 +116,7 @@ export const reports = pgTable(
   (t) => [
     index("reports_profile_id_idx").on(t.profileId),
     index("reports_episode_id_idx").on(t.episodeId),
+    check("reports_title_length", sql`char_length(${t.title}) <= 60`),
   ],
 );
 
@@ -143,7 +153,8 @@ export const episodes = pgTable(
  *
  * @remarks
  * `page_classes` holds one class per page as uploaded. Identity pages are cut from the stored file, so stored page n is the
- * n-th entry that is not `identity_document`. A file with a `skip_reason` has no object in storage.
+ * n-th entry that is not `identity_document`. A file with a `skip_reason` has no object in storage. `lab_name` is the lab
+ * printed on the letterhead of this file.
  */
 export const reportFiles = pgTable(
   "report_files",
@@ -160,6 +171,7 @@ export const reportFiles = pgTable(
     sha256: text(),
     pageClasses: text("page_classes", { enum: pageClasses }).array(),
     skipReason: text("skip_reason", { enum: ["duplicate", "identity"] }),
+    labName: text("lab_name"),
   },
   (t) => [index("report_files_sha256_idx").on(t.sha256)],
 );
@@ -183,6 +195,9 @@ export const reportMarkers = pgTable(
     calibratedHigh: doublePrecision("calibrated_high"),
     note: text(),
     derived: boolean().notNull().default(false),
+    reportFileId: uuid("report_file_id").references(() => reportFiles.id, {
+      onDelete: "set null",
+    }),
   },
   (t) => [index("report_markers_report_id_idx").on(t.reportId)],
 );

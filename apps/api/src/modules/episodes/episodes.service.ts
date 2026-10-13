@@ -364,6 +364,11 @@ export async function getEpisode(userId: string, id: string) {
     }),
   );
   const episode = buildEpisode(visits.flat());
+  const titles = new Map(rows.map((row) => [row.id, row.title]));
+  const timeline = episode.timeline.map((row) => ({
+    ...row,
+    title: titles.get(row.reportId) ?? null,
+  }));
   const { summary, ...fields } = stored;
-  return { ...fields, ...episode, summary: await summaryFor(id, summary, episode) };
+  return { ...fields, ...episode, timeline, summary: await summaryFor(id, summary, episode) };
 }

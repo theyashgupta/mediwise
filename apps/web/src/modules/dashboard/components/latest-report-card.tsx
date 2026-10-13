@@ -76,7 +76,7 @@ export function LatestReportCard({ report }: LatestReportCardProps) {
             {report.coverage !== null && ` · ${text.coverage(report.coverage)}`}
           </p>
           <h2 id="latest-report" className="text-2xl font-semibold tracking-tight text-balance">
-            {report.labName ?? text.fallbackTitle}
+            {report.title ?? text.fallbackTitle}
           </h2>
           {report.deltaSincePrevious && (
             <ScoreChange delta={report.deltaSincePrevious} latestDate={report.date} />

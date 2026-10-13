@@ -4,7 +4,13 @@ import type { EarlierValue, ExportReport, MarkerRow } from "../types";
 import { ReportExport } from "./report-export";
 
 const report: ExportReport = {
-  header: { labName: "Made-up Labs", collectedAt: "2025-02-14", reportedAt: "2025-02-15" },
+  header: {
+    title: "14 Feb 2025 · blood panel (2 markers), ultrasound",
+    labName: "Made-up Labs",
+    collectedAt: "2025-02-14",
+    reportedAt: "2025-02-15",
+  },
+  labs: ["Made-up Labs", "Made-up Imaging"],
   note: "Tired for two weeks.\nStarted walking daily.",
   moveFirst: [],
   patterns: [],
@@ -43,6 +49,7 @@ const marker = (markerKey: string, name: string, value: number): MarkerRow => ({
   deviation: null,
   labRange: null,
   calibratedRange: null,
+  labName: "Made-up Labs",
 });
 
 const earlierValue = (markerKey: string, value: number, reportId: string, collectedAt: string) => ({
@@ -60,6 +67,7 @@ const withMarkers: ExportReport = {
     {
       key: "metabolic",
       label: "Metabolic",
+      labNames: ["Made-up Labs"],
       markers: [marker("glucose_fasting", "Glucose", 96), marker("ldl_cholesterol", "LDL", 120)],
     },
   ],
@@ -69,6 +77,12 @@ const rowOf = (html: string, name: string) => {
   const start = html.indexOf(`>${name}</th>`);
   return html.slice(start, html.indexOf("</tr>", start));
 };
+
+test("the export header names the report by its title and lists every lab under it", () => {
+  const html = render(report);
+  expect(html).toContain("14 Feb 2025 · blood panel (2 markers), ultrasound");
+  expect(html).toContain("Made-up Labs, Made-up Imaging");
+});
 
 test("the export prints the visit note under the visit dates, before the results", () => {
   const html = render(report);

@@ -46,7 +46,7 @@ export const episodes: Messages["episodes"] = {
       empty: "इस एपिसोड में कोई रिपोर्ट नहीं है। रिपोर्ट के पेज से कोई रिपोर्ट जोड़ें।",
       markers: (n: number, flagged: number) =>
         review(`${n} मार्कर, ${flagged} वॉच या जोखिम की स्थिति में`),
-      unnamedLab: "लैब का नाम छपा नहीं है",
+      unnamedReport: "रिपोर्ट",
     },
     repeated: {
       title: "दोहराए गए मार्कर",

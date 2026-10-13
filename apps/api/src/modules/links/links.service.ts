@@ -117,7 +117,7 @@ export function settleStored(
   }));
   const sequence = (settlement: Settlement) => ({
     state: settlement.state,
-    earlier: step(reportId, settlement.earlierDate, current.labName, settlement.earlier),
+    earlier: step(reportId, settlement.earlierDate, settlement.earlierLabName, settlement.earlier),
     later: step(settlement.reportId, settlement.date, settlement.labName, settlement.later),
   });
   const settled = states.flatMap(({ finding, settlement }) =>

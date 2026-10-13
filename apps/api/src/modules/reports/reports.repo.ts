@@ -53,6 +53,8 @@ export const reportColumns = {
   status: reports.status,
   error: reports.error,
   labName: reports.labName,
+  title: reports.title,
+  titleEdited: reports.titleEdited,
   collectedAt: reports.collectedAt,
   reportedAt: reports.reportedAt,
   score: reports.score,
@@ -63,6 +65,16 @@ export const reportColumns = {
   markerCount: sql<number>`(select count(*)::int from ${reportMarkers} where ${reportMarkers}.${sql.identifier("report_id")} = ${reports}.${sql.identifier("id")} and not ${reportMarkers}.${sql.identifier("derived")})`,
   createdAt: reports.createdAt,
 };
+
+/**
+ * The lab of a marker row: the lab of its file, or the report's lab for a row stored before markers kept their file.
+ *
+ * @remarks
+ * Needs `report_markers` joined to `reports` and left joined to `report_files` on `report_file_id`.
+ */
+export const markerLabName = sql<
+  string | null
+>`case when ${reportMarkers.reportFileId} is null then ${reports.labName} else ${reportFiles.labName} end`;
 
 /** Names of the files a report keeps, in upload order, for the visit cards. */
 export const reportFileNames = sql<
@@ -84,6 +96,63 @@ export async function updateReportNote(ownerUserId: string, id: string, note: st
     .where(and(eq(reports.id, id), ownedBy(ownerUserId)))
     .returning({ note: reports.note });
   return row;
+}
+
+/** Sets a report's title and whether the user wrote it. */
+export async function updateReportTitle(
+  ownerUserId: string,
+  id: string,
+  title: string,
+  titleEdited: boolean,
+) {
+  const [row] = await db
+    .update(reports)
+    .set({ title, titleEdited })
+    .where(and(eq(reports.id, id), ownedBy(ownerUserId)))
+    .returning({ title: reports.title, titleEdited: reports.titleEdited });
+  return row;
+}
+
+/**
+ * Loads what the title rule reads: the lab date, the upload date, the marker keys and the studies of a report.
+ *
+ * @remarks
+ * Not scoped by owner: the backfill command calls it for every report. The service checks the owner first.
+ */
+export async function findTitleFacts(id: string) {
+  const [report] = await db
+    .select({ collectedAt: reports.collectedAt, createdAt: reports.createdAt })
+    .from(reports)
+    .where(eq(reports.id, id));
+  if (!report) return undefined;
+  const [markerRows, studyRows] = await Promise.all([
+    db
+      .select({ markerKey: reportMarkers.markerKey })
+      .from(reportMarkers)
+      .where(and(eq(reportMarkers.reportId, id), eq(reportMarkers.derived, false))),
+    db
+      .select({ kind: studies.kind, performedAt: studies.performedAt })
+      .from(studies)
+      .where(eq(studies.reportId, id)),
+  ]);
+  return { ...report, markerKeys: markerRows.map((row) => row.markerKey), studies: studyRows };
+}
+
+/** Lists the ids of every done report whose title the user did not write, for the backfill command. */
+export async function listRuleTitledReportIds() {
+  const rows = await db
+    .select({ id: reports.id })
+    .from(reports)
+    .where(and(eq(reports.status, "done"), eq(reports.titleEdited, false)));
+  return rows.map((row) => row.id);
+}
+
+/** Stores the rule title of a report, unless the user wrote one in between. */
+export async function saveRuleTitle(id: string, title: string) {
+  await db
+    .update(reports)
+    .set({ title })
+    .where(and(eq(reports.id, id), eq(reports.titleEdited, false)));
 }
 
 export async function listReportFiles(reportId: string) {
@@ -115,8 +184,11 @@ export async function listReportMarkers(reportId: string) {
       calibratedLow: reportMarkers.calibratedLow,
       calibratedHigh: reportMarkers.calibratedHigh,
       derived: reportMarkers.derived,
+      labName: markerLabName,
     })
     .from(reportMarkers)
+    .innerJoin(reports, eq(reports.id, reportMarkers.reportId))
+    .leftJoin(reportFiles, eq(reportFiles.id, reportMarkers.reportFileId))
     .where(eq(reportMarkers.reportId, reportId));
 }
 
@@ -138,6 +210,7 @@ export async function listStudies(reportId: string) {
       signedBy: studies.signedBy,
       pageIndex: studies.pageIndex,
       fileName: reportFiles.name,
+      labName: reportFiles.labName,
       filmFileId: studies.filmFileId,
       filmName: film.name,
     })
@@ -332,10 +405,10 @@ export async function updateReportStatus(
 }
 
 /**
- * Replaces a report's markers, alias suggestions, follow-ups and studies, and marks it done, in one transaction.
+ * Replaces a report's markers, alias suggestions, follow-ups, studies and file labs, and marks it done, in one transaction.
  *
  * @remarks
- * Old rows are deleted first, so a retried job never duplicates them.
+ * Old rows are deleted first, so a retried job never duplicates them. A title the user wrote stays.
  */
 export async function saveReportResult(
   id: string,
@@ -348,8 +421,16 @@ export async function saveReportResult(
     measurements: Omit<typeof studyMeasurements.$inferInsert, "studyId">[];
   }[] = [],
   findingRows: (typeof findings.$inferInsert)[] = [],
+  fileLabs: { id: string; labName: string | null }[] = [],
 ) {
+  const { title, ...rest } = report;
   await db.transaction(async (tx) => {
+    for (const file of fileLabs) {
+      await tx
+        .update(reportFiles)
+        .set({ labName: file.labName })
+        .where(eq(reportFiles.id, file.id));
+    }
     await tx.delete(reportMarkers).where(eq(reportMarkers.reportId, id));
     await tx.delete(followUps).where(eq(followUps.reportId, id));
     await tx.delete(studies).where(eq(studies.reportId, id));
@@ -365,7 +446,15 @@ export async function saveReportResult(
     if (findingRows.length > 0) await tx.insert(findings).values(findingRows);
     await tx
       .update(reports)
-      .set({ ...report, status: "done", error: null, translations: null })
+      .set({
+        ...rest,
+        ...(title !== undefined && {
+          title: sql`case when ${reports.titleEdited} then ${reports.title} else ${title} end`,
+        }),
+        status: "done",
+        error: null,
+        translations: null,
+      })
       .where(eq(reports.id, id));
   });
 }

@@ -48,6 +48,17 @@ export const report: Messages["report"] = {
       standard: review("सामान्य पैनल"),
     },
   },
+  labs: (names: string[]) => `लैब: ${names.join(", ")}`,
+  rename: {
+    open: "नाम बदलें",
+    label: "रिपोर्ट का नाम",
+    help: "MediWise रिपोर्ट की तारीख़ों और उसकी जाँचों से नाम बनाता है।",
+    save: "नाम सेव करें",
+    cancel: "रद्द करें",
+    restore: "MediWise का बनाया नाम लगाएँ",
+    saveError: "हम नाम सेव नहीं कर सके। फिर से कोशिश करें।",
+    characters: (count: string, max: string) => `${max} में से ${count} अक्षर`,
+  },
   note: {
     label: "इस जाँच के नोट",
     help: review("MediWise यह नोट नहीं पढ़ता। आपके डॉक्टर इसे एक्सपोर्ट में देखते हैं।"),
@@ -93,10 +104,10 @@ export const report: Messages["report"] = {
     description: review(
       "किसी रिपोर्ट की दोबारा जाँच या दूसरी राय। बाद की रिपोर्ट पहले की रिपोर्ट की किसी लाइन को तय कर सकती है।",
     ),
-    repeatOf: (report: string, date: string) => `${date} की ${report} की दोबारा जाँच`,
-    secondOpinionOf: (report: string, date: string) => `${date} की ${report} पर दूसरी राय`,
-    repeatedIn: (report: string, date: string) => `${date} की ${report} में दोबारा जाँच`,
-    secondOpinionIn: (report: string, date: string) => `${date} की ${report} में दूसरी राय`,
+    repeatOf: (report: string) => `"${report}" की दोबारा जाँच`,
+    secondOpinionOf: (report: string) => `"${report}" पर दूसरी राय`,
+    repeatedIn: (report: string) => `"${report}" में दोबारा जाँच`,
+    secondOpinionIn: (report: string) => `"${report}" में दूसरी राय`,
     proposed: review(
       "MediWise ने यह जोड़ी ढूँढी। अगर बाद की रिपोर्ट वही जाँच दोहराती है, तो इसकी पुष्टि करें।",
     ),
@@ -112,7 +123,6 @@ export const report: Messages["report"] = {
     add: "रिपोर्ट जोड़ें",
     adding: "जोड़ रहे हैं",
     failed: "हम लिंक सेव नहीं कर सके। फिर से कोशिश करें।",
-    unnamed: "आपकी रिपोर्ट",
   },
   moveFirst: {
     title: review("पहले इन पर काम करें"),
