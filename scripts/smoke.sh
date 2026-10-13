@@ -49,6 +49,9 @@ pass "POST /profiles"
 call "$API_URL/reports?profileId=$profile" | jq -e '.items | length == 0' >/dev/null || fail "GET /reports"
 pass "GET /reports"
 
+[ "$(call "$API_URL/profiles/$profile/export.csv" | head -c 8)" = "$(printf '\xef\xbb\xbfType,')" ] || fail "GET /profiles/:id/export.csv"
+pass "GET /profiles/:id/export.csv"
+
 call -X DELETE "$API_URL/profiles/$profile" >/dev/null || fail "DELETE /profiles/$profile"
 pass "DELETE /profiles (clean up)"
 

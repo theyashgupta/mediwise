@@ -1,3 +1,4 @@
+import { derived, markers, studyMarkers } from "@mediwise/engine";
 import {
   guardianMessage,
   isMinor,
@@ -6,6 +7,7 @@ import {
   type ProfileUpdate,
 } from "@mediwise/shared";
 import { AppError } from "../../common/errors.js";
+import { isVital } from "../studies/index.js";
 import * as repo from "./profiles.repo.js";
 
 /**
@@ -118,4 +120,129 @@ export async function getOwnedProfile(userId: string, id: string) {
   const profile = await repo.findProfileById(userId, id);
   if (!profile) throw new AppError(404, "We could not find this profile");
   return profile;
+}
+
+const csvHeader = [
+  "Type",
+  "Report date",
+  "Lab",
+  "Marker key",
+  "Marker name",
+  "Value",
+  "Unit",
+  "Status",
+  "Printed range",
+  "Calibrated range",
+  "Visit ID",
+  "Report ID",
+];
+const catalogNames = new Map(
+  [...markers, ...derived, ...studyMarkers].map((entry) => [entry.key, entry.name]),
+);
+
+type Cell = string | number | null | undefined;
+type ExportReport = {
+  reportId: string;
+  reportDate: string;
+  collectedAt: string | null;
+  labName: string | null;
+};
+
+/**
+ * Writes one RFC 4180 field.
+ *
+ * @remarks
+ * Report text comes from uploaded files, so a text cell that starts like a formula gets a leading quote mark. Excel and
+ * Numbers then show it as text and never run it.
+ */
+function csvField(cell: Cell) {
+  if (cell === null || cell === undefined) return "";
+  let text = String(cell);
+  if (typeof cell === "string" && /^[=+\-@\t\r]/.test(text) && Number.isNaN(Number(text))) {
+    text = `'${text}`;
+  }
+  return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+}
+
+function rangeText(low: number | null, high: number | null) {
+  if (low !== null && high !== null) return `${low} to ${high}`;
+  if (low !== null) return `> ${low}`;
+  if (high !== null) return `< ${high}`;
+  return null;
+}
+
+/** Gives the report columns of one export row: date, lab and the visit id the web groups reports by. */
+function reportCells(report: ExportReport) {
+  return {
+    reportDate: report.reportDate,
+    lab: report.labName,
+    visitId: report.collectedAt ? `visit-${report.collectedAt}` : report.reportId,
+    reportId: report.reportId,
+  };
+}
+
+/**
+ * Writes a profile's stored values as a CSV file: UTF-8 with a BOM, CRLF line ends, one row per value.
+ *
+ * @remarks
+ * The file is built in memory. A profile holds a few thousand values at most, so a stream would add code and save nothing.
+ */
+export async function exportProfileCsv(userId: string, id: string) {
+  await getOwnedProfile(userId, id);
+  const { markerRows, studyRows, measurementRows } = await repo.listExportRows(userId, id);
+  const rows = [
+    ...markerRows.map((row) => ({
+      ...reportCells(row),
+      type: row.markerKey && isVital(row.markerKey) ? "vital" : "marker",
+      key: row.markerKey,
+      name: (row.markerKey && catalogNames.get(row.markerKey)) || row.rawName,
+      value: row.value ?? row.valueText,
+      unit: row.unit,
+      status: row.status,
+      printedRange: rangeText(row.labRangeLow, row.labRangeHigh),
+      calibratedRange: rangeText(row.calibratedLow, row.calibratedHigh),
+    })),
+    ...studyRows.map((row) => ({
+      ...reportCells(row),
+      type: "study",
+      key: row.kind,
+      name: row.bodyRegion,
+      value: row.impressionText ?? row.resultText ?? row.findingsText,
+      unit: null,
+      status: null,
+      printedRange: null,
+      calibratedRange: null,
+    })),
+    ...measurementRows.map((row) => ({
+      ...reportCells(row),
+      type: "study measurement",
+      key: row.key,
+      name: catalogNames.get(row.key) ?? row.key,
+      value: row.value ?? row.valueText,
+      unit: row.unit,
+      status: row.status,
+      printedRange: row.printedRange,
+      calibratedRange: null,
+    })),
+  ].sort(
+    (a, b) => a.reportDate.localeCompare(b.reportDate) || a.reportId.localeCompare(b.reportId),
+  );
+  const lines = [
+    csvHeader,
+    ...rows.map((row) => [
+      row.type,
+      row.reportDate,
+      row.lab,
+      row.key,
+      row.name,
+      row.value,
+      row.unit,
+      row.status,
+      row.printedRange,
+      row.calibratedRange,
+      row.visitId,
+      row.reportId,
+    ]),
+  ];
+  return `\uFEFF${lines.map((cells) => cells.map(csvField).join(",")).join("\r\n")}\r\n`;
 }

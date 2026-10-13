@@ -15,10 +15,19 @@ const profile: Profile = {
   permissionConfirmedAt: "2026-10-13T06:00:00.000Z",
   guardianConfirmedAt: null,
   reportCount: 1,
+  valueCount: 42,
 };
 
 function render(card: Profile) {
-  return renderToStaticMarkup(<ProfileCard profile={card} onEdit={() => {}} onRemove={() => {}} />);
+  return renderToStaticMarkup(
+    <ProfileCard
+      profile={card}
+      onEdit={() => {}}
+      onRemove={() => {}}
+      downloading={false}
+      onDownload={() => {}}
+    />,
+  );
 }
 
 test("an approximate date of birth shows the badge and the note", () => {
@@ -29,4 +38,10 @@ test("an approximate date of birth shows the badge and the note", () => {
 
 test("an exact date of birth shows no badge", () => {
   expect(render({ ...profile, dateOfBirthApproximate: false })).not.toContain("Approximate");
+});
+
+test("the card shows the CSV button with the row count", () => {
+  const html = render(profile);
+  expect(html).toContain("Download all values (CSV)");
+  expect(html).toContain("42 rows");
 });

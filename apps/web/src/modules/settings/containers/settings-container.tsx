@@ -8,7 +8,7 @@ import { type Theme, useTheme } from "@/common/hooks/use-theme";
 import { SecurityContainer, useSignOut } from "@/modules/auth";
 import { creditsLeftLabel } from "@/modules/credits";
 import { useMe, useMeMutations } from "@/modules/me";
-import { SelfProfileContainer } from "@/modules/profiles";
+import { ProfileCsvContainer, SelfProfileContainer } from "@/modules/profiles";
 import { DataActions } from "../components/data-actions";
 import { DeleteAccountDialog } from "../components/delete-account-dialog";
 import { NameForm } from "../components/name-form";
@@ -89,15 +89,18 @@ export function SettingsContainer() {
           title="Your data"
           description="Download a copy of your profiles, reports and markers, or delete all of it."
         >
-          <DataActions
-            downloading={download.isPending}
-            error={download.error?.message}
-            onDownload={() => download.mutate()}
-            onDelete={() => {
-              remove.reset();
-              setDeleting(true);
-            }}
-          />
+          <div className="space-y-6">
+            <ProfileCsvContainer />
+            <DataActions
+              downloading={download.isPending}
+              error={download.error?.message}
+              onDownload={() => download.mutate()}
+              onDelete={() => {
+                remove.reset();
+                setDeleting(true);
+              }}
+            />
+          </div>
         </SettingsSection>
       </div>
       <DeleteAccountDialog
