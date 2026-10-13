@@ -9,6 +9,7 @@ import { useProfiles } from "@/modules/profiles";
 import { useEarlierValues } from "@/modules/trends";
 import { ReportExport } from "../components/report-export";
 import { dateOptions, profileDetails } from "../config/export";
+import { useReportTranslation } from "../hooks/use-report-translation";
 import { useReport } from "../hooks/use-reports";
 import { ShareReportContainer } from "./share-report-container";
 
@@ -35,7 +36,9 @@ function Content() {
   const report = useReport(reportId);
   const profiles = useProfiles();
   const earlier = useEarlierValues(reportId, report.data?.status === "done");
-  const ready = report.data?.status === "done" && profiles.isSuccess && earlier.isSuccess;
+  const { translating } = useReportTranslation(reportId, report.data?.translation);
+  const ready =
+    report.data?.status === "done" && profiles.isSuccess && earlier.isSuccess && !translating;
   usePrintWhenReady(ready);
 
   if (report.isPending || profiles.isPending) return <LoadingState variant="page" />;

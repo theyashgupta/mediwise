@@ -30,6 +30,7 @@ import { StudyList } from "../components/study-list";
 import { UnmeasuredList } from "../components/unmeasured-list";
 import { formatReportDate } from "../config/report";
 import { useReportLinks } from "../hooks/use-report-links";
+import { useReportTranslation } from "../hooks/use-report-translation";
 import { inProgress } from "../config/status";
 import { useDeleteReport } from "../hooks/use-delete-report";
 import { useReport, useReports } from "../hooks/use-reports";
@@ -53,6 +54,7 @@ export function ReportContainer() {
   const saveNote = useUpdateReportNote();
   const links = useReportLinks();
   const siblings = useReports(report.data?.profileId);
+  const translation = useReportTranslation(reportId, report.data?.translation);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   if (report.isPending) return <LoadingState variant="page" />;
@@ -165,6 +167,14 @@ export function ReportContainer() {
       )}
       {status === "done" && (
         <div className="space-y-12" data-testid="report-done">
+          {(translation.translating || translation.failed) && (
+            <p className="flex items-center gap-3 text-sm text-muted-foreground" role="status">
+              {translation.translating && (
+                <LoaderCircle className="size-4 animate-spin" aria-hidden />
+              )}
+              {translation.translating ? t.report.translation.writing : t.report.translation.failed}
+            </p>
+          )}
           {header.score !== null && <ReportSummary header={header} verdict={report.data.verdict} />}
           <ReportLinks
             links={report.data.links}
