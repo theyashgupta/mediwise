@@ -1,6 +1,6 @@
 import { createReadStream, existsSync, statSync } from "node:fs";
 import { createServer } from "node:http";
-import { extname, join, resolve, sep } from "node:path";
+import { dirname, extname, join, resolve, sep } from "node:path";
 import { createGzip } from "node:zlib";
 
 const types: Record<string, string> = {
@@ -39,19 +39,26 @@ function findFile(root: string, pathname: string) {
   return undefined;
 }
 
+/** Returns the `404.html` nearest to a request path, as Cloudflare Pages picks it. */
+function findNotFound(root: string, pathname: string) {
+  let dir = dirname(resolve(join(root, decodeURIComponent(pathname))));
+  while (dir.startsWith(root + sep) && !existsSync(join(dir, "404.html"))) dir = dirname(dir);
+  return join(dir.startsWith(root + sep) ? dir : root, "404.html");
+}
+
 /**
  * Serves a built folder with gzip, as Cloudflare Pages serves the web and the landing.
  *
  * @remarks
  * Lighthouse scores an uncompressed build far too low, and neither `vite preview` nor `next start` serves a static export with compression.
- * A single-page app answers an unknown path with `index.html`, the landing with `404.html`.
+ * A single-page app answers an unknown path with `index.html`, the landing with the nearest `404.html`.
  */
 function serve(dir: string, port: number, spa: boolean) {
   const root = resolve(dir);
   createServer((req, res) => {
     const { pathname } = new URL(req.url ?? "/", "http://localhost");
     const found = findFile(root, pathname);
-    const file = found ?? join(root, spa ? "index.html" : "404.html");
+    const file = found ?? (spa ? join(root, "index.html") : findNotFound(root, pathname));
     const ext = extname(file);
     const gzip = compressible.has(ext) && /\bgzip\b/.test(req.headers["accept-encoding"] ?? "");
     res.writeHead(found || spa ? 200 : 404, {
