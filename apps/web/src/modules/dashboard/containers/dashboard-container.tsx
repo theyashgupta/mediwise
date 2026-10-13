@@ -8,12 +8,14 @@ import { useActiveProfile } from "@/modules/profiles";
 import { ReportFailed, useRetryReport } from "@/modules/reports";
 import { AttentionList } from "../components/attention-list";
 import { DashboardGreeting } from "../components/dashboard-greeting";
+import { FamilyList } from "../components/family-list";
 import { LatestReportCard } from "../components/latest-report-card";
 import { ProcessingCard } from "../components/processing-card";
 import { ProfilePrompt } from "../components/profile-prompt";
 import { RecentReports } from "../components/recent-reports";
 import { useDashboard } from "../hooks/use-dashboard";
 import { useDismissedForSession } from "../hooks/use-dismissed-for-session";
+import { useFamily } from "../hooks/use-family";
 
 function UploadButton() {
   return (
@@ -27,8 +29,9 @@ function UploadButton() {
 }
 
 export function DashboardContainer() {
-  const { profile } = useActiveProfile();
+  const { profile, setActiveProfileId } = useActiveProfile();
   const dashboard = useDashboard(profile?.id);
+  const family = useFamily();
   const retry = useRetryReport();
   const data = dashboard.data;
   const isEmpty = data?.recent.length === 0;
@@ -82,6 +85,14 @@ export function DashboardContainer() {
             title="Upload your first report"
             body="Upload a PDF or photos of a report. We read every marker and explain it in plain English. We score each marker against ranges for your age, sex and ancestry."
             action={<UploadButton />}
+          />
+        )}
+        {family.data && (
+          <FamilyList
+            members={family.data}
+            activeId={profile?.id}
+            today={new Date()}
+            onSelect={setActiveProfileId}
           />
         )}
         {data && data.recent.length > 0 && (
