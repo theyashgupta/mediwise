@@ -1,11 +1,13 @@
 import {
   categories,
+  categoryLabel,
   daysBetween,
   derived,
   type Marker,
   markers,
   repeatMarkerDays,
   studyMarkers,
+  type TextLocale,
   toCanonical,
   trendDirection,
 } from "@mediwise/engine";
@@ -227,13 +229,15 @@ export async function listSeries(userId: string, profileId: string) {
 }
 
 /** Lists every marker of a profile measured in at least two done reports, in catalog order. */
-export async function listTrends(userId: string, profileId: string) {
+export async function listTrends(userId: string, profileId: string, locale: TextLocale = "en") {
   const { reports, series: all } = await listSeries(userId, profileId);
   const series = all.filter((item) => item.points.length >= 2);
   const present = new Set(series.map((item) => item.category));
   return {
     reportCount: reports.length,
-    categories: categories.filter(({ key }) => present.has(key)),
+    categories: categories
+      .filter(({ key }) => present.has(key))
+      .map(({ key }) => ({ key, label: categoryLabel(key, locale) })),
     markers: series,
   };
 }
@@ -267,7 +271,11 @@ function toHeader(report: StoredReport) {
  * of an earlier date than `b`. A pair picked newest first is swapped, so a change always reads forward in time.
  * Both must be in the profile's done reports, so a report of another profile or owner answers 404.
  */
-export async function compareReports(userId: string, query: CompareQuery) {
+export async function compareReports(
+  userId: string,
+  query: CompareQuery,
+  locale: TextLocale = "en",
+) {
   const profileId = query.b
     ? await repo.findReportProfileId(userId, query.b)
     : (await getOwnedProfile(userId, query.profileId ?? "")).id;
@@ -329,7 +337,8 @@ export async function compareReports(userId: string, query: CompareQuery) {
     a: a ? toHeader(a) : null,
     b: b ? toHeader(b) : null,
     summary,
-    groups: categories.flatMap(({ key, label }) => {
+    groups: categories.flatMap(({ key }) => {
+      const label = categoryLabel(key, locale);
       const items = compared.filter((row) => row.category === key);
       return items.length > 0 ? [{ key, label, rows: items }] : [];
     }),

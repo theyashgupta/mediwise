@@ -1,16 +1,24 @@
 import {
+  alertHeadlineStart,
   categories,
+  categoryLabel,
   coreMarkerKeys,
   countsInScore,
   coverageCap,
   derived,
   deviation,
+  localizeAlertHeadline,
+  localizeFollowUp,
+  localizeVerdict,
   type Marker,
   markers,
+  markerText,
   matchRange,
+  patternText,
   rankMoveFirst,
   scoreFormula,
   studyMarkers,
+  type TextLocale,
 } from "@mediwise/engine";
 import type { CreateReportInput, PageClass, ReportMime } from "@mediwise/shared";
 import { randomUUID } from "node:crypto";
@@ -21,6 +29,8 @@ import { createSignedUploadUrl, list, remove } from "../../lib/storage.js";
 import { assertCanAddReport } from "../credits/index.js";
 import { listFindings } from "../findings/index.js";
 import { listReportLinks, loadSequence, settleStored } from "../links/index.js";
+import { stepUsage } from "../extraction/index.js";
+import { writeHindi } from "../narrative/index.js";
 import { getOwnedProfile } from "../profiles/index.js";
 import { claudeCostCents } from "../spend/index.js";
 import * as repo from "./reports.repo.js";
@@ -114,7 +124,7 @@ export async function getReport(userId: string, id: string) {
  * The engine never runs here: statuses, score and follow-ups are what processing stored, so a catalog change cannot move an old report.
  * Only the split into open and settled findings is new on each load, because a link can change after the read.
  */
-export async function getReportDetail(userId: string, id: string) {
+export async function getReportDetail(userId: string, id: string, locale: TextLocale = "en") {
   const report = await getReport(userId, id);
   const done = report.status === "done";
   const [storedFiles, storedStudies, storedFindings, sequence, links] = await Promise.all([
@@ -125,17 +135,14 @@ export async function getReportDetail(userId: string, id: string) {
     done ? listReportLinks(id) : [],
   ]);
   const files = describeFiles(storedFiles, storedStudies);
-  const read =
-    report.status === "done"
-      ? buildReportDetail(
-          report,
-          ...(await Promise.all([
-            repo.listReportMarkers(id),
-            repo.listFollowUps(id),
-            repo.findReportInsights(id),
-          ])),
-        )
-      : buildReportDetail(report, [], []);
+  const [rows, storedFollowUps, insights] = done
+    ? await Promise.all([
+        repo.listReportMarkers(id),
+        repo.listFollowUps(id),
+        repo.findReportInsights(id),
+      ])
+    : [[], [], undefined];
+  const read = buildReportDetail(report, rows, storedFollowUps, insights, locale);
   const settled = sequence
     ? settleStored(id, sequence.current, sequence.later, {
         findings: storedFindings,
@@ -150,13 +157,55 @@ export async function getReportDetail(userId: string, id: string) {
       };
   const detail = {
     ...read,
-    ...settled,
-    studies: storedStudies.map(toStudy),
+    ...withClaudeText(settled, locale, insights?.translations),
+    studies: storedStudies.map((study) => toStudy(study, locale)),
     files,
     links,
+    ...(locale === "en"
+      ? {}
+      : { translation: done ? (insights?.translations?.[locale]?.status ?? ("missing" as const)) : null }),
   };
   if (!env.ADMIN_USER_ID || userId !== env.ADMIN_USER_ID) return detail;
   return { ...detail, costCents: await reportCostCents(id) };
+}
+
+type ClaudeText = Pick<
+  ReturnType<typeof settleStored>,
+  "findings" | "settled" | "doctorQuestions" | "narrative"
+>;
+
+/**
+ * Swaps the Claude-written text of a report for its stored translation in the locale, once that translation passed.
+ *
+ * @remarks
+ * Runs after the settle step, so the English logic that drops settled findings and questions stays the only logic.
+ * A text with no translation keeps its English, and English returns the input as it is.
+ */
+function withClaudeText<T extends ClaudeText>(
+  text: T,
+  locale: TextLocale,
+  translations: StoredTranslations | undefined,
+): T {
+  const stored = locale === "en" ? undefined : translations?.[locale];
+  if (stored?.status !== "done") return text;
+  const put = (english: string) =>
+    stored.text[english] ?? localizeAlertHeadline(english, locale);
+  return {
+    ...text,
+    findings: text.findings.map((finding) => ({
+      ...finding,
+      title: put(finding.title),
+      body: put(finding.body),
+    })),
+    settled: text.settled.map((item) => ({ ...item, title: put(item.title) })),
+    doctorQuestions: text.doctorQuestions.map(put),
+    narrative: text.narrative && {
+      sections: text.narrative.sections.map((section) => ({
+        ...section,
+        sentences: section.sentences.map((sentence) => ({ ...sentence, text: put(sentence.text) })),
+      })),
+    },
+  };
 }
 
 /** Prices the latest read of a report in US cents, to two decimals, or null when it has no read job. */
@@ -214,7 +263,7 @@ function describeFiles(
 const studyCatalog = new Map(studyMarkers.map((entry, order) => [entry.key, { entry, order }]));
 
 /** Shapes a stored study for the report page: impression first, measurements in catalog order. */
-function toStudy(study: Awaited<ReturnType<typeof repo.listStudies>>[number]) {
+function toStudy(study: Awaited<ReturnType<typeof repo.listStudies>>[number], locale: TextLocale) {
   return {
     id: study.id,
     kind: study.kind,
@@ -239,7 +288,7 @@ function toStudy(study: Awaited<ReturnType<typeof repo.listStudies>>[number]) {
       .map(({ known: { entry }, ...measurement }) => ({
         key: measurement.key,
         name: entry.name,
-        description: entry.description,
+        description: markerText(entry, locale).description,
         value: measurement.value,
         valueText: measurement.valueText,
         unit: measurement.unit,
@@ -254,6 +303,7 @@ type StoredReport = Awaited<ReturnType<typeof getReport>>;
 type StoredMarker = Awaited<ReturnType<typeof repo.listReportMarkers>>[number];
 type StoredFollowUp = Awaited<ReturnType<typeof repo.listFollowUps>>[number];
 type StoredInsights = Awaited<ReturnType<typeof repo.findReportInsights>>;
+type StoredTranslations = NonNullable<StoredInsights>["translations"];
 
 const catalog = new Map(
   [...markers, ...derived].map((entry, order) => [entry.key, { entry, order }]),
@@ -274,12 +324,12 @@ function toRange(low: number | null, high: number | null) {
   return low === null && high === null ? null : { low, high };
 }
 
-function toMarkerRow(row: StoredMarker, entry: Marker) {
+function toMarkerRow(row: StoredMarker, entry: Marker, locale: TextLocale) {
   return {
     markerKey: entry.key,
     name: entry.name,
     shortName: entry.shortName ?? null,
-    description: entry.description,
+    description: markerText(entry, locale).description,
     value: row.value,
     valueText: row.valueText,
     unit: row.unit,
@@ -309,6 +359,7 @@ function buildReportDetail(
   rows: StoredMarker[],
   storedFollowUps: StoredFollowUp[],
   insights?: StoredInsights,
+  locale: TextLocale = "en",
 ) {
   const seen = new Set<string>();
   const mapped: { row: MarkerRow; entry: Marker; order: number }[] = [];
@@ -331,12 +382,12 @@ function buildReportDetail(
       continue;
     }
     if (row.derived && countsInScore(known.entry)) {
-      derivedRows.push({ row: toMarkerRow(row, known.entry), order: known.order });
+      derivedRows.push({ row: toMarkerRow(row, known.entry, locale), order: known.order });
       continue;
     }
     if (seen.has(known.entry.key)) continue;
     seen.add(known.entry.key);
-    mapped.push({ row: toMarkerRow(row, known.entry), entry: known.entry, order: known.order });
+    mapped.push({ row: toMarkerRow(row, known.entry, locale), entry: known.entry, order: known.order });
   }
   const byOrder = (a: { order: number }, b: { order: number }) => a.order - b.order;
   mapped.sort(byOrder);
@@ -373,27 +424,36 @@ function buildReportDetail(
       capped: report.status === "done" && coverageCap(measuredCore, core) < 100,
       formula: scoreFormula,
     },
-    verdict: report.verdict,
+    verdict: report.verdict && localizeVerdict(report.verdict, locale),
     note: report.note,
     moveFirst,
-    categories: categories.flatMap(({ key, label }) => {
+    categories: categories.flatMap(({ key }) => {
+      const label = categoryLabel(key, locale);
       const items = mapped.filter(({ entry }) => entry.category === key).map(({ row }) => row);
       return items.length > 0 ? [{ key, label, markers: items }] : [];
     }),
     derived: derivedRows.map(({ row }) => row),
     unmapped,
-    followUps: storedFollowUps.map(({ nextAction, ...followUp }) => ({
-      ...followUp,
-      next: nextAction,
-    })),
+    followUps: storedFollowUps.map(({ nextAction, ...followUp }) =>
+      localizeFollowUp({ ...followUp, next: nextAction }, locale),
+    ),
     unmeasured: storedFollowUps.flatMap((followUp) => {
       const entry =
         followUp.kind === "measure" ? catalog.get(followUp.markerKey ?? "")?.entry : undefined;
       return entry
-        ? [{ markerKey: entry.key, name: entry.name, description: entry.description }]
+        ? [
+            {
+              markerKey: entry.key,
+              name: entry.name,
+              description: markerText(entry, locale).description,
+            },
+          ]
         : [];
     }),
-    patterns: insights?.patterns ?? [],
+    patterns: (insights?.patterns ?? []).map((match) => ({
+      ...match,
+      ...patternText(match, locale),
+    })),
     doctorQuestions: insights?.doctorQuestions ?? [],
     narrative: insights?.narrative ?? null,
   };
@@ -406,7 +466,12 @@ function buildReportDetail(
  * The row comes from the same build as the report page, so value, status and marker order match it.
  * History keeps one point per date, and this report wins its own date, so the page always marks its point.
  */
-export async function getMarkerDetail(userId: string, id: string, markerKey: string) {
+export async function getMarkerDetail(
+  userId: string,
+  id: string,
+  markerKey: string,
+  locale: TextLocale = "en",
+) {
   const report = await getReport(userId, id);
   const notFound = new AppError(404, "This marker is not in this report");
   if (report.status !== "done") throw notFound;
@@ -415,12 +480,13 @@ export async function getMarkerDetail(userId: string, id: string, markerKey: str
     repo.listFollowUps(id),
     repo.findReportProfile(userId, id),
   ]);
-  const detail = buildReportDetail(report, rows, storedFollowUps);
+  const detail = buildReportDetail(report, rows, storedFollowUps, undefined, locale);
   const ordered = [...detail.categories.flatMap((category) => category.markers), ...detail.derived];
   const index = ordered.findIndex((row) => row.markerKey === markerKey);
   const marker = ordered[index];
   const entry = catalog.get(markerKey)?.entry;
   if (!marker || !entry || !profile) throw notFound;
+  const text = markerText(entry, locale);
 
   const calibrated = marker.calibratedRange;
   const range =
@@ -468,12 +534,8 @@ export async function getMarkerDetail(userId: string, id: string, markerKey: str
       ? (entry.sources.find((source) => source.id === range.source) ?? null)
       : null,
     history: [...history.values()],
-    knowledge: {
-      whatItIs: entry.whatItIs,
-      whyItMatters: entry.whyItMatters,
-      whatMovesIt: entry.whatMovesIt,
-    },
-    southAsianNote: entry.southAsianNote ?? null,
+    knowledge: { whatItIs: text.whatItIs, whyItMatters: text.whyItMatters, whatMovesIt: text.whatMovesIt },
+    southAsianNote: text.southAsianNote ?? null,
     sources: entry.sources,
     followUps: detail.followUps.filter((followUp) => followUp.markerKey === markerKey),
     previous: neighbour(ordered[index - 1]),
@@ -510,4 +572,52 @@ async function deleteStaleDrafts(userId: string) {
     new Date(Date.now() - draftLifetimeMs),
   );
   if (paths.length > 0) await remove(paths);
+}
+
+/**
+ * Writes the Hindi text of a done report's narrative, findings and doctor questions once, and returns its status.
+ *
+ * @remarks
+ * A stored result, done or failed, is returned with no new call, so each report pays for one translation at most.
+ * The step's tokens join the report's read job, so the report cost and the monthly cap count them.
+ */
+export async function translateReport(userId: string, id: string) {
+  const report = await getReport(userId, id);
+  if (report.status !== "done") {
+    throw new AppError(409, "MediWise can write the Hindi text only after it reads the report");
+  }
+  const [insights, storedFindings, rows] = await Promise.all([
+    repo.findReportInsights(id),
+    listFindings(id),
+    repo.listReportMarkers(id),
+  ]);
+  const stored = insights?.translations?.hi;
+  if (stored) return { status: stored.status };
+  if (env.CLAUDE_HARD_STOP) {
+    throw new AppError(503, "We cannot write the Hindi text at the moment. Try again later.");
+  }
+  const english = [
+    ...new Set([
+      ...(insights?.narrative?.sections ?? [])
+        .flatMap((section) => section.sentences.map((sentence) => sentence.text))
+        .filter((text) => !text.startsWith(alertHeadlineStart)),
+      ...storedFindings.flatMap((finding) => [finding.title, finding.body]),
+      ...(insights?.doctorQuestions ?? []),
+    ]),
+  ];
+  const printedNames = [
+    ...new Set(
+      rows.flatMap((row) => {
+        const entry = row.markerKey ? catalog.get(row.markerKey)?.entry : undefined;
+        return entry ? [entry.name, ...(entry.shortName ? [entry.shortName] : [])] : [];
+      }),
+    ),
+  ];
+  const usage = stepUsage(env.ANTHROPIC_NARRATIVE_MODEL);
+  const hindi = await writeHindi(english, printedNames, usage);
+  const translation = hindi
+    ? { status: "done" as const, text: Object.fromEntries(hindi) }
+    : { status: "failed" as const, text: {} };
+  await repo.saveTranslation(id, { ...insights?.translations, hi: translation }, usage);
+  return { status: translation.status };
 }

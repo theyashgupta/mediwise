@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { requestLocale } from "../../common/locale.js";
 import { validate } from "../../common/validate.js";
 import type { AuthEnv } from "../../middleware/auth.js";
 import { createShareSchema, shareParamsSchema, shareReportParamsSchema } from "./shares.schemas.js";
@@ -33,5 +34,5 @@ export const sharesRoutes = new Hono<AuthEnv>()
 export const sharedExportRoutes = new Hono().get("/:token", async (c) => {
   c.header("Cache-Control", "no-store");
   c.header("X-Robots-Tag", "noindex, nofollow");
-  return c.json(await getSharedExport(c.req.param("token")));
+  return c.json(await getSharedExport(c.req.param("token"), requestLocale(c)));
 });

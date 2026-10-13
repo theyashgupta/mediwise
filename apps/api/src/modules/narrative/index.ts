@@ -6,3 +6,4 @@ export {
   withHeadline,
   writeNarrative,
 } from "./narrative.service.js";
+export { type HindiProblem, validateHindi, writeHindi } from "./narrative.hindi.js";

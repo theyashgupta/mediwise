@@ -34,7 +34,7 @@ const store = vi.hoisted(() => {
   const findingRows: object[] = [];
   const visits = new Map<string, object>();
   const links: object[] = [];
-  const insights: { current?: object } = {};
+  const insights: { current?: object; usage?: object } = {};
   const credits = new Map<string, { balance: number; readsToday: number }>();
   const view = ({ id, profileId, status, createdAt, note }: Report) => ({
     id,
@@ -129,6 +129,10 @@ const store = vi.hoisted(() => {
       listReportMarkers: async () => markerRows,
       listFollowUps: async () => followUpRows,
       findReportInsights: async () => insights.current,
+      saveTranslation: async (_id: string, translations: object, usage: object) => {
+        insights.current = { ...insights.current, translations };
+        insights.usage = usage;
+      },
       listStudies: async () => studyRows,
       findReportProfile: async (owner: string, id: string) =>
         find(owner, id) && { id: aliceProfile, sex: "male", ancestry: "south_asian" },
@@ -156,6 +160,8 @@ vi.mock("../profiles/profiles.repo.js", () => store.profilesRepo);
 vi.mock("../../lib/storage.js", () => store.storage);
 vi.mock("../findings/findings.repo.js", () => store.findingsRepo);
 vi.mock("../links/links.repo.js", () => store.linksRepo);
+const edge = vi.hoisted(() => ({ create: vi.fn() }));
+vi.mock("../../lib/anthropic.js", () => ({ anthropic: { messages: { create: edge.create } } }));
 
 const app = new Hono<AuthEnv>()
   .use(async (c, next) => {
@@ -894,4 +900,160 @@ test("with CLAUDE_HARD_STOP every new report returns 503", async () => {
   env.CLAUDE_HARD_STOP = true;
   expect((await create([pdf])).res.status).toBe(503);
   expect(store.reports).toEqual([]);
+});
+
+/** Stores a done report with one marker, its retest, a finding, a question and a narrative. */
+async function doneReport(translations?: object) {
+  const { body } = await create([pdf]);
+  const report = store.reports.find((r) => r.id === body.id);
+  if (report) report.status = "done";
+  store.markerRows.push(
+    stored({
+      markerKey: "tsh",
+      rawName: "TSH",
+      value: 12,
+      unit: "µIU/mL",
+      status: "risk",
+      calibratedLow: 0.45,
+      calibratedHigh: 4.12,
+    }),
+  );
+  store.followUpRows.push({
+    kind: "retest",
+    markerKey: "tsh",
+    title: "Retest Thyroid stimulating hormone in 8 to 12 weeks",
+    why: "Your Thyroid stimulating hormone is well outside your calibrated range.",
+    nextAction: "Book a retest in 8 to 12 weeks.",
+    rank: 1,
+  });
+  store.findingRows.push({
+    kind: "risk",
+    severity: "risk",
+    title: "TSH 12 has risk status",
+    body: "TSH is 12 µIU/mL, above the optimal range.",
+    citedKeys: ["tsh"],
+    citedStudyIds: [],
+  });
+  store.insights.current = {
+    patterns: [],
+    doctorQuestions: ["My TSH is 12. What could explain it?"],
+    narrative: {
+      sections: [
+        {
+          heading: "The headline",
+          sentences: [{ text: "TSH is the one to move first.", markerKeys: ["tsh"] }],
+        },
+      ],
+    },
+    translations,
+  };
+  return body.id;
+}
+
+const hindiText = {
+  "TSH is the one to move first.": "सबसे पहले TSH पर काम करें।",
+  "TSH 12 has risk status": "TSH 12 जोखिम स्थिति में है",
+  "TSH is 12 µIU/mL, above the optimal range.": "TSH 12 µIU/mL है, सबसे अच्छी रेंज से ऊपर।",
+  "My TSH is 12. What could explain it?": "मेरा TSH 12 है। इसकी क्या वजह हो सकती है?",
+};
+
+type Detail = {
+  categories: { label: string; markers: { name: string; description: string }[] }[];
+  followUps: { title: string }[];
+  narrative: { sections: { sentences: { text: string; markerKeys: string[] }[] }[] };
+  findings: { title: string; body: string }[];
+  doctorQuestions: string[];
+  translation?: string;
+  knowledge: { whatItIs: string };
+};
+
+async function readJson(path: string, language?: string) {
+  return (await (await read(path, language)).json()) as Detail;
+}
+
+function read(path: string, language?: string) {
+  return app.request(path, {
+    headers: { "x-user": "alice", ...(language ? { "Accept-Language": language } : {}) },
+  });
+}
+
+test("the English report is the same byte for byte with no language, with English, and with a Hindi translation stored", async () => {
+  const id = await doneReport();
+  const plain = await (await read(`/reports/${id}`)).text();
+  expect(await (await read(`/reports/${id}`, "en")).text()).toBe(plain);
+  expect(await (await read(`/reports/${id}`, "en-IN,en;q=0.9")).text()).toBe(plain);
+  store.insights.current = {
+    ...store.insights.current,
+    translations: { hi: { status: "done", text: hindiText } },
+  };
+  expect(await (await read(`/reports/${id}`)).text()).toBe(plain);
+  expect(plain).not.toContain("translation");
+  expect(plain).not.toMatch(/\p{Script=Devanagari}/u);
+});
+
+test("a Hindi report shows catalog copy, follow-ups and the stored translation in Hindi, with names as printed", async () => {
+  const id = await doneReport({ hi: { status: "done", text: hindiText } });
+  const detail = await readJson(`/reports/${id}`, "hi");
+  const marker = detail.categories[0]?.markers[0];
+  expect(detail.categories[0]?.label).toBe("थायरॉइड");
+  expect(marker?.name).toBe("Thyroid stimulating hormone");
+  expect(marker?.description).toMatch(/\p{Script=Devanagari}/u);
+  expect(detail.followUps[0]?.title).toBe(
+    "8 से 12 हफ़्ते में Thyroid stimulating hormone का दोबारा टेस्ट करें",
+  );
+  expect(detail.narrative.sections[0]?.sentences[0]).toEqual({
+    text: "सबसे पहले TSH पर काम करें।",
+    markerKeys: ["tsh"],
+  });
+  expect(detail.findings[0]).toMatchObject({
+    title: "TSH 12 जोखिम स्थिति में है",
+    body: "TSH 12 µIU/mL है, सबसे अच्छी रेंज से ऊपर।",
+  });
+  expect(detail.doctorQuestions).toEqual(["मेरा TSH 12 है। इसकी क्या वजह हो सकती है?"]);
+  expect(detail.translation).toBe("done");
+
+  const page = await readJson(`/reports/${id}/markers/tsh`, "hi");
+  expect(page.knowledge.whatItIs).toContain("TSH");
+  expect(page.knowledge.whatItIs).toMatch(/\p{Script=Devanagari}/u);
+});
+
+test("a Hindi report with no translation keeps the Claude text in English and says it is missing", async () => {
+  const id = await doneReport();
+  const detail = await readJson(`/reports/${id}`, "hi");
+  expect(detail.translation).toBe("missing");
+  expect(detail.narrative.sections[0]?.sentences[0]?.text).toBe("TSH is the one to move first.");
+  expect(detail.findings[0]?.title).toBe("TSH 12 has risk status");
+});
+
+test("translating a report calls Claude once, stores the Hindi text and its tokens, and a second call reuses it", async () => {
+  const id = await doneReport();
+  edge.create.mockReset().mockResolvedValueOnce({
+    content: [
+      {
+        type: "tool_use",
+        id: "toolu_1",
+        name: "write_hindi",
+        input: {
+          items: Object.values(hindiText).map((text, i) => ({ n: i + 1, text })),
+        },
+      },
+    ],
+    stop_reason: "tool_use",
+    usage: { input_tokens: 900, output_tokens: 400 },
+  });
+
+  const first = await call("POST", `/reports/${id}/translation`);
+  expect(await first.json()).toEqual({ status: "done" });
+  const second = await call("POST", `/reports/${id}/translation`);
+  expect(await second.json()).toEqual({ status: "done" });
+  expect(edge.create).toHaveBeenCalledTimes(1);
+  expect(store.insights.usage).toMatchObject({ inputTokens: 900, outputTokens: 400 });
+
+  const detail = await readJson(`/reports/${id}`, "hi");
+  expect(detail.findings[0]?.title).toBe("TSH 12 जोखिम स्थिति में है");
+});
+
+test("translating an unfinished report returns 409", async () => {
+  const { body } = await create([pdf]);
+  expect((await call("POST", `/reports/${body.id}/translation`)).status).toBe(409);
 });

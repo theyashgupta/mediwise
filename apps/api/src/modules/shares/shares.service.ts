@@ -1,3 +1,4 @@
+import type { TextLocale } from "@mediwise/engine";
 import { createHash, randomBytes } from "node:crypto";
 import { AppError } from "../../common/errors.js";
 import { getOwnedProfile } from "../profiles/index.js";
@@ -79,10 +80,10 @@ async function previousValues(ownerUserId: string, reportId: string) {
  * @remarks
  * The person is only a first name and an age, and file names are replaced, because a name in either could identify the patient.
  */
-export async function getSharedExport(token: string) {
+export async function getSharedExport(token: string, locale: TextLocale = "en") {
   const share = await repo.findOpenShare(hashToken(token));
   if (!share) throw new AppError(404, "This link has ended");
-  const report = await getReportDetail(share.ownerUserId, share.reportId);
+  const report = await getReportDetail(share.ownerUserId, share.reportId, locale);
   const [profile, previous] = await Promise.all([
     getOwnedProfile(share.ownerUserId, report.profileId),
     previousValues(share.ownerUserId, share.reportId),
