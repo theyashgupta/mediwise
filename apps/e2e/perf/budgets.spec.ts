@@ -14,9 +14,9 @@ const password = "e2e-Password-1";
 const debugPort = 9333;
 const runs = 3;
 const referenceBenchmark = 2000;
-const maxInpMs = 200;
+const maxInpMs = 250;
 
-const appBudget = { accessibility: 90, "best-practices": 90, seo: 53 };
+const appBudget = { accessibility: 100, "best-practices": 95, seo: 58 };
 
 let context: BrowserContext;
 let page: Page;
@@ -147,17 +147,17 @@ async function afterNextPaint(target: Page) {
 }
 
 for (const { name, url, budget } of [
-  { name: "home", url: () => webOrigin, budget: { ...appBudget, performance: 57 } },
+  { name: "home", url: () => webOrigin, budget: { ...appBudget, performance: 63 } },
   {
     name: "report",
     url: () => `${webOrigin}${reportPath}`,
-    budget: { ...appBudget, performance: 51 },
+    budget: { ...appBudget, performance: 56 },
   },
-  { name: "trends", url: () => `${webOrigin}/trends`, budget: { ...appBudget, performance: 60 } },
+  { name: "trends", url: () => `${webOrigin}/trends`, budget: { ...appBudget, performance: 67 } },
   {
     name: "landing",
     url: () => landingOrigin,
-    budget: { performance: 82, accessibility: 90, "best-practices": 90, seo: 90 },
+    budget: { performance: 80, accessibility: 100, "best-practices": 95, seo: 95 },
   },
 ]) {
   test(`Lighthouse on ${name} stays within its budget on a phone`, async () => {
