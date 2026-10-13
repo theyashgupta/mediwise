@@ -18,6 +18,7 @@ import { reportsRoutes } from "./modules/reports/index.js";
 import { sharedExportRoutes, sharesRoutes } from "./modules/shares/index.js";
 import { spendRoutes } from "./modules/spend/index.js";
 import { compareRoutes, trendsRoutes } from "./modules/trends/index.js";
+import { yearReviewRoutes } from "./modules/year-review/index.js";
 
 /**
  * The API with every module mounted.
@@ -45,6 +46,7 @@ export const app = new Hono()
   .route("/dashboard", dashboardRoutes)
   .route("/me", meRoutes)
   .route("/profiles", profilesRoutes)
+  .route("/profiles", yearReviewRoutes)
   .route("/reports", reportsRoutes)
   .route("/reports", sharesRoutes)
   .route("/trends", trendsRoutes)

@@ -99,7 +99,7 @@ function toRange(low: number | null, high: number | null) {
 }
 
 /** The day a report belongs to: its collection date, or its upload day when the lab printed none. */
-function visitDate(report: Pick<StoredReport, "collectedAt" | "createdAt">) {
+export function visitDate(report: Pick<StoredReport, "collectedAt" | "createdAt">) {
   return report.collectedAt ?? report.createdAt.toISOString().slice(0, 10);
 }
 
@@ -152,8 +152,8 @@ function toSeries(
   };
 }
 
-/** Lists every marker of a profile measured in at least two done reports, in catalog order. */
-export async function listTrends(userId: string, profileId: string) {
+/** Loads a profile's done reports, oldest first, and one series for each catalog marker they measure. */
+export async function listSeries(userId: string, profileId: string) {
   await getOwnedProfile(userId, profileId);
   const [ordered, rows] = await Promise.all([
     repo.listDoneReports(userId, profileId),
@@ -161,16 +161,20 @@ export async function listTrends(userId: string, profileId: string) {
   ]);
   const picked = pickRows(rows);
   const keys = new Set([...picked.values()].flatMap((report) => [...report.keys()]));
-  const series = [...keys]
-    .sort(byCatalogOrder)
-    .flatMap((key) => {
-      const entry = catalog.get(key)?.entry;
-      return entry ? [toSeries(entry, ordered, picked)] : [];
-    })
-    .filter((item) => item.points.length >= 2);
+  const series = [...keys].sort(byCatalogOrder).flatMap((key) => {
+    const entry = catalog.get(key)?.entry;
+    return entry ? [toSeries(entry, ordered, picked)] : [];
+  });
+  return { reports: ordered, series };
+}
+
+/** Lists every marker of a profile measured in at least two done reports, in catalog order. */
+export async function listTrends(userId: string, profileId: string) {
+  const { reports, series: all } = await listSeries(userId, profileId);
+  const series = all.filter((item) => item.points.length >= 2);
   const present = new Set(series.map((item) => item.category));
   return {
-    reportCount: ordered.length,
+    reportCount: reports.length,
     categories: categories.filter(({ key }) => present.has(key)),
     markers: series,
   };
