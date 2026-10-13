@@ -36,6 +36,7 @@ export async function findVisit(reportId: string) {
         id: studies.id,
         kind: studies.kind,
         bodyRegion: studies.bodyRegion,
+        performedAt: studies.performedAt,
         impression: studies.impressionText,
         result: studies.resultText,
       })

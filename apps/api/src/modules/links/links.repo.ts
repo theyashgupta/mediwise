@@ -79,6 +79,7 @@ export async function listVisitDates(profileId: string) {
   return rows.map(({ date }) => date);
 }
 
+/** Writes the links the detector found as confirmed, so the user only acts to undo one. */
 export async function insertDetectedLinks(
   rows: { earlierReportId: string; laterReportId: string; kind: ReportLinkKind }[],
 ) {
@@ -86,7 +87,7 @@ export async function insertDetectedLinks(
   await db
     .insert(reportLinks)
     .values(
-      rows.map((row) => ({ ...row, createdBy: "detector" as const, state: "proposed" as const })),
+      rows.map((row) => ({ ...row, createdBy: "detector" as const, state: "confirmed" as const })),
     )
     .onConflictDoNothing();
 }

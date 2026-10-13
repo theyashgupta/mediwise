@@ -509,8 +509,13 @@ test("an alert that a linked later ultrasound settles leaves the findings, the q
       kind: "study_alert",
       title: alert.title,
       state: "settled",
-      earlier: { reportId: body.id, date: "2025-02-10", text: line },
-      later: { reportId: "report-b", date: "2025-03-24", text: "No adnexal mass is seen." },
+      earlier: { reportId: body.id, date: "2025-02-10", labName: null, text: line },
+      later: {
+        reportId: "report-b",
+        date: "2025-03-24",
+        labName: null,
+        text: "No adnexal mass is seen.",
+      },
     },
   ]);
   expect(detail.doctorQuestions).toEqual([]);
