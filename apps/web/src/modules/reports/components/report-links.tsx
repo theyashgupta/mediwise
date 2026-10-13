@@ -40,6 +40,8 @@ export function ReportLinks({
   const [otherId, setOtherId] = useState("");
   const [kind, setKind] = useState<LinkKind>("repeat");
   if (links.length === 0 && candidates.length === 0) return null;
+  const detected = (link: ReportLink) =>
+    link.createdBy === "detector" && link.state === "confirmed";
 
   function describe({ role, kind: linkKind, other }: ReportLink) {
     const name = other.labName ?? text.unnamed;
@@ -71,6 +73,7 @@ export function ReportLinks({
                 {link.state === "proposed" && (
                   <p className="text-sm text-muted-foreground">{text.proposed}</p>
                 )}
+                {detected(link) && <p className="text-sm text-muted-foreground">{text.detected}</p>}
               </div>
               <div className="flex gap-2">
                 {link.state === "proposed" && (
@@ -84,7 +87,7 @@ export function ReportLinks({
                   disabled={busy}
                   onClick={() => onUpdate(link.id, "dismissed")}
                 >
-                  {text.dismiss}
+                  {detected(link) ? text.undo : text.dismiss}
                 </Button>
               </div>
             </li>

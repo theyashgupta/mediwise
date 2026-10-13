@@ -534,6 +534,7 @@ export async function processReport(reportId: string, usage: ReportUsage, reclas
       id: study.id,
       kind: study.kind,
       bodyRegion: study.bodyRegion ?? null,
+      performedAt: study.performedAt ?? null,
       impression: study.impressionText ?? null,
       result: study.resultText ?? null,
       measurements: measurements.map(({ key, value, unit, status }) => ({

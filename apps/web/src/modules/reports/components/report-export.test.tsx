@@ -91,8 +91,13 @@ test("the export shows a settled alert and the later report as one block, in dat
         kind: "study_alert",
         title: `Your ultrasound report says: "${line}"`,
         state: "settled",
-        earlier: { reportId: "a", date: "2025-02-10", text: line },
-        later: { reportId: "b", date: "2025-03-24", text: "No adnexal mass is seen." },
+        earlier: { reportId: "a", date: "2025-02-10", labName: null, text: line },
+        later: {
+          reportId: "b",
+          date: "2025-03-24",
+          labName: null,
+          text: "No adnexal mass is seen.",
+        },
       },
     ],
   });

@@ -6,8 +6,8 @@ import {
   type LaterVisit,
   openQuestions,
   repeatMarkerDays,
+  repeatGap,
   repeatStudyDays,
-  repeatsStudy,
   type Settlement,
   settleFinding,
   typicalGapDays,
@@ -32,11 +32,11 @@ function inOrder(a: Dated, b: Dated): [Dated, Dated] {
 }
 
 /**
- * Proposes a link to every done report of the profile with a study of the same kind and region within 90 days.
+ * Links every done report of the profile with a study of the same modality and region within 90 days.
  *
  * @remarks
  * Runs on every read, so an older report uploaded after a newer one still finds it. A pair that already has a row keeps it,
- * so a dismissed proposal never comes back.
+ * so an undone link never comes back.
  */
 export async function proposeLinks(
   profileId: string,
@@ -48,9 +48,11 @@ export async function proposeLinks(
   const rows = [];
   for (const other of near) {
     const visit = (await findVisit(other.id))?.visit;
-    if (!visit || !repeatsStudy(current, visit)) continue;
-    const [earlier, later] = inOrder(report, other);
-    const kind: ReportLinkKind = earlier.date === later.date ? "second_opinion" : "repeat";
+    const days = visit && repeatGap(current, visit);
+    if (days === undefined) continue;
+    const [earlier, later] =
+      days === 0 ? inOrder(report, other) : days > 0 ? [report, other] : [other, report];
+    const kind: ReportLinkKind = days === 0 ? "second_opinion" : "repeat";
     rows.push({ earlierReportId: earlier.id, laterReportId: later.id, kind });
   }
   await repo.insertDetectedLinks(rows);
@@ -89,8 +91,8 @@ export async function loadLaterVisits(
   };
 }
 
-function step(reportId: string, date: string, text: string) {
-  return { reportId, date, text };
+function step(reportId: string, date: string, labName: string | null, text: string) {
+  return { reportId, date, labName, text };
 }
 
 /**
@@ -115,8 +117,8 @@ export function settleStored(
   }));
   const sequence = (settlement: Settlement) => ({
     state: settlement.state,
-    earlier: step(reportId, current.date, settlement.earlier),
-    later: step(settlement.reportId, settlement.date, settlement.later),
+    earlier: step(reportId, settlement.earlierDate, current.labName, settlement.earlier),
+    later: step(settlement.reportId, settlement.date, settlement.labName, settlement.later),
   });
   const settled = states.flatMap(({ finding, settlement }) =>
     settlement?.state === "settled" ? [{ settlement, finding }] : [],

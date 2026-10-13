@@ -1,0 +1,45 @@
+{
+  "earlier": {
+    "date": "2025-02-01",
+    "labName": "Lakeview Imaging",
+    "markers": [],
+    "studies": [
+      {
+        "id": "4d2b8e61-7a3c-4f19-b0e5-9c1a2d3e4f01",
+        "kind": "ultrasound",
+        "bodyRegion": "Abdomen and pelvis",
+        "performedAt": "2025-02-01",
+        "impression": "Liver, gall bladder and both kidneys are normal.\nA 3.8 x 2.9 cm complex mass in the left adnexa. Suggest clinical correlation.",
+        "result": null,
+        "measurements": []
+      }
+    ]
+  },
+  "later": {
+    "reportId": "8f3c1d72-6b4e-4a28-9d07-5e2f1a3b4c02",
+    "linked": true,
+    "date": "2025-02-01",
+    "labName": "Hillside Scan Centre",
+    "markers": [],
+    "studies": [
+      {
+        "id": "9a4e2f83-1c5d-4b36-8e18-6f3a2b4c5d03",
+        "kind": "ultrasound",
+        "bodyRegion": "USG BOTH BREASTS",
+        "performedAt": "2025-02-01",
+        "impression": "No focal lesion in either breast.",
+        "result": null,
+        "measurements": []
+      },
+      {
+        "id": "b5f6a394-2d6e-4c47-9f29-7a4b3c5d6e04",
+        "kind": "ultrasound",
+        "bodyRegion": "USG PELVIS - [TVS]",
+        "performedAt": "2025-02-11",
+        "impression": "Uterus is normal in size.\nBoth ovaries are normal. No adnexal mass is seen.",
+        "result": null,
+        "measurements": []
+      }
+    ]
+  }
+}
