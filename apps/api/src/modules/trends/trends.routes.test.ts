@@ -276,6 +276,24 @@ test("compare without ids uses the latest two reports, and with b alone the repo
   expect(first.body).toMatchObject({ a: null, b: { id: ids.first }, groups: [] });
 });
 
+test("compare gives a value from another unit only when the engine converts it", async () => {
+  store.rows.splice(0, store.rows.length);
+  store.rows.push(
+    { reportId: ids.first, markerKey: "ldl_cholesterol", value: 4, unit: "mmol/L", status: null },
+    { reportId: ids.second, markerKey: "ldl_cholesterol", value: 120, unit: "mg/dL", status: null },
+    { reportId: ids.first, markerKey: "hdl_cholesterol", value: 50, unit: "mg%", status: null },
+    { reportId: ids.second, markerKey: "hdl_cholesterol", value: 45, unit: "mg/dL", status: null },
+  );
+  const { body } = await json(`/compare?a=${ids.first}&b=${ids.second}`);
+  const rows = (body.groups as unknown as { rows: { markerKey: string }[] }[]).flatMap(
+    (group) => group.rows,
+  );
+  expect(rows).toEqual([
+    expect.objectContaining({ markerKey: "ldl_cholesterol", valueA: 155, unit: "mg/dL" }),
+    expect.objectContaining({ markerKey: "hdl_cholesterol", valueA: null, change: null }),
+  ]);
+});
+
 test("compare returns 404 for reports of two profiles or of another owner", async () => {
   expect((await json(`/compare?a=${ids.stranger}&b=${ids.second}`)).status).toBe(404);
   expect((await json(`/compare?a=${ids.first}&b=${ids.second}`, "bob")).status).toBe(404);

@@ -4,6 +4,7 @@ import {
   type Marker,
   markers,
   studyMarkers,
+  toCanonical,
   trendDirection,
 } from "@mediwise/engine";
 import { AppError } from "../../common/errors.js";
@@ -79,6 +80,18 @@ export function verdictChange(
 
 function statusOf(row: StoredRow): Status {
   return row.status ?? "unknown";
+}
+
+/**
+ * Writes a stored value in another row's unit, so the two values of a compared marker share one unit.
+ *
+ * @remarks
+ * The engine converts only to the catalog unit. A value it cannot convert returns null, never a number in the wrong unit.
+ */
+function valueInUnit(entry: Marker, row: StoredRow, unit: string | null) {
+  if (row.value === null) return row.valueText;
+  if (row.unit === unit) return row.value;
+  return unit === entry.unit ? (toCanonical(entry, row.value, row.unit ?? undefined) ?? null) : null;
 }
 
 function toRange(low: number | null, high: number | null) {
@@ -215,20 +228,22 @@ export async function compareReports(userId: string, query: CompareQuery) {
     const rowB = rowsB?.get(key);
     const statusA = rowA ? statusOf(rowA) : null;
     const statusB = rowB ? statusOf(rowB) : null;
+    const unit = rowB?.unit ?? rowA?.unit ?? null;
+    const valueA = rowA ? valueInUnit(entry, rowA, unit) : null;
     return [
       {
         markerKey: key,
         name: entry.name,
         category: entry.category,
-        unit: rowB?.unit ?? rowA?.unit ?? null,
+        unit,
         precision: entry.precision,
-        valueA: rowA ? (rowA.value ?? rowA.valueText) : null,
+        valueA,
         valueB: rowB ? (rowB.value ?? rowB.valueText) : null,
         statusA,
         statusB,
         change:
-          rowA && rowB && rowA.value !== null && rowB.value !== null && rowA.unit === rowB.unit
-            ? computeChange(rowA.value, rowB.value)
+          typeof valueA === "number" && rowB && rowB.value !== null
+            ? computeChange(valueA, rowB.value)
             : null,
         verdictChange: verdictChange(statusA, statusB),
       },
