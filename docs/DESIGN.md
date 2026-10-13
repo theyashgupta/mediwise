@@ -177,6 +177,7 @@ Every screen uses the foundation above. The patterns below repeat across pages, 
 - **Sticky bars.** The marker filter on the report and the compare table header stick under the app header (`top-12`).
 - **Footer.** The app shell and the auth pages show the disclaimer once, with links to the four policy pages.
 - **Doctor export.** The export page sets `data-theme="light"`, so it stays black on white in both themes and in print.
+- **Previous values on the export (MEDI-53).** The Move first and Markers tables get a Previous column between Value and Unit. It shows the value from the profile's previous done report, with ↑ or ↓ when the printed values differ. The mark has a screen reader label ("Higher now", "Lower now"). One line under the profile block names the previous report. A first report shows no column and no line. The page fits A4 portrait with the column.
 
 Decisions:
 
@@ -190,6 +191,7 @@ Screenshots: the demo account (made-up profile "Arjun Mehta", the two sample rep
 | - | - | - | - |
 | Dashboard | [after](design/pages/after-dashboard-light.jpg) | [after](design/pages/after-dashboard-dark.jpg) | [after](design/pages/after-dashboard-light-phone.jpg) |
 | Home, Your family (MEDI-51), 1440 and 1920 px, phone at 390 px; with only the self profile: [light](design/pages/after-family-self-light-1440.jpg), [phone](design/pages/after-family-self-light-390.jpg) | [after](design/pages/after-family-light-1440.jpg), [1920](design/pages/after-family-light-1920.jpg) | [after](design/pages/after-family-dark-1440.jpg), [1920](design/pages/after-family-dark-1920.jpg) | [light](design/pages/after-family-light-390.jpg), [dark](design/pages/after-family-dark-390.jpg) |
+| Home, Due for retest (MEDI-54). The demo report has HbA1c and ACR in range, so the two rows are added to the dashboard response in the browser for the capture | [after](design/pages/after-retest-light.jpg) | [after](design/pages/after-retest-dark.jpg) | [light](design/pages/after-retest-light-phone.jpg), [dark](design/pages/after-retest-dark-phone.jpg) |
 | Report with findings and studies (29 Mar 2025) | [after](design/pages/after-report-studies-light.jpg) | | |
 | Report | [after](design/pages/after-report-light.jpg) | [after](design/pages/after-report-dark.jpg) | [after](design/pages/after-report-light-phone.jpg) |
 | Marker | [after](design/pages/after-marker-light.jpg) | [after](design/pages/after-marker-dark.jpg) | [after](design/pages/after-marker-light-phone.jpg) |
@@ -201,7 +203,7 @@ Screenshots: the demo account (made-up profile "Arjun Mehta", the two sample rep
 | Profiles | [after](design/pages/after-profiles-light.jpg) | [after](design/pages/after-profiles-dark.jpg) | [after](design/pages/after-profiles-light-phone.jpg) |
 | Settings | [after](design/pages/after-settings-light.jpg) | [after](design/pages/after-settings-dark.jpg) | [after](design/pages/after-settings-light-phone.jpg) |
 | Credits | [after](design/pages/after-credits-light.jpg) | [after](design/pages/after-credits-dark.jpg) | [after](design/pages/after-credits-light-phone.jpg) |
-| Doctor export | [after](design/pages/after-export-light.jpg) | [after](design/pages/after-export-dark.jpg) | [after](design/pages/after-export-light-phone.jpg) |
+| Doctor export with previous values (29 Mar 2025, previous 9 Mar 2024, MEDI-53) | [after](design/pages/after-export-light.jpg) | [after](design/pages/after-export-dark.jpg) | [after](design/pages/after-export-light-phone.jpg) |
 | Sign in | [before](design/pages/before-login-light.jpg), [after](design/pages/after-login-light.jpg) | [before](design/pages/before-login-dark.jpg), [after](design/pages/after-login-dark.jpg) | [after](design/pages/after-login-light-phone.jpg) |
 | Create account | [before](design/pages/before-signup-light.jpg), [after](design/pages/after-signup-light.jpg) | [before](design/pages/before-signup-dark.jpg), [after](design/pages/after-signup-dark.jpg) | [after](design/pages/after-signup-light-phone.jpg) |
 | Forgot password | [before](design/pages/before-forgot-password-light.jpg), [after](design/pages/after-forgot-password-light.jpg) | [before](design/pages/before-forgot-password-dark.jpg), [after](design/pages/after-forgot-password-dark.jpg) | [after](design/pages/after-forgot-password-light-phone.jpg) |

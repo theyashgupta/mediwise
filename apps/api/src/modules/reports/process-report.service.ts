@@ -208,7 +208,7 @@ async function describeFindings(
 }
 
 /** Whole years between two ISO dates. */
-function ageOn(dateOfBirth: string, on: string) {
+export function ageOn(dateOfBirth: string, on: string) {
   const years = Number(on.slice(0, 4)) - Number(dateOfBirth.slice(0, 4));
   return on.slice(5) < dateOfBirth.slice(5) ? years - 1 : years;
 }

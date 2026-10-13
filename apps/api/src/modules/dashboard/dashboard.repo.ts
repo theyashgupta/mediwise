@@ -40,6 +40,7 @@ export async function listLatestDoneReports(ownerUserId: string, profileId: stri
     .select({
       id: reports.id,
       labName: reports.labName,
+      collectedAt: reports.collectedAt,
       date: reportDate,
       score: reports.score,
       tier: reports.tier,

@@ -5,8 +5,11 @@ import { EmptyState } from "@/common/components/empty-state";
 import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
 import { useProfiles } from "@/modules/profiles";
+import { useComparison } from "@/modules/trends";
 import { ReportExport } from "../components/report-export";
+import { dateOptions, previousReport, previousValues, profileDetails } from "../config/export";
 import { useReport } from "../hooks/use-reports";
+import { ShareReportContainer } from "./share-report-container";
 
 const route = getRouteApi("/reports/$reportId/export");
 
@@ -29,7 +32,15 @@ function Content() {
   const { reportId } = route.useParams();
   const report = useReport(reportId);
   const profiles = useProfiles();
-  const ready = report.data?.status === "done" && profiles.isSuccess;
+  const reports = useComparison({ b: reportId });
+  const previous = reports.data?.b
+    ? previousReport(reports.data.reports, reports.data.b)
+    : undefined;
+  const paired = useComparison({ a: previous?.id, b: previous ? reportId : undefined });
+  const comparing = reports.isPending || (previous !== undefined && paired.isPending);
+  const comparisonFailed = reports.isError || paired.isError;
+  const ready =
+    report.data?.status === "done" && profiles.isSuccess && !comparing && !comparisonFailed;
   usePrintWhenReady(ready);
 
   if (report.isPending || profiles.isPending) return <LoadingState variant="page" />;
@@ -39,6 +50,15 @@ function Content() {
   if (profiles.isError) {
     return (
       <ErrorState message="We could not load the profile." onRetry={() => profiles.refetch()} />
+    );
+  }
+  if (comparisonFailed) {
+    const failed = reports.isError ? reports : paired;
+    return (
+      <ErrorState
+        message="We could not load the previous report."
+        onRetry={() => failed.refetch()}
+      />
     );
   }
   if (report.data.status !== "done") {
@@ -51,16 +71,20 @@ function Content() {
     );
   }
 
+  if (comparing) return <LoadingState variant="page" />;
+
   return (
     <ReportExport
       report={report.data}
-      profile={profiles.data.find((profile) => profile.id === report.data.profileId)}
-      generatedOn={new Date().toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      })}
+      previous={
+        previous && paired.data
+          ? { report: previous, values: previousValues(paired.data.groups) }
+          : undefined
+      }
+      person={profileDetails(profiles.data.find((profile) => profile.id === report.data.profileId))}
+      generatedOn={new Date().toLocaleDateString("en-IN", dateOptions)}
       onPrint={() => window.print()}
+      actions={<ShareReportContainer reportId={reportId} />}
     />
   );
 }

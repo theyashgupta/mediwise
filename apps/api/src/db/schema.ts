@@ -297,3 +297,37 @@ export const markerAliasSuggestions = pgTable("marker_alias_suggestions", {
   suggestedMarkerKey: text("suggested_marker_key"),
   createdAt: createdAt(),
 });
+
+/**
+ * A read-only link to one report's doctor export.
+ *
+ * @remarks
+ * Only the SHA-256 of the token is stored, so a copy of this table cannot open a link.
+ */
+export const reportShares = pgTable(
+  "report_shares",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    reportId: uuid("report_id")
+      .notNull()
+      .references(() => reports.id, { onDelete: "cascade" }),
+    ownerUserId: text("owner_user_id").notNull(),
+    tokenHash: text("token_hash").notNull().unique(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    endedAt: timestamp("ended_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [index("report_shares_report_id_idx").on(t.reportId)],
+);
+
+export const reportShareOpens = pgTable(
+  "report_share_opens",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    shareId: uuid("share_id")
+      .notNull()
+      .references(() => reportShares.id, { onDelete: "cascade" }),
+    openedAt: timestamp("opened_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("report_share_opens_share_id_idx").on(t.shareId)],
+);

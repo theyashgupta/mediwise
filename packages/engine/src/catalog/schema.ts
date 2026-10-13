@@ -96,6 +96,13 @@ export const textRuleSchema = z
   );
 export type TextRule = z.infer<typeof textRuleSchema>;
 
+export const retestSchema = z.object({
+  status: z.enum(["watch", "risk"]),
+  weeks: z.number().int().positive(),
+  source: z.string().min(1),
+});
+export type Retest = z.infer<typeof retestSchema>;
+
 export const markerSchema = z.object({
   key: z.string().regex(/^[a-z][a-z0-9]*(_[a-z0-9]+)*$/),
   name: z.string().min(1),
@@ -111,6 +118,7 @@ export const markerSchema = z.object({
   whatMovesIt: z.string().min(1),
   ranges: z.array(rangeSchema),
   textRules: z.array(textRuleSchema).optional(),
+  retest: z.array(retestSchema).optional(),
   southAsianNote: z.string().min(1).optional(),
   sources: z.array(sourceSchema).min(1),
   core: z.boolean(),

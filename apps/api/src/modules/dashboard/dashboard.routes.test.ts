@@ -12,6 +12,7 @@ const store = vi.hoisted(() => {
     status: string;
     error: string | null;
     labName: string | null;
+    collectedAt: string | null;
     date: string;
     score: number | null;
     tier: string | null;
@@ -90,6 +91,7 @@ function done(id: string, date: string, score: number) {
     status: "done",
     error: null,
     labName: "Lab",
+    collectedAt: date,
     date,
     score,
     tier: "gold",
@@ -130,7 +132,13 @@ beforeEach(() => {
 test("a profile with no reports gets an empty dashboard", async () => {
   const res = await dashboard();
   expect(res.status).toBe(200);
-  expect(await res.json()).toEqual({ latest: null, moveFirst: [], recent: [], processingCount: 0 });
+  expect(await res.json()).toEqual({
+    latest: null,
+    moveFirst: [],
+    retests: [],
+    recent: [],
+    processingCount: 0,
+  });
 });
 
 test("the latest done report carries its counts and the score change since the previous one", async () => {
@@ -192,6 +200,35 @@ test("a ratio the lab reported carries its catalog description", async () => {
   store.markers.set("r", [marker("tc_hdl_ratio", 30, "risk")]);
   const data = await body();
   expect(data.moveFirst[0]?.description).toEqual(expect.any(String));
+});
+
+test("retest dates come from the collection date and the status, soonest first", async () => {
+  store.reports.push(done("r", "2025-02-01", 60));
+  store.markers.set("r", [
+    marker("urine_acr", 40, "watch"),
+    marker("hba1c", 8, "risk"),
+    marker("ldl", 30, "risk"),
+    marker("glucose", 15, "optimal"),
+  ]);
+  const data = await body();
+  expect(data.retests).toEqual([
+    { markerKey: "hba1c", name: "HbA1c", dueOn: "2025-05-03" },
+    { markerKey: "urine_acr", name: "Urine albumin to creatinine ratio", dueOn: "2026-01-31" },
+  ]);
+});
+
+test("a marker printed twice keeps its soonest retest date", async () => {
+  store.reports.push(done("r", "2025-02-01", 60));
+  store.markers.set("r", [marker("hba1c", 6, "watch"), marker("hba1c", 8, "risk")]);
+  const data = await body();
+  expect(data.retests).toEqual([{ markerKey: "hba1c", name: "HbA1c", dueOn: "2025-05-03" }]);
+});
+
+test("a report with no collection date gives no retest date", async () => {
+  store.reports.push({ ...done("r", "2025-02-01", 60), collectedAt: null });
+  store.markers.set("r", [marker("hba1c", 8, "risk")]);
+  const data = await body();
+  expect(data.retests).toEqual([]);
 });
 
 test("reports still being read are counted", async () => {

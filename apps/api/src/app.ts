@@ -15,6 +15,7 @@ import { meRoutes } from "./modules/me/index.js";
 import { paymentsRoutes, paymentsWebhookRoutes } from "./modules/payments/index.js";
 import { profilesRoutes } from "./modules/profiles/index.js";
 import { reportsRoutes } from "./modules/reports/index.js";
+import { sharedExportRoutes, sharesRoutes } from "./modules/shares/index.js";
 import { spendRoutes } from "./modules/spend/index.js";
 import { compareRoutes, trendsRoutes } from "./modules/trends/index.js";
 
@@ -22,7 +23,7 @@ import { compareRoutes, trendsRoutes } from "./modules/trends/index.js";
  * The API with every module mounted.
  *
  * @remarks
- * `auth` is registered after `/health` and the payments webhook, so only routes mounted below it are protected.
+ * `auth` is registered after `/health`, the payments webhook and the share links, so only routes mounted below it are protected.
  */
 export const app = new Hono()
   .use(contextStorage())
@@ -38,12 +39,14 @@ export const app = new Hono()
   )
   .route("/health", healthRoutes)
   .route("/payments", paymentsWebhookRoutes)
+  .route("/share", sharedExportRoutes)
   .use(auth)
   .use("/reports", reportCreateLimit)
   .route("/dashboard", dashboardRoutes)
   .route("/me", meRoutes)
   .route("/profiles", profilesRoutes)
   .route("/reports", reportsRoutes)
+  .route("/reports", sharesRoutes)
   .route("/trends", trendsRoutes)
   .route("/compare", compareRoutes)
   .route("/payments", paymentsRoutes)
