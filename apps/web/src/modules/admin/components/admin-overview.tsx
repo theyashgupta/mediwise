@@ -45,6 +45,7 @@ export function AdminOverview({ overview, retryingId, onRetry }: AdminOverviewPr
           {overview.alerts.map((alert) => (
             <p
               key={alert}
+              data-testid={`admin-alert-${alert}`}
               className="flex items-center gap-2 rounded-lg border border-destructive/40 px-4 py-3 text-sm text-destructive"
             >
               <AlertTriangle aria-hidden className="size-4 shrink-0" />
