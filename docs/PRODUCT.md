@@ -6,7 +6,7 @@ Upload any lab report. MediWise extracts every marker, explains it in plain lang
 
 ## Users
 
-- Primary: an adult in India who gets a yearly or half-yearly blood panel and wants to understand it without a doctor visit.
+- Primary: an adult in India who wants every report they get in one place, at any cadence: a yearly panel, a monthly thyroid test or a weekly glucose test. They want to understand each one without a doctor visit.
 - Secondary: the same person managing reports for parents, partner and children (family profiles).
 - Not in v1: doctors, labs, employers.
 
