@@ -19,6 +19,18 @@ export const dashboard = {
     action: "Enter the date",
   },
   loadError: "We could not load your dashboard.",
+  install: {
+    title: "Install MediWise",
+    body: "Add MediWise to your home screen. Then it opens like an app.",
+    action: "Install",
+    dismiss: "Not now",
+    ios: {
+      title: "Add MediWise to your home screen",
+      body: "Then MediWise opens like an app.",
+      steps: ["Tap the Share button in Safari.", "Tap Add to Home Screen.", "Tap Add."],
+      close: "Close",
+    },
+  },
   readFailed: "We could not read your latest report.",
   empty: {
     title: "Upload your first report",
