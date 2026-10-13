@@ -73,7 +73,7 @@ export function DashboardContainer() {
       <DashboardGreeting firstName={profile?.name.split(" ")[0]} now={new Date()} />
       <div className="space-y-10">
         <ConsentPromptContainer />
-        {install.offer === "banner" && (
+        {install.offer === "banner" && data && (
           <InstallBanner onInstall={() => void install.install()} onDismiss={install.dismiss} />
         )}
         <InstallHintSheet open={install.offer === "ios-hint"} onClose={install.close} />
