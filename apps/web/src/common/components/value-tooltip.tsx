@@ -16,6 +16,7 @@ type ValueTooltipProps = {
   lab?: LabInfo;
   sameDay?: { value: string; labName: string | null }[];
   unit?: string;
+  episode?: string | null;
 };
 
 function rangeText(range: Bounds | null, unit: string | undefined, empty: string) {
@@ -23,7 +24,7 @@ function rangeText(range: Bounds | null, unit: string | undefined, empty: string
   return formatRange({ low: range.low ?? undefined, high: range.high ?? undefined }, unit);
 }
 
-export function ValueTooltip({ date, value, lab, sameDay = [], unit }: ValueTooltipProps) {
+export function ValueTooltip({ date, value, lab, sameDay = [], unit, episode }: ValueTooltipProps) {
   const t = useT();
   const { chart, range } = t.common;
   const withUnit = (text: string) => `${text}${unit ? ` ${unit}` : ""}`;
@@ -34,6 +35,7 @@ export function ValueTooltip({ date, value, lab, sameDay = [], unit }: ValueTool
         [range.optimal, rangeText(lab.optimalRange, unit, chart.none)],
       ]
     : [];
+  if (episode) rows.push([chart.episode, episode]);
   return (
     <div className="grid min-w-48 gap-1.5 rounded-lg border bg-background px-3 py-2 text-xs shadow-xl">
       <p className="font-medium">{date}</p>

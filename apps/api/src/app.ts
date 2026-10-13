@@ -10,6 +10,11 @@ import { auth } from "./middleware/auth.js";
 import { requestLogger } from "./middleware/logger.js";
 import { reportCreateLimit } from "./middleware/rate-limit.js";
 import { dashboardRoutes } from "./modules/dashboard/index.js";
+import {
+  episodesRoutes,
+  profileEpisodesRoutes,
+  reportEpisodeRoutes,
+} from "./modules/episodes/index.js";
 import { healthRoutes } from "./modules/health/index.js";
 import { linksRoutes } from "./modules/links/index.js";
 import { meRoutes } from "./modules/me/index.js";
@@ -48,9 +53,12 @@ export const app = new Hono()
   .route("/me", meRoutes)
   .route("/profiles", profilesRoutes)
   .route("/profiles", yearReviewRoutes)
+  .route("/profiles", profileEpisodesRoutes)
+  .route("/episodes", episodesRoutes)
   .route("/reports", reportsRoutes)
   .route("/reports", sharesRoutes)
   .route("/reports", linksRoutes)
+  .route("/reports", reportEpisodeRoutes)
   .route("/trends", trendsRoutes)
   .route("/compare", compareRoutes)
   .route("/payments", paymentsRoutes)

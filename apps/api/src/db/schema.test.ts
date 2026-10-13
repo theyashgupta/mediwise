@@ -16,6 +16,7 @@ test("every table turns on row level security in a migration", () => {
 
   expect(tables).toContain("report_shares");
   expect(tables).toContain("report_links");
+  expect(tables).toContain("episodes");
   expect(
     tables.filter((table) => !sql.includes(`ALTER TABLE "${table}" ENABLE ROW LEVEL SECURITY`)),
   ).toEqual([]);

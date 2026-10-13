@@ -4,6 +4,7 @@ import { shell } from "./shell";
 import { auth } from "./auth";
 import { credits } from "./credits";
 import { dashboard } from "./dashboard";
+import { episodes } from "./episodes";
 import { markers } from "./markers";
 import { me } from "./me";
 import { payments } from "./payments";
@@ -20,6 +21,7 @@ export const hi: Messages = {
   auth,
   credits,
   dashboard,
+  episodes,
   markers,
   me,
   payments,

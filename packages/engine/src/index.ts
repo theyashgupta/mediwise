@@ -75,5 +75,13 @@ export {
   settleFinding,
   typicalGapDays,
 } from "./sequence.js";
+export {
+  buildEpisode,
+  type Episode,
+  episodeMinVisits,
+  episodeWindowDays,
+  type EpisodeVisit,
+  proposeEpisode,
+} from "./episode.js";
 export { patterns } from "./patterns/catalog.js";
 export { alertKeys } from "./patterns/study-alerts.js";

@@ -54,3 +54,13 @@ test("a point without lab details shows the date and the value only", () => {
   expect(html).toContain("104 mg/dL");
   expect(html).not.toContain("Lab");
 });
+
+test("a point inside an episode names the episode, a point outside has no episode row", () => {
+  const inside = renderToStaticMarkup(
+    <ValueTooltip date="10 Feb 2025" value="3.9" lab={lab} episode="Thyroid tests" />,
+  );
+  const outside = renderToStaticMarkup(<ValueTooltip date="10 Sep 2024" value="2.1" lab={lab} />);
+  expect(inside).toContain("Episode");
+  expect(inside).toContain("Thyroid tests");
+  expect(outside).not.toContain("Episode");
+});

@@ -1,4 +1,5 @@
-export { validateCompareSearch } from "./config/trends";
+export { directionStyles, validateCompareSearch } from "./config/trends";
+export { Sparkline } from "./components/sparkline";
 export { CompareContainer } from "./containers/compare-container";
 export { TrendContainer } from "./containers/trend-container";
 export { TrendsContainer } from "./containers/trends-container";
