@@ -8,7 +8,7 @@ export const site: Messages["site"] = {
   skipToContent: "सीधे सामग्री पर जाएँ",
   disclaimer: review("MediWise जानकारी के लिए है, निदान के लिए नहीं। यह डॉक्टर की जगह नहीं लेता।"),
   readReport: "मेरी रिपोर्ट समझें",
-  signIn: "साइन इन करें",
+  signIn: "साइन इन",
   pauseMotion: "एनिमेशन रोकें",
   language: "भाषा",
   nav: { label: "मुख्य", howItWorks: "यह कैसे काम करता है", pricing: "कीमत", faq: "सवाल-जवाब" },

@@ -36,17 +36,17 @@ export function Nav({ locale }: { locale: Locale }) {
             </li>
           ))}
         </ul>
-        <div className="ml-auto flex items-center gap-4">
-          <LanguageSwitch current={locale} />
+        <div className="ml-auto flex items-center gap-3 sm:gap-4">
+          <LanguageSwitch current={locale} compact />
           <a
             href={appLinks.signIn}
-            className="inline-flex h-8 items-center rounded-md font-medium transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4"
+            className="inline-flex h-8 items-center rounded-md font-medium whitespace-nowrap transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4"
           >
             {t.signIn}
           </a>
           <a
             href={appLinks.signUp}
-            className="inline-flex h-8 items-center rounded-md bg-primary px-3 font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2"
+            className="inline-flex h-8 items-center rounded-md bg-primary px-3 whitespace-nowrap font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2"
           >
             {t.readReport}
           </a>

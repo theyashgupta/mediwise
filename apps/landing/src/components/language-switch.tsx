@@ -15,7 +15,15 @@ function saveLocale(locale: Locale) {
   }
 }
 
-export function LanguageSwitch({ current, className }: { current: Locale; className?: string }) {
+export function LanguageSwitch({
+  current,
+  compact = false,
+  className,
+}: {
+  current: Locale;
+  compact?: boolean;
+  className?: string;
+}) {
   const target: Locale = current === "hi" ? "en" : "hi";
   const page = localePages[target];
   return (
@@ -25,12 +33,12 @@ export function LanguageSwitch({ current, className }: { current: Locale; classN
       lang={page.lang}
       onClick={() => saveLocale(target)}
       className={cn(
-        "inline-flex h-8 items-center gap-1.5 rounded-md font-medium transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4",
+        "inline-flex h-8 items-center gap-1.5 rounded-md font-medium whitespace-nowrap transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4",
         className,
       )}
     >
       <Languages aria-hidden className="size-4 shrink-0" />
-      {page.name}
+      <span className={compact ? "sr-only sm:not-sr-only" : undefined}>{page.name}</span>
     </a>
   );
 }
