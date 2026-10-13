@@ -949,6 +949,62 @@ test("an imaging page goes to the study reader, never to lab extraction, and its
   ]);
 });
 
+test("a blood panel and two ultrasounds from three centres keep a lab per file and a title with no lab", async () => {
+  edge.files.length = 0;
+  addFile(0, labPdf);
+  addFile(1, textPdf([["ULTRASOUND PELVIS", "Impression: Simple cyst in the left ovary."]]));
+  addFile(2, textPdf([["ULTRASOUND PELVIS", "Impression: No adnexal mass."]]));
+  const ultrasound = (performedAt: string) => ({
+    page: 1,
+    kind: "ultrasound",
+    bodyRegion: "Pelvis",
+    performedAt,
+    signedBy: null,
+    findings: null,
+    impression: "Ovaries are normal.",
+    familyHistory: null,
+    measurements: [],
+  });
+  edge.create
+    .mockResolvedValueOnce(classified("lab_panel"))
+    .mockResolvedValueOnce(classified("imaging_report"))
+    .mockResolvedValueOnce(classified("imaging_report"))
+    .mockResolvedValueOnce(
+      toolUse("record_studies", {
+        labName: "Lakeview Imaging",
+        studies: [ultrasound("2024-03-10")],
+      }),
+    )
+    .mockResolvedValueOnce(
+      toolUse("record_studies", {
+        labName: "Riverside Scans",
+        studies: [ultrasound("2024-03-20")],
+      }),
+    )
+    .mockResolvedValueOnce(toolUse("record_extraction", compact(extraction)))
+    .mockResolvedValueOnce(toolUse("map_markers", mappings));
+
+  await read();
+
+  const [[, report, markers, , , stored, , fileLabs]] = edge.saved as [
+    [...Saved, unknown[], { id: string; labName: string | null }[]],
+  ];
+  const printed = markers.filter((marker) => !marker.derived);
+  expect(report.title).toBe(
+    `10 to 20 Mar 2024 · blood panel (${printed.length} markers), ultrasound x2`,
+  );
+  expect(report.labName).toBe("Sunrise Diagnostics");
+  expect(new Set(printed.map((marker) => marker.reportFileId))).toEqual(new Set(["file-0"]));
+  expect(stored.map(({ study }) => study.reportFileId)).toEqual(["file-1", "file-2"]);
+  expect(fileLabs).toEqual(
+    expect.arrayContaining([
+      { id: "file-0", labName: "Sunrise Diagnostics" },
+      { id: "file-1", labName: "Lakeview Imaging" },
+      { id: "file-2", labName: "Riverside Scans" },
+    ]),
+  );
+});
+
 test("examination form vitals become markers with a BMI and leave the lab score alone", async () => {
   edge.create
     .mockResolvedValueOnce(classified("lab_panel"))

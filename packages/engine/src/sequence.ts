@@ -130,6 +130,16 @@ function studyDate(visit: Pick<Visit, "date">, study: VisitStudy) {
 }
 
 /**
+ * Gives the lab of a study: the lab of its own file, or the report's lab when the study carries no lab field at all.
+ *
+ * @remarks
+ * A null lab means the file prints none, and the report's lab could be another centre, so it never stands in.
+ */
+function studyLab(visit: Pick<Visit, "labName">, study: VisitStudy) {
+  return study.labName !== undefined ? study.labName : visit.labName;
+}
+
+/**
  * Gives the days from a study of `a` to the same study in `b` within 90 days, or undefined when `b` repeats no study of `a`.
  *
  * @remarks
@@ -181,7 +191,8 @@ function settleAlert(
       reportId: visit.reportId,
       date: studyDate(visit, match),
       earlierDate: studyDate(current, study),
-      labName: visit.labName,
+      earlierLabName: studyLab(current, study),
+      labName: studyLab(visit, match),
       earlier: line,
       later: answerLine(match, keys),
       subject: line,
@@ -224,6 +235,7 @@ function settleMarker(
     reportId: visit.reportId,
     date: visit.date,
     earlierDate: current.date,
+    earlierLabName: current.labName,
     labName: visit.labName,
     earlier: valueText(before),
     later: valueText(row),

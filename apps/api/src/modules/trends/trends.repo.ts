@@ -3,14 +3,20 @@ import { db } from "../../db/client.js";
 import {
   episodes,
   profiles,
+  reportFiles,
   reportMarkers,
   reports,
   studies,
   studyMeasurements,
 } from "../../db/schema.js";
-import { reportFileNames } from "../reports/index.js";
+import { markerLabName, reportFileNames } from "../reports/index.js";
 
 const reportDate = sql`coalesce(${reports.collectedAt}, ${reports.createdAt}::date)`;
+
+/** Every lab named in a report: the lab of each file, and the report's lab for a report read before files kept one. */
+const reportLabNames = sql<
+  string[]
+>`array(select ${reports.labName} where ${reports.labName} is not null union select ${reportFiles.labName} from ${reportFiles} where ${reportFiles.reportId} = ${reports.id} and ${reportFiles.labName} is not null)`;
 
 const doneReportsOf = (ownerUserId: string, profileId: string) =>
   and(
@@ -30,6 +36,7 @@ export async function listDoneReports(ownerUserId: string, profileId: string) {
     .select({
       id: reports.id,
       labName: reports.labName,
+      title: reports.title,
       collectedAt: reports.collectedAt,
       createdAt: reports.createdAt,
       score: reports.score,
@@ -37,6 +44,7 @@ export async function listDoneReports(ownerUserId: string, profileId: string) {
       coverage: reports.coverage,
       episodeName: episodes.name,
       fileName: sql<string | null>`(${reportFileNames})[1]`,
+      labNames: reportLabNames,
     })
     .from(reports)
     .innerJoin(profiles, eq(profiles.id, reports.profileId))
@@ -65,9 +73,11 @@ export async function listMarkerRows(ownerUserId: string, profileId: string, mar
         labRangeHigh: reportMarkers.labRangeHigh,
         calibratedLow: reportMarkers.calibratedLow,
         calibratedHigh: reportMarkers.calibratedHigh,
+        labName: markerLabName,
       })
       .from(reportMarkers)
       .innerJoin(reports, eq(reports.id, reportMarkers.reportId))
+      .leftJoin(reportFiles, eq(reportFiles.id, reportMarkers.reportFileId))
       .innerJoin(profiles, eq(profiles.id, reports.profileId))
       .where(
         and(
@@ -87,9 +97,11 @@ export async function listMarkerRows(ownerUserId: string, profileId: string, mar
         labRangeHigh: sql<number | null>`null`,
         calibratedLow: sql<number | null>`null`,
         calibratedHigh: sql<number | null>`null`,
+        labName: reportFiles.labName,
       })
       .from(studyMeasurements)
       .innerJoin(studies, eq(studies.id, studyMeasurements.studyId))
+      .innerJoin(reportFiles, eq(reportFiles.id, studies.reportFileId))
       .innerJoin(reports, eq(reports.id, studies.reportId))
       .innerJoin(profiles, eq(profiles.id, reports.profileId))
       .where(

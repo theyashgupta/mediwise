@@ -34,6 +34,7 @@ const store = vi.hoisted(() => {
     labRangeHigh?: number | null;
     calibratedLow?: number | null;
     calibratedHigh?: number | null;
+    labName?: string | null;
   };
   const reports: Report[] = [];
   const rows: Row[] = [];
@@ -77,6 +78,7 @@ const store = vi.hoisted(() => {
             labRangeHigh: null,
             calibratedLow: null,
             calibratedHigh: null,
+            labName: header(reports.find((report) => report.id === row.reportId)!).labName,
             ...row,
           }));
       },
@@ -337,6 +339,14 @@ test("each point carries the lab range and the optimal range of its own report",
     },
   ]);
   expect(body.labCount).toBe(2);
+});
+
+test("a point takes the lab of its marker's file, not the lab of the report", async () => {
+  store.rows[1] = { ...store.rows[1]!, labName: "Second file lab" };
+  const { body } = await json(`/trends/ldl_cholesterol?profileId=${ids.profile}`);
+  const points = body.points as { labName: string | null; labChange: boolean }[];
+  expect(points.map((point) => point.labName)).toEqual(["Lab", "Second file lab"]);
+  expect(points.map((point) => point.labChange)).toEqual([false, true]);
 });
 
 test("a series from one lab has no lab change and a lab count of one", async () => {

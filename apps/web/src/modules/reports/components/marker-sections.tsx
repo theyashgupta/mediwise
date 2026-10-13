@@ -18,15 +18,23 @@ type SectionProps = {
   id: string;
   title: string;
   count: number;
+  labs?: string[];
   children: ReactNode;
 };
 
-function Section({ id, title, count, children }: SectionProps) {
+function Section({ id, title, count, labs = [], children }: SectionProps) {
+  const t = useT();
   return (
     <section aria-labelledby={`section-${id}`} className="space-y-2">
-      <h3 id={`section-${id}`} className="flex items-baseline gap-2 px-1 text-sm font-semibold">
+      <h3
+        id={`section-${id}`}
+        className="flex flex-wrap items-baseline gap-x-2 px-1 text-sm font-semibold"
+      >
         {title}
         <span className="font-mono font-normal text-muted-foreground">{count}</span>
+        {labs.length > 0 && (
+          <span className="font-normal text-muted-foreground">{t.report.labs(labs)}</span>
+        )}
       </h3>
       <ul className="divide-y overflow-hidden rounded-xl border bg-card">{children}</ul>
     </section>
@@ -38,9 +46,10 @@ export function MarkerSections({ reportId, detail, filter, onFilterChange }: Mar
   const visible = (rows: MarkerRowData[]) =>
     filter === "all" ? rows : rows.filter((row) => row.status === "watch" || row.status === "risk");
   const sections = [
-    ...detail.categories.map(({ key, label, markers }) => ({
+    ...detail.categories.map(({ key, label, labNames, markers }) => ({
       key,
       label,
+      labs: labNames,
       markers: visible(markers),
     })),
     { key: "ratios", label: t.report.markers.ratios, markers: visible(detail.derived) },
@@ -83,6 +92,7 @@ export function MarkerSections({ reportId, detail, filter, onFilterChange }: Mar
           id={section.key}
           title={section.label}
           count={section.markers.length}
+          labs={"labs" in section ? section.labs : undefined}
         >
           {section.markers.map((marker) => (
             <li key={marker.markerKey}>

@@ -165,7 +165,7 @@ function toSeries(
   const last = days.at(-1);
   const previous = days.at(-2);
   const change = last && previous ? computeChange(previous.value, last.value) : null;
-  const labChange = labChanges(days.map(({ report }) => report.labName));
+  const labChange = labChanges(days.map(({ row }) => row.labName));
   const joined = days.map(({ report, row }, index) => {
     const next = days[index + 1]?.report;
     return (
@@ -184,7 +184,7 @@ function toSeries(
     precision: entry.precision,
     points: days.map(({ report, row, value, sameDay }, index) => ({
       reportId: report.id,
-      labName: report.labName,
+      labName: row.labName,
       labChange: labChange[index] ?? false,
       labRange: toRange(row.labRangeLow, row.labRangeHigh),
       calibratedRange: toRange(row.calibratedLow, row.calibratedHigh),
@@ -194,14 +194,14 @@ function toSeries(
       status: statusOf(row),
       sameDay: sameDay.map((other) => ({
         reportId: other.report.id,
-        labName: other.report.labName,
+        labName: other.row.labName,
         value: other.value,
         status: statusOf(other.row),
       })),
       linked: joined[index] === true || joined[index - 1] === true,
       episode: report.episodeName ?? null,
     })),
-    labCount: new Set(days.map(({ report }) => labKey(report.labName)).filter(Boolean)).size,
+    labCount: new Set(days.map(({ row }) => labKey(row.labName)).filter(Boolean)).size,
     latestStatus: last ? statusOf(last.row) : "unknown",
     change,
     direction:
@@ -284,9 +284,9 @@ export async function listEarlierValues(userId: string, reportId: string) {
     for (const report of earlier) {
       const found = picked.get(report.id)?.get(markerKey);
       const value = found ? valueInUnit(entry, found, row.unit) : null;
-      if (value !== null) {
-        const { id, labName, collectedAt, createdAt } = report;
-        return [{ markerKey, value, reportId: id, labName, collectedAt, createdAt }];
+      if (found && value !== null) {
+        const { id, collectedAt, createdAt } = report;
+        return [{ markerKey, value, reportId: id, labName: found.labName, collectedAt, createdAt }];
       }
     }
     return [];
@@ -294,8 +294,8 @@ export async function listEarlierValues(userId: string, reportId: string) {
 }
 
 function toHeader(report: StoredReport) {
-  const { id, labName, collectedAt, createdAt, score, tier, fileName } = report;
-  return { id, labName, collectedAt, createdAt, score, tier, fileName };
+  const { id, title, labName, collectedAt, createdAt, score, tier, fileName } = report;
+  return { id, title, labName, collectedAt, createdAt, score, tier, fileName };
 }
 
 /**

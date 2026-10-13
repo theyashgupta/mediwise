@@ -44,12 +44,11 @@ export function ReportLinks({
     link.createdBy === "detector" && link.state === "confirmed";
 
   function describe({ role, kind: linkKind, other }: ReportLink) {
-    const name = other.labName ?? text.unnamed;
-    const date = formatPlainDate(other.date, dateOptions);
+    const name = other.title ?? formatPlainDate(other.date, dateOptions);
     if (role === "later") {
-      return linkKind === "repeat" ? text.repeatOf(name, date) : text.secondOpinionOf(name, date);
+      return linkKind === "repeat" ? text.repeatOf(name) : text.secondOpinionOf(name);
     }
-    return linkKind === "repeat" ? text.repeatedIn(name, date) : text.secondOpinionIn(name, date);
+    return linkKind === "repeat" ? text.repeatedIn(name) : text.secondOpinionIn(name);
   }
 
   return (

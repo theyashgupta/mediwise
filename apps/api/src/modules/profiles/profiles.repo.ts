@@ -1,6 +1,13 @@
 import { and, asc, count, desc, eq, isNotNull, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
-import { profiles, reportMarkers, reports, studies, studyMeasurements } from "../../db/schema.js";
+import {
+  profiles,
+  reportFiles,
+  reportMarkers,
+  reports,
+  studies,
+  studyMeasurements,
+} from "../../db/schema.js";
 
 const profileColumns = {
   id: profiles.id,
@@ -104,7 +111,7 @@ const exportReportColumns = {
   reportId: reports.id,
   reportDate,
   collectedAt: reports.collectedAt,
-  labName: reports.labName,
+  title: reports.title,
 };
 const doneReportsOf = (ownerUserId: string, profileId: string) =>
   and(
@@ -117,7 +124,7 @@ const doneReportsOf = (ownerUserId: string, profileId: string) =>
 export async function listExportRows(ownerUserId: string, profileId: string) {
   const [noteRows, markerRows, studyRows, measurementRows] = await Promise.all([
     db
-      .select({ ...exportReportColumns, note: reports.note })
+      .select({ ...exportReportColumns, labName: reports.labName, note: reports.note })
       .from(reports)
       .innerJoin(profiles, eq(profiles.id, reports.profileId))
       .where(and(doneReportsOf(ownerUserId, profileId), isNotNull(reports.note)))
@@ -135,9 +142,13 @@ export async function listExportRows(ownerUserId: string, profileId: string) {
         labRangeHigh: reportMarkers.labRangeHigh,
         calibratedLow: reportMarkers.calibratedLow,
         calibratedHigh: reportMarkers.calibratedHigh,
+        labName: sql<
+          string | null
+        >`case when ${reportMarkers.reportFileId} is null then ${reports.labName} else ${reportFiles.labName} end`,
       })
       .from(reportMarkers)
       .innerJoin(reports, eq(reports.id, reportMarkers.reportId))
+      .leftJoin(reportFiles, eq(reportFiles.id, reportMarkers.reportFileId))
       .innerJoin(profiles, eq(profiles.id, reports.profileId))
       .where(doneReportsOf(ownerUserId, profileId))
       .orderBy(reportDate, asc(reports.createdAt), asc(reportMarkers.rawName)),
@@ -149,9 +160,11 @@ export async function listExportRows(ownerUserId: string, profileId: string) {
         impressionText: studies.impressionText,
         resultText: studies.resultText,
         findingsText: studies.findingsText,
+        labName: reportFiles.labName,
       })
       .from(studies)
       .innerJoin(reports, eq(reports.id, studies.reportId))
+      .innerJoin(reportFiles, eq(reportFiles.id, studies.reportFileId))
       .innerJoin(profiles, eq(profiles.id, reports.profileId))
       .where(doneReportsOf(ownerUserId, profileId))
       .orderBy(reportDate, asc(reports.createdAt), asc(studies.pageIndex)),
@@ -164,9 +177,11 @@ export async function listExportRows(ownerUserId: string, profileId: string) {
         unit: studyMeasurements.unit,
         status: studyMeasurements.status,
         printedRange: studyMeasurements.printedRange,
+        labName: reportFiles.labName,
       })
       .from(studyMeasurements)
       .innerJoin(studies, eq(studies.id, studyMeasurements.studyId))
+      .innerJoin(reportFiles, eq(reportFiles.id, studies.reportFileId))
       .innerJoin(reports, eq(reports.id, studies.reportId))
       .innerJoin(profiles, eq(profiles.id, reports.profileId))
       .where(doneReportsOf(ownerUserId, profileId))

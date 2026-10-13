@@ -12,6 +12,7 @@ const store = vi.hoisted(() => {
     collectedAt: string;
     score: number;
     labName: string | null;
+    fileLabs?: string[];
     coverage?: number;
   };
   type Row = {
@@ -40,6 +41,7 @@ const store = vi.hoisted(() => {
       listDoneReports: async (owner: string, id: string) =>
         done(owner, id).map((report) => ({
           ...report,
+          labNames: [...(report.labName ? [report.labName] : []), ...(report.fileLabs ?? [])],
           createdAt: new Date(`${report.collectedAt}T00:00:00Z`),
           tier: "gold" as const,
         })),
@@ -47,7 +49,13 @@ const store = vi.hoisted(() => {
         const ids = new Set(done(owner, id).map((report) => report.id));
         return rows
           .filter((row) => ids.has(row.reportId))
-          .map((row) => ({ valueText: null, calibratedLow: null, calibratedHigh: null, ...row }));
+          .map((row) => ({
+            valueText: null,
+            calibratedLow: null,
+            calibratedHigh: null,
+            labName: null,
+            ...row,
+          }));
       },
     },
     repo: {
@@ -159,6 +167,11 @@ describe("window", () => {
       labCount: 2,
       score: { from: 80, to: 86 },
     });
+  });
+
+  test("the lab of a study file in a report counts as one more lab", async () => {
+    store.reports[3]!.fileLabs = ["Lakeview Imaging"];
+    expect((await getReview()).body.labCount).toBe(3);
   });
 
   test("a report on the first day of the window counts and a report one day earlier does not", async () => {

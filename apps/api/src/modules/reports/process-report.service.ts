@@ -20,6 +20,7 @@ import { download, remove, upload } from "../../lib/storage.js";
 import { log } from "../../middleware/logger.js";
 import { classifyPages } from "../classification/index.js";
 import {
+  checkedLabName,
   extractReport,
   mapMarkers,
   type ReportFileData,
@@ -37,8 +38,15 @@ import {
 } from "../findings/index.js";
 import { loadLaterVisits, proposeLinks } from "../links/index.js";
 import { withHeadline, writeNarrative } from "../narrative/index.js";
-import { readStudies, type StudyDraft, type StudyPage, vitalValues } from "../studies/index.js";
+import {
+  isVital,
+  readStudies,
+  type StudyDraft,
+  type StudyPage,
+  vitalValues,
+} from "../studies/index.js";
 import * as repo from "./reports.repo.js";
+import { ruleTitle } from "./reports.title.js";
 
 const maxPagesBytes = 40 * 1024 * 1024;
 const photoPixels = 1568;
@@ -91,6 +99,7 @@ async function sortFiles(report: StoredReport, usage: StepUsage, reclassify: boo
   const known = new Set(await repo.listProfileFileHashes(report.profileId, report.id));
   for (const file of report.files) if (file.pageClasses && file.sha256) known.add(file.sha256);
   const lab: ReportPage[] = [];
+  const labFiles: string[] = [];
   const studyFiles: { fileId: string; pages: StudyPage[] }[] = [];
   const films: string[] = [];
   let duplicates = report.files.filter((file) => file.skipReason === "duplicate").length;
@@ -140,9 +149,9 @@ async function sortFiles(report: StoredReport, usage: StepUsage, reclassify: boo
       const pageIndex = uploadedIndexes?.[index];
       return pageClass && pageIndex !== undefined ? [{ page, pageClass, pageIndex }] : [];
     });
-    lab.push(
-      ...sorted.filter(({ pageClass }) => pageClass === "lab_panel").map(({ page }) => page),
-    );
+    const labPages = sorted.filter(({ pageClass }) => pageClass === "lab_panel");
+    lab.push(...labPages.map(({ page }) => page));
+    labFiles.push(...labPages.map(() => file.id));
     const study = sorted.filter(({ pageClass }) => studyClasses.has(pageClass));
     if (study.length > 0) studyFiles.push({ fileId: file.id, pages: study });
     if (sorted.length > 0 && sorted.every(({ pageClass }) => pageClass === "raw_image")) {
@@ -162,7 +171,7 @@ async function sortFiles(report: StoredReport, usage: StepUsage, reclassify: boo
   if (size > maxPagesBytes) {
     throw new AppError(413, "These files are larger than 40 MB together. Upload a smaller PDF.");
   }
-  return { lab, studyFiles, films };
+  return { lab, labFiles, studyFiles, films };
 }
 
 /**
@@ -255,7 +264,18 @@ type StudyFacts = {
   ageYears?: number;
   performedAt?: string;
   hasStudies: boolean;
+  pageFiles?: string[];
 };
+
+/**
+ * Gives the file a lab page came from, by its index in the pages sent to extraction.
+ *
+ * @remarks
+ * Claude can cite a page number past the last page. When every lab page comes from one file, the row still gets it.
+ */
+function fileOfPage(pageFiles: string[] = [], pageIndex: number) {
+  return pageFiles[pageIndex] ?? (new Set(pageFiles).size === 1 ? pageFiles[0]! : null);
+}
 
 /** Builds the engine profile, or undefined when neither the profile nor a printed page gives an age. */
 function engineProfile(person: Person, on: string, ageYears: number | undefined) {
@@ -343,6 +363,7 @@ export async function readReport(
     return {
       id: randomUUID(),
       reportId,
+      reportFileId: i < extracted.length ? fileOfPage(facts.pageFiles, marker.pageIndex) : null,
       markerKey,
       rawName: marker.rawName,
       value: converted?.value ?? numeric,
@@ -420,17 +441,51 @@ function attachFilms(studies: StudyDraft[], films: string[]) {
   return new Map(films.flatMap((film, i) => (scans[i] ? [[scans[i], film] as const] : [])));
 }
 
+/** The text of the first page that has a text layer, for the letterhead check. */
+function firstText(pages: ReportPage[]) {
+  return pages.flatMap((page) => ("text" in page ? [page.text] : []))[0];
+}
+
 /** Reads the study pages of every file, one Claude call per file, and a file with a scanned page on the scan model. */
 async function readStudyFiles(files: { fileId: string; pages: StudyPage[] }[], usage: ReportUsage) {
   const studies: (StudyDraft & { reportFileId: string })[] = [];
+  const labs = new Map<string, string | undefined>();
   let ageYears: number | undefined;
   for (const file of files) {
     const scanned = file.pages.some(({ page }) => !("text" in page));
     const read = await readStudies(file.pages, scanned ? usage.studyScans : usage.studies);
     studies.push(...read.studies.map((study) => ({ ...study, reportFileId: file.fileId })));
+    labs.set(
+      file.fileId,
+      checkedLabName({ labName: read.labName }, firstText(file.pages.map(({ page }) => page))),
+    );
     ageYears ??= read.ageYears;
   }
-  return { studies, ageYears };
+  return { studies, ageYears, labs };
+}
+
+/**
+ * Gives each file the lab on its letterhead: the extracted lab for the file of the first lab page, the study read for a
+ * study file, and the printed letterhead text for any other lab file.
+ *
+ * @remarks
+ * One extraction call reads the lab pages of every file and returns one lab, so a second lab file falls back to its text.
+ */
+function fileLabs(
+  lab: ReportPage[],
+  labFiles: string[],
+  extractedLab: string | undefined,
+  studyLabs: Map<string, string | undefined>,
+) {
+  const labs = new Map(studyLabs);
+  labFiles.forEach((fileId, index) => {
+    if (index === 0) labs.set(fileId, extractedLab ?? labs.get(fileId));
+    else if (labFiles.indexOf(fileId) === index) {
+      const pages = lab.filter((_, page) => labFiles[page] === fileId);
+      labs.set(fileId, checkedLabName({}, firstText(pages)) ?? labs.get(fileId));
+    }
+  });
+  return [...labs].map(([id, labName]) => ({ id, labName: labName ?? null }));
 }
 
 /**
@@ -448,13 +503,13 @@ export async function processReport(reportId: string, usage: ReportUsage, reclas
   await repo.updateReportStatus(reportId, "processing");
   step("processing");
 
-  const { lab, studyFiles, films } = await sortFiles(report, usage.classify, reclassify);
+  const { lab, labFiles, studyFiles, films } = await sortFiles(report, usage.classify, reclassify);
   step(
     "sort",
     ` files=${report.files.length} pages=${lab.length} study_files=${studyFiles.length} films=${films.length}`,
   );
 
-  const { studies, ageYears } = await readStudyFiles(studyFiles, usage);
+  const { studies, ageYears, labs: studyLabs } = await readStudyFiles(studyFiles, usage);
   const vitals = vitalValues(studies);
   const performedAt = studies.flatMap((study) => study.performedAt ?? []).sort()[0];
   step("studies", ` studies=${studies.length} vitals=${vitals.length}`);
@@ -466,6 +521,7 @@ export async function processReport(reportId: string, usage: ReportUsage, reclas
           ageYears,
           performedAt,
           hasStudies: studies.length + films.length > 0,
+          pageFiles: labFiles,
         })
       : undefined;
   const collectedAt = read?.extraction.collectedAt ?? performedAt ?? null;
@@ -521,6 +577,8 @@ export async function processReport(reportId: string, usage: ReportUsage, reclas
     };
   });
 
+  const labs = fileLabs(lab, labFiles, read?.extraction.lab?.name, studyLabs);
+  const labOf = new Map(labs.map((file) => [file.id, file.labName]));
   const current: Visit = {
     date: collectedAt ?? report.createdAt.toISOString().slice(0, 10),
     labName: read?.extraction.lab?.name ?? null,
@@ -535,6 +593,7 @@ export async function processReport(reportId: string, usage: ReportUsage, reclas
       kind: study.kind,
       bodyRegion: study.bodyRegion ?? null,
       performedAt: study.performedAt ?? null,
+      labName: labOf.get(study.reportFileId) ?? null,
       impression: study.impressionText ?? null,
       result: study.resultText ?? null,
       measurements: measurements.map(({ key, value, unit, status }) => ({
@@ -560,9 +619,18 @@ export async function processReport(reportId: string, usage: ReportUsage, reclas
     ` drafts=${drafts.length} kept=${findings.length} earlier=${earlier.length} later=${later.length}`,
   );
 
+  const title = ruleTitle({
+    markerCount: (read?.markerRows ?? []).filter(
+      ({ markerKey }) => !markerKey || !isVital(markerKey),
+    ).length,
+    markerDate: collectedAt,
+    studies: studyRows.map(({ study }) => study),
+    uploadDate: report.createdAt.toISOString().slice(0, 10),
+  });
   await repo.saveReportResult(
     reportId,
     {
+      title,
       labName: read?.extraction.lab?.name ?? null,
       collectedAt,
       reportedAt: read?.extraction.reportedAt ?? null,
@@ -580,6 +648,7 @@ export async function processReport(reportId: string, usage: ReportUsage, reclas
     read?.followUpRows ?? [],
     studyRows,
     findings.map((finding) => ({ ...finding, reportId })),
+    labs,
   );
   if (read?.birth) {
     await repo.fillDateOfBirth(report.profileId, read.birth.dateOfBirth, read.birth.approximate);

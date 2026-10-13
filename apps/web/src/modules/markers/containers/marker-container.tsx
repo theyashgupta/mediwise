@@ -23,7 +23,7 @@ export function MarkerContainer() {
   const { reportId, markerKey } = route.useParams();
   const query = useMarker(reportId, markerKey);
   const t = useT();
-  useCrumbLabel(`/reports/${reportId}`, query.data?.report.labName);
+  useCrumbLabel(`/reports/${reportId}`, query.data?.report.title);
   useCrumbLabel(
     `/reports/${reportId}/markers/${markerKey}`,
     query.data && (query.data.marker.shortName ?? query.data.marker.name),

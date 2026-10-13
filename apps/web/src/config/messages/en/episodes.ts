@@ -42,7 +42,7 @@ export const episodes = {
       empty: "This episode has no reports. Add a report from its report page.",
       markers: (n: number, flagged: number) =>
         `${plural("en", n, { one: `${n} marker`, other: `${n} markers` })}, ${flagged} with watch or risk status`,
-      unnamedLab: "Lab name not printed",
+      unnamedReport: "Report",
     },
     repeated: {
       title: "Repeated markers",
