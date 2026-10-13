@@ -1,0 +1,35 @@
+import { execFileSync } from "node:child_process";
+
+const status = JSON.parse(
+  execFileSync("supabase", ["status", "--workdir", import.meta.dirname, "--output", "json"], {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "ignore"],
+  }),
+) as Record<"API_URL" | "DB_URL" | "ANON_KEY" | "SERVICE_ROLE_KEY" | "JWT_SECRET", string>;
+
+export const webOrigin = "http://localhost:5174";
+export const apiPort = 3101;
+
+export const apiEnv = {
+  NODE_ENV: "development",
+  PORT: String(apiPort),
+  CORS_ORIGINS: webOrigin,
+  DATABASE_URL: status.DB_URL,
+  SUPABASE_URL: status.API_URL,
+  SUPABASE_SERVICE_ROLE_KEY: status.SERVICE_ROLE_KEY,
+  SUPABASE_JWT_SECRET: status.JWT_SECRET,
+  RUN_WORKER: "true",
+  CLAUDE_STUB: "true",
+  ANTHROPIC_API_KEY: "",
+  CLAUDE_HARD_STOP: "false",
+  ADMIN_USER_ID: "",
+  PAYMENTS_ENABLED: "false",
+};
+
+export const webEnv = {
+  VITE_API_URL: `http://localhost:${apiPort}`,
+  VITE_SUPABASE_URL: status.API_URL,
+  VITE_SUPABASE_ANON_KEY: status.ANON_KEY,
+  VITE_PAYMENTS_ENABLED: "false",
+  VITE_APP_ORIGIN: webOrigin,
+};

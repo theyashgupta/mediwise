@@ -1,0 +1,16 @@
+{
+  "name": "@mediwise/e2e",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "scripts": {
+    "e2e": "playwright test",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@mediwise/config": "workspace:*",
+    "@playwright/test": "1.63.0",
+    "@types/node": "24.19.2"
+  }
+}
