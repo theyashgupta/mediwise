@@ -4,9 +4,21 @@ MediWise has three test layers. CI runs all three on every push and every pull r
 
 | Layer | Command | What it covers |
 | --- | --- | --- |
-| Unit | `pnpm check` | Typecheck, lint and Vitest in every package. The rules are in [.claude/rules/testing.md](../.claude/rules/testing.md). |
+| Unit | `pnpm check` | Typecheck, lint and Vitest in every package, with rendered page tests for the web. The rules are in [.claude/rules/testing.md](../.claude/rules/testing.md). |
 | Database | `pnpm test:db` | The SQL in `apps/api` against a real Postgres: credits ledger, purchases, the Claude spend cap, and the history queries (earlier values, same-day order, trends, compare, retests). |
 | End-to-end | `pnpm e2e` | The main flow in a real browser, against a local Supabase and the real API and web. |
+
+## Rendered page tests
+
+A web page test renders the whole app in jsdom with Testing Library. It uses the helper in `apps/web/src/test/render-app.tsx`.
+
+- Put `/** @vitest-environment jsdom */` on the first line of the test file.
+- `fakeNetwork({ "GET /me": () => body })` replaces `fetch`. It answers the API and Supabase, and records each request. A request with no handler fails like a dropped connection. Use `problem(status, title)` for an error and `never` for a request that stays pending.
+- `renderApp(path, { locale })` stores a session and renders the app router at the path. `renderInApp(ui)` renders a container that has no route.
+- Call `afterEach(resetApp)`.
+- Assert on roles and on text from `config/messages`, in English and in Hindi. Do not mock a component or a hook of the app.
+- The payments flag is read when the payments module loads. A test file sets it with `vi.stubEnv` before it imports the helper. See `modules/payments/containers/buy-credits-container.test.tsx`.
+- Cashfree is a script, not a `fetch` call. jsdom does not load scripts, so the checkout test answers the script tag with a fake `window.Cashfree`.
 
 ## Database tests
 
