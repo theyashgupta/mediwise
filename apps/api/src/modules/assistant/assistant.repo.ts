@@ -1,6 +1,7 @@
-import { and, asc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import {
+  assistantQuestions,
   episodes,
   findings,
   followUps,
@@ -186,4 +187,58 @@ export async function findSnapshot(profileId: string): Promise<Snapshot | undefi
     links: linkRows,
     episodes: episodeRows,
   };
+}
+
+const questionColumns = {
+  id: assistantQuestions.id,
+  question: assistantQuestions.question,
+  focusReportId: assistantQuestions.focusReportId,
+  answer: assistantQuestions.answer,
+  refusalKind: assistantQuestions.refusalKind,
+  flaggedAt: assistantQuestions.flaggedAt,
+  createdAt: assistantQuestions.createdAt,
+};
+
+/** Tells whether a done report belongs to the profile. */
+export async function isProfileReport(profileId: string, reportId: string) {
+  const [row] = await db
+    .select({ id: reports.id })
+    .from(reports)
+    .where(and(eq(reports.id, reportId), eq(reports.profileId, profileId)));
+  return row !== undefined;
+}
+
+export async function insertQuestion(row: typeof assistantQuestions.$inferInsert) {
+  const [inserted] = await db.insert(assistantQuestions).values(row).returning(questionColumns);
+  return inserted!;
+}
+
+/** Lists the newest questions of one profile of the owner, newest first. */
+export async function listQuestions(ownerUserId: string, profileId: string, limit: number) {
+  return db
+    .select(questionColumns)
+    .from(assistantQuestions)
+    .where(
+      and(eq(assistantQuestions.userId, ownerUserId), eq(assistantQuestions.profileId, profileId)),
+    )
+    .orderBy(desc(assistantQuestions.createdAt), desc(assistantQuestions.id))
+    .limit(limit);
+}
+
+export async function deleteQuestions(ownerUserId: string, profileId: string) {
+  await db
+    .delete(assistantQuestions)
+    .where(
+      and(eq(assistantQuestions.userId, ownerUserId), eq(assistantQuestions.profileId, profileId)),
+    );
+}
+
+/** Marks one question of the owner as flagged, once, and returns it. */
+export async function flagQuestion(ownerUserId: string, id: string) {
+  const [row] = await db
+    .update(assistantQuestions)
+    .set({ flaggedAt: sql`coalesce(${assistantQuestions.flaggedAt}, now())` })
+    .where(and(eq(assistantQuestions.id, id), eq(assistantQuestions.userId, ownerUserId)))
+    .returning(questionColumns);
+  return row;
 }
