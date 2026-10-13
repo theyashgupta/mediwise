@@ -1,7 +1,8 @@
-import { and, count, eq, inArray, sql } from "drizzle-orm";
+import { and, count, eq, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import {
   assistantQuestions,
+  clearedQuestion,
   deletionLog,
   jobs,
   profiles,
@@ -51,9 +52,9 @@ export async function listStoragePathsByOwner(ownerUserId: string) {
  * Deletes the owner's unfinished jobs and profiles, and writes one deletion log row with the counts.
  *
  * @remarks
- * Reports, files, markers, follow-ups and assistant questions go with their profile through `on delete cascade`; jobs
- * have no foreign key.
- * Done and failed jobs stay, because their token counts are this month's Claude spend.
+ * Reports, files, markers and follow-ups go with their profile through `on delete cascade`; jobs have no foreign key.
+ * Done and failed jobs stay, and assistant questions stay with their text wiped, because their token counts are this
+ * month's Claude spend.
  * The log row is in the same transaction, so a logged deletion always happened.
  */
 export async function deleteAllByOwner(
@@ -85,6 +86,10 @@ export async function deleteAllByOwner(
         );
     }
     await tx.delete(profiles).where(eq(profiles.ownerUserId, ownerUserId));
+    await tx
+      .update(assistantQuestions)
+      .set(clearedQuestion)
+      .where(and(eq(assistantQuestions.userId, ownerUserId), isNull(assistantQuestions.clearedAt)));
     await tx.insert(deletionLog).values({
       userIdHash: log.userIdHash,
       scope: "account",
@@ -121,7 +126,7 @@ export async function exportByOwner(ownerUserId: string) {
         createdAt: assistantQuestions.createdAt,
       })
       .from(assistantQuestions)
-      .where(eq(assistantQuestions.userId, ownerUserId)),
+      .where(and(eq(assistantQuestions.userId, ownerUserId), isNull(assistantQuestions.clearedAt))),
   ]);
   return {
     profiles: profileRows,

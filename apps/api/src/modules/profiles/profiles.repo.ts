@@ -1,6 +1,8 @@
-import { and, asc, count, desc, eq, isNotNull, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, isNotNull, isNull, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import {
+  assistantQuestions,
+  clearedQuestion,
   profiles,
   reportFiles,
   reportMarkers,
@@ -102,8 +104,30 @@ export async function updateProfile(
   return row;
 }
 
+/**
+ * Deletes one profile of the owner, and wipes the text of its assistant questions in the same transaction.
+ *
+ * @remarks
+ * The delete runs first, so a question stored while the delete waits loses its profile and is wiped too.
+ */
 export async function deleteProfile(ownerUserId: string, id: string) {
-  await db.delete(profiles).where(and(eq(profiles.id, id), eq(profiles.ownerUserId, ownerUserId)));
+  await db.transaction(async (tx) => {
+    const deleted = await tx
+      .delete(profiles)
+      .where(and(eq(profiles.id, id), eq(profiles.ownerUserId, ownerUserId)))
+      .returning({ id: profiles.id });
+    if (deleted.length === 0) return;
+    await tx
+      .update(assistantQuestions)
+      .set(clearedQuestion)
+      .where(
+        and(
+          eq(assistantQuestions.userId, ownerUserId),
+          isNull(assistantQuestions.profileId),
+          isNull(assistantQuestions.clearedAt),
+        ),
+      );
+  });
 }
 
 const reportDate = sql<string>`coalesce(${reports.collectedAt}, ${reports.createdAt}::date)::text`;
