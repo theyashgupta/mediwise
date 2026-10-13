@@ -4,6 +4,7 @@ import { Faq } from "@/sections/faq";
 import { FeatureStory } from "@/sections/feature-story";
 import { FinalCta, Footer } from "@/sections/footer";
 import { Hero } from "@/sections/hero";
+import { History } from "@/sections/history";
 import { HowItWorks } from "@/sections/how-it-works";
 import { MarkerMarquee } from "@/sections/marquee";
 import { Nav } from "@/sections/nav";
@@ -26,6 +27,7 @@ export default function Home() {
         <MarkerMarquee />
         <HowItWorks />
         <FeatureStory />
+        <History />
         <Comparison />
         <Bento />
         <Numbers />
