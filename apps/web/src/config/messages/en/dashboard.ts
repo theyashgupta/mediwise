@@ -38,6 +38,11 @@ export const dashboard = {
     byStatus: "Markers by status",
     open: "Open report",
   },
+  newSince: {
+    title: (date: string) => `New since ${date}`,
+    body: (date: string) =>
+      `These reports have few markers. Your score stays from the report of ${date}.`,
+  },
   attention: {
     title: "Needs attention",
     seeAll: (n: number) => `See all ${n}`,

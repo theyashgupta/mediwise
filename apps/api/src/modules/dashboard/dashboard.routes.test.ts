@@ -17,6 +17,7 @@ const store = vi.hoisted(() => {
     score: number | null;
     tier: string | null;
     coverage: number | null;
+    mappedCount: number;
   };
   type Marker = {
     markerKey: string | null;
@@ -110,7 +111,12 @@ function done(id: string, date: string, score: number) {
     score,
     tier: "gold",
     coverage: 90,
+    mappedCount: 40,
   };
+}
+
+function glucoseOnly(id: string, date: string) {
+  return { ...done(id, date, 50), coverage: 6, mappedCount: 1 };
 }
 
 function marker(markerKey: string, value: number, status: "optimal" | "watch" | "risk") {
@@ -148,6 +154,7 @@ test("a profile with no reports gets an empty dashboard", async () => {
   expect(res.status).toBe(200);
   expect(await res.json()).toEqual({
     latest: null,
+    newSince: [],
     moveFirst: [],
     retests: [],
     recent: [],
@@ -176,20 +183,77 @@ test("the latest done report carries its counts and the score change since the p
 test("the score change skips a narrow report and compares with the last report on the same scale", async () => {
   store.reports.push(
     done("full", "2026-08-04", 70),
-    { ...done("glucose-only", "2026-09-29", 50), coverage: 6 },
+    glucoseOnly("glucose-only", "2026-09-29"),
     done("new", "2026-10-06", 74),
   );
   const data = await body();
   expect(data.latest?.deltaSincePrevious).toEqual({ score: 4, since: "2026-08-04" });
 });
 
-test("a narrow latest report gets no score change against a full panel", async () => {
-  store.reports.push(done("full", "2026-09-29", 80), {
-    ...done("glucose-only", "2026-10-06", 50),
-    coverage: 6,
-  });
+test("a narrow report after a full panel leaves the full panel on top and lists itself as new since", async () => {
+  store.reports.push(
+    done("older", "2026-08-04", 76),
+    done("full", "2026-09-15", 80),
+    glucoseOnly("week-1", "2026-09-22"),
+    glucoseOnly("week-2", "2026-09-29"),
+  );
+  store.markers.set("full", [marker("hba1c", 40, "risk"), marker("ldl", 15, "optimal")]);
+  store.markers.set("week-1", [marker("glucose_fasting", 15, "optimal")]);
+  store.markers.set("week-2", [marker("glucose_fasting", 30, "watch")]);
   const data = await body();
-  expect(data.latest?.deltaSincePrevious).toBeNull();
+  expect(data.latest).toMatchObject({
+    id: "full",
+    score: 80,
+    counts: { optimal: 1, watch: 0, risk: 1 },
+    deltaSincePrevious: { score: 4, since: "2026-08-04" },
+  });
+  expect(data.moveFirst.map((row) => [row.reportId, row.markerKey])).toEqual([["full", "hba1c"]]);
+  expect(data.newSince).toEqual([
+    {
+      id: "week-2",
+      date: "2026-09-29",
+      labName: "Lab",
+      markers: [
+        {
+          markerKey: "glucose_fasting",
+          name: expect.any(String),
+          value: 30,
+          unit: "x",
+          status: "watch",
+        },
+      ],
+    },
+    expect.objectContaining({ id: "week-1", date: "2026-09-22" }),
+  ]);
+});
+
+test("new since lists the three newest narrow reports", async () => {
+  store.reports.push(
+    done("full", "2026-09-01", 80),
+    ...["2026-09-08", "2026-09-15", "2026-09-22", "2026-09-29"].map((date) =>
+      glucoseOnly(date, date),
+    ),
+  );
+  const data = await body();
+  expect(data.newSince.map((report) => report.id)).toEqual([
+    "2026-09-29",
+    "2026-09-22",
+    "2026-09-15",
+  ]);
+});
+
+test("with no report of ten mapped markers the newest report leads", async () => {
+  store.reports.push(glucoseOnly("week-1", "2026-09-22"), glucoseOnly("week-2", "2026-09-29"));
+  const data = await body();
+  expect(data.latest?.id).toBe("week-2");
+  expect(data.newSince).toEqual([]);
+});
+
+test("a full panel after narrow reports leads with nothing new since", async () => {
+  store.reports.push(glucoseOnly("week-1", "2026-09-22"), done("full", "2026-09-29", 80));
+  const data = await body();
+  expect(data.latest?.id).toBe("full");
+  expect(data.newSince).toEqual([]);
 });
 
 test("a report one week after the last one gives a score change", async () => {

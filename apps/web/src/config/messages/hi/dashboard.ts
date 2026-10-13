@@ -45,6 +45,11 @@ export const dashboard: Messages["dashboard"] = {
     byStatus: review("स्थिति के हिसाब से मार्कर"),
     open: "रिपोर्ट खोलें",
   },
+  newSince: {
+    title: (date: string) => `${date} के बाद नई रिपोर्ट`,
+    body: (date: string) =>
+      review(`इन रिपोर्ट में कम मार्कर हैं। आपका स्कोर ${date} की रिपोर्ट से ही रहता है।`),
+  },
   attention: {
     title: review("इन पर ध्यान दें"),
     seeAll: (n: number) => `सभी ${n} देखें`,

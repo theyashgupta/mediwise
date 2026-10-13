@@ -35,6 +35,8 @@ export async function listRecentReports(ownerUserId: string, profileId: string, 
     .limit(limit);
 }
 
+const mappedCount = sql<number>`(select count(*)::int from ${reportMarkers} where ${reportMarkers}.${sql.identifier("report_id")} = ${reports}.${sql.identifier("id")} and ${reportMarkers}.${sql.identifier("marker_key")} is not null and not ${reportMarkers}.${sql.identifier("derived")})`;
+
 export async function listLatestDoneReports(ownerUserId: string, profileId: string, limit: number) {
   return db
     .select({
@@ -45,6 +47,7 @@ export async function listLatestDoneReports(ownerUserId: string, profileId: stri
       score: reports.score,
       tier: reports.tier,
       coverage: reports.coverage,
+      mappedCount,
     })
     .from(reports)
     .innerJoin(profiles, eq(profiles.id, reports.profileId))
