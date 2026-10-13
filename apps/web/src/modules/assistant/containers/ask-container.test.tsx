@@ -15,7 +15,11 @@ const member = {
   relation: "parent" as const,
   isSelf: false,
 };
-const meOn = { ...me, questionsLeft: 12, assistant: { enabled: true, outOfQuestions: null } };
+const meOn = {
+  ...me,
+  questionsLeft: 12,
+  assistant: { enabled: true, outOfQuestions: null, reviewRequired: false, consented: false },
+};
 
 const chip = {
   kind: "value" as const,
@@ -500,4 +504,81 @@ test("an open report that is not a uuid is dropped, and a question over 500 char
       question: "a".repeat(500),
     }),
   );
+});
+
+describe.each(["en", "hi"] as const)("the review month in %s", (locale) => {
+  const t = messages[locale].assistant;
+  const reviewMe = (consented: boolean) => ({
+    ...meOn,
+    assistant: { enabled: true, outOfQuestions: null, reviewRequired: true, consented },
+  });
+
+  test("the page asks for consent first, and one tick stores it and opens the input", async () => {
+    let consented = false;
+    const requests = network([], {
+      "GET /me": () => reviewMe(consented),
+      "POST /me/assistant-consent": () => {
+        consented = true;
+        return new Response(null, { status: 204 });
+      },
+    });
+    await renderApp("/ask", { locale });
+
+    const input = await screen.findByRole("textbox", { name: t.inputLabel });
+    expect(screen.getByText(t.consent)).toBeTruthy();
+    expect((input as HTMLTextAreaElement).disabled).toBe(true);
+
+    await userEvent.dblClick(screen.getByRole("checkbox", { name: t.consent }));
+
+    await waitFor(() => expect(screen.queryByText(t.consent)).toBeNull());
+    expect((input as HTMLTextAreaElement).disabled).toBe(false);
+    expect(requests.filter(({ path }) => path === "/me/assistant-consent")).toHaveLength(1);
+  });
+
+  test("a failed consent shows its title and leaves the box unticked and the input off", async () => {
+    network([], {
+      "GET /me": () => reviewMe(false),
+      "POST /me/assistant-consent": () => problem(404, "Not Found"),
+    });
+    await renderApp("/ask", { locale });
+
+    await userEvent.click(await screen.findByRole("checkbox", { name: t.consent }));
+
+    expect(await screen.findByText("Not Found")).toBeTruthy();
+    expect(screen.getByRole("checkbox", { name: t.consent }).getAttribute("aria-checked")).toBe(
+      "false",
+    );
+    expect(
+      (screen.getByRole("textbox", { name: t.inputLabel }) as HTMLTextAreaElement).disabled,
+    ).toBe(true);
+  });
+});
+
+test("no consent shows when the review month is off or the account already agreed", async () => {
+  network([answered]);
+  await renderApp("/ask");
+  await screen.findByText(answered.question);
+  expect(screen.queryByText(messages.en.assistant.consent)).toBeNull();
+  resetApp();
+
+  network([answered], {
+    "GET /me": () => ({
+      ...meOn,
+      assistant: { enabled: true, outOfQuestions: null, reviewRequired: true, consented: true },
+    }),
+  });
+  await renderApp("/ask");
+  await screen.findByText(answered.question);
+  expect(screen.queryByText(messages.en.assistant.consent)).toBeNull();
+});
+
+test("a question of only invisible characters shows the empty-question copy and sends nothing", async () => {
+  const requests = network([]);
+  await renderApp("/ask");
+
+  const input = await screen.findByRole("textbox", { name: messages.en.assistant.inputLabel });
+  await userEvent.type(input, "\u200B\u200B  {Enter}");
+
+  expect(await screen.findByText(messages.en.assistant.emptyQuestion)).toBeTruthy();
+  expect(requests.some(({ method }) => method === "POST")).toBe(false);
 });

@@ -4,10 +4,14 @@ import { review } from "../review";
 
 export const assistant: Messages["assistant"] = {
   askReport: "इस रिपोर्ट के बारे में पूछें",
+  consent: review(
+    "मैं सहमत हूं कि MediWise की टीम जांच के लिए एक महीने तक मेरे सवाल और उत्तर पढ़ सकती है।",
+  ),
   title: "अपनी रिपोर्ट के बारे में पूछें",
   titleFor: (name: string) => `${name} की रिपोर्ट के बारे में पूछें`,
   onlyReports: "उत्तर केवल आपकी रिपोर्ट से आते हैं।",
   inputLabel: "आपका सवाल",
+  emptyQuestion: "एक सवाल लिखें।",
   placeholder: "अपनी रिपोर्ट के बारे में सवाल पूछें",
   send: "पूछें",
   writing: "MediWise उत्तर लिख रहा है।",

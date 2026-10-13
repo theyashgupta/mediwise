@@ -2,10 +2,13 @@ import { plural } from "../plural";
 
 export const assistant = {
   askReport: "Ask about this report",
+  consent:
+    "I agree that the MediWise team can read my questions and answers for one month to check them.",
   title: "Ask about your reports",
   titleFor: (name: string) => `Ask about ${name}'s reports`,
   onlyReports: "Answers come only from your reports.",
   inputLabel: "Your question",
+  emptyQuestion: "Write a question.",
   placeholder: "Ask a question about your reports",
   send: "Ask",
   writing: "MediWise is writing the answer.",

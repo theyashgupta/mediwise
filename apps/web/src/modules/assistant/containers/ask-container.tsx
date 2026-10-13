@@ -20,8 +20,10 @@ import { AskInput } from "../components/ask-input";
 import { ChatMenu } from "../components/chat-menu";
 import { ClearChatDialog } from "../components/clear-chat-dialog";
 import { OutOfQuestions } from "../components/out-of-questions";
+import { ReviewConsent } from "../components/review-consent";
 import { QuestionReply } from "../components/question-reply";
 import { useQuestionPack } from "../hooks/use-question-pack";
+import { useReviewConsent } from "../hooks/use-review-consent";
 import {
   useAskQuestion,
   useClearQuestions,
@@ -46,6 +48,7 @@ export function AskContainer() {
   const flag = useFlagQuestion(profile?.id ?? "");
   const clear = useClearQuestions(profile?.id ?? "");
   const pack = useQuestionPack();
+  const consent = useReviewConsent();
   const locale = useLocale();
   const [clearing, setClearing] = useState(false);
   const wide = useWideScreen();
@@ -86,9 +89,9 @@ export function AskContainer() {
     );
   }
 
-  const send = () =>
+  const send = (question: string) =>
     ask.mutate(
-      { question: draft.trim(), ...(search.report && { reportId: search.report }) },
+      { question, ...(search.report && { reportId: search.report }) },
       {
         onSuccess: () => {
           setDraft("");
@@ -101,6 +104,7 @@ export function AskContainer() {
   const title = profile ? t.titleFor(profile.name) : t.title;
   const left = me.data?.questionsLeft ?? 0;
   const out = me.data?.assistant.outOfQuestions ?? null;
+  const needsConsent = Boolean(me.data?.assistant.reviewRequired && !me.data.assistant.consented);
 
   return (
     <div>
@@ -165,6 +169,13 @@ export function AskContainer() {
             className="sticky bottom-[calc(--spacing(14)+env(safe-area-inset-bottom))] z-20 mt-8 -mx-4 border-t px-4 py-3 md:bottom-0 md:mx-0 md:rounded-2xl md:border"
           >
             <div>
+              {needsConsent && (
+                <ReviewConsent
+                  pending={consent.isPending}
+                  error={consent.error?.message}
+                  onAgree={consent.agree}
+                />
+              )}
               {out && (
                 <OutOfQuestions
                   step={out}
@@ -181,7 +192,7 @@ export function AskContainer() {
               <AskInput
                 value={draft}
                 busy={ask.isPending}
-                disabled={!profile || out !== null}
+                disabled={!profile || out !== null || needsConsent}
                 onChange={setDraft}
                 onSubmit={send}
               />

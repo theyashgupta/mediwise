@@ -37,7 +37,11 @@ const dashboard = {
   recent: [],
   processingCount: 0,
 };
-const meOn = { ...me, questionsLeft: 12, assistant: { enabled: true, outOfQuestions: null } };
+const meOn = {
+  ...me,
+  questionsLeft: 12,
+  assistant: { enabled: true, outOfQuestions: null, reviewRequired: false, consented: false },
+};
 
 function network(assistantMe: object) {
   return fakeNetwork({
