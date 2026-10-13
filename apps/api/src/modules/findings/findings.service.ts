@@ -26,6 +26,46 @@ function namedIn(text: string, name: string) {
   return new RegExp(`(?<![a-z0-9])${escaped}(?![a-z0-9])`).test(text);
 }
 
+/**
+ * Lists the catalog marker names a text uses whose key is not in the allowed set.
+ *
+ * @remarks
+ * Present names are cut out of the text before the search, so "fasting glucose" never counts as a bare "glucose".
+ */
+export function absentMarkerNames(text: string, allowed: Set<string>) {
+  const names = catalogNames.toSorted((a, b) => b.name.length - a.name.length);
+  let rest = text.toLowerCase();
+  for (const { name } of names.filter(({ key }) => allowed.has(key))) {
+    rest = rest.replaceAll(name, " ");
+  }
+  return [
+    ...new Set(
+      names
+        .filter(({ key, name }) => !allowed.has(key) && namedIn(rest, name))
+        .map(({ name }) => name),
+    ),
+  ];
+}
+
+/**
+ * Tells whether a sentence states a settled alert line or names a settled marker without saying that it is settled.
+ */
+export function statesSettledAsCurrent(
+  sentence: string,
+  settled: Pick<Settlement, "alertKeys" | "subject" | "markerKey">[],
+) {
+  const stated = alertKeys([sentence]);
+  const lower = sentence.toLowerCase();
+  return (
+    !/\bsettle/i.test(sentence) &&
+    settled.some(
+      ({ alertKeys: keys, subject, markerKey }) =>
+        keys.some((key) => stated.has(key)) ||
+        (markerKey !== undefined && namedIn(lower, subject.toLowerCase())),
+    )
+  );
+}
+
 const bodiesSchema = z.object({
   findings: z.array(
     z.object({
@@ -108,7 +148,6 @@ export type Finding = Omit<
  * Lists every reason one body breaks the copy rules, cites nothing, or names a marker that is not in either visit.
  *
  * @remarks
- * Present names are cut out of the text before the search, so "fasting glucose" never counts as a bare "glucose".
  * A sentence that states a settled alert line or names a settled marker passes only when it also says "settle".
  */
 export function validateFindingBody(
@@ -132,14 +171,7 @@ export function validateFindingBody(
         message: `"${sentence}" has ${words} words. Use ${maxWords} or fewer.`,
       });
     }
-    const stated = alertKeys([sentence]);
-    const lower = sentence.toLowerCase();
-    const current = settled.find(
-      ({ alertKeys: keys, subject, markerKey }) =>
-        keys.some((key) => stated.has(key)) ||
-        (markerKey !== undefined && namedIn(lower, subject.toLowerCase())),
-    );
-    if (current && !/\bsettle/i.test(sentence)) {
+    if (statesSettledAsCurrent(sentence, settled)) {
       problems.push({
         rule: "settled_as_current",
         message: `"${sentence}" names a settled result as current. Say that the later report settles it.`,
@@ -157,17 +189,7 @@ export function validateFindingBody(
       message: `It cites "${key}", which is not in the cite list.`,
     });
   }
-  const names = catalogNames.toSorted((a, b) => b.name.length - a.name.length);
-  let text = body.toLowerCase();
-  for (const { name } of names.filter(({ key }) => allowed.has(key))) {
-    text = text.replaceAll(name, " ");
-  }
-  const absent = new Set(
-    names
-      .filter(({ key, name }) => !allowed.has(key) && namedIn(text, name))
-      .map(({ name }) => name),
-  );
-  for (const name of absent) {
+  for (const name of absentMarkerNames(body, allowed)) {
     problems.push({
       rule: "unknown_marker",
       message: `It names "${name}", which is not in this report.`,
