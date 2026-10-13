@@ -1,0 +1,69 @@
+name: deploy-landing
+
+# A needs chain on the reusable check workflow, not workflow_run: workflow_run cannot filter by path.
+# The cost is a second check run on each main push that touches these paths.
+on:
+  push:
+    branches: [main]
+    paths:
+      - apps/landing/**
+      - apps/api/src/modules/payments/payments.config.ts
+      - apps/web/public/favicon.*
+      - apps/web/public/apple-touch-icon.png
+      - apps/web/public/og-image.png
+      - packages/**
+      - pnpm-lock.yaml
+      - .github/workflows/deploy-landing.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-mediwise-landing
+  cancel-in-progress: true
+
+jobs:
+  check:
+    if: github.repository == 'theyashgupta/mediwise'
+    uses: ./.github/workflows/check.yml
+
+  deploy:
+    if: github.repository == 'theyashgupta/mediwise'
+    needs: check
+    runs-on: ubuntu-latest
+    env:
+      PRODUCTION_URL: https://mediwise-landing.pages.dev
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build
+        run: pnpm turbo run build --filter @mediwise/landing
+      # wrangler-action would run `pnpm add` at the workspace root, which pnpm refuses. It uses this global install instead.
+      - run: npm install --global wrangler@4
+      - name: Deploy
+        id: deploy
+        uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy apps/landing/out --project-name mediwise-landing --branch main
+      - name: Summary
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          {
+            echo "### Landing page deployed"
+            echo "- Production: $PRODUCTION_URL"
+            echo "- This deploy: $DEPLOYMENT_URL"
+            echo "- Commit: $GITHUB_SHA"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Smoke
+        run: |
+          html=$(curl --fail --silent --show-error --retry 5 --retry-delay 5 --retry-all-errors "$PRODUCTION_URL")
+          grep --quiet "<title>MediWise" <<< "$html" || { echo "::error::$PRODUCTION_URL has no MediWise title"; exit 1; }
