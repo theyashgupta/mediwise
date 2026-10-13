@@ -55,7 +55,7 @@ export function ReportTitle({
 
   return (
     <form
-      className="max-w-measure space-y-2"
+      className="w-full max-w-md space-y-2"
       onSubmit={(event) => {
         event.preventDefault();
         const next = draft.trim();
@@ -74,7 +74,6 @@ export function ReportTitle({
         autoFocus
         aria-describedby="report-title-help"
         onChange={(event) => setDraft(event.target.value)}
-        className="text-lg"
       />
       <div className="flex justify-between gap-4 text-sm text-muted-foreground">
         <p id="report-title-help">{t.report.rename.help}</p>

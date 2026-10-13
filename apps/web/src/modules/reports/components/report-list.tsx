@@ -55,11 +55,13 @@ export function ReportList({ reports }: ReportListProps) {
                         <span className="block truncate font-medium">
                           {report.title ?? t.reports.list.report}
                         </span>
-                        <span className="block text-sm text-muted-foreground">
-                          {formatReportDate(report.collectedAt, report.createdAt)}
-                          {report.markerCount > 0 &&
-                            ` · ${t.report.markerCount(report.markerCount)}`}
-                        </span>
+                        {(!report.title || report.titleEdited) && (
+                          <span className="block text-sm text-muted-foreground">
+                            {formatReportDate(report.collectedAt, report.createdAt)}
+                            {report.markerCount > 0 &&
+                              ` · ${t.report.markerCount(report.markerCount)}`}
+                          </span>
+                        )}
                         {report.fileNames.length > 0 && (
                           <span className="block truncate text-sm text-muted-foreground">
                             {report.fileNames.join(", ")}
