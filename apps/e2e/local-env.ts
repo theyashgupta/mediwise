@@ -11,6 +11,7 @@ export const webOrigin = "http://localhost:5174";
 export const shellOrigin = "http://localhost:5175";
 export const landingOrigin = "http://localhost:3200";
 export const apiPort = 3101;
+export const adminUserId = "00000000-0000-4000-8000-00000000ad01";
 
 export const apiEnv = {
   NODE_ENV: "development",
@@ -24,7 +25,7 @@ export const apiEnv = {
   CLAUDE_STUB: "true",
   ANTHROPIC_API_KEY: "",
   CLAUDE_HARD_STOP: "false",
-  ADMIN_USER_ID: "",
+  ADMIN_USER_ID: adminUserId,
   PAYMENTS_ENABLED: "true",
   CASHFREE_STUB: "true",
   CASHFREE_APP_ID: "e2e-app-id",

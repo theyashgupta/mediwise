@@ -97,6 +97,15 @@ A spec file, `apps/e2e/tests/follow-up.spec.ts`, signs up another user with thre
 6. Downloads the CSV of the active profile from Settings and checks the vitamin D value (MEDI-62).
 7. Switches the language to Hindi. The report page keeps the score and the values and shows Devanagari text (MEDI-64 and MEDI-66).
 
+A spec file, `apps/e2e/tests/admin.spec.ts`, tests the operator page `/admin` (MEDI-94). It makes the demo account `arjun.demo@example.com` with the fixed user id that `apps/e2e/local-env.ts` gives the API as `ADMIN_USER_ID`, and signs up a second user who is not the admin. In order, it:
+
+1. Checks that `GET /admin/overview`, `GET /admin/spend` and `POST /admin/reports/:id/retry` return 401 with no session.
+2. Checks that the second user gets Not Found on `/admin` with no breadcrumb and no link to `/admin`, and 404 from the three routes.
+3. Seeds the dense history of the second user with `db:seed-history`, reads the 2025 sample, and marks that report failed with no credits, as the worker does. It adds a job that brings the month to 90% of the cap and a queued job from 45 minutes ago. These two jobs have the kinds `e2e_spend` and `e2e_stale`, and the spec deletes them at the end.
+4. Signs in as the admin and compares every number on the page with the `GET /admin/overview` response that the page loaded: spend, reads chart, queue, credits, profiles and the failed reads with their error class.
+5. Checks the spend alert line and the queue alert line.
+6. Clicks Re-read on the failed report. The row goes off the failed table, the report reaches done, and the owner has one credit less.
+
 A spec file, `apps/e2e/tests/checkout.spec.ts`, buys the 5 credit pack on the credits page with payments on. See [No Cashfree call](#no-cashfree-call).
 
 A spec file, `apps/e2e/tests/offline.spec.ts`, runs against a production build of the web, because the dev server keeps no app shell. It signs up a user and checks that Chrome reports no installability error. It checks that Cache Storage holds only the app shell and no API response. Then it opens a new page offline, as a user opens the installed app, and checks that the service worker serves the shell with the offline state. A reload does not work for this check, because Chromium resets `navigator.onLine` to true on a reload under Playwright.
@@ -133,7 +142,7 @@ supabase stop --workdir apps/e2e
 ```
 
 - `supabase start` uses `apps/e2e/supabase/config.toml`. That file turns off the services the suite does not use and creates the private `reports` bucket. It is not in the root `supabase` folder, so `supabase config push` never reads it.
-- `pnpm e2e` applies the Drizzle migrations to the local database. Then it starts the API on port 3101 and the web on port 5174, with the same commands as `pnpm dev`. It also builds the web and serves the build with `vite preview` on port 5175 for the offline spec. The API and the web get the local Supabase URL and keys, not the values in `apps/*/.env`.
+- `pnpm e2e` applies the Drizzle migrations to the local database. Then it starts the API on port 3101 and the web on port 5174, with the same commands as `pnpm dev`. It also builds the web and serves the build with `vite preview` on port 5175 for the offline spec. The API and the web get the local Supabase URL and keys, not the values in `apps/*/.env`. The API gets `ADMIN_USER_ID` set to the fixed id of the demo account, so only that account opens `/admin`.
 - The suite does not use a running `pnpm dev`. That process uses `apps/api/.env`, which has the real Claude key and the dev Supabase project.
 - On a machine with 8 GB of RAM, do not run `pnpm e2e` together with `pnpm check` or `pnpm dev`. Stop Supabase when you are done.
 - Each run makes a new user. The local database keeps the old users until `supabase stop`.
