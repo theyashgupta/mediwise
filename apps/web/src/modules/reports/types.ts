@@ -30,6 +30,8 @@ export type ShareLink = InferResponseType<
 
 export type SharedReport = InferResponseType<(typeof api.share)[":token"]["$get"], 200>;
 
+export type EarlierValue = SharedReport["earlier"][number];
+
 export type ExportReport = Omit<SharedReport["report"], "studies"> & {
   studies: Omit<Study, "fileName" | "filmName">[];
 };

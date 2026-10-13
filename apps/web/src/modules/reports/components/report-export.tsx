@@ -6,20 +6,24 @@ import { useT } from "@/common/hooks/use-locale";
 import { formatPlainDate } from "@/common/utils/date";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { changeMark, dateOptions, rangeText, unitText, valueText } from "../config/export";
+import {
+  changeMark,
+  dateOptions,
+  earlierSource,
+  rangeText,
+  unitText,
+  valueText,
+} from "../config/export";
 import { conditionValue, formatReportDate } from "../config/report";
 import { printedLines, studyTitle } from "../config/studies";
 import { SequenceSteps } from "./sequence-steps";
-import type { ExportDetail, ExportReport, MarkerRow } from "../types";
+import type { EarlierValue, ExportDetail, ExportReport, MarkerRow } from "../types";
 
-type PreviousValues = Map<string, number | string>;
+type Previous = { values: Map<string, EarlierValue>; dated: boolean };
 
 type ReportExportProps = {
   report: ExportReport;
-  previous?: {
-    report: { labName: string | null; collectedAt: string | null; createdAt: string };
-    values: PreviousValues;
-  };
+  earlier?: EarlierValue[];
   person: ExportDetail[];
   generatedOn: string;
   onPrint: () => void;
@@ -47,7 +51,10 @@ const columnsWithPrevious = [
   { key: "status", width: "w-[11%]" },
 ] as const;
 
-function PreviousCell({ row, value }: { row: MarkerRow; value: number | string | undefined }) {
+type PreviousCellProps = { row: MarkerRow; earlier: EarlierValue | undefined; dated: boolean };
+
+function PreviousCell({ row, earlier, dated }: PreviousCellProps) {
+  const value = earlier?.value;
   const mark =
     typeof value === "number" && row.value !== null
       ? changeMark(value, row.value, row.precision)
@@ -67,11 +74,16 @@ function PreviousCell({ row, value }: { row: MarkerRow; value: number | string |
           <span className="sr-only">{mark.label}</span>
         </>
       )}
+      {earlier && dated && (
+        <span className="block text-muted-foreground">
+          {formatReportDate(earlier.collectedAt, earlier.createdAt)}
+        </span>
+      )}
     </td>
   );
 }
 
-type MarkerTableProps = { groups: MarkerGroup[]; numbered?: boolean; previous?: PreviousValues };
+type MarkerTableProps = { groups: MarkerGroup[]; numbered?: boolean; previous?: Previous };
 
 function MarkerTable({ groups, numbered = false, previous }: MarkerTableProps) {
   const t = useT();
@@ -110,7 +122,13 @@ function MarkerTable({ groups, numbered = false, previous }: MarkerTableProps) {
                 <td className={cn(cell, "tabular-nums break-words")}>
                   {valueText(row.value, row.valueText, row.precision)}
                 </td>
-                {previous && <PreviousCell row={row} value={previous.get(row.markerKey)} />}
+                {previous && (
+                  <PreviousCell
+                    row={row}
+                    earlier={previous.values.get(row.markerKey)}
+                    dated={previous.dated}
+                  />
+                )}
                 <td className={cell}>{unitText(row.unit)}</td>
                 <td className={cn(cell, "tabular-nums")}>{rangeText(row.labRange)}</td>
                 <td className={cn(cell, "tabular-nums")}>{rangeText(row.calibratedRange)}</td>
@@ -133,7 +151,7 @@ function MarkerTable({ groups, numbered = false, previous }: MarkerTableProps) {
 
 export function ReportExport({
   report,
-  previous,
+  earlier = [],
   person,
   generatedOn,
   onPrint,
@@ -152,6 +170,11 @@ export function ReportExport({
     ...report.findings.flatMap(({ title, sequence }) => (sequence ? [{ title, ...sequence }] : [])),
     ...report.settled,
   ];
+  const source = earlierSource(earlier);
+  const previous =
+    earlier.length > 0
+      ? { values: new Map(earlier.map((item) => [item.markerKey, item])), dated: !source }
+      : undefined;
   const groups: MarkerGroup[] = [
     ...report.categories.map(({ key, label, markers }) => ({ key, label, rows: markers })),
     ...(report.derived.length > 0
@@ -193,13 +216,10 @@ export function ReportExport({
             <p className="whitespace-pre-line">{report.note}</p>
           </div>
         )}
-        {previous && (
+        {source && (
           <p>
             {text.previousFrom(
-              [
-                previous.report.labName,
-                formatReportDate(previous.report.collectedAt, previous.report.createdAt),
-              ]
+              [source.labName, formatReportDate(source.collectedAt, source.createdAt)]
                 .filter(Boolean)
                 .join(", "),
             )}
@@ -215,7 +235,7 @@ export function ReportExport({
           <MarkerTable
             groups={[{ key: "move-first", rows: report.moveFirst }]}
             numbered
-            previous={previous?.values}
+            previous={previous}
           />
         </section>
       )}
@@ -297,7 +317,7 @@ export function ReportExport({
         <h2 id="export-markers" className="text-base font-semibold print:text-[11pt]">
           {text.markers}
         </h2>
-        <MarkerTable groups={groups} previous={previous?.values} />
+        <MarkerTable groups={groups} previous={previous} />
       </section>
 
       {(report.studies.length > 0 || report.files.images.length > 0) && (

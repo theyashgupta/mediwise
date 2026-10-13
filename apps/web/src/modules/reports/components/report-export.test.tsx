@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { expect, test } from "vitest";
-import type { ExportReport } from "../types";
+import type { EarlierValue, ExportReport, MarkerRow } from "../types";
 import { ReportExport } from "./report-export";
 
 const report: ExportReport = {
@@ -18,11 +18,57 @@ const report: ExportReport = {
   files: { images: [] },
 };
 
-function render(exported: ExportReport) {
+function render(exported: ExportReport, earlier?: EarlierValue[]) {
   return renderToStaticMarkup(
-    <ReportExport report={exported} person={[]} generatedOn="1 Mar 2025" onPrint={() => {}} />,
+    <ReportExport
+      report={exported}
+      earlier={earlier}
+      person={[]}
+      generatedOn="1 Mar 2025"
+      onPrint={() => {}}
+    />,
   );
 }
+
+const marker = (markerKey: string, name: string, value: number): MarkerRow => ({
+  markerKey,
+  name,
+  shortName: null,
+  description: "",
+  value,
+  valueText: null,
+  unit: "mg/dL",
+  precision: 0,
+  status: "optimal",
+  deviation: null,
+  labRange: null,
+  calibratedRange: null,
+});
+
+const earlierValue = (markerKey: string, value: number, reportId: string, collectedAt: string) => ({
+  markerKey,
+  value,
+  reportId,
+  labName: "Made-up Labs",
+  collectedAt,
+  createdAt: `${collectedAt}T09:00:00Z`,
+});
+
+const withMarkers: ExportReport = {
+  ...report,
+  categories: [
+    {
+      key: "metabolic",
+      label: "Metabolic",
+      markers: [marker("glucose_fasting", "Glucose", 96), marker("ldl_cholesterol", "LDL", 120)],
+    },
+  ],
+};
+
+const rowOf = (html: string, name: string) => {
+  const start = html.indexOf(`>${name}</th>`);
+  return html.slice(start, html.indexOf("</tr>", start));
+};
 
 test("the export prints the visit note under the visit dates, before the results", () => {
   const html = render(report);
@@ -61,4 +107,31 @@ test("the export shows a settled alert and the later report as one block, in dat
 
 test("an export without a repeat study prints no repeat studies heading", () => {
   expect(render(report)).not.toContain("Repeat studies");
+});
+
+test("earlier values from two reports print each date in its row, with the change mark", () => {
+  const html = render(withMarkers, [
+    earlierValue("glucose_fasting", 92, "glucose-only", "2025-01-20"),
+    earlierValue("ldl_cholesterol", 140, "full-panel", "2024-11-02"),
+  ]);
+  expect(html).not.toContain("Previous values are from");
+  expect(rowOf(html, "Glucose")).toContain("92");
+  expect(rowOf(html, "Glucose")).toContain("20 Jan 2025");
+  expect(rowOf(html, "Glucose")).toContain("Higher now");
+  expect(rowOf(html, "LDL")).toContain("140");
+  expect(rowOf(html, "LDL")).toContain("2 Nov 2024");
+  expect(rowOf(html, "LDL")).toContain("Lower now");
+});
+
+test("earlier values from one report print one line and no date in the rows", () => {
+  const html = render(withMarkers, [
+    earlierValue("glucose_fasting", 92, "full-panel", "2024-11-02"),
+    earlierValue("ldl_cholesterol", 140, "full-panel", "2024-11-02"),
+  ]);
+  expect(html).toContain("Previous values are from Made-up Labs, 2 Nov 2024.");
+  expect(rowOf(html, "LDL")).not.toContain("2024");
+});
+
+test("an export without earlier values prints no previous column", () => {
+  expect(render(withMarkers, [])).not.toContain("Previous");
 });

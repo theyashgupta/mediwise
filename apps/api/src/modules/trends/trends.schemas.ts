@@ -12,4 +12,6 @@ export const compareQuerySchema = z
     message: "Give b or profileId",
   });
 
+export const earlierQuerySchema = z.object({ reportId: z.uuid() });
+
 export type CompareQuery = z.infer<typeof compareQuerySchema>;

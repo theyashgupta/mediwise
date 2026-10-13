@@ -492,6 +492,94 @@ test("the 12-report fixture gives one glucose point per day, with the same-day v
   expect(body.change).toEqual({ absolute: -3, percent: -3.2 });
 });
 
+test("an earlier value is each marker's newest value from an earlier date, even two reports back", async () => {
+  store.reports.push({ id: ids.third, profileId: ids.profile, collectedAt: "2025-12-01" });
+  store.rows.push(
+    { reportId: ids.third, markerKey: "hba1c", value: 5.8, unit: "%", status: "watch" },
+    { reportId: ids.third, markerKey: "ldl_cholesterol", value: 110, unit: "mg/dL", status: null },
+    { reportId: ids.third, markerKey: "vitamin_d", value: 30, unit: "ng/mL", status: null },
+  );
+  const { body } = await json(`/compare/earlier?reportId=${ids.third}`);
+  expect(body).toEqual([
+    expect.objectContaining({ markerKey: "hba1c", value: 5.4, reportId: ids.first }),
+    expect.objectContaining({
+      markerKey: "ldl_cholesterol",
+      value: 120,
+      reportId: ids.second,
+      collectedAt: "2025-07-10",
+      labName: "Lab",
+    }),
+  ]);
+});
+
+test("an earlier value skips a report of the same date, keeps a text result and converts the unit", async () => {
+  store.reports.push({ id: ids.third, profileId: ids.profile, collectedAt: "2025-07-10" });
+  store.rows.push(
+    {
+      reportId: ids.first,
+      markerKey: "urine_protein",
+      value: null,
+      valueText: "Negative",
+      unit: null,
+      status: "optimal",
+    },
+    {
+      reportId: ids.third,
+      markerKey: "urine_protein",
+      value: null,
+      valueText: "Trace",
+      unit: null,
+      status: "watch",
+    },
+    { reportId: ids.first, markerKey: "glucose_fasting", value: 5, unit: "mmol/L", status: null },
+    { reportId: ids.third, markerKey: "glucose_fasting", value: 95, unit: "mg/dL", status: null },
+    { reportId: ids.third, markerKey: "ldl_cholesterol", value: 100, unit: "mg/dL", status: null },
+  );
+  const { body } = await json(`/compare/earlier?reportId=${ids.third}`);
+  const values = Object.fromEntries(
+    (body as unknown as { markerKey: string; value: unknown }[]).map((item) => [
+      item.markerKey,
+      item.value,
+    ]),
+  );
+  expect(values).toEqual({ ldl_cholesterol: 160, urine_protein: "Negative", glucose_fasting: 90 });
+});
+
+test("earlier values return 404 for a report of another owner", async () => {
+  expect((await json(`/compare/earlier?reportId=${ids.second}`, "bob")).status).toBe(404);
+});
+
+test("the second full panel of the 12-report fixture takes earlier values from the first full panel", async () => {
+  store.reports.splice(0, store.reports.length);
+  store.rows.splice(0, store.rows.length);
+  const id = (index: number) =>
+    `0b4c2a51-6666-4e0f-9a51-6f2b8c1d0e${String(index).padStart(2, "0")}`;
+  const dense = denseHistoryReports("2026-10-13");
+  dense.forEach((report, index) => {
+    store.reports.push({
+      id: id(index),
+      profileId: ids.profile,
+      collectedAt: report.collectedAt,
+      labName: report.labName,
+    });
+    store.rows.push(...report.markers.map((marker) => ({ ...marker, reportId: id(index) })));
+  });
+  const panel = dense.findIndex((report) => report.labName === "Moon Labs");
+  const { body } = await json(`/compare/earlier?reportId=${id(panel)}`);
+  const earlier = body as unknown as { markerKey: string; collectedAt: string; labName: string }[];
+  const between = new Set(
+    dense.slice(1, panel).flatMap((report) => report.markers.map((marker) => marker.markerKey)),
+  );
+  const byKey = new Map(earlier.map((item) => [item.markerKey, item]));
+  expect(byKey.get("glucose_fasting")).toMatchObject({ collectedAt: "2026-09-08" });
+  expect(byKey.get("hba1c")).toMatchObject({ collectedAt: "2026-09-01" });
+  const others = earlier.filter((item) => !between.has(item.markerKey));
+  expect(others.length).toBeGreaterThan(40);
+  expect(new Set(others.map((item) => `${item.collectedAt} ${item.labName}`))).toEqual(
+    new Set(["2026-08-04 Sunrise Diagnostics"]),
+  );
+});
+
 test("in the weekly 12-report fixture only rechecks of a watch or risk glucose value are linked", async () => {
   store.reports.splice(0, store.reports.length);
   store.rows.splice(0, store.rows.length);
