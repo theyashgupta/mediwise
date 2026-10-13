@@ -128,7 +128,7 @@ The hard cap keeps every request under 100,000 tokens. Above that, Haiku 5.5 cha
 | - | - | - | - | - |
 | Dense history fixture (178 values in 10 weeks) | 12 | 318 | 77,784 | 33,916 |
 | 2024 golden panel with a settled repeat scan and a workup of 5 reports | 8 | 263 | 78,006 | 32,084 |
-| System prompt and answer tool | | | | 3,086 |
+| System prompt and answer tool | | | | 3,143 |
 
 - The text has about 2.3 characters per token, not 3.5. The estimates above are about 1.5 times too low, mostly because the catalog text and the engine follow-ups go into the block. The server now estimates with 2.2 characters per token, so the 60,000 cap stays on the safe side.
 - A profile with one full panel is about 32,000 tokens, not 12,000. The cache still makes this cheap: see the eval cost below.
@@ -239,7 +239,7 @@ The eval runs these 30 questions on two fixture profiles: the dense history fixt
 
 Pass bar for launch: 30 of 30 on 3 runs each, on Haiku 5.5, with the validator on. A question that passes only after the retry counts as a pass, and the eval prints the first-try rate.
 
-**Result on 2026-10-13 (MEDI-75):** `pnpm eval:assistant 3` on `claude-haiku-5-5` passed 30 of 30 questions on every run. 78 of 81 Claude answers passed the validator on the first try. One full run (27 Claude answers, 3 gate answers) cost 4.6 cents, a mean of 0.057 cents per Claude answer. The prompt tuning and every eval run of the ticket cost 32.4 cents in total.
+**Result on 2026-10-13 (MEDI-75):** `pnpm eval:assistant 3` on `claude-haiku-5-5` passed 30 of 30 questions on every run with the final validator. 79 of 81 Claude answers passed the validator on the first try. One full run (27 Claude answers, 3 gate answers) cost 5.0 cents, a mean of 0.062 cents per Claude answer. The prompt tuning and every eval run of the ticket cost 37.3 cents in total.
 
 ### What the app logs
 
