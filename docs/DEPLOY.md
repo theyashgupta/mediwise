@@ -306,7 +306,24 @@ Do this test on an Android phone after each deploy that changes `sw.js` or the m
 8. Do steps 4 to 7 again with a JPG photo.
 9. Sign out. Do step 4 again. Sign in. Make sure that the PDF is in the list after sign-in.
 
-To see Cache Storage, connect the phone with USB and open `chrome://inspect` on the Mac. Select the MediWise page, then Application, Cache Storage. After step 5 it has no entries.
+To see Cache Storage, connect the phone with USB and open `chrome://inspect` on the Mac. Select the MediWise page, then Application, Cache Storage. After step 5, `mediwise-share` has no entries.
+
+## Install and offline on a phone
+
+`sw.js` keeps the app shell of one build in the cache `mediwise-shell-<version>`: `/` and the content-hashed files in `/assets`. It never keeps an API response. The build writes the version and the file list at the top of `sw.js`, so each deploy that changes a file gives a new worker and a new cache. The new worker waits until the user selects "Update". Then it deletes the caches of earlier builds.
+
+Do this test on an Android phone after each deploy that changes `sw.js`, the manifest or `index.html`:
+
+1. In Chrome, open https://app.mediwise.theyashgupta.me and sign in. Close the tab.
+2. Open the app again in a new tab. Make sure that Home shows the "Install MediWise" banner.
+3. Select "Not now". Open Home again. Make sure that the banner does not show. It shows again after 30 days.
+4. Install the app from the Chrome menu. Open it from the home screen. Make sure that it opens with no address bar and that the status bar has the colour of the app theme.
+5. Turn on airplane mode. Close the app and open it again. Make sure that it shows "You are offline" and no report data.
+6. Turn off airplane mode. Make sure that the page content comes back.
+7. In Cache Storage (see the section above), make sure that `mediwise-shell-<version>` holds only `/`, `/assets/...`, `site.webmanifest`, `robots.txt` and `sitemap.xml`.
+8. After the next deploy, open the installed app. Make sure that "Update available" shows. Select "Update". The app loads the new build.
+
+On an iPhone, open the app in Safari on two different days. On the second visit, Home shows the hint sheet with the Share and Add to Home Screen steps one time only.
 
 ## Deploy a change
 

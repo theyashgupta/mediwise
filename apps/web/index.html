@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>MediWise</title>
     <meta
       name="description"
@@ -42,7 +42,12 @@
     <script>
       try {
         const theme = localStorage.getItem("theme");
-        if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+        if (theme === "light" || theme === "dark") {
+          document.documentElement.dataset.theme = theme;
+          for (const meta of document.querySelectorAll('meta[name="theme-color"]')) {
+            meta.content = theme === "dark" ? "#181715" : "#FBFAF7";
+          }
+        }
         if (localStorage.getItem("locale") === "hi") document.documentElement.lang = "hi";
       } catch {}
       if (navigator.deviceMemory < 4) document.documentElement.dataset.glass = "off";

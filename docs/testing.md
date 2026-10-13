@@ -99,6 +99,8 @@ A spec file, `apps/e2e/tests/follow-up.spec.ts`, signs up another user with thre
 
 A spec file, `apps/e2e/tests/checkout.spec.ts`, buys the 5 credit pack on the credits page with payments on. See [No Cashfree call](#no-cashfree-call).
 
+A spec file, `apps/e2e/tests/offline.spec.ts`, runs against a production build of the web, because the dev server keeps no app shell. It signs up a user and checks that Chrome reports no installability error. It checks that Cache Storage holds only the app shell and no API response. Then it opens a new page offline, as a user opens the installed app, and checks that the service worker serves the shell with the offline state. A reload does not work for this check, because Chromium resets `navigator.onLine` to true on a reload under Playwright.
+
 ### No Claude call
 
 The suite never calls Claude.
@@ -131,7 +133,7 @@ supabase stop --workdir apps/e2e
 ```
 
 - `supabase start` uses `apps/e2e/supabase/config.toml`. That file turns off the services the suite does not use and creates the private `reports` bucket. It is not in the root `supabase` folder, so `supabase config push` never reads it.
-- `pnpm e2e` applies the Drizzle migrations to the local database. Then it starts the API on port 3101 and the web on port 5174, with the same commands as `pnpm dev`. The API and the web get the local Supabase URL and keys, not the values in `apps/*/.env`.
+- `pnpm e2e` applies the Drizzle migrations to the local database. Then it starts the API on port 3101 and the web on port 5174, with the same commands as `pnpm dev`. It also builds the web and serves the build with `vite preview` on port 5175 for the offline spec. The API and the web get the local Supabase URL and keys, not the values in `apps/*/.env`.
 - The suite does not use a running `pnpm dev`. That process uses `apps/api/.env`, which has the real Claude key and the dev Supabase project.
 - On a machine with 8 GB of RAM, do not run `pnpm e2e` together with `pnpm check` or `pnpm dev`. Stop Supabase when you are done.
 - Each run makes a new user. The local database keeps the old users until `supabase stop`.

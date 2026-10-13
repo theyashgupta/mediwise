@@ -57,3 +57,9 @@ test("a visitor without a session goes to sign in with the page they asked for",
   });
   expect(await redirectOf(requireSession(at("/")))).toMatchObject({ to: "/login", search: {} });
 });
+
+test("offline, a visitor without a session stays in the shell and its offline state", async () => {
+  vi.stubGlobal("navigator", { onLine: false });
+  await expect(requireSession(at("/reports"))).resolves.toBeUndefined();
+  vi.unstubAllGlobals();
+});
