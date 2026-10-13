@@ -1,8 +1,9 @@
 import { describe, expect, test } from "vitest";
+import split from "../fixtures/repeat-study-split.json";
 import fixture from "../fixtures/repeat-study.json";
 import { alertHeadlineStart, buildFindings } from "./findings.js";
-import { repeatsMarker, repeatsStudy, settleFinding, typicalGapDays } from "./sequence.js";
-import type { LaterVisit, Visit } from "./types.js";
+import { repeatGap, repeatsMarker, settleFinding, typicalGapDays } from "./sequence.js";
+import type { LaterVisit, Visit, VisitStudy } from "./types.js";
 
 const earlier = fixture.earlier as Visit;
 const later = fixture.later as LaterVisit;
@@ -45,29 +46,73 @@ describe("repeatsMarker", () => {
   });
 });
 
-describe("repeatsStudy", () => {
+describe("repeatGap", () => {
   test("a study of the same kind and region 42 days later is a repeat", () => {
-    expect(repeatsStudy(earlier, later)).toBe(true);
+    expect(repeatGap(earlier, later)).toBe(42);
   });
 
   test("a study 91 days later is not a repeat", () => {
-    expect(repeatsStudy(earlier, laterWith({ date: "2025-05-12" }))).toBe(false);
+    expect(repeatGap(earlier, laterWith({ date: "2025-05-12" }))).toBeUndefined();
   });
 
   test("a study 90 days earlier is a repeat, so an older report uploaded later still matches", () => {
-    expect(repeatsStudy(earlier, laterWith({ date: "2024-11-12" }))).toBe(true);
+    expect(repeatGap(earlier, laterWith({ date: "2024-11-12" }))).toBe(-90);
   });
 
   test("a study of another kind or another region is not a repeat", () => {
     const xray = { ...laterStudy!, kind: "xray" };
     const abdomen = { ...laterStudy!, bodyRegion: "Abdomen" };
-    expect(repeatsStudy(earlier, { ...later, studies: [xray] })).toBe(false);
-    expect(repeatsStudy(earlier, { ...later, studies: [abdomen] })).toBe(false);
+    expect(repeatGap(earlier, { ...later, studies: [xray] })).toBeUndefined();
+    expect(repeatGap(earlier, { ...later, studies: [abdomen] })).toBeUndefined();
   });
 
   test("a study with no printed region is not a repeat", () => {
     const studies = [{ ...earlierStudy!, bodyRegion: null }];
-    expect(repeatsStudy({ ...earlier, studies }, later)).toBe(false);
+    expect(repeatGap({ ...earlier, studies }, later)).toBeUndefined();
+  });
+});
+
+describe("a pelvis study printed differently from an earlier abdomen and pelvis study", () => {
+  const before = split.earlier as Visit;
+  const after = split.later as LaterVisit;
+  const [breast, pelvis] = after.studies as [VisitStudy, VisitStudy];
+  const pelvisAlert = { ...alert, citedStudyIds: [before.studies[0]!.id] };
+  const only = (study: VisitStudy, changes: Partial<VisitStudy> = {}) => ({
+    ...after,
+    studies: [{ ...study, ...changes }],
+  });
+
+  test("the TVS pelvis study 10 days later repeats the abdomen and pelvis study", () => {
+    expect(repeatGap(before, after)).toBe(10);
+    expect(repeatGap(after, before)).toBe(-10);
+  });
+
+  test("the modality matches when one study prints USG and the other has the kind ultrasound", () => {
+    expect(repeatGap(before, only(pelvis, { kind: "other" }))).toBe(10);
+  });
+
+  test("a breast study does not repeat a pelvis study", () => {
+    expect(repeatGap(before, only(breast))).toBeUndefined();
+  });
+
+  test("a pelvis study of another modality does not repeat it", () => {
+    expect(
+      repeatGap(before, only(pelvis, { kind: "ct", bodyRegion: "CT pelvis" })),
+    ).toBeUndefined();
+  });
+
+  test("a pelvis study 100 days later does not repeat it", () => {
+    expect(repeatGap(before, only(pelvis, { performedAt: "2025-05-12" }))).toBeUndefined();
+  });
+
+  test("the pelvis study settles the alert with its own date and lab, not the breast study", () => {
+    expect(settleFinding(pelvisAlert, before, [after])).toMatchObject({
+      state: "settled",
+      date: "2025-02-11",
+      earlierDate: "2025-02-01",
+      labName: "Hillside Scan Centre",
+      later: "No adnexal mass is seen.",
+    });
   });
 });
 

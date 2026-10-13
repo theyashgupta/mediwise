@@ -140,6 +140,7 @@ export type VisitMarker = {
 
 export type VisitStudy = PatternStudy & {
   bodyRegion: string | null;
+  performedAt?: string | null;
   result?: string | null;
   measurements: { key: string; value: number | null; unit: string | null; status: StoredStatus }[];
 };
@@ -163,6 +164,8 @@ export type Settlement = {
   state: "settled" | "confirmed";
   reportId: string;
   date: string;
+  earlierDate: string;
+  labName: string | null;
   earlier: string;
   later: string;
   subject: string;

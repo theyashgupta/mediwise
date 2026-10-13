@@ -1250,7 +1250,7 @@ test("An adnexal mass line is the first finding, a doctor question and the first
 
 test("a later ultrasound of the same region with no alert line settles the mass line on a re-read", async () => {
   const later: Visit = {
-    date: "2024-04-22",
+    date: "2025-03-14",
     labName: null,
     markers: [],
     studies: [
@@ -1265,7 +1265,7 @@ test("a later ultrasound of the same region with no alert line settles the mass 
     ],
   };
   edge.visits.set("later-report", later);
-  edge.near.push({ id: "later-report", date: later.date, createdAt: new Date("2024-04-23") });
+  edge.near.push({ id: "later-report", date: later.date, createdAt: new Date("2025-03-15") });
   edge.files.length = 0;
   addFile(0, textPdf([labPage, xrayPage]));
   edge.create
@@ -1287,7 +1287,7 @@ test("a later ultrasound of the same region with no alert line settles the mass 
   expect(findings).toEqual([
     expect.objectContaining({
       kind: "study_alert",
-      body: "Settled by the report of 22 Apr 2024.",
+      body: "Settled by the report of 14 Mar 2025.",
     }),
   ]);
   expect(report.doctorQuestions.some((question) => question.includes("adnexa"))).toBe(false);

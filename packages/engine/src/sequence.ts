@@ -59,32 +59,90 @@ export function repeatsMarker(
   );
 }
 
-function region(study: Pick<VisitStudy, "bodyRegion">) {
+const modalityWords: [string, RegExp][] = [
+  ["mammogram", /mammo/],
+  ["ultrasound", /\b(usg|ultra ?sound|sonography|tvs|tas|doppler|echo)/],
+  ["ct", /\b(ct|cect|ncct|hrct)\b|computed tomography/],
+  ["mri", /\bmri\b|magnetic resonance/],
+  ["x-ray", /x ?ray|radiograph|\bcxr\b/],
+  ["ecg", /\b(ecg|ekg)\b/],
+];
+
+const kindModality: Record<string, string> = {
+  ultrasound: "ultrasound",
+  xray: "x-ray",
+  ct: "ct",
+  mri: "mri",
+  ecg: "ecg",
+};
+
+const regionWords: [string, RegExp][] = [
+  ["abdomen", /(?<!trans ?)abdom|\b(kub|kidneys?|renal|liver|gall ?bladder|hepat\w*)\b/],
+  ["pelvis", /pelvi|\b(tvs|tas|transvaginal|uterus|ovar\w*|adnex\w*|endometri\w*)\b/],
+  ["breast", /breast|mammo/],
+  ["chest", /\b(chest|thora\w*|lungs?|heart|cardiac|echo\w*)\b/],
+  ["neck", /\b(neck|thyroid|carotid)\b/],
+  ["head", /\b(head|brain|skull|sinus\w*|orbits?)\b/],
+  [
+    "limb",
+    /\b(limbs?|arms?|legs?|knees?|hips?|shoulders?|ankles?|wrists?|elbows?|hands?|feet|foot)\b/,
+  ],
+  ["whole body", /whole body/],
+];
+
+function printed(study: Pick<VisitStudy, "bodyRegion">) {
   return (study.bodyRegion ?? "")
     .toLowerCase()
     .replace(/[^a-z]+/g, " ")
     .trim();
 }
 
-export function sameStudy(a: VisitStudy, b: VisitStudy) {
+/** Names the modality of a study from its printed name, else from its kind, or null for a kind that is not imaging. */
+function modality(study: Pick<VisitStudy, "kind" | "bodyRegion">) {
+  const name = printed(study);
   return (
-    a.kind === b.kind && a.kind !== "examination" && region(a) !== "" && region(a) === region(b)
+    modalityWords.find(([, words]) => words.test(name))?.[0] ?? kindModality[study.kind] ?? null
   );
 }
 
 /**
- * Tells whether two visits hold a study of the same kind and body region within 90 days, so the later may repeat the earlier.
+ * Lists the body regions a study covers, from a small fixed list.
  *
  * @remarks
- * ponytail: the region match is exact after case and punctuation, so "Pelvis" and "Abdomen and pelvis" never match. The user
- * links that pair by hand.
+ * A printed name with no known region word keeps its whole printed name, so two odd names still match when they are equal.
  */
-export function repeatsStudy(
-  a: Pick<Visit, "date" | "studies">,
-  b: Pick<Visit, "date" | "studies">,
-) {
-  if (Math.abs(daysBetween(a.date, b.date)) > repeatStudyDays) return false;
-  return a.studies.some((study) => b.studies.some((other) => sameStudy(study, other)));
+function regions(study: Pick<VisitStudy, "bodyRegion">) {
+  const name = printed(study);
+  const found = regionWords.filter(([, words]) => words.test(name)).map(([key]) => key);
+  return new Set(found.length > 0 ? found : name ? [name] : []);
+}
+
+/** Tells whether two studies have the same modality and cover at least one same body region. */
+export function sameStudy(a: VisitStudy, b: VisitStudy) {
+  const kind = modality(a);
+  if (!kind || kind !== modality(b)) return false;
+  const other = regions(b);
+  return [...regions(a)].some((key) => other.has(key));
+}
+
+function studyDate(visit: Pick<Visit, "date">, study: VisitStudy) {
+  return study.performedAt ?? visit.date;
+}
+
+/**
+ * Gives the days from a study of `a` to the same study in `b` within 90 days, or undefined when `b` repeats no study of `a`.
+ *
+ * @remarks
+ * The dates are the study dates, because one report can hold studies of several dates.
+ */
+export function repeatGap(a: Pick<Visit, "date" | "studies">, b: Pick<Visit, "date" | "studies">) {
+  for (const study of a.studies) {
+    for (const other of b.studies) {
+      const days = daysBetween(studyDate(a, study), studyDate(b, other));
+      if (Math.abs(days) <= repeatStudyDays && sameStudy(study, other)) return days;
+    }
+  }
+  return undefined;
 }
 
 /** Finds the sentence of a later study that speaks about the same alert rules, negated or not, else its first sentence. */
@@ -100,14 +158,20 @@ function answerLine(study: VisitStudy, keys: Set<string>) {
   );
 }
 
-function settleAlert(study: VisitStudy, later: LaterVisit[]): Settlement | undefined {
+function settleAlert(
+  study: VisitStudy,
+  current: Visit,
+  later: LaterVisit[],
+): Settlement | undefined {
   const line = alertLine([study.result, study.impression]);
   if (!line) return undefined;
   const keys = alertKeys([study.result, study.impression]);
   let settlement: Settlement | undefined;
   for (const visit of later.filter(({ linked }) => linked)) {
     const kind = visit.studies.filter((other) => other.kind === study.kind);
-    const match = kind.find((other) => region(other) === region(study)) ?? kind[0];
+    const match =
+      visit.studies.find((other) => sameStudy(study, other)) ??
+      (kind.length === 1 ? kind[0] : undefined);
     if (!match) continue;
     const found = alertKeys([match.result, match.impression]);
     const repeats = [...keys].some((key) => found.has(key));
@@ -115,7 +179,9 @@ function settleAlert(study: VisitStudy, later: LaterVisit[]): Settlement | undef
     settlement = {
       state: repeats ? "confirmed" : "settled",
       reportId: visit.reportId,
-      date: visit.date,
+      date: studyDate(visit, match),
+      earlierDate: studyDate(current, study),
+      labName: visit.labName,
       earlier: line,
       later: answerLine(match, keys),
       subject: line,
@@ -157,6 +223,8 @@ function settleMarker(
     state: row.status === "optimal" ? "settled" : "confirmed",
     reportId: visit.reportId,
     date: visit.date,
+    earlierDate: current.date,
+    labName: visit.labName,
     earlier: valueText(before),
     later: valueText(row),
     subject: names.get(key) ?? key,
@@ -170,7 +238,7 @@ function settleMarker(
  * Tells whether a later report settles or confirms one finding of this visit, or undefined when none speaks to it.
  *
  * @remarks
- * A study alert needs a linked later study of the same kind: no alert line there settles it, the same alert rule confirms it,
+ * A study alert needs a linked later study of the same modality and region: no alert line there settles it, the same alert rule confirms it,
  * and a different alert leaves it open. A risk or change finding of one marker takes the status of the latest repeat of
  * that marker by `repeatsMarker`, linked or not. `later` must be in date order.
  */
@@ -182,7 +250,7 @@ export function settleFinding(
 ): Settlement | undefined {
   if (finding.kind === "study_alert") {
     const study = current.studies.find(({ id }) => id === finding.citedStudyIds[0]);
-    return study && settleAlert(study, later);
+    return study && settleAlert(study, current, later);
   }
   const [key] = finding.citedKeys;
   if ((finding.kind === "risk" || finding.kind === "change") && key) {

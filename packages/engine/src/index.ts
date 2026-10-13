@@ -71,7 +71,7 @@ export {
   repeatMarkerDays,
   repeatStudyDays,
   repeatsMarker,
-  repeatsStudy,
+  repeatGap,
   settleFinding,
   typicalGapDays,
 } from "./sequence.js";
