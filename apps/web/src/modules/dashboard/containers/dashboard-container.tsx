@@ -14,6 +14,7 @@ import { AttentionList } from "../components/attention-list";
 import { DashboardGreeting } from "../components/dashboard-greeting";
 import { FamilyList } from "../components/family-list";
 import { LatestReportCard } from "../components/latest-report-card";
+import { NewSinceStrip } from "../components/new-since-strip";
 import { ProcessingCard } from "../components/processing-card";
 import { ProfilePrompt } from "../components/profile-prompt";
 import { RecentReports } from "../components/recent-reports";
@@ -97,6 +98,9 @@ export function DashboardContainer() {
             retryError={retry.error?.message}
             onRetry={() => retry.mutate(lastFailed.id, { onSuccess: () => dashboard.refetch() })}
           />
+        )}
+        {data?.latest && data.newSince.length > 0 && (
+          <NewSinceStrip since={data.latest.date} reports={data.newSince} />
         )}
         {data?.latest && <LatestReportCard report={data.latest} />}
         {data?.latest && <EpisodeCardContainer profileId={profile?.id} />}
