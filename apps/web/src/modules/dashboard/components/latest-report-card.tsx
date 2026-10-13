@@ -110,7 +110,11 @@ export function LatestReportCard({ report }: LatestReportCardProps) {
           </div>
         )}
         <Button asChild>
-          <Link to="/reports/$reportId" params={{ reportId: report.id }}>
+          <Link
+            to="/reports/$reportId"
+            params={{ reportId: report.id }}
+            data-testid="latest-report-link"
+          >
             {text.open}
             <ArrowRight aria-hidden />
           </Link>
