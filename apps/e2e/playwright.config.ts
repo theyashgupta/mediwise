@@ -31,7 +31,7 @@ export default defineConfig({
     {
       command: `pnpm --filter @mediwise/web exec vite --port ${new URL(webOrigin).port} --strictPort`,
       url: webOrigin,
-      env: webEnv,
+      env: { ...webEnv, NODE_ENV: "development" },
       reuseExistingServer: false,
       timeout: 120_000,
     },
