@@ -30,6 +30,7 @@ export function TrendControls({
             size="sm"
             variant={category === key ? "secondary" : "ghost"}
             aria-pressed={category === key}
+            data-testid={`trend-category-${key ?? "all"}`}
             onClick={() => onCategoryChange(key)}
           >
             {label}
@@ -48,6 +49,7 @@ export function TrendControls({
             size="sm"
             variant={sort === value ? "secondary" : "ghost"}
             aria-pressed={sort === value}
+            data-testid={`trend-sort-${value}`}
             onClick={() => onSortChange(value)}
           >
             {t.trends.controls.sorts[value]}
