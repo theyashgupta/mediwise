@@ -7,9 +7,11 @@ import { useT } from "@/common/hooks/use-locale";
 import { downloadFile } from "@/common/utils/download";
 import { Button } from "@/components/ui/button";
 import { EpisodeCardContainer } from "@/modules/episodes";
+import { useMe } from "@/modules/me";
 import { ConsentPromptContainer, useActiveProfile } from "@/modules/profiles";
 import { ReportFailed, useRetryReport } from "@/modules/reports";
 import { YearReviewCardContainer } from "@/modules/year-review";
+import { AskCard } from "../components/ask-card";
 import { AttentionList } from "../components/attention-list";
 import { DashboardGreeting } from "../components/dashboard-greeting";
 import { FamilyList } from "../components/family-list";
@@ -21,6 +23,7 @@ import { ProcessingCard } from "../components/processing-card";
 import { ProfilePrompt } from "../components/profile-prompt";
 import { RecentReports } from "../components/recent-reports";
 import { RetestList } from "../components/retest-list";
+import { askSuggestions } from "../config/ask-suggestions";
 import { buildRetestCalendarFile } from "../config/calendar-file";
 import { isMeasuredRecently } from "../config/report-age";
 import { useDashboard } from "../hooks/use-dashboard";
@@ -45,6 +48,7 @@ export function DashboardContainer() {
   const text = useT().dashboard;
   const { profile, setActiveProfileId } = useActiveProfile();
   const dashboard = useDashboard(profile?.id);
+  const me = useMe();
   const family = useFamily();
   const retry = useRetryReport();
   const install = useInstallOffer();
@@ -111,6 +115,9 @@ export function DashboardContainer() {
           <NewSinceStrip since={data.latest.date} reports={data.newSince} />
         )}
         {data?.latest && <LatestReportCard report={data.latest} />}
+        {data?.latest && me.data?.assistant.enabled && (
+          <AskCard reportId={data.latest.id} suggestions={askSuggestions(data, retests ?? [])} />
+        )}
         {data?.latest && <EpisodeCardContainer profileId={profile?.id} />}
         {data?.latest && <YearReviewCardContainer profileId={profile?.id} />}
         {retests && retests.length > 0 && (

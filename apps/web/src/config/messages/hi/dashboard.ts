@@ -2,6 +2,14 @@ import type { Messages } from "..";
 import { review } from "../review";
 
 export const dashboard: Messages["dashboard"] = {
+  ask: {
+    title: "अपनी रिपोर्ट के बारे में पूछें",
+    body: "हर उत्तर हर संख्या की रिपोर्ट और तारीख बताता है।",
+    changed: (marker: string) => `मेरा ${marker} कैसे बदला है?`,
+    finding: (title: string) => review(`मेरी रिपोर्ट "${title}" के बारे में क्या कहती है?`),
+    retest: (marker: string) => `मुझे ${marker} की दोबारा जांच कब करानी चाहिए?`,
+    open: "सवाल पूछें",
+  },
   greeting: {
     morning: "सुप्रभात",
     afternoon: "नमस्ते",
