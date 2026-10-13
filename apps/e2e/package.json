@@ -5,12 +5,14 @@
   "type": "module",
   "scripts": {
     "e2e": "playwright test",
+    "perf": "playwright test --config playwright.perf.config.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint ."
   },
   "devDependencies": {
     "@mediwise/config": "workspace:*",
     "@playwright/test": "1.63.0",
-    "@types/node": "24.19.2"
+    "@types/node": "24.19.2",
+    "lighthouse": "12.8.2"
   }
 }

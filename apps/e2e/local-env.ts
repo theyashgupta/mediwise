@@ -8,6 +8,7 @@ const status = JSON.parse(
 ) as Record<"API_URL" | "DB_URL" | "ANON_KEY" | "SERVICE_ROLE_KEY" | "JWT_SECRET", string>;
 
 export const webOrigin = "http://localhost:5174";
+export const landingOrigin = "http://localhost:3200";
 export const apiPort = 3101;
 
 export const apiEnv = {

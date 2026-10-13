@@ -64,3 +64,40 @@ jobs:
             apps/e2e/test-results
           retention-days: 14
 
+  # Lighthouse budgets and INP on production builds. A job of its own, so the e2e job stays under 10 minutes.
+  perf:
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SUPABASE_CLI_VERSION: 2.120.0
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - id: supabase-cli
+        uses: actions/cache@v6
+        with:
+          path: ~/.supabase-cli
+          key: supabase-cli-${{ env.SUPABASE_CLI_VERSION }}
+      - if: steps.supabase-cli.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/.supabase-cli
+          curl --fail --silent --show-error --location "https://github.com/supabase/cli/releases/download/v${SUPABASE_CLI_VERSION}/supabase_linux_amd64.tar.gz" | tar -xz -C ~/.supabase-cli
+      - run: echo "$HOME/.supabase-cli" >> "$GITHUB_PATH"
+      - run: pnpm install --frozen-lockfile
+      # The API runs with CLAUDE_STUB=true and no ANTHROPIC_API_KEY, as in the e2e job.
+      - run: supabase start --workdir apps/e2e
+      - run: pnpm --filter @mediwise/e2e exec playwright install --with-deps chromium
+      - run: pnpm perf
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: perf-report
+          path: |
+            apps/e2e/playwright-report
+            apps/e2e/test-results
+          retention-days: 14
