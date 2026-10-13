@@ -4,6 +4,7 @@ export { groupVisits } from "./config/visits";
 export { ReportContainer } from "./containers/report-container";
 export { ReportExportContainer } from "./containers/report-export-container";
 export { ReportsContainer } from "./containers/reports-container";
+export { SharedReportContainer } from "./containers/shared-report-container";
 export { UploadReportContainer } from "./containers/upload-report-container";
 export { ReportFailed } from "./components/report-failed";
 export { ReportStatusBadge } from "./components/report-status-badge";

@@ -276,7 +276,7 @@ The emails say "The link expires after 1 hour", so `otp_expiry` stays `3600`. Bo
 
 ## Smoke test
 
-`scripts/smoke.sh` checks: `/health` (it waits up to 2 minutes for Render to wake), CORS for the web origin, the SPA rewrite, sign in through Supabase, `GET /me`, create a profile, list its reports, delete the profile. It needs `curl` and `jq`.
+`scripts/smoke.sh` checks: `/health` (it waits up to 2 minutes for Render to wake), CORS for the web origin, the SPA rewrite, the `noindex` header on `/share/*`, the public share route (`GET /share/:token` answers 404 without sign-in, not 401), sign in through Supabase, `GET /me`, create a profile, list its reports, delete the profile. It needs `curl` and `jq`.
 
 ```sh
 API_URL=https://mediwise-api-ij2v.onrender.com \
