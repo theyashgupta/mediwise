@@ -4,9 +4,13 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    groups:
+      github-actions:
+        patterns: ["*"]
     commit-message:
       prefix: ci
 
+  # Majors match no group, so each gets its own pull request. Dependabot adds the repository's `major` label to it.
   - package-ecosystem: npm
     directory: /
     schedule:
@@ -14,10 +18,17 @@ updates:
     # A release waits 7 days before Dependabot proposes it. npm worm releases so far were unpublished within hours.
     cooldown:
       default-days: 7
+    # Pinned majors, see the Dependencies row in docs/DECISIONS.md.
+    ignore:
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
+      - dependency-name: eslint
+        update-types: ["version-update:semver-major"]
     groups:
-      dev-dependencies:
-        dependency-type: development
+      npm-minor-patch:
+        patterns: ["*"]
         update-types: [minor, patch]
     commit-message:
       prefix: chore
-      prefix-development: chore

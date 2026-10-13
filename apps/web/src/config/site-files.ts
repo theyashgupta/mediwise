@@ -18,6 +18,29 @@ export function webManifest(appOrigin: string) {
       { src: "/icon-512.png", sizes: "512x512", type: "image/png" },
       { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
+    share_target: {
+      action: "/share-target",
+      method: "POST",
+      enctype: "multipart/form-data",
+      params: {
+        files: [
+          {
+            name: "files",
+            accept: [
+              "application/pdf",
+              ".pdf",
+              "image/jpeg",
+              ".jpg",
+              ".jpeg",
+              "image/png",
+              ".png",
+              "image/heic",
+              ".heic",
+            ],
+          },
+        ],
+      },
+    },
   };
 }
 

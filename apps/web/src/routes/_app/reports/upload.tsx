@@ -1,4 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { UploadReportContainer } from "@/modules/reports";
+import { UploadReportContainer, validateUploadSearch } from "@/modules/reports";
 
-export const Route = createFileRoute("/_app/reports/upload")({ component: UploadReportContainer });
+export const Route = createFileRoute("/_app/reports/upload")({
+  validateSearch: validateUploadSearch,
+  component: UploadReportContainer,
+});
