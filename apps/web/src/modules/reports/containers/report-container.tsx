@@ -19,6 +19,7 @@ import { PatternList } from "../components/pattern-list";
 import { ReportFailed } from "../components/report-failed";
 import { ReportFiles } from "../components/report-files";
 import { ReportNarrative } from "../components/report-narrative";
+import { ReportNote } from "../components/report-note";
 import { ReportStatusBadge } from "../components/report-status-badge";
 import { ReportSummary } from "../components/report-summary";
 import { StudyList } from "../components/study-list";
@@ -28,6 +29,7 @@ import { inProgress } from "../config/status";
 import { useDeleteReport } from "../hooks/use-delete-report";
 import { useReport } from "../hooks/use-reports";
 import { useRetryReport } from "../hooks/use-retry-report";
+import { useUpdateReportNote } from "../hooks/use-update-report-note";
 import type { MarkerFilter } from "../types";
 import { SharedLinksContainer } from "./shared-links-container";
 import { ShareReportContainer } from "./share-report-container";
@@ -42,6 +44,7 @@ export function ReportContainer() {
   useCrumbLabel(`/reports/${reportId}`, report.data?.header.labName);
   const retry = useRetryReport();
   const remove = useDeleteReport();
+  const saveNote = useUpdateReportNote();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   if (report.isPending) return <LoadingState variant="page" />;
@@ -146,6 +149,14 @@ export function ReportContainer() {
       {status === "done" && (
         <div className="space-y-12">
           {header.score !== null && <ReportSummary header={header} verdict={report.data.verdict} />}
+          <ReportNote
+            key={reportId}
+            note={report.data.note}
+            saving={saveNote.isPending}
+            saved={saveNote.isSuccess && saveNote.variables.reportId === reportId}
+            failed={saveNote.isError && saveNote.variables.reportId === reportId}
+            onSave={(note) => saveNote.mutate({ reportId, note })}
+          />
           <PatternList reportId={reportId} items={report.data.patterns} />
           <FindingList reportId={reportId} detail={report.data} />
           <StudyList studies={report.data.studies} images={report.data.files.images} />

@@ -58,6 +58,7 @@ export const reportColumns = {
   tier: reports.tier,
   coverage: reports.coverage,
   verdict: reports.verdict,
+  note: reports.note,
   markerCount: sql<number>`(select count(*)::int from ${reportMarkers} where ${reportMarkers}.${sql.identifier("report_id")} = ${reports}.${sql.identifier("id")} and not ${reportMarkers}.${sql.identifier("derived")})`,
   createdAt: reports.createdAt,
 };
@@ -72,6 +73,15 @@ export async function findReportById(ownerUserId: string, id: string) {
     .select(reportColumns)
     .from(reports)
     .where(and(eq(reports.id, id), ownedBy(ownerUserId)));
+  return row;
+}
+
+export async function updateReportNote(ownerUserId: string, id: string, note: string | null) {
+  const [row] = await db
+    .update(reports)
+    .set({ note })
+    .where(and(eq(reports.id, id), ownedBy(ownerUserId)))
+    .returning({ note: reports.note });
   return row;
 }
 

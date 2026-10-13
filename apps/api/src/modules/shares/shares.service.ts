@@ -103,6 +103,7 @@ export async function getSharedExport(token: string) {
         collectedAt: header.collectedAt,
         reportedAt: header.reportedAt,
       },
+      note: report.note,
       moveFirst: report.moveFirst,
       patterns: report.patterns,
       findings: report.findings,

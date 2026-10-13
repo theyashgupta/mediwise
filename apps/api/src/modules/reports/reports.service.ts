@@ -351,6 +351,7 @@ function buildReportDetail(
       formula: scoreFormula,
     },
     verdict: report.verdict,
+    note: report.note,
     moveFirst,
     categories: categories.flatMap(({ key, label }) => {
       const items = mapped.filter(({ entry }) => entry.category === key).map(({ row }) => row);
@@ -453,6 +454,13 @@ export async function getMarkerDetail(userId: string, id: string, markerKey: str
     previous: neighbour(ordered[index - 1]),
     next: neighbour(ordered[index + 1]),
   };
+}
+
+/** Saves the user's note on a report, and clears it when the note is empty. */
+export async function setReportNote(userId: string, id: string, note: string) {
+  const row = await repo.updateReportNote(userId, id, note || null);
+  if (!row) throw new AppError(404, "We could not find this report");
+  return row;
 }
 
 export async function retryReport(userId: string, id: string) {

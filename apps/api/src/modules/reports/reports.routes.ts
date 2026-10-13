@@ -1,4 +1,4 @@
-import { createReportSchema } from "@mediwise/shared";
+import { createReportSchema, reportNoteSchema } from "@mediwise/shared";
 import { Hono } from "hono";
 import { validate } from "../../common/validate.js";
 import type { AuthEnv } from "../../middleware/auth.js";
@@ -15,6 +15,7 @@ import {
   listReports,
   markReportUploaded,
   retryReport,
+  setReportNote,
 } from "./reports.service.js";
 
 export const reportsRoutes = new Hono<AuthEnv>()
@@ -33,6 +34,13 @@ export const reportsRoutes = new Hono<AuthEnv>()
   )
   .get("/:id", validate("param", reportParamsSchema), async (c) =>
     c.json(await getReportDetail(c.var.userId, c.req.valid("param").id)),
+  )
+  .put(
+    "/:id/note",
+    validate("param", reportParamsSchema),
+    validate("json", reportNoteSchema),
+    async (c) =>
+      c.json(await setReportNote(c.var.userId, c.req.valid("param").id, c.req.valid("json").note)),
   )
   .get("/:id/markers/:markerKey", validate("param", markerParamsSchema), async (c) => {
     const { id, markerKey } = c.req.valid("param");
