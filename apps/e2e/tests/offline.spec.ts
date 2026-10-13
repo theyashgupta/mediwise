@@ -40,11 +40,13 @@ test("the built app is installable, and after one visit its shell opens offline 
   }
 
   await context.setOffline(true);
-  const offline = await page.reload();
+  await page.close();
+  const app = await context.newPage();
+  const offline = await app.goto("/");
   expect(offline?.fromServiceWorker()).toBe(true);
-  await expect(page.getByTestId("shell-offline")).toBeVisible();
-  await expect(page.getByTestId("user-menu")).toBeVisible();
+  await expect(app.getByTestId("shell-offline")).toBeVisible();
+  await expect(app.getByTestId("user-menu")).toBeVisible();
 
   await context.setOffline(false);
-  await expect(page.getByTestId("shell-offline")).toBeHidden();
+  await expect(app.getByTestId("shell-offline")).toBeHidden();
 });
