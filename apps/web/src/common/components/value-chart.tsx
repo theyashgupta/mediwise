@@ -21,6 +21,7 @@ type ValuePoint = {
   value: number;
   status: Status;
   current?: boolean;
+  linked?: boolean;
   lab?: LabInfo;
 };
 
@@ -48,6 +49,17 @@ function StatusDot({ cx, cy, payload }: DotProps) {
           className="fill-none stroke-foreground"
         />
       )}
+      {payload.linked && (
+        <circle
+          cx={cx}
+          cy={cy}
+          r={r + (payload.lab?.change ? 8 : 4)}
+          strokeWidth="1.5"
+          strokeDasharray="2 2"
+          className="fill-none stroke-foreground"
+          data-testid="linked-point"
+        />
+      )}
       <circle
         cx={cx}
         cy={cy}
@@ -73,12 +85,13 @@ export function ValueChart({ points, band, bandLabel, unit, precision }: ValueCh
   const label = points
     .map(
       (point) =>
-        `${point.date}: ${format(point.value)}${unit ? ` ${unit}` : ""}${point.lab?.change ? ` (${t.common.chart.labChangedShort})` : ""}`,
+        `${point.date}: ${format(point.value)}${unit ? ` ${unit}` : ""}${point.lab?.change ? ` (${t.common.chart.labChangedShort})` : ""}${point.linked ? ` (${t.common.chart.linkedShort})` : ""}`,
     )
     .join(", ");
   const hasBand = band && (band.low !== null || band.high !== null);
   const hasLabs = points.some((point) => point.lab);
   const labChanges = points.filter((point) => point.lab?.change);
+  const hasLinked = points.some((point) => point.linked);
 
   return (
     <div className="space-y-3">
@@ -160,7 +173,7 @@ export function ValueChart({ points, band, bandLabel, unit, precision }: ValueCh
           </LineChart>
         </ChartContainer>
       </div>
-      {(hasBand || labChanges.length > 0) && (
+      {(hasBand || labChanges.length > 0 || hasLinked) && (
         <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground" aria-hidden>
           {hasBand && (
             <p className="flex items-center gap-1.5">
@@ -172,6 +185,12 @@ export function ValueChart({ points, band, bandLabel, unit, precision }: ValueCh
             <p className="flex items-center gap-1.5">
               <span className="size-3 rounded-full border-[1.5px] border-foreground" />
               {t.common.chart.labChanged}
+            </p>
+          )}
+          {hasLinked && (
+            <p className="flex items-center gap-1.5">
+              <span className="size-3 rounded-full border-[1.5px] border-dashed border-foreground" />
+              {t.common.chart.linked}
             </p>
           )}
         </div>

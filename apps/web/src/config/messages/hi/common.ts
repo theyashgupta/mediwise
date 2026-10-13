@@ -27,6 +27,8 @@ export const common: Messages["common"] = {
     value: "मान",
     labChanged: "इस नतीजे पर लैब बदली",
     labChangedShort: "लैब बदली",
+    linked: "दोबारा जाँच या जुड़ी रिपोर्ट",
+    linkedShort: "दोबारा जाँच",
     lab: "लैब",
     notPrinted: "छपा नहीं है",
     none: "कोई नहीं",

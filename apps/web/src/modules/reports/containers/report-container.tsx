@@ -20,15 +20,18 @@ import { PatternList } from "../components/pattern-list";
 import { ReportFailed } from "../components/report-failed";
 import { ReportFiles } from "../components/report-files";
 import { ReportNarrative } from "../components/report-narrative";
+import { ReportLinks } from "../components/report-links";
 import { ReportNote } from "../components/report-note";
 import { ReportStatusBadge } from "../components/report-status-badge";
 import { ReportSummary } from "../components/report-summary";
+import { SettledList } from "../components/settled-list";
 import { StudyList } from "../components/study-list";
 import { UnmeasuredList } from "../components/unmeasured-list";
 import { formatReportDate } from "../config/report";
+import { useReportLinks } from "../hooks/use-report-links";
 import { inProgress } from "../config/status";
 import { useDeleteReport } from "../hooks/use-delete-report";
-import { useReport } from "../hooks/use-reports";
+import { useReport, useReports } from "../hooks/use-reports";
 import { useRetryReport } from "../hooks/use-retry-report";
 import { useUpdateReportNote } from "../hooks/use-update-report-note";
 import type { MarkerFilter } from "../types";
@@ -47,6 +50,8 @@ export function ReportContainer() {
   const retry = useRetryReport();
   const remove = useDeleteReport();
   const saveNote = useUpdateReportNote();
+  const links = useReportLinks();
+  const siblings = useReports(report.data?.profileId);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   if (report.isPending) return <LoadingState variant="page" />;
@@ -160,6 +165,24 @@ export function ReportContainer() {
       {status === "done" && (
         <div className="space-y-12" data-testid="report-done">
           {header.score !== null && <ReportSummary header={header} verdict={report.data.verdict} />}
+          <ReportLinks
+            links={report.data.links}
+            candidates={(siblings.data?.pages.flatMap((page) => page.items) ?? [])
+              .filter(
+                (item) =>
+                  item.status === "done" &&
+                  item.id !== reportId &&
+                  !report.data.links.some((link) => link.other.id === item.id),
+              )
+              .map((item) => ({
+                id: item.id,
+                label: `${item.labName ?? t.report.title}, ${formatReportDate(item.collectedAt, item.createdAt)}`,
+              }))}
+            busy={links.link.isPending || links.update.isPending}
+            failed={links.link.isError || links.update.isError}
+            onUpdate={(linkId, state) => links.update.mutate({ reportId, linkId, state })}
+            onLink={(otherId, kind) => links.link.mutate({ reportId, otherId, kind })}
+          />
           <ReportNote
             key={reportId}
             note={report.data.note}
@@ -170,6 +193,7 @@ export function ReportContainer() {
           />
           <PatternList reportId={reportId} items={report.data.patterns} />
           <FindingList reportId={reportId} detail={report.data} />
+          <SettledList items={report.data.settled} />
           <StudyList studies={report.data.studies} images={report.data.files.images} />
           <MoveFirstList reportId={reportId} items={report.data.moveFirst} />
           {report.data.narrative && (

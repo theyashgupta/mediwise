@@ -15,6 +15,7 @@ const shared = {
     moveFirst: [],
     patterns: [],
     findings: [],
+    settled: [],
     doctorQuestions: ["Should I repeat the HbA1c test in three months?"],
     categories: [],
     derived: [],
