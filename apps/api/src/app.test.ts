@@ -31,6 +31,7 @@ test("GET /me runs as the dev user under NODE_ENV=test", async () => {
     name: "dev-user",
     credits: 0,
     questionsLeft: 0,
+    assistant: { enabled: false, outOfQuestions: null },
   });
 });
 

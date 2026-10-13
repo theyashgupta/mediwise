@@ -16,6 +16,7 @@ const store = vi.hoisted(() => {
     credits: 3,
     freeCredits: 3,
     packs: 0,
+    charged: 2,
   };
   return {
     state,
@@ -64,7 +65,11 @@ const store = vi.hoisted(() => {
 vi.mock("./me.repo.js", () => store.repo);
 vi.mock("../credits/credits.repo.js", () => ({
   findBalance: async () => store.state.credits,
-  findQuestionCounts: async () => ({ reads: 1, packs: store.state.packs, charged: 2 }),
+  findQuestionCounts: async () => ({
+    reads: 1,
+    packs: store.state.packs,
+    charged: store.state.charged,
+  }),
   findCreditUsage: async () => ({
     balance: store.state.credits,
     readsToday: 0,
@@ -117,7 +122,7 @@ beforeEach(() => {
   store.state.removeCalls.length = 0;
   store.state.deletedUsers.length = 0;
   store.state.deletionLog.length = 0;
-  Object.assign(store.state, { credits: 3, freeCredits: 3, packs: 0 });
+  Object.assign(store.state, { credits: 3, freeCredits: 3, packs: 0, charged: 2 });
   env.ASSISTANT_ENABLED = true;
   env.PAYMENTS_ENABLED = false;
 });
@@ -129,6 +134,41 @@ test("GET /me returns the email, the self profile name, defaulting to the email 
     name: "alice",
     credits: 3,
     questionsLeft: 3,
+    assistant: { enabled: true, outOfQuestions: null },
+  });
+});
+
+async function getMeBody() {
+  return (await (await call("GET", "/me")).json()) as {
+    questionsLeft: number;
+    assistant: { enabled: boolean; outOfQuestions: string | null };
+  };
+}
+
+test("GET /me at 0 questions with a free credit names use_credit as the next step", async () => {
+  store.state.charged = 5;
+  const body = await getMeBody();
+  expect(body.questionsLeft).toBe(0);
+  expect(body.assistant).toEqual({ enabled: true, outOfQuestions: "use_credit" });
+});
+
+test("GET /me at 0 questions with the only credit held by a waiting report names add_report while payments are off", async () => {
+  Object.assign(store.state, { charged: 5, credits: 1, freeCredits: 0 });
+  expect((await getMeBody()).assistant.outOfQuestions).toBe("add_report");
+});
+
+test("GET /me at 0 questions with no free credit names buy while payments are on", async () => {
+  Object.assign(store.state, { charged: 5, credits: 0, freeCredits: 0 });
+  env.PAYMENTS_ENABLED = true;
+  expect((await getMeBody()).assistant.outOfQuestions).toBe("buy");
+});
+
+test("GET /me while the assistant is off says so and names no next step", async () => {
+  store.state.charged = 5;
+  env.ASSISTANT_ENABLED = false;
+  expect((await getMeBody()).assistant).toEqual({
+    enabled: false,
+    outOfQuestions: null,
   });
 });
 
