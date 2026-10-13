@@ -2,7 +2,7 @@ import { range } from "../range.js";
 import type { Marker } from "../schema.js";
 import { sources } from "../sources.js";
 
-const { kdigo2024, tietz2022 } = sources;
+const { clevelandDkd2026, kdigo2024, tietz2022 } = sources;
 
 export const kidneyMarkers: Marker[] = [
   {
@@ -175,7 +175,11 @@ export const kidneyMarkers: Marker[] = [
     whatMovesIt:
       "High sugar, high blood pressure, smoking, fever and hard exercise raise it. Sugar and blood pressure control and some blood pressure medicines lower it.",
     ranges: [range(kdigo2024, [null, 29], [null, 300])],
-    sources: [kdigo2024],
+    retest: [
+      { status: "watch", weeks: 52, source: clevelandDkd2026.id },
+      { status: "risk", weeks: 52, source: clevelandDkd2026.id },
+    ],
+    sources: [kdigo2024, clevelandDkd2026],
     core: false,
     direction: "high_is_bad",
   },

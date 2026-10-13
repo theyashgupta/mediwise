@@ -50,10 +50,11 @@ In:
 8. Settings: account, self profile, delete report, sign out.
 9. Doctor export: printable summary of one report.
 10. Deploy: web on Cloudflare Pages, API on Render free, Supabase hosted (see DECISIONS.md).
+11. Retest due dates and a calendar file: a due date for markers with a sourced retest interval, and an `.ics` file the user adds to the phone calendar. MediWise stores no reminder.
 
 Out of v1 (do not build, do not scaffold):
 
-- Medications, vitals, reminders, home blood draw booking, chat, story recap, payments and plans, landing page, iOS app.
+- Medications, vitals, push, email and WhatsApp reminders, home blood draw booking, chat, story recap, payments and plans, landing page, iOS app.
 
 ## Screens
 

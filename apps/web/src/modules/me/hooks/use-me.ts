@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { downloadFile } from "@/common/utils/download";
 import { deleteMe } from "../api/delete-me";
 import { exportMe } from "../api/export-me";
 import { getMe } from "../api/get-me";
@@ -27,14 +28,8 @@ export function useMeMutations() {
     }),
     download: useMutation({
       mutationFn: exportMe,
-      onSuccess: (blob) => {
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `mediwise-export-${new Date().toISOString().slice(0, 10)}.json`;
-        link.click();
-        URL.revokeObjectURL(url);
-      },
+      onSuccess: (blob) =>
+        downloadFile(blob, `mediwise-export-${new Date().toISOString().slice(0, 10)}.json`),
     }),
     remove: useMutation({ mutationFn: deleteMe }),
   };

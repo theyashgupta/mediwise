@@ -549,4 +549,25 @@ export const sources = {
     year: 2024,
     url: "https://uroweb.org/guidelines/urolithiasis",
   },
+  aafpAda2018: {
+    id: "aafpAda2018",
+    title:
+      "Diabetes: ADA Releases Revised Position Statement on Standards of Medical Care. Hauk L, Am Fam Physician 98 (3)",
+    year: 2018,
+    url: "https://www.aafp.org/pubs/afp/issues/2018/0801/p187.html",
+  },
+  usPharmacistAda2022: {
+    id: "usPharmacistAda2022",
+    title:
+      "Recommended Glycemic Targets and Value of Routine Monitoring, on the ADA Standards of Medical Care in Diabetes 2022. US Pharmacist",
+    year: 2022,
+    url: "https://www.uspharmacist.com/article/recommended-glycemic-targets-and-value-of-routine-monitoring",
+  },
+  clevelandDkd2026: {
+    id: "clevelandDkd2026",
+    title:
+      "Diabetes and Chronic Kidney Disease Management: A Practical Primary Care Approach. Cleveland Clinic Consult QD",
+    year: 2026,
+    url: "https://consultqd.clevelandclinic.org/diabetes-and-chronic-kidney-disease-management-a-practical-primary-care-approach",
+  },
 } satisfies Record<string, Source>;
