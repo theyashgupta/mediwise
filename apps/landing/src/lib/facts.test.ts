@@ -1,4 +1,4 @@
-import { derived, markers } from "@mediwise/engine";
+import { derived, markers, repeatStudyDays } from "@mediwise/engine";
 import { maxFiles } from "@mediwise/shared";
 import { expect, test } from "vitest";
 import { paymentPacks } from "../../../api/src/modules/payments/payments.config";
@@ -22,6 +22,7 @@ test("every price on the page comes from payments.config.ts", () => {
 test("the counts on the page are the catalog's own counts", () => {
   expect(facts.markers).toBe(markers.length);
   expect(facts.maxFiles).toBe(maxFiles);
+  expect(facts.repeatStudyDays).toBe(repeatStudyDays);
 });
 
 test("the marquee shows only marker names from the catalog", () => {

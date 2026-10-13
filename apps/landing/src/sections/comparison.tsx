@@ -3,7 +3,7 @@ import { SectionHeader } from "@/components/section-header";
 import { facts } from "@/lib/facts";
 
 const rows = [
-  { label: "Explained", pdf: "Test names and numbers", us: "Every marker in plain English" },
+  { label: "Explained", pdf: "Test names and numbers", us: "Every marker in plain English or Hindi" },
   { label: "Scored", pdf: "The lab's printed range", us: "Ranges for your age, sex and ancestry" },
   { label: "Tracked", pdf: "One visit in each file", us: "Each marker across your visits" },
   {
