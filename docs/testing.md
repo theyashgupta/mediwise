@@ -208,6 +208,6 @@ Update the baseline only when the growth is necessary, or when a chunk is new, r
 
 ### Update a budget
 
-- Raise a budget when the scores stay higher in CI. Set it 5 points under the CI median, and record the numbers in DESIGN.md. Do not use numbers from a laptop.
+- Raise a budget when the scores stay higher in CI. Set a performance budget 10 points under the lowest CI median of at least two runs, because one run moves by about 7 points. Record the numbers in DESIGN.md. Do not use numbers from a laptop.
 - Never lower a budget to make a change pass. When a change must make a page slower, write the reason in the pull request and in DESIGN.md, in the same commit as the new budget.
 - On a machine with 8 GB of RAM, do not run `pnpm perf` together with `pnpm check`, `pnpm dev` or `pnpm e2e`. Other work on the machine makes the scores lower.

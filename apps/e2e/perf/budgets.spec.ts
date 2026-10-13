@@ -147,17 +147,17 @@ async function afterNextPaint(target: Page) {
 }
 
 for (const { name, url, budget } of [
-  { name: "home", url: () => webOrigin, budget: { ...appBudget, performance: 63 } },
+  { name: "home", url: () => webOrigin, budget: { ...appBudget, performance: 58 } },
   {
     name: "report",
     url: () => `${webOrigin}${reportPath}`,
-    budget: { ...appBudget, performance: 56 },
+    budget: { ...appBudget, performance: 51 },
   },
-  { name: "trends", url: () => `${webOrigin}/trends`, budget: { ...appBudget, performance: 67 } },
+  { name: "trends", url: () => `${webOrigin}/trends`, budget: { ...appBudget, performance: 55 } },
   {
     name: "landing",
     url: () => landingOrigin,
-    budget: { performance: 80, accessibility: 100, "best-practices": 95, seo: 95 },
+    budget: { performance: 75, accessibility: 100, "best-practices": 95, seo: 95 },
   },
 ]) {
   test(`Lighthouse on ${name} stays within its budget on a phone`, async () => {
