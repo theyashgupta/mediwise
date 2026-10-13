@@ -93,7 +93,8 @@ jobs:
       - run: supabase start --workdir apps/e2e
       - run: pnpm --filter @mediwise/e2e exec playwright install --with-deps chromium
       - run: pnpm perf
-      - if: failure()
+      # Always, so a passing run still carries the Lighthouse reports for the next tuning pass.
+      - if: always()
         uses: actions/upload-artifact@v7
         with:
           name: perf-report

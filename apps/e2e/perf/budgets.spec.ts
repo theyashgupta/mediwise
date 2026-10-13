@@ -147,13 +147,13 @@ async function afterNextPaint(target: Page) {
 }
 
 for (const { name, url, budget } of [
-  { name: "home", url: () => webOrigin, budget: { ...appBudget, performance: 58 } },
+  { name: "home", url: () => webOrigin, budget: { ...appBudget, performance: 76 } },
   {
     name: "report",
     url: () => `${webOrigin}${reportPath}`,
-    budget: { ...appBudget, performance: 51 },
+    budget: { ...appBudget, performance: 78 },
   },
-  { name: "trends", url: () => `${webOrigin}/trends`, budget: { ...appBudget, performance: 55 } },
+  { name: "trends", url: () => `${webOrigin}/trends`, budget: { ...appBudget, performance: 77 } },
   {
     name: "landing",
     url: () => landingOrigin,

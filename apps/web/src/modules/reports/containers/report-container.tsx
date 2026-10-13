@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useT } from "@/common/hooks/use-locale";
 import { useCrumbLabel } from "@/common/hooks/use-crumb-label";
+import { AfterFirstPaint } from "@/common/components/after-first-paint";
 import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
 import { PageHeader } from "@/common/components/page-header";
@@ -191,88 +192,92 @@ export function ReportContainer() {
             </p>
           )}
           {header.score !== null && <ReportSummary header={header} verdict={report.data.verdict} />}
-          <ReportLinks
-            links={report.data.links}
-            candidates={(siblings.data?.pages.flatMap((page) => page.items) ?? [])
-              .filter(
-                (item) =>
-                  item.status === "done" &&
-                  item.id !== reportId &&
-                  !report.data.links.some((link) => link.other.id === item.id),
-              )
-              .map((item) => ({
-                id: item.id,
-                label: item.title ?? formatReportDate(item.collectedAt, item.createdAt),
-              }))}
-            busy={links.link.isPending || links.update.isPending}
-            failed={links.link.isError || links.update.isError}
-            onUpdate={(linkId, state) => links.update.mutate({ reportId, linkId, state })}
-            onLink={(otherId, kind) => links.link.mutate({ reportId, otherId, kind })}
-          />
-          <ReportEpisodeContainer reportId={reportId} profileId={report.data.profileId} />
-          <ReportNote
-            key={reportId}
-            note={report.data.note}
-            saving={saveNote.isPending}
-            saved={saveNote.isSuccess && saveNote.variables.reportId === reportId}
-            failed={saveNote.isError && saveNote.variables.reportId === reportId}
-            onSave={(note) => saveNote.mutate({ reportId, note })}
-          />
-          <PatternList reportId={reportId} items={report.data.patterns} />
-          <FindingList reportId={reportId} detail={report.data} />
-          <SettledList items={report.data.settled} />
-          <StudyList studies={report.data.studies} images={report.data.files.images} />
-          <MoveFirstList reportId={reportId} items={report.data.moveFirst} />
-          {report.data.narrative && (
-            <ReportNarrative
-              reportId={reportId}
-              narrative={report.data.narrative}
-              detail={report.data}
+          <AfterFirstPaint>
+            <ReportLinks
+              links={report.data.links}
+              candidates={(siblings.data?.pages.flatMap((page) => page.items) ?? [])
+                .filter(
+                  (item) =>
+                    item.status === "done" &&
+                    item.id !== reportId &&
+                    !report.data.links.some((link) => link.other.id === item.id),
+                )
+                .map((item) => ({
+                  id: item.id,
+                  label: item.title ?? formatReportDate(item.collectedAt, item.createdAt),
+                }))}
+              busy={links.link.isPending || links.update.isPending}
+              failed={links.link.isError || links.update.isError}
+              onUpdate={(linkId, state) => links.update.mutate({ reportId, linkId, state })}
+              onLink={(otherId, kind) => links.link.mutate({ reportId, otherId, kind })}
             />
-          )}
-          {markerCount > 0 && (
-            <Tabs defaultValue="markers" className="gap-4">
-              <TabsList className="w-full max-w-full justify-start overflow-x-auto sm:w-fit">
-                <TabsTrigger value="markers" className="text-muted-foreground">
-                  {t.report.tabs.markers(markerCount)}
-                </TabsTrigger>
-                <TabsTrigger value="follow-ups" className="text-muted-foreground">
-                  {t.report.tabs.followUps(report.data.followUps.length)}
-                </TabsTrigger>
-                <TabsTrigger value="unmeasured" className="text-muted-foreground">
-                  {t.report.tabs.unmeasured(report.data.unmeasured.length)}
-                </TabsTrigger>
-                <TabsTrigger value="doctor-questions" className="text-muted-foreground">
-                  {t.report.tabs.doctorQuestions(report.data.doctorQuestions.length)}
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="markers">
-                <MarkerSections
-                  reportId={reportId}
-                  detail={report.data}
-                  filter={filter}
-                  onFilterChange={setFilter}
-                />
-              </TabsContent>
-              <TabsContent value="follow-ups">
-                <FollowUpList items={report.data.followUps} />
-              </TabsContent>
-              <TabsContent value="unmeasured">
-                <UnmeasuredList items={report.data.unmeasured} />
-              </TabsContent>
-              <TabsContent value="doctor-questions">
-                <DoctorQuestions items={report.data.doctorQuestions} />
-              </TabsContent>
-            </Tabs>
-          )}
+            <ReportEpisodeContainer reportId={reportId} profileId={report.data.profileId} />
+            <ReportNote
+              key={reportId}
+              note={report.data.note}
+              saving={saveNote.isPending}
+              saved={saveNote.isSuccess && saveNote.variables.reportId === reportId}
+              failed={saveNote.isError && saveNote.variables.reportId === reportId}
+              onSave={(note) => saveNote.mutate({ reportId, note })}
+            />
+            <PatternList reportId={reportId} items={report.data.patterns} />
+            <FindingList reportId={reportId} detail={report.data} />
+            <SettledList items={report.data.settled} />
+            <StudyList studies={report.data.studies} images={report.data.files.images} />
+            <MoveFirstList reportId={reportId} items={report.data.moveFirst} />
+            {report.data.narrative && (
+              <ReportNarrative
+                reportId={reportId}
+                narrative={report.data.narrative}
+                detail={report.data}
+              />
+            )}
+            {markerCount > 0 && (
+              <Tabs defaultValue="markers" className="gap-4">
+                <TabsList className="w-full max-w-full justify-start overflow-x-auto sm:w-fit">
+                  <TabsTrigger value="markers" className="text-muted-foreground">
+                    {t.report.tabs.markers(markerCount)}
+                  </TabsTrigger>
+                  <TabsTrigger value="follow-ups" className="text-muted-foreground">
+                    {t.report.tabs.followUps(report.data.followUps.length)}
+                  </TabsTrigger>
+                  <TabsTrigger value="unmeasured" className="text-muted-foreground">
+                    {t.report.tabs.unmeasured(report.data.unmeasured.length)}
+                  </TabsTrigger>
+                  <TabsTrigger value="doctor-questions" className="text-muted-foreground">
+                    {t.report.tabs.doctorQuestions(report.data.doctorQuestions.length)}
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="markers">
+                  <MarkerSections
+                    reportId={reportId}
+                    detail={report.data}
+                    filter={filter}
+                    onFilterChange={setFilter}
+                  />
+                </TabsContent>
+                <TabsContent value="follow-ups">
+                  <FollowUpList items={report.data.followUps} />
+                </TabsContent>
+                <TabsContent value="unmeasured">
+                  <UnmeasuredList items={report.data.unmeasured} />
+                </TabsContent>
+                <TabsContent value="doctor-questions">
+                  <DoctorQuestions items={report.data.doctorQuestions} />
+                </TabsContent>
+              </Tabs>
+            )}
+          </AfterFirstPaint>
         </div>
       )}
-      {status === "done" && (
-        <div className="mt-12">
-          <SharedLinksContainer reportId={reportId} />
-        </div>
-      )}
-      <ReportFiles files={report.data.files} className="mt-12" />
+      <AfterFirstPaint>
+        {status === "done" && (
+          <div className="mt-12">
+            <SharedLinksContainer reportId={reportId} />
+          </div>
+        )}
+        <ReportFiles files={report.data.files} className="mt-12" />
+      </AfterFirstPaint>
       <DeleteReportDialog
         open={confirmingDelete}
         deleting={remove.isPending}
