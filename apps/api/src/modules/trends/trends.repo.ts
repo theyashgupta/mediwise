@@ -1,6 +1,13 @@
 import { and, asc, eq, isNotNull, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
-import { profiles, reportMarkers, reports, studies, studyMeasurements } from "../../db/schema.js";
+import {
+  episodes,
+  profiles,
+  reportMarkers,
+  reports,
+  studies,
+  studyMeasurements,
+} from "../../db/schema.js";
 
 const reportDate = sql`coalesce(${reports.collectedAt}, ${reports.createdAt}::date)`;
 
@@ -26,9 +33,11 @@ export async function listDoneReports(ownerUserId: string, profileId: string) {
       createdAt: reports.createdAt,
       score: reports.score,
       tier: reports.tier,
+      episodeName: episodes.name,
     })
     .from(reports)
     .innerJoin(profiles, eq(profiles.id, reports.profileId))
+    .leftJoin(episodes, eq(episodes.id, reports.episodeId))
     .where(doneReportsOf(ownerUserId, profileId))
     .orderBy(reportDate, asc(reports.createdAt));
 }
