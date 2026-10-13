@@ -39,7 +39,7 @@ export const episodes: Messages["episodes"] = {
     notFoundBody: "किसी ने इसे हटा दिया, या यह किसी दूसरे अकाउंट का है।",
     back: "एपिसोड पर वापस जाएँ",
     summary: "सार",
-    stats: { reports: "रिपोर्ट", days: "दिन", repeated: "दोहराए गए मार्कर" },
+    stats: { reports: "रिपोर्ट", days: "दिन", repeated: "दोहराए गए" },
     timeline: {
       title: "टाइमलाइन",
       description: "एपिसोड की हर रिपोर्ट, सबसे पुरानी पहले।",

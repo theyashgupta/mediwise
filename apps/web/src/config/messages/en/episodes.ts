@@ -35,7 +35,7 @@ export const episodes = {
     notFoundBody: "Someone deleted it, or it belongs to another account.",
     back: "Back to episodes",
     summary: "Summary",
-    stats: { reports: "Reports", days: "Days", repeated: "Repeated markers" },
+    stats: { reports: "Reports", days: "Days", repeated: "Repeated" },
     timeline: {
       title: "Timeline",
       description: "Every report of the episode, oldest first.",
