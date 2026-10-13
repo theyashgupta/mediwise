@@ -46,6 +46,7 @@ const envSchema = z
     CASHFREE_SECRET_KEY: z.string().min(1).optional(),
     CASHFREE_ENV: z.enum(["sandbox", "production"]).default("sandbox"),
     PAYMENTS_WEBHOOK_URL: z.url().optional(),
+    CASHFREE_STUB: z.stringbool().default(false),
   })
   .refine(
     (e) => !e.PAYMENTS_ENABLED || (e.CASHFREE_APP_ID && e.CASHFREE_SECRET_KEY),
@@ -54,6 +55,10 @@ const envSchema = z
   .refine(
     (e) => !(e.CLAUDE_STUB && e.NODE_ENV === "production"),
     "CLAUDE_STUB=true is for the e2e suite only, never in production.",
+  )
+  .refine(
+    (e) => !(e.CASHFREE_STUB && e.NODE_ENV === "production"),
+    "CASHFREE_STUB=true is for the e2e suite only, never in production.",
   )
   .transform(({ CORS_ORIGINS, WEB_ORIGIN, ...rest }) => ({
     ...rest,

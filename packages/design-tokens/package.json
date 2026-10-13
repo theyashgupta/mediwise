@@ -10,7 +10,8 @@
     "build": "node src/build.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "coverage": "vitest run --coverage --coverage.include=src/**/*.{ts,tsx} --coverage.reporter=text-summary --coverage.thresholds.statements=97 --coverage.thresholds.branches=93 --coverage.thresholds.functions=100 --coverage.thresholds.lines=98"
   },
   "devDependencies": {
     "@mediwise/config": "workspace:*",

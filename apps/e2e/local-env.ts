@@ -23,13 +23,18 @@ export const apiEnv = {
   ANTHROPIC_API_KEY: "",
   CLAUDE_HARD_STOP: "false",
   ADMIN_USER_ID: "",
-  PAYMENTS_ENABLED: "false",
+  PAYMENTS_ENABLED: "true",
+  CASHFREE_STUB: "true",
+  CASHFREE_APP_ID: "e2e-app-id",
+  CASHFREE_SECRET_KEY: "e2e-secret-key",
+  CASHFREE_ENV: "sandbox",
 };
 
 export const webEnv = {
   VITE_API_URL: `http://localhost:${apiPort}`,
   VITE_SUPABASE_URL: status.API_URL,
   VITE_SUPABASE_ANON_KEY: status.ANON_KEY,
-  VITE_PAYMENTS_ENABLED: "false",
+  VITE_PAYMENTS_ENABLED: "true",
+  VITE_CASHFREE_MODE: "sandbox",
   VITE_APP_ORIGIN: webOrigin,
 };

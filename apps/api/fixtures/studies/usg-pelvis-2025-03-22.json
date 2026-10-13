@@ -1,0 +1,18 @@
+{
+  "labId": "RD25032201",
+  "labName": "Riverside Diagnostics",
+  "ageYears": 42,
+  "studies": [
+    {
+      "page": 1,
+      "kind": "ultrasound",
+      "bodyRegion": "Abdomen and pelvis",
+      "performedAt": "2025-03-22",
+      "signedBy": "Dr. S. Iyer",
+      "findings": "Liver, gall bladder, pancreas and spleen are normal.\nBoth kidneys are normal in size and echotexture.\nUterus is normal in size. Endometrial thickness is 6 mm.\nBoth ovaries are normal in size and echotexture.\nNo adnexal mass is seen. No free fluid.",
+      "impression": "Uterus and both ovaries are normal.\nNo adnexal mass is seen.",
+      "familyHistory": null,
+      "measurements": []
+    }
+  ]
+}
