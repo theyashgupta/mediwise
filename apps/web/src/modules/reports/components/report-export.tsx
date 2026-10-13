@@ -1,5 +1,5 @@
-import { Printer } from "lucide-react";
-import type { ReactNode } from "react";
+import { FileDown, Printer } from "lucide-react";
+import { type ReactNode, useEffect, useId } from "react";
 import { Logo } from "@/common/components/brand/logo";
 import { Disclaimer } from "@/common/components/disclaimer";
 import { useT } from "@/common/hooks/use-locale";
@@ -10,12 +10,14 @@ import {
   changeMark,
   dateOptions,
   earlierSource,
+  pdfFileName,
   rangeText,
   unitText,
   valueText,
 } from "../config/export";
 import { conditionValue, formatReportDate } from "../config/report";
 import { printedLines, studyTitle } from "../config/studies";
+import { PagedExport } from "./paged-export";
 import { SequenceSteps } from "./sequence-steps";
 import type { EarlierValue, ExportDetail, ExportReport, MarkerRow } from "../types";
 
@@ -26,13 +28,15 @@ type ReportExportProps = {
   earlier?: EarlierValue[];
   person: ExportDetail[];
   generatedOn: string;
+  firstName?: string;
   onPrint: () => void;
+  onPaged?: () => void;
   actions?: ReactNode;
 };
 
 type MarkerGroup = { key: string; label?: string; rows: MarkerRow[] };
 
-const cell = "border-b py-1 pr-3 align-top break-words print:py-px";
+const cell = "border-b py-1 pr-3 align-top break-words paged:py-px";
 const columns = [
   { key: "marker", width: "w-[32%]" },
   { key: "value", width: "w-[12%]" },
@@ -89,8 +93,8 @@ function MarkerTable({ groups, numbered = false, previous }: MarkerTableProps) {
   const t = useT();
   const shown = previous ? columnsWithPrevious : columns;
   return (
-    <div className="overflow-x-auto print:overflow-visible">
-      <table className="w-full min-w-[42rem] table-fixed border-collapse text-left print:min-w-0 print:leading-tight">
+    <div data-group className="overflow-x-auto paged:overflow-visible">
+      <table className="w-full min-w-[42rem] table-fixed border-collapse text-left paged:min-w-0 paged:leading-tight">
         <thead>
           <tr className="text-muted-foreground">
             {shown.map(({ key, width }) => (
@@ -101,20 +105,20 @@ function MarkerTable({ groups, numbered = false, previous }: MarkerTableProps) {
           </tr>
         </thead>
         {groups.map((group) => (
-          <tbody key={group.key}>
+          <tbody key={group.key} data-group>
             {group.label && (
-              <tr className="break-inside-avoid break-after-avoid">
+              <tr data-atom data-keep-next className="break-inside-avoid break-after-avoid">
                 <th
                   colSpan={shown.length}
                   scope="colgroup"
-                  className={cn(cell, "pt-3 font-semibold print:pt-1.5")}
+                  className={cn(cell, "pt-3 font-semibold paged:pt-1.5")}
                 >
                   {group.label}
                 </th>
               </tr>
             )}
             {group.rows.map((row, index) => (
-              <tr key={row.markerKey} className="break-inside-avoid">
+              <tr key={row.markerKey} data-atom className="break-inside-avoid">
                 <th scope="row" className={cn(cell, "font-normal")}>
                   {numbered && `${index + 1}. `}
                   {row.name}
@@ -149,16 +153,14 @@ function MarkerTable({ groups, numbered = false, previous }: MarkerTableProps) {
   );
 }
 
-export function ReportExport({
-  report,
-  earlier = [],
-  person,
-  generatedOn,
-  onPrint,
-  actions,
-}: ReportExportProps) {
+type ExportBodyProps = Pick<ReportExportProps, "report" | "earlier" | "person" | "actions"> & {
+  onPrint?: () => void;
+};
+
+function ExportBody({ report, earlier = [], person, actions, onPrint }: ExportBodyProps) {
   const t = useT();
   const text = t.reports.export;
+  const id = useId();
   const { header } = report;
   const details: ExportDetail[] = [
     ...person,
@@ -189,26 +191,32 @@ export function ReportExport({
   ];
 
   return (
-    <article
-      className="space-y-6 text-sm print:space-y-4 print:text-[9pt]"
-      data-testid="report-export"
-    >
-      <header className="flex items-start justify-between gap-4 border-b pb-4 print:pb-2">
+    <>
+      <header data-atom className="flex items-start justify-between gap-4 border-b pb-4 paged:pb-2">
         <div>
           <Logo className="mb-1" />
-          <h1 className="text-xl font-semibold print:text-[14pt]">{text.title}</h1>
+          <h1 className="text-xl font-semibold paged:text-[14pt]">{text.title}</h1>
         </div>
-        <div className="flex flex-wrap justify-end gap-2 print:hidden">
-          {actions}
-          <Button variant="outline" onClick={onPrint}>
-            <Printer aria-hidden />
-            {text.print}
-          </Button>
-        </div>
+        {onPrint && (
+          <div className="space-y-1">
+            <div className="flex flex-wrap justify-end gap-2">
+              {actions}
+              <Button variant="outline" onClick={onPrint}>
+                <Printer aria-hidden />
+                {text.print}
+              </Button>
+              <Button onClick={onPrint} data-testid="export-download-pdf">
+                <FileDown aria-hidden />
+                {text.downloadPdf}
+              </Button>
+            </div>
+            <p className="text-right text-xs text-muted-foreground">{text.pdfHint}</p>
+          </div>
+        )}
       </header>
 
-      <div className="space-y-2">
-        <dl className="grid grid-cols-2 gap-x-6 gap-y-1 sm:grid-cols-3">
+      <div data-group className="space-y-2">
+        <dl data-atom className="grid grid-cols-2 gap-x-6 gap-y-1 sm:grid-cols-3">
           {details.map(([term, detail]) => (
             <div key={term}>
               <dt className="text-muted-foreground">{term}</dt>
@@ -217,13 +225,13 @@ export function ReportExport({
           ))}
         </dl>
         {report.note && (
-          <div className="break-inside-avoid">
+          <div data-atom className="break-inside-avoid">
             <p className="text-muted-foreground">{text.note}</p>
             <p className="whitespace-pre-line">{report.note}</p>
           </div>
         )}
         {source && (
-          <p>
+          <p data-atom>
             {text.previousFrom(
               [source.labName, formatReportDate(source.collectedAt, source.createdAt)]
                 .filter(Boolean)
@@ -234,8 +242,13 @@ export function ReportExport({
       </div>
 
       {report.moveFirst.length > 0 && (
-        <section aria-labelledby="export-move-first" className="space-y-2">
-          <h2 id="export-move-first" className="text-base font-semibold print:text-[11pt]">
+        <section data-group aria-labelledby={`${id}export-move-first`} className="space-y-2">
+          <h2
+            data-atom
+            data-keep-next
+            id={`${id}export-move-first`}
+            className="text-base font-semibold paged:text-[11pt]"
+          >
             {text.moveFirst}
           </h2>
           <MarkerTable
@@ -247,13 +260,18 @@ export function ReportExport({
       )}
 
       {report.patterns.length > 0 && (
-        <section aria-labelledby="export-patterns" className="space-y-2">
-          <h2 id="export-patterns" className="text-base font-semibold print:text-[11pt]">
+        <section data-group aria-labelledby={`${id}export-patterns`} className="space-y-2">
+          <h2
+            data-atom
+            data-keep-next
+            id={`${id}export-patterns`}
+            className="text-base font-semibold paged:text-[11pt]"
+          >
             {text.patterns}
           </h2>
-          <ul className="space-y-2 print:space-y-1">
+          <ul data-group className="space-y-2 paged:space-y-1">
             {report.patterns.map((pattern) => (
-              <li key={pattern.key} className="break-inside-avoid">
+              <li key={pattern.key} data-atom className="break-inside-avoid">
                 <p className="font-medium">
                   {pattern.name} ({t.common.status[pattern.severity]})
                 </p>
@@ -270,13 +288,18 @@ export function ReportExport({
       )}
 
       {report.findings.length > 0 && (
-        <section aria-labelledby="export-findings" className="space-y-2">
-          <h2 id="export-findings" className="text-base font-semibold print:text-[11pt]">
+        <section data-group aria-labelledby={`${id}export-findings`} className="space-y-2">
+          <h2
+            data-atom
+            data-keep-next
+            id={`${id}export-findings`}
+            className="text-base font-semibold paged:text-[11pt]"
+          >
             {text.findings}
           </h2>
-          <ul className="space-y-2 print:space-y-1">
+          <ul data-group className="space-y-2 paged:space-y-1">
             {report.findings.map((finding) => (
-              <li key={finding.title} className="break-inside-avoid">
+              <li key={finding.title} data-atom className="break-inside-avoid">
                 <p className="font-medium">
                   {finding.title} ({t.common.status[finding.severity]})
                 </p>
@@ -288,14 +311,21 @@ export function ReportExport({
       )}
 
       {sequences.length > 0 && (
-        <section aria-labelledby="export-sequences" className="space-y-2">
-          <h2 id="export-sequences" className="text-base font-semibold print:text-[11pt]">
+        <section data-group aria-labelledby={`${id}export-sequences`} className="space-y-2">
+          <h2
+            data-atom
+            data-keep-next
+            id={`${id}export-sequences`}
+            className="text-base font-semibold paged:text-[11pt]"
+          >
             {text.sequences}
           </h2>
-          <p className="text-muted-foreground">{text.sequencesNote}</p>
-          <ul className="space-y-3 print:space-y-2">
+          <p data-atom data-keep-next className="text-muted-foreground">
+            {text.sequencesNote}
+          </p>
+          <ul data-group className="space-y-3 paged:space-y-2">
             {sequences.map((item) => (
-              <li key={item.title} className="break-inside-avoid space-y-1">
+              <li key={item.title} data-atom className="break-inside-avoid space-y-1">
                 <p className="font-medium">{item.title}</p>
                 <SequenceSteps sequence={item} />
               </li>
@@ -305,13 +335,18 @@ export function ReportExport({
       )}
 
       {report.doctorQuestions.length > 0 && (
-        <section aria-labelledby="export-questions" className="space-y-2">
-          <h2 id="export-questions" className="text-base font-semibold print:text-[11pt]">
+        <section data-group aria-labelledby={`${id}export-questions`} className="space-y-2">
+          <h2
+            data-atom
+            data-keep-next
+            id={`${id}export-questions`}
+            className="text-base font-semibold paged:text-[11pt]"
+          >
             {text.questions}
           </h2>
-          <ol className="list-decimal space-y-1 pl-5">
-            {report.doctorQuestions.map((question) => (
-              <li key={question} className="break-inside-avoid">
+          <ol data-group className="list-decimal space-y-1 pl-5">
+            {report.doctorQuestions.map((question, index) => (
+              <li key={question} value={index + 1} data-atom className="break-inside-avoid">
                 {question}
               </li>
             ))}
@@ -319,22 +354,34 @@ export function ReportExport({
         </section>
       )}
 
-      <section aria-labelledby="export-markers" className="space-y-2">
-        <h2 id="export-markers" className="text-base font-semibold print:text-[11pt]">
+      <section data-group aria-labelledby={`${id}export-markers`} className="space-y-2">
+        <h2
+          data-atom
+          data-keep-next
+          id={`${id}export-markers`}
+          className="text-base font-semibold paged:text-[11pt]"
+        >
           {text.markers}
         </h2>
         <MarkerTable groups={groups} previous={previous} />
       </section>
 
       {(report.studies.length > 0 || report.files.images.length > 0) && (
-        <section aria-labelledby="export-studies" className="space-y-2">
-          <h2 id="export-studies" className="text-base font-semibold print:text-[11pt]">
+        <section data-group aria-labelledby={`${id}export-studies`} className="space-y-2">
+          <h2
+            data-atom
+            data-keep-next
+            id={`${id}export-studies`}
+            className="text-base font-semibold paged:text-[11pt]"
+          >
             {text.studies}
           </h2>
-          <p className="text-muted-foreground">{text.studiesNote}</p>
-          <ul className="space-y-3 print:space-y-2">
+          <p data-atom data-keep-next className="text-muted-foreground">
+            {text.studiesNote}
+          </p>
+          <ul data-group className="space-y-3 paged:space-y-2">
             {report.studies.map((study) => (
-              <li key={study.id} className="break-inside-avoid space-y-1">
+              <li key={study.id} data-atom className="break-inside-avoid space-y-1">
                 <p className="font-medium">
                   {studyTitle(study)}
                   {study.performedAt && `, ${formatPlainDate(study.performedAt, dateOptions)}`}
@@ -379,7 +426,7 @@ export function ReportExport({
               </li>
             ))}
             {report.files.images.map((name) => (
-              <li key={name} className="break-inside-avoid">
+              <li key={name} data-atom className="break-inside-avoid">
                 {text.imageNotRead(name)}
               </li>
             ))}
@@ -388,12 +435,19 @@ export function ReportExport({
       )}
 
       {report.unmapped.length > 0 && (
-        <section aria-labelledby="export-appendix" className="space-y-2">
-          <h2 id="export-appendix" className="text-base font-semibold print:text-[11pt]">
+        <section data-group aria-labelledby={`${id}export-appendix`} className="space-y-2">
+          <h2
+            data-atom
+            data-keep-next
+            id={`${id}export-appendix`}
+            className="text-base font-semibold paged:text-[11pt]"
+          >
             {text.appendix}
           </h2>
-          <p className="text-muted-foreground">{text.appendixNote}</p>
-          <table className="w-full border-collapse text-left print:leading-tight">
+          <p data-atom data-keep-next className="text-muted-foreground">
+            {text.appendixNote}
+          </p>
+          <table data-group className="w-full border-collapse text-left paged:leading-tight">
             <thead>
               <tr className="text-muted-foreground">
                 {[text.columns.rawName, text.columns.value, text.columns.unit].map((title) => (
@@ -405,7 +459,7 @@ export function ReportExport({
             </thead>
             <tbody>
               {report.unmapped.map((item, index) => (
-                <tr key={index} className="break-inside-avoid">
+                <tr key={index} data-atom className="break-inside-avoid">
                   <th scope="row" className={cn(cell, "font-normal")}>
                     {item.rawName}
                   </th>
@@ -419,11 +473,66 @@ export function ReportExport({
           </table>
         </section>
       )}
+    </>
+  );
+}
 
-      <footer className="space-y-1 border-t pt-4 print:break-inside-avoid print:pt-2">
-        <Disclaimer />
-        <p className="text-muted-foreground">{text.generated(generatedOn)}</p>
-      </footer>
-    </article>
+/**
+ * Sets the page title to the PDF file name while the export is open, and puts the old title back after.
+ *
+ * @remarks
+ * Chrome and Safari name a PDF saved from the print window after the page title, so this sets the file name.
+ */
+function usePdfTitle(fileName: string) {
+  useEffect(() => {
+    const previous = document.title;
+    document.title = fileName.replace(/\.pdf$/, "");
+    return () => {
+      document.title = previous;
+    };
+  }, [fileName]);
+}
+
+export function ReportExport({
+  report,
+  earlier,
+  person,
+  generatedOn,
+  firstName,
+  onPrint,
+  onPaged,
+  actions,
+}: ReportExportProps) {
+  const text = useT().reports.export;
+  usePdfTitle(pdfFileName(firstName, report.header.title));
+
+  return (
+    <>
+      <article className="space-y-6 text-sm print:hidden" data-testid="report-export">
+        <ExportBody
+          report={report}
+          earlier={earlier}
+          person={person}
+          actions={actions}
+          onPrint={onPrint}
+        />
+        <footer className="space-y-1 border-t pt-4">
+          <Disclaimer />
+          <p className="text-muted-foreground">{text.generated(generatedOn)}</p>
+        </footer>
+      </article>
+      <PagedExport
+        onPaged={onPaged}
+        footer={
+          <footer className="mt-auto space-y-0.5 border-t pt-1.5 text-muted-foreground [&_p]:text-[7.5pt]">
+            <Disclaimer />
+            <p>{text.pageLabs(report.labs.join(", "))}</p>
+            <p>{text.generated(generatedOn)}</p>
+          </footer>
+        }
+      >
+        <ExportBody report={report} earlier={earlier} person={person} />
+      </PagedExport>
+    </>
   );
 }

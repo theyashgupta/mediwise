@@ -3,6 +3,7 @@ import {
   birthDateTerm,
   changeMark,
   earlierSource,
+  pdfFileName,
   profileDetails,
   rangeText,
   sharedPersonDetails,
@@ -83,4 +84,24 @@ test("the signed-in export lists the full name, the date of birth and the sex", 
     ["Date of birth (approximate)", "28 Feb 1977"],
     ["Sex", "Female"],
   ]);
+});
+
+test("the PDF is named after the first name and the report title, with hyphens for spaces and signs", () => {
+  expect(pdfFileName("Arjun Mehta", "14 Feb 2025 · blood panel (46 markers), ultrasound")).toBe(
+    "Arjun-14-Feb-2025-blood-panel-46-markers-ultrasound-mediwise.pdf",
+  );
+  expect(pdfFileName("  Meera  ", "Lipid / thyroid: 3 Mar 2025")).toBe(
+    "Meera-Lipid-thyroid-3-Mar-2025-mediwise.pdf",
+  );
+});
+
+test("a Devanagari first name keeps its vowel signs in the PDF name", () => {
+  expect(pdfFileName("अर्जुन मेहता", "1 Feb 2025 · blood panel")).toBe(
+    "अर्जुन-1-Feb-2025-blood-panel-mediwise.pdf",
+  );
+});
+
+test("a PDF without a profile name starts with the report title", () => {
+  expect(pdfFileName(undefined, "1 Feb 2025")).toBe("1-Feb-2025-mediwise.pdf");
+  expect(pdfFileName("", "1 Feb 2025")).toBe("1-Feb-2025-mediwise.pdf");
 });

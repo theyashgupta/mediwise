@@ -1,6 +1,6 @@
 import { getRouteApi } from "@tanstack/react-router";
 import { FileClock } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { getIntlTag, useT } from "@/common/hooks/use-locale";
 import { EmptyState } from "@/common/components/empty-state";
 import { ErrorState } from "@/common/components/error-state";
@@ -16,18 +16,18 @@ import { ShareReportContainer } from "./share-report-container";
 const route = getRouteApi("/reports/$reportId/export");
 
 /**
- * Opens the print dialog once, after the report and its profile are on the page.
+ * Returns a callback that opens the print dialog once, when the pages are cut with the report and its profile on them.
  *
  * @remarks
- * Waits for web fonts, so the print preview does not lay out the page with the fallback font. The ref stops a second dialog when React runs the effect twice in development.
+ * The pages are cut after the web fonts load, so the print preview never uses the fallback font. The ref stops a second dialog when the pages are cut again.
  */
-function usePrintWhenReady(ready: boolean) {
+function usePrintOnce(ready: boolean) {
   const printed = useRef(false);
-  useEffect(() => {
+  return () => {
     if (!ready || printed.current) return;
     printed.current = true;
-    void document.fonts.ready.then(() => window.print());
-  }, [ready]);
+    window.print();
+  };
 }
 
 function Content() {
@@ -39,7 +39,7 @@ function Content() {
   const { translating } = useReportTranslation(reportId, report.data?.translation);
   const ready =
     report.data?.status === "done" && profiles.isSuccess && earlier.isSuccess && !translating;
-  usePrintWhenReady(ready);
+  const printOnce = usePrintOnce(ready);
 
   if (report.isPending || profiles.isPending) return <LoadingState variant="page" />;
   if (report.isError) {
@@ -66,14 +66,17 @@ function Content() {
   }
 
   if (earlier.isPending) return <LoadingState variant="page" />;
+  const profile = profiles.data.find((item) => item.id === report.data.profileId);
 
   return (
     <ReportExport
       report={report.data}
       earlier={earlier.data}
-      person={profileDetails(profiles.data.find((profile) => profile.id === report.data.profileId))}
+      person={profileDetails(profile)}
       generatedOn={new Date().toLocaleDateString(getIntlTag(), dateOptions)}
+      firstName={profile?.name}
       onPrint={() => window.print()}
+      onPaged={printOnce}
       actions={<ShareReportContainer reportId={reportId} />}
     />
   );

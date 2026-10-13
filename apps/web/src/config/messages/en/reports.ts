@@ -79,6 +79,9 @@ export const reports = {
   export: {
     title: "Report summary",
     print: "Print",
+    downloadPdf: "Download PDF",
+    pdfHint: "In the print window, select Save as PDF. On a phone, select Share.",
+    pageLabs: (labs: string) => `Labs: ${labs}`,
     loadError: "We could not load this report.",
     profileError: "We could not load the profile.",
     previousError: "We could not load the previous values.",
