@@ -30,4 +30,4 @@ Upload a lab report, get every marker explained, scored and tracked. Turborepo +
 ## Personal data
 
 - Never commit a real report, name, value, lab name or doctor name. Tests and fixtures use made-up data.
-- Screenshots and recordings use the demo account `arjun.demo@example.com` on `mediwise-dev`, which holds only the two sample reports in `apps/api/fixtures/golden`. Its password is `MEDIWISE_DEMO_PASSWORD` in the env-vault. Never capture the dev profile or a real report.
+- Screenshots and recordings use the demo account `arjun.demo@example.com` on `mediwise-dev`. It holds the two sample reports in `apps/api/fixtures/golden` (profile Arjun Mehta) and the five reports in `apps/api/fixtures/episode` (made-up partner profile Meera Mehta). Its password is `MEDIWISE_DEMO_PASSWORD` in the env-vault. Never capture the dev profile or a real report.

@@ -272,11 +272,11 @@ Checked on 2026-10-13 at 390, 768, 1024, 1440 and 1920 px: Home, Reports, report
 
 `apps/landing` is the public page at `https://mediwise.theyashgupta.me`. It imports its tokens from `@mediwise/design-tokens` and uses the same fonts and logo as the app. The research behind it is in [landing-research.md](design/landing-research.md).
 
-Sections, in order: navigation, hero, marker marquee, how it works, the report story, the comparison card, features, numbers, trust, pricing, FAQ, the last call to action and the footer.
+Sections, in order: navigation, hero, marker marquee, how it works, the report story, every report in one history (MEDI-87), the comparison card, features, numbers, trust, pricing, FAQ, the last call to action and the footer.
 
 Rules:
 
-- **Real screens only.** Every phone on the page shows a screen from the app, captured at 390 px from the dev data. Lab names, doctor names and the profile name are removed before capture. The values are real.
+- **Real screens, made-up data.** Every phone on the page shows a screen from the app, captured at 390 px on the demo account. The people, labs and values are made up (MEDI-87). Never capture a real profile.
 - **Numbers come from code.** Prices come from `payments.config.ts`. Counts (137 markers, 15 patterns, 80 sources, 20 files, 8 profiles) come from the engine and `@mediwise/shared` when the page builds. `src/lib/facts.test.ts` fails when a number on the page and its source differ.
 - **Words.** "Built to follow the DPDP Act 2023", never "compliant". No free first read, because a new account has 0 credits. No user counts and no testimonials until real ones exist.
 - **One serif.** Instrument Serif is used for the hero headline only. Section titles use Inter.
@@ -335,6 +335,35 @@ Lighthouse after MEDI-56 (Lighthouse 12.8.2, mobile, 3 runs per theme, before an
 | CLS | 0.001 or less | 0.001 or less |
 
 That server sends files without compression, so LCP is 6.2 s in both builds. Compare these runs with each other, not with the MEDI-41 table. First-load JavaScript is 145 kB gzipped before and after, without the `nomodule` polyfill.
+
+### Screens refresh (MEDI-87)
+
+Every phone screen was captured again after design v2, the new navigation, report titles, episodes, the Settled block and Hindi. The landing code kept every file name and added three screens: `settled`, `episode` and `hindi`.
+
+- **Data.** The demo account `arjun.demo@example.com` on `mediwise-dev`. Arjun Mehta has the two sample reports in `apps/api/fixtures/golden`. A made-up partner profile, Meera Mehta, has the five reports in `apps/api/fixtures/episode`, read through the normal upload. They model a workup: a 34 mm ovarian cyst on 10 Feb 2025, a 6 mm thyroid nodule on 24 Feb 2025, and a repeat pelvis ultrasound on 17 Mar 2025 that settles the cyst. The five reports form the episode "Hormone tests".
+- **Sign-in.** A script makes a magic-link token with the service role key and trades it for a session. It writes the session to a local file and prints no key and no token.
+- **Capture.** Playwright, 390 x 844 at 2x, one viewport scrolled to the section, resized to 600 x 1299 WebP at quality 80. The hero screen uses quality 74, so it is smaller than the old one (34.6 kB and 33.7 kB against 36.7 kB and 35.2 kB). Hindi screens set the account language in the session.
+- **Demo GIF.** A Chrome DevTools screencast saves a PNG only when the screen changes. The read wait is cut, the rest plays at 1.25x, 10 frames a second, 960 px wide, 96 colours, no dither. The result is 20 seconds and 842 kB. The VP8 video that Playwright records made a 2.7 to 4.6 MB GIF.
+- **OCR.** Tesseract on all 200 GIF frames, the 22 landing screens and the four page captures finds only made-up names: Arjun Mehta, Meera Mehta, Dr. A. Sample and the Made-up labs. No email shows.
+
+Lighthouse before and after (production build served with compression by `serve`, Lighthouse 12.8.2, mobile, simulated throttling). Another session loaded the machine, so the two builds ran in turns in each round. The after build has the final hero image.
+
+| | Light, before | Light, after | Dark, before | Dark, after |
+| - | - | - | - | - |
+| Runs | 7 | 7 | 3 | 3 |
+| Performance (median, range) | 92 (92 to 96) | 92 (84 to 96) | 92 (76 to 96) | 96 (92 to 96) |
+| LCP (median) | 3.26 s | 3.27 s | 3.22 s | 2.69 s |
+| Accessibility, best practices, SEO | 100, 100, 100 in every run | 100, 100, 100 in every run | 100, 100, 100 in every run | 100, 100, 100 in every run |
+| CLS | 0.001 | 0.001 | 0.001 | 0.001 |
+
+LCP is the hero image in both builds. It takes one of two values, about 2.7 s or 3.3 s, in both builds. First-load JavaScript is 145,233 bytes gzipped before and after, without the `nomodule` polyfill. The new section is server-rendered and adds no JavaScript.
+
+Screenshots, full page with reduced motion (MEDI-87):
+
+| Width | Light | Dark |
+| - | - | - |
+| 1440 px | [after](design/pages/landing-light-1440-medi87.jpg) | [after](design/pages/landing-dark-1440-medi87.jpg) |
+| 390 px | [after](design/pages/landing-light-390-medi87.jpg) | [after](design/pages/landing-dark-390-medi87.jpg) |
 
 ## Auth pages (MEDI-46)
 
