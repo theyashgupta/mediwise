@@ -1,9 +1,6 @@
 export type Status = "optimal" | "watch" | "risk" | "unknown";
 
-export const statusStyles: Record<
-  Status,
-  { badge: string; mark: string; fill: string }
-> = {
+export const statusStyles: Record<Status, { badge: string; mark: string; fill: string }> = {
   optimal: {
     badge: "bg-optimal-soft text-optimal",
     mark: "bg-optimal",

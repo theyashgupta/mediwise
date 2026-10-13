@@ -5,6 +5,7 @@ import { EmptyState } from "@/common/components/empty-state";
 import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
 import { PageHeader } from "@/common/components/page-header";
+import { useT } from "@/common/hooks/use-locale";
 import { ValueChart } from "@/common/components/value-chart";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -18,32 +19,36 @@ import { useTrend } from "../hooks/use-trends";
 
 const route = getRouteApi("/_app/trends/$markerKey");
 
-const backLink = (
-  <Button asChild variant="outline">
-    <Link to="/trends">
-      <ArrowLeft aria-hidden />
-      All trends
-    </Link>
-  </Button>
-);
+function BackLink() {
+  const t = useT();
+  return (
+    <Button asChild variant="outline">
+      <Link to="/trends">
+        <ArrowLeft aria-hidden />
+        {t.trends.detail.back}
+      </Link>
+    </Button>
+  );
+}
 
 export function TrendContainer() {
   const { markerKey } = route.useParams();
   const { profile } = useActiveProfile();
   const trend = useTrend(profile?.id, markerKey);
   useCrumbLabel(`/trends/${markerKey}`, trend.data?.name);
+  const t = useT();
 
   if (!profile || trend.isPending) return <LoadingState variant="page" />;
   if (trend.isError) {
-    return <ErrorState message="We could not load this trend." onRetry={() => trend.refetch()} />;
+    return <ErrorState message={t.trends.detail.loadError} onRetry={() => trend.refetch()} />;
   }
   if (!trend.data) {
     return (
       <EmptyState
         icon={TrendingUp}
-        title="No values for this marker"
-        body="This profile has no report with this marker."
-        action={backLink}
+        title={t.trends.detail.emptyTitle}
+        body={t.trends.detail.emptyBody}
+        action={<BackLink />}
       />
     );
   }
@@ -58,8 +63,8 @@ export function TrendContainer() {
     <>
       <PageHeader
         title={data.name}
-        description={`${points.length} ${points.length === 1 ? "value" : "values"} for ${profile.name}`}
-        actions={backLink}
+        description={t.trends.detail.values(points.length, profile.name)}
+        actions={<BackLink />}
       />
       <div className="space-y-8">
         {data.change && (
@@ -70,9 +75,9 @@ export function TrendContainer() {
               unit={data.unit}
               className={cn("text-base", style.text)}
             />
-            <span className="text-muted-foreground">since the report before.</span>
+            <span className="text-muted-foreground">{t.trends.detail.sinceBefore}</span>
             <span className={cn("rounded-md px-2 py-0.5 text-sm font-medium", style.badge)}>
-              {style.label}
+              {t.trends.direction[data.direction]}
             </span>
           </p>
         )}
@@ -91,7 +96,7 @@ export function TrendContainer() {
               },
             }))}
             band={data.calibratedRange}
-            bandLabel="Optimal range for your profile"
+            bandLabel={t.trends.detail.band}
             unit={displayUnit(data.unit)}
             precision={data.precision}
           />

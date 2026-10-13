@@ -1,5 +1,6 @@
 import { getRouteApi } from "@tanstack/react-router";
 import { Link2Off } from "lucide-react";
+import { getIntlTag, useT } from "@/common/hooks/use-locale";
 import { EmptyState } from "@/common/components/empty-state";
 import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
@@ -12,6 +13,7 @@ import { useSharedReport } from "../hooks/use-shares";
 const route = getRouteApi("/share/$token");
 
 function Content() {
+  const t = useT();
   const { token } = route.useParams();
   const shared = useSharedReport(token);
 
@@ -20,20 +22,20 @@ function Content() {
     return (
       <EmptyState
         icon={Link2Off}
-        title="This link has ended"
-        body="Ask the person who sent you this link for a new link."
+        title={t.reports.share.endedTitle}
+        body={t.reports.share.endedBody}
       />
     );
   }
   if (shared.isError) {
-    return <ErrorState message="We could not load this report." onRetry={() => shared.refetch()} />;
+    return <ErrorState message={t.reports.export.loadError} onRetry={() => shared.refetch()} />;
   }
 
   const { report, previous, person, expiresAt } = shared.data;
   return (
     <div className="space-y-4">
       <p className="rounded-lg border bg-muted px-3 py-2 text-sm print:hidden">
-        This link ends on {shareDate(expiresAt)}.
+        {t.reports.share.endsOn(shareDate(expiresAt))}
       </p>
       <ReportExport
         report={report}
@@ -43,7 +45,7 @@ function Content() {
             : undefined
         }
         person={sharedPersonDetails(person)}
-        generatedOn={new Date().toLocaleDateString("en-IN", dateOptions)}
+        generatedOn={new Date().toLocaleDateString(getIntlTag(), dateOptions)}
         onPrint={() => window.print()}
       />
     </div>

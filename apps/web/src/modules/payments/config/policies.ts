@@ -4,17 +4,17 @@ export const contact = {
   address: "[postal address in India]",
 };
 
-export const policyUpdated = "13 October 2026";
+export const policyUpdated = "2026-10-13";
 
 export type PolicyPage = "terms" | "privacy" | "refunds" | "contact";
 
 type Policy = { title: string; sections: { heading: string; body: string[] }[] };
 
 export const policyLinks = [
-  { page: "terms", to: "/terms", label: "Terms of use" },
-  { page: "privacy", to: "/privacy", label: "Privacy policy" },
-  { page: "refunds", to: "/refunds", label: "Refund policy" },
-  { page: "contact", to: "/contact", label: "Contact" },
+  { page: "terms", to: "/terms" },
+  { page: "privacy", to: "/privacy" },
+  { page: "refunds", to: "/refunds" },
+  { page: "contact", to: "/contact" },
 ] as const;
 
 export const policies: Record<PolicyPage, Policy> = {

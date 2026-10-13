@@ -1,4 +1,5 @@
 import { CircleCheck, Clock } from "lucide-react";
+import { useT } from "@/common/hooks/use-locale";
 
 type PurchaseStatusProps = {
   status: "waiting" | "paid" | "late";
@@ -6,7 +7,7 @@ type PurchaseStatusProps = {
 };
 
 export function PurchaseStatus({ status, credits }: PurchaseStatusProps) {
-  const added = credits === 1 ? "1 report credit" : `${credits} report credits`;
+  const t = useT();
   return (
     <p role="status" aria-live="polite" className="flex items-start gap-2">
       {status === "paid" ? (
@@ -14,10 +15,9 @@ export function PurchaseStatus({ status, credits }: PurchaseStatusProps) {
       ) : (
         <Clock className="mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden />
       )}
-      {status === "waiting" && "We are waiting for your bank to confirm the payment."}
-      {status === "paid" && `Payment received. We added ${added} to your account.`}
-      {status === "late" &&
-        "Your bank did not confirm the payment yet. Your credits show here when it does."}
+      {status === "waiting" && t.payments.status.waiting}
+      {status === "paid" && t.payments.status.paid(credits)}
+      {status === "late" && t.payments.status.late}
     </p>
   );
 }

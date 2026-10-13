@@ -2,6 +2,7 @@ import { getRouteApi, Link, useNavigate } from "@tanstack/react-router";
 import { CirclePause, FileDown, GitCompareArrows, LoaderCircle, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useT } from "@/common/hooks/use-locale";
 import { useCrumbLabel } from "@/common/hooks/use-crumb-label";
 import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
@@ -40,6 +41,7 @@ export function ReportContainer() {
   const { reportId } = route.useParams();
   const { show } = route.useSearch();
   const navigate = useNavigate();
+  const t = useT();
   const report = useReport(reportId);
   useCrumbLabel(`/reports/${reportId}`, report.data?.header.labName);
   const retry = useRetryReport();
@@ -49,7 +51,7 @@ export function ReportContainer() {
 
   if (report.isPending) return <LoadingState variant="page" />;
   if (report.isError) {
-    return <ErrorState message="We could not load this report." onRetry={() => report.refetch()} />;
+    return <ErrorState message={t.report.loadError} onRetry={() => report.refetch()} />;
   }
 
   const { header, status } = report.data;
@@ -72,7 +74,7 @@ export function ReportContainer() {
   function confirmDelete() {
     remove.mutate(reportId, {
       onSuccess: () => {
-        toast.success("We deleted the report.");
+        toast.success(t.report.deleted);
         void navigate({ to: "/reports" });
       },
     });
@@ -80,7 +82,7 @@ export function ReportContainer() {
 
   const description = [
     formatReportDate(header.collectedAt, report.data.createdAt),
-    header.markerCount > 0 && `${header.markerCount} markers`,
+    header.markerCount > 0 && t.report.markerCount(header.markerCount),
   ]
     .filter(Boolean)
     .join(" · ");
@@ -88,7 +90,7 @@ export function ReportContainer() {
   return (
     <>
       <PageHeader
-        title={header.labName ?? "Your report"}
+        title={header.labName ?? t.report.title}
         description={description}
         glass
         actions={
@@ -98,7 +100,7 @@ export function ReportContainer() {
               <GlassButton asChild>
                 <Link to="/compare" search={{ b: reportId }}>
                   <GitCompareArrows aria-hidden />
-                  Compare reports
+                  {t.report.compare}
                 </Link>
               </GlassButton>
             )}
@@ -106,7 +108,7 @@ export function ReportContainer() {
               <GlassButton asChild>
                 <Link to="/reports/$reportId/export" params={{ reportId }} target="_blank">
                   <FileDown aria-hidden />
-                  Export for doctor
+                  {t.report.export}
                 </Link>
               </GlassButton>
             )}
@@ -120,7 +122,7 @@ export function ReportContainer() {
                 }}
               >
                 <Trash2 aria-hidden />
-                Delete report
+                {t.report.delete}
               </Button>
             )}
           </>
@@ -129,18 +131,18 @@ export function ReportContainer() {
       {status === "paused" && (
         <p className="flex items-center gap-3 text-muted-foreground">
           <CirclePause className="size-5" aria-hidden />
-          Reading is paused for now. We will read your report when reading starts again.
+          {t.report.paused}
         </p>
       )}
       {inProgress(status) && status !== "paused" && (
         <p className="flex items-center gap-3 text-muted-foreground">
           <LoaderCircle className="size-5 animate-spin" aria-hidden />
-          We are reading your report. This page updates when it is ready.
+          {t.report.reading}
         </p>
       )}
       {status === "failed" && (
         <ReportFailed
-          message={report.data.error ?? "We could not read this report."}
+          message={report.data.error ?? t.report.readError}
           retrying={retry.isPending}
           retryError={retry.error?.message}
           onRetry={() => retry.mutate(reportId)}
@@ -172,16 +174,16 @@ export function ReportContainer() {
             <Tabs defaultValue="markers" className="gap-4">
               <TabsList className="w-full max-w-full justify-start overflow-x-auto sm:w-fit">
                 <TabsTrigger value="markers" className="text-muted-foreground">
-                  Markers ({markerCount})
+                  {t.report.tabs.markers(markerCount)}
                 </TabsTrigger>
                 <TabsTrigger value="follow-ups" className="text-muted-foreground">
-                  Follow-ups ({report.data.followUps.length})
+                  {t.report.tabs.followUps(report.data.followUps.length)}
                 </TabsTrigger>
                 <TabsTrigger value="unmeasured" className="text-muted-foreground">
-                  Unmeasured ({report.data.unmeasured.length})
+                  {t.report.tabs.unmeasured(report.data.unmeasured.length)}
                 </TabsTrigger>
                 <TabsTrigger value="doctor-questions" className="text-muted-foreground">
-                  Questions for your doctor ({report.data.doctorQuestions.length})
+                  {t.report.tabs.doctorQuestions(report.data.doctorQuestions.length)}
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="markers">

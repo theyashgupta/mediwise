@@ -1,9 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { Section } from "@/common/components/section";
+import { useT } from "@/common/hooks/use-locale";
 import { formatPlainDate } from "@/common/utils/date";
 import { statusStyles } from "@/common/utils/status";
 import { cn } from "@/lib/utils";
-import { relationLabels } from "@/modules/profiles";
 import { isOlderThanAYear } from "../config/report-age";
 import type { FamilyMember } from "../types";
 
@@ -18,14 +18,16 @@ const textLink =
   "rounded-sm text-sm font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 function MemberSummary({ member, today }: { member: FamilyMember; today: Date }) {
+  const t = useT();
+  const text = t.dashboard.family;
   const { latest } = member;
-  const relation = relationLabels[member.relation];
+  const relation = t.profiles.relation[member.relation];
   if (!latest) {
     return (
       <span className="min-w-0 flex-1">
         <span className="block truncate font-medium">{member.name}</span>
         <span className="block truncate text-sm text-muted-foreground">{relation}</span>
-        <span className="block text-sm text-muted-foreground">No report yet.</span>
+        <span className="block text-sm text-muted-foreground">{text.noReport}</span>
       </span>
     );
   }
@@ -40,13 +42,11 @@ function MemberSummary({ member, today }: { member: FamilyMember; today: Date })
         {latest.riskCount > 0 && (
           <span className="flex items-center gap-1.5 text-sm">
             <span className={cn("size-1.5 rounded-full", statusStyles.risk.mark)} aria-hidden />
-            {latest.riskCount} {latest.riskCount === 1 ? "marker" : "markers"} at risk
+            {text.atRisk(latest.riskCount)}
           </span>
         )}
         {isOlderThanAYear(latest.date, today) && (
-          <span className="block text-sm text-muted-foreground">
-            No report in the last 12 months.
-          </span>
+          <span className="block text-sm text-muted-foreground">{text.stale}</span>
         )}
       </span>
       {latest.score !== null && (
@@ -60,13 +60,14 @@ function MemberSummary({ member, today }: { member: FamilyMember; today: Date })
 }
 
 export function FamilyList({ members, activeId, today, onSelect }: FamilyListProps) {
+  const text = useT().dashboard.family;
   return (
-    <Section id="your-family" title="Your family">
+    <Section id="your-family" title={text.title}>
       {members.length < 2 ? (
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-xl border bg-card px-4 py-3">
-          <p className="text-muted-foreground">Add family members to see their reports here.</p>
+          <p className="text-muted-foreground">{text.empty}</p>
           <Link to="/profiles" className={textLink}>
-            Add a family member
+            {text.add}
           </Link>
         </div>
       ) : (
@@ -87,7 +88,7 @@ export function FamilyList({ members, activeId, today, onSelect }: FamilyListPro
                   onClick={() => onSelect(member.id)}
                   className={cn(textLink, "mx-4 shrink-0")}
                 >
-                  Upload a report
+                  {text.upload}
                 </Link>
               )}
             </li>

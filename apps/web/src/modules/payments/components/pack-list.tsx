@@ -1,3 +1,4 @@
+import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatRupees } from "../config/payments";
@@ -10,6 +11,7 @@ type PackListProps = {
 };
 
 export function PackList({ packs, buyingPackId, onBuy }: PackListProps) {
+  const t = useT();
   return (
     <ul className="grid gap-4 sm:grid-cols-3">
       {packs.map((pack) => (
@@ -24,11 +26,13 @@ export function PackList({ packs, buyingPackId, onBuy }: PackListProps) {
             <CardFooter className="mt-auto">
               <Button
                 className="w-full"
-                aria-label={buyingPackId === pack.id ? undefined : `Buy ${pack.label}`}
+                aria-label={
+                  buyingPackId === pack.id ? undefined : t.payments.buy.buyPack(pack.label)
+                }
                 disabled={buyingPackId !== undefined}
                 onClick={() => onBuy(pack.id)}
               >
-                {buyingPackId === pack.id ? "Opening payment" : "Buy"}
+                {buyingPackId === pack.id ? t.payments.buy.opening : t.payments.buy.buy}
               </Button>
             </CardFooter>
           </Card>

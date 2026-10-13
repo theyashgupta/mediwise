@@ -1,4 +1,5 @@
 import { LogOut, Monitor, Moon, Sun, User } from "lucide-react";
+import { useT } from "@/common/hooks/use-locale";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,10 +30,11 @@ export function UserMenu({
   onThemeChange,
   onSignOut,
 }: UserMenuProps) {
+  const t = useT();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-full" aria-label="Open user menu">
+        <Button variant="ghost" size="icon" className="rounded-full" aria-label={t.me.menu.open}>
           <Avatar className="size-8">
             <AvatarFallback className="bg-secondary text-sm font-medium uppercase">
               {account ? account.charAt(0) : <User className="size-4" aria-hidden />}
@@ -42,33 +44,33 @@ export function UserMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-60">
         <DropdownMenuLabel className="font-normal">
-          <span className="block text-xs text-muted-foreground">Signed in as</span>
+          <span className="block text-xs text-muted-foreground">{t.me.menu.signedInAs}</span>
           <span className="block truncate font-medium">
-            {account ?? (loading ? "Loading account" : "Account unavailable")}
+            {account ?? (loading ? t.me.menu.loadingAccount : t.me.menu.unavailable)}
           </span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-          Theme
+          {t.me.menu.theme}
         </DropdownMenuLabel>
         <DropdownMenuRadioGroup value={theme} onValueChange={onThemeChange}>
           <DropdownMenuRadioItem value="light">
             <Sun aria-hidden />
-            Light
+            {t.me.menu.light}
           </DropdownMenuRadioItem>
           <DropdownMenuRadioItem value="dark">
             <Moon aria-hidden />
-            Dark
+            {t.me.menu.dark}
           </DropdownMenuRadioItem>
           <DropdownMenuRadioItem value="system">
             <Monitor aria-hidden />
-            Match system
+            {t.me.menu.system}
           </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem disabled={signingOut} onSelect={onSignOut}>
           <LogOut aria-hidden />
-          {signingOut ? "Signing out" : "Sign out"}
+          {signingOut ? t.me.menu.signingOut : t.me.menu.signOut}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

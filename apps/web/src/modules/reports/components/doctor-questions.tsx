@@ -1,5 +1,6 @@
 import { Copy } from "lucide-react";
 import { toast } from "sonner";
+import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 
 type DoctorQuestionsProps = {
@@ -7,26 +8,27 @@ type DoctorQuestionsProps = {
 };
 
 export function DoctorQuestions({ items }: DoctorQuestionsProps) {
+  const t = useT();
   if (items.length === 0) {
-    return <p className="text-muted-foreground">This report has no questions for your doctor.</p>;
+    return <p className="text-muted-foreground">{t.report.doctorQuestions.empty}</p>;
   }
 
   async function copyAll() {
     try {
       await navigator.clipboard.writeText(items.map((item, i) => `${i + 1}. ${item}`).join("\n"));
-      toast.success("We copied the questions.");
+      toast.success(t.report.doctorQuestions.copied);
     } catch {
-      toast.error("We could not copy the questions. Select the text and copy it.");
+      toast.error(t.report.doctorQuestions.copyError);
     }
   }
 
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-muted-foreground">Take these questions to your next doctor visit.</p>
+        <p className="text-muted-foreground">{t.report.doctorQuestions.intro}</p>
         <Button variant="outline" size="sm" onClick={() => void copyAll()}>
           <Copy aria-hidden />
-          Copy all
+          {t.report.doctorQuestions.copyAll}
         </Button>
       </div>
       <ol className="divide-y rounded-xl border bg-card">

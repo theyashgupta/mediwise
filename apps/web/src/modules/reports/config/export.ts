@@ -1,6 +1,7 @@
+import { getIntlTag, getT } from "@/common/hooks/use-locale";
 import { formatPlainDate } from "@/common/utils/date";
 import { formatRange } from "@/common/utils/range-scale";
-import { type Profile, sexLabels } from "@/modules/profiles";
+import type { Profile } from "@/modules/profiles";
 import type { Comparison } from "@/modules/trends";
 import type { ExportDetail, MarkerRow } from "../types";
 
@@ -15,23 +16,25 @@ export function rangeText(range: MarkerRow["labRange"]) {
 export function valueText(value: number | null, text: string | null, precision = 3) {
   return value === null
     ? (text ?? "-")
-    : value.toLocaleString("en-IN", { maximumFractionDigits: precision });
+    : value.toLocaleString(getIntlTag(), { maximumFractionDigits: precision });
 }
 
 /** Names the date of birth row, so a doctor sees when the date came from a printed age. */
 export function birthDateTerm(approximate: boolean | undefined) {
-  return approximate ? "Date of birth (approximate)" : "Date of birth";
+  const t = getT().reports.export;
+  return approximate ? t.dateOfBirthApproximate : t.dateOfBirth;
 }
 
 /** Lists the profile rows the signed-in export prints above the lab details. */
 export function profileDetails(profile: Profile | undefined): ExportDetail[] {
+  const t = getT();
   return [
-    ["Name", profile?.name],
+    [t.reports.export.name, profile?.name],
     [
       birthDateTerm(profile?.dateOfBirthApproximate),
       profile?.dateOfBirth ? formatPlainDate(profile.dateOfBirth, dateOptions) : null,
     ],
-    ["Sex", profile?.sex ? sexLabels[profile.sex] : null],
+    [t.reports.export.sex, profile?.sex ? t.profiles.sex[profile.sex] : null],
   ];
 }
 
@@ -45,9 +48,10 @@ export function sharedPersonDetails(person: {
   firstName: string;
   age: number | null;
 }): ExportDetail[] {
+  const t = getT().reports.export;
   return [
-    ["First name", person.firstName],
-    ["Age", person.age === null ? null : `${person.age} years`],
+    [t.firstName, person.firstName],
+    [t.age, person.age === null ? null : t.years(person.age)],
   ];
 }
 
@@ -89,7 +93,8 @@ export function previousValues(groups: Comparison["groups"]) {
  */
 export function changeMark(previous: number, current: number, precision: number) {
   const delta = Number(current.toFixed(precision)) - Number(previous.toFixed(precision));
-  if (delta > 0) return { symbol: "↑", label: "Higher now" };
-  if (delta < 0) return { symbol: "↓", label: "Lower now" };
+  const t = getT().reports.export;
+  if (delta > 0) return { symbol: "↑", label: t.higher };
+  if (delta < 0) return { symbol: "↓", label: t.lower };
   return undefined;
 }

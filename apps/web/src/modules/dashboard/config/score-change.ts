@@ -1,3 +1,4 @@
+import { getT } from "@/common/hooks/use-locale";
 import { formatPlainDate } from "@/common/utils/date";
 import type { Status } from "@/common/utils/status";
 
@@ -14,7 +15,8 @@ export function scoreChange(delta: { score: number; since: string }, latestDate:
     month: "short",
     ...(!sameYear && { year: "numeric" }),
   });
-  if (delta.score === 0) return { value: "No change", since, status: "unknown" as Status };
+  if (delta.score === 0)
+    return { value: getT().dashboard.latest.noChange, since, status: "unknown" as Status };
   return {
     value: `${delta.score > 0 ? "+" : "−"}${Math.abs(delta.score)}`,
     since,

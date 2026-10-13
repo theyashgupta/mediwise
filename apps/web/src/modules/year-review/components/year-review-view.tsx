@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { Section } from "@/common/components/section";
 import { StatusBadge } from "@/common/components/status-badge";
 import { StatTile } from "@/common/components/surface/stat-tile";
+import { useT } from "@/common/hooks/use-locale";
 import { cn } from "@/lib/utils";
 import { MarkerValue } from "@/modules/reports";
 import { formatReviewDate } from "../config/year-review";
@@ -20,8 +21,8 @@ type MarkerInfo = {
 };
 
 const directionStyles = {
-  improved: { label: "Better status", badge: "bg-optimal-soft text-optimal" },
-  worsened: { label: "Worse status", badge: "bg-risk-soft text-risk" },
+  improved: "bg-optimal-soft text-optimal",
+  worsened: "bg-risk-soft text-risk",
 };
 
 function ReadingCell({ marker, reading }: { marker: MarkerInfo; reading: Reading }) {
@@ -56,6 +57,7 @@ function ChangeList({
 }: {
   items: (MarkerInfo & { from: Reading; to: Reading; direction?: "improved" | "worsened" })[];
 }) {
+  const t = useT();
   return (
     <ul className="divide-y rounded-xl border bg-card">
       {items.map((item) => (
@@ -66,17 +68,17 @@ function ChangeList({
           <MarkerName marker={item} />
           <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <ReadingCell marker={item} reading={item.from} />
-            <ArrowRight className="size-4 text-muted-foreground" aria-label="to" />
+            <ArrowRight className="size-4 text-muted-foreground" aria-label={t.yearReview.to} />
             <ReadingCell marker={item} reading={item.to} />
           </span>
           {item.direction && (
             <span
               className={cn(
                 "justify-self-start rounded-md px-1.5 py-0.5 text-xs font-medium whitespace-nowrap",
-                directionStyles[item.direction].badge,
+                directionStyles[item.direction],
               )}
             >
-              {directionStyles[item.direction].label}
+              {t.yearReview.direction[item.direction]}
             </span>
           )}
         </li>
@@ -86,10 +88,13 @@ function ChangeList({
 }
 
 export function YearReviewView({ review }: YearReviewViewProps) {
+  const t = useT();
   const { score, moved, stillAtRisk, measuredOnce } = review;
   const scoreText = (
     <span className="text-xl whitespace-nowrap sm:text-2xl">
-      {score.from !== null && score.to !== null ? `${score.from} → ${score.to}` : "No score"}
+      {score.from !== null && score.to !== null
+        ? `${score.from} → ${score.to}`
+        : t.yearReview.noScore}
     </span>
   );
   return (
@@ -97,41 +102,45 @@ export function YearReviewView({ review }: YearReviewViewProps) {
       <div className="space-y-6">
         <p className="max-w-measure text-lg text-pretty">{review.intro.join(" ")}</p>
         <dl className="grid grid-cols-3 gap-2 sm:max-w-xl">
-          <StatTile label="Score" value={scoreText} className="px-3 py-2" />
-          <StatTile label="Reports" value={review.reportCount} className="px-3 py-2" />
-          <StatTile label="Labs" value={review.labCount} className="px-3 py-2" />
+          <StatTile label={t.yearReview.stats.score} value={scoreText} className="px-3 py-2" />
+          <StatTile
+            label={t.yearReview.stats.reports}
+            value={review.reportCount}
+            className="px-3 py-2"
+          />
+          <StatTile label={t.yearReview.stats.labs} value={review.labCount} className="px-3 py-2" />
         </dl>
       </div>
 
       <Section
         id="review-moved"
-        title="Markers that moved"
-        description="These markers have a different status in the last report than in the first report."
+        title={t.yearReview.moved.title}
+        description={t.yearReview.moved.description}
       >
         {moved.length > 0 ? (
           <ChangeList items={moved} />
         ) : (
-          <p className="text-muted-foreground">No marker moved to a different status.</p>
+          <p className="text-muted-foreground">{t.yearReview.moved.empty}</p>
         )}
       </Section>
 
       <Section
         id="review-risk"
-        title="Markers still at risk"
-        description="These markers have risk status in the first report and in the last report."
+        title={t.yearReview.risk.title}
+        description={t.yearReview.risk.description}
       >
         {stillAtRisk.length > 0 ? (
           <ChangeList items={stillAtRisk} />
         ) : (
-          <p className="text-muted-foreground">No marker kept risk status.</p>
+          <p className="text-muted-foreground">{t.yearReview.risk.empty}</p>
         )}
       </Section>
 
       {measuredOnce.length > 0 && (
         <Section
           id="review-once"
-          title="Markers measured once"
-          description="These markers have one value in this period, so they have no trend."
+          title={t.yearReview.once.title}
+          description={t.yearReview.once.description}
         >
           <ul className="divide-y rounded-xl border bg-card">
             {measuredOnce.map((item) => (

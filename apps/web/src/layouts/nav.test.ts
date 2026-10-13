@@ -24,8 +24,8 @@ test("[ toggles the sidebar and ? shows the shortcuts", () => {
 
 test("a marker page trail runs from Reports through its report", () => {
   expect(
-    pageTrail("/_app/reports/$reportId_/markers/$markerKey").map((step) => step.page.title),
-  ).toEqual(["Reports", "Report", "Marker"]);
+    pageTrail("/_app/reports/$reportId_/markers/$markerKey").map((step) => step.page.name),
+  ).toEqual(["reports", "report", "marker"]);
   expect(pageTrail("/_auth/login")).toEqual([]);
 });
 

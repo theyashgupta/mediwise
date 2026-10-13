@@ -6,6 +6,7 @@ import { EmptyState } from "@/common/components/empty-state";
 import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
 import { PageHeader } from "@/common/components/page-header";
+import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 import { ProfileCard } from "../components/profile-card";
 import { ProfileSheet } from "../components/profile-sheet";
@@ -21,6 +22,7 @@ export function ProfilesContainer() {
   const [removing, setRemoving] = useState<Profile>();
   const saving = editing === "new" ? create : update;
   const atLimit = (profiles.data?.length ?? 0) >= maxProfilesPerUser;
+  const text = useT().profiles.page;
 
   function openSheet(target: Profile | "new") {
     create.reset();
@@ -33,16 +35,15 @@ export function ProfilesContainer() {
       toast.success(message);
       setEditing(undefined);
     };
-    if (editing === "new") create.mutate(input, { onSuccess: done(`We added ${input.name}.`) });
-    else if (editing)
-      update.mutate({ id: editing.id, input }, { onSuccess: done("We saved the profile.") });
+    if (editing === "new") create.mutate(input, { onSuccess: done(text.added(input.name)) });
+    else if (editing) update.mutate({ id: editing.id, input }, { onSuccess: done(text.saved) });
   }
 
   function confirmRemove() {
     if (!removing) return;
     remove.mutate(removing.id, {
       onSuccess: () => {
-        toast.success(`We removed ${removing.name}.`);
+        toast.success(text.removed(removing.name));
         setRemoving(undefined);
       },
     });
@@ -51,20 +52,20 @@ export function ProfilesContainer() {
   return (
     <>
       <PageHeader
-        title="Profiles"
-        description="You and the family members whose reports you manage."
+        title={text.title}
+        description={text.description}
         actions={
           profiles.data && (
             <Button onClick={() => openSheet("new")} disabled={atLimit}>
               <Plus aria-hidden />
-              Add family member
+              {text.add}
             </Button>
           )
         }
       />
       {profiles.isPending && <LoadingState variant="list" />}
       {profiles.isError && (
-        <ErrorState message="We could not load your profiles." onRetry={() => profiles.refetch()} />
+        <ErrorState message={text.loadError} onRetry={() => profiles.refetch()} />
       )}
       {profiles.data && (
         <div className="space-y-6">
@@ -86,16 +87,10 @@ export function ProfilesContainer() {
             ))}
           </ul>
           {profiles.data.length === 1 && (
-            <EmptyState
-              icon={Users}
-              title="Only you so far"
-              body="Add family members to keep their reports and trends separate from yours."
-            />
+            <EmptyState icon={Users} title={text.emptyTitle} body={text.emptyBody} />
           )}
           {atLimit && (
-            <p className="text-sm text-muted-foreground">
-              You are at the limit of {maxProfilesPerUser} profiles.
-            </p>
+            <p className="text-sm text-muted-foreground">{text.limit(maxProfilesPerUser)}</p>
           )}
         </div>
       )}

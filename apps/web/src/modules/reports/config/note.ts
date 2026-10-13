@@ -1,5 +1,4 @@
-export const noteLabel = "Notes for this visit";
-export const noteHelp = "MediWise does not read this note. Your doctor sees it on the export.";
+import { getT } from "@/common/hooks/use-locale";
 
 /** Returns the note to save when the field loses focus, or undefined when it did not change. */
 export function changedNote(draft: string, saved: string | null) {
@@ -19,8 +18,9 @@ export function noteStatus({
   saved: boolean;
   changed: boolean;
 }) {
-  if (saving) return "Saving";
-  if (failed && changed) return "We could not save the note. Click outside the field to try again.";
-  if (saved && !changed) return "Saved";
+  const { note } = getT().report;
+  if (saving) return note.saving;
+  if (failed && changed) return note.saveError;
+  if (saved && !changed) return note.saved;
   return "";
 }

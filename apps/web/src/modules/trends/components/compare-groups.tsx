@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { StatusBadge } from "@/common/components/status-badge";
+import { useT } from "@/common/hooks/use-locale";
 import { cn } from "@/lib/utils";
 import { MarkerValue } from "@/modules/reports";
 import { verdictStyles } from "../config/trends";
@@ -23,7 +24,10 @@ const headCell =
   "sticky top-12 z-10 border-b bg-card px-3 py-2.5 text-left text-xs font-medium text-muted-foreground";
 
 function Side({ value, status, unit, precision }: SideProps) {
-  if (status === null) return <span className="text-sm text-muted-foreground">Not measured</span>;
+  const t = useT();
+  if (status === null) {
+    return <span className="text-sm text-muted-foreground">{t.trends.compare.notMeasured}</span>;
+  }
   return (
     <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
       <MarkerValue
@@ -39,46 +43,47 @@ function Side({ value, status, unit, precision }: SideProps) {
 }
 
 function Verdict({ row, className }: { row: CompareRow; className?: string }) {
-  const verdict = verdictStyles[row.verdictChange];
+  const t = useT();
   return (
     <span
       className={cn(
         "inline-block rounded-md px-1.5 py-0.5 text-xs font-medium whitespace-nowrap",
-        verdict.badge,
+        verdictStyles[row.verdictChange],
         className,
       )}
     >
-      {verdict.label}
+      {t.trends.verdict[row.verdictChange]}
     </span>
   );
 }
 
 export function CompareGroups({ groups, labelA, labelB }: CompareGroupsProps) {
+  const t = useT();
   return (
     <div className="rounded-xl border bg-card">
       <table className="w-full table-fixed border-separate border-spacing-0 text-left">
         <thead>
           <tr>
             <th scope="col" className={cn(headCell, "w-[40%] rounded-tl-xl pl-4 lg:w-[26%]")}>
-              Marker
+              {t.trends.columns.marker}
             </th>
             <th scope="col" className={cn(headCell, "w-[30%] lg:w-[21%]")}>
-              A <span className="font-normal">· {labelA}</span>
+              {t.trends.columns.a} <span className="font-normal">· {labelA}</span>
             </th>
             <th
               scope="col"
               className={cn(headCell, "w-[30%] rounded-tr-xl lg:w-[21%] lg:rounded-none")}
             >
-              B <span className="font-normal">· {labelB}</span>
+              {t.trends.columns.b} <span className="font-normal">· {labelB}</span>
             </th>
             <th scope="col" className={cn(headCell, "hidden w-[20%] lg:table-cell")}>
-              Change
+              {t.trends.columns.change}
             </th>
             <th
               scope="col"
               className={cn(headCell, "hidden w-[12%] rounded-tr-xl pr-4 lg:table-cell")}
             >
-              Status
+              {t.trends.columns.status}
             </th>
           </tr>
         </thead>

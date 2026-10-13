@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -30,6 +31,8 @@ export function DeleteAccountDialog({
   onOpenChange,
 }: DeleteAccountDialogProps) {
   const [typed, setTyped] = useState("");
+  const t = useT();
+  const copy = t.settings.deleteDialog;
 
   return (
     <Dialog
@@ -41,14 +44,11 @@ export function DeleteAccountDialog({
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete your account?</DialogTitle>
-          <DialogDescription>
-            This deletes every profile, report and uploaded file. You cannot undo this. Download
-            your data first if you want a copy.
-          </DialogDescription>
+          <DialogTitle>{copy.title}</DialogTitle>
+          <DialogDescription>{copy.description}</DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
-          <Label htmlFor="confirm-delete">Type {confirmWord} to confirm</Label>
+          <Label htmlFor="confirm-delete">{copy.confirm(confirmWord)}</Label>
           <Input
             id="confirm-delete"
             autoComplete="off"
@@ -63,14 +63,14 @@ export function DeleteAccountDialog({
         )}
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline">{copy.cancel}</Button>
           </DialogClose>
           <Button
             variant="destructive"
             onClick={onConfirm}
             disabled={typed !== confirmWord || deleting}
           >
-            {deleting ? "Deleting" : "Delete account"}
+            {deleting ? copy.deleting : t.settings.data.delete}
           </Button>
         </DialogFooter>
       </DialogContent>

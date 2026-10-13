@@ -1,6 +1,7 @@
 import { reportFilesSchema } from "@mediwise/shared";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { getT } from "@/common/hooks/use-locale";
 import { createReport } from "../api/create-report";
 import { markReportUploaded } from "../api/mark-report-uploaded";
 import { uploadFile } from "../api/upload-file";
@@ -24,7 +25,7 @@ export function useUploadReport() {
         files.map((file, i) => {
           const url = uploadUrls[i];
           const mime = described[i]?.mime;
-          if (!url || !mime) throw new Error("The upload failed. Try again.");
+          if (!url || !mime) throw new Error(getT().reports.upload.errors.failed);
           return uploadFile(url, file, mime, (fraction) =>
             setProgress((current) => current.with(i, fraction)),
           );

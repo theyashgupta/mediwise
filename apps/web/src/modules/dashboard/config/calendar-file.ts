@@ -1,3 +1,4 @@
+import { getT } from "@/common/hooks/use-locale";
 import { formatPlainDate } from "@/common/utils/date";
 
 const dayMs = 86_400_000;
@@ -55,6 +56,7 @@ export function buildRetestCalendarFile({ profile, marker, reportDate }: RetestE
     month: "short",
     year: "numeric",
   });
+  const text = getT().dashboard.calendar;
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
@@ -66,8 +68,8 @@ export function buildRetestCalendarFile({ profile, marker, reportDate }: RetestE
     `DTSTAMP:${now.toISOString().replace(/[-:]|\.\d{3}/g, "")}`,
     `DTSTART;VALUE=DATE:${basicDate(marker.dueOn)}`,
     `DTEND;VALUE=DATE:${basicDate(dayAfter)}`,
-    `SUMMARY:${escapeText(`Retest ${marker.name} for ${profile.name}`)}`,
-    `DESCRIPTION:${escapeText(`MediWise suggests this date from your report of ${reportDay}. Ask your doctor before you book a retest.`)}`,
+    `SUMMARY:${escapeText(text.summary(marker.name, profile.name))}`,
+    `DESCRIPTION:${escapeText(text.description(reportDay))}`,
     "END:VEVENT",
     "END:VCALENDAR",
   ];

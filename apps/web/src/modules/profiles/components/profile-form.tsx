@@ -7,8 +7,9 @@ import {
   relations,
   sexes,
 } from "@mediwise/shared";
-import { useForm, useWatch } from "react-hook-form";
+import { type Resolver, useForm, useWatch } from "react-hook-form";
 import type { z } from "zod";
+import { getT, useT } from "@/common/hooks/use-locale";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,14 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  ancestryLabels,
-  approximateBirthNote,
-  guardianLabel,
-  permissionLabel,
-  relationLabels,
-  sexLabels,
-} from "../config/labels";
+import { messages } from "@/config/messages";
 
 type ProfileFormValues = z.input<typeof profileInputSchema>;
 
@@ -55,6 +49,30 @@ type Option = { value: string; label: string };
 const memberRelations = relations.filter((relation) => relation !== "self");
 
 const isoDate = /^\d{4}-\d{2}-\d{2}$/;
+
+const englishErrors = messages.en.profiles.form.errors;
+const errorKeys = Object.keys(englishErrors) as (keyof typeof englishErrors)[];
+const validate = zodResolver(profileInputSchema);
+
+/**
+ * Validates with the shared profile schema and shows its messages in the active locale.
+ *
+ * @remarks
+ * The shared schema writes English messages, so each one is matched to the English namespace text and swapped for the active locale's. An unmatched message stays as it is.
+ */
+const resolver: Resolver<ProfileFormValues, unknown, ProfileInput> = async (
+  values,
+  context,
+  options,
+) => {
+  const result = await validate(values, context, options);
+  const local = getT().profiles.form.errors;
+  for (const error of Object.values(result.errors)) {
+    const key = errorKeys.find((name) => englishErrors[name] === error?.message);
+    if (error && key) error.message = local[key];
+  }
+  return result;
+};
 
 function CheckboxField({
   checked,
@@ -122,8 +140,10 @@ export function ProfileForm({
   error,
   onSubmit,
 }: ProfileFormProps) {
+  const t = useT();
+  const text = t.profiles.form;
   const form = useForm<ProfileFormValues, unknown, ProfileInput>({
-    resolver: zodResolver(profileInputSchema),
+    resolver,
     defaultValues: {
       name: "",
       dateOfBirth: "",
@@ -143,7 +163,7 @@ export function ProfileForm({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>{text.name}</FormLabel>
                 <FormControl>
                   <Input autoComplete={isSelf ? "name" : "off"} {...field} />
                 </FormControl>
@@ -158,14 +178,14 @@ export function ProfileForm({
             name="relation"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Relation to you</FormLabel>
+                <FormLabel>{text.relation}</FormLabel>
                 <SelectField
                   value={field.value}
                   onChange={field.onChange}
-                  placeholder="Choose a relation"
+                  placeholder={text.relationPlaceholder}
                   options={memberRelations.map((value) => ({
                     value,
-                    label: relationLabels[value],
+                    label: t.profiles.relation[value],
                   }))}
                 />
                 <FormMessage />
@@ -179,13 +199,15 @@ export function ProfileForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                Date of birth
-                {approximateBirth && <Badge variant="secondary">Approximate</Badge>}
+                {text.dateOfBirth}
+                {approximateBirth && <Badge variant="secondary">{t.profiles.approximate}</Badge>}
               </FormLabel>
               <FormControl>
                 <Input type="date" min="1900-01-01" {...field} />
               </FormControl>
-              {approximateBirth && <FormDescription>{approximateBirthNote}</FormDescription>}
+              {approximateBirth && (
+                <FormDescription>{t.profiles.approximateBirthNote}</FormDescription>
+              )}
               <FormMessage />
             </FormItem>
           )}
@@ -195,14 +217,14 @@ export function ProfileForm({
           name="sex"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Sex</FormLabel>
+              <FormLabel>{text.sex}</FormLabel>
               <SelectField
                 value={field.value}
                 onChange={field.onChange}
-                placeholder="Choose a sex"
-                options={sexes.map((value) => ({ value, label: sexLabels[value] }))}
+                placeholder={text.sexPlaceholder}
+                options={sexes.map((value) => ({ value, label: t.profiles.sex[value] }))}
               />
-              <FormDescription>Many lab ranges differ by sex.</FormDescription>
+              <FormDescription>{text.sexHint}</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -212,17 +234,14 @@ export function ProfileForm({
           name="ancestry"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Ancestry</FormLabel>
+              <FormLabel>{text.ancestry}</FormLabel>
               <SelectField
                 value={field.value}
                 onChange={field.onChange}
-                placeholder="Choose an ancestry"
-                options={ancestries.map((value) => ({ value, label: ancestryLabels[value] }))}
+                placeholder={text.ancestryPlaceholder}
+                options={ancestries.map((value) => ({ value, label: t.profiles.ancestry[value] }))}
               />
-              <FormDescription>
-                MediWise calibrates some ranges by ancestry, for example blood sugar and
-                cholesterol.
-              </FormDescription>
+              <FormDescription>{text.ancestryHint}</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -235,7 +254,7 @@ export function ProfileForm({
               <CheckboxField
                 checked={field.value}
                 onChange={field.onChange}
-                label={permissionLabel}
+                label={text.permission}
               />
             )}
           />
@@ -248,7 +267,7 @@ export function ProfileForm({
               <CheckboxField
                 checked={field.value}
                 onChange={field.onChange}
-                label={guardianLabel}
+                label={text.guardian}
               />
             )}
           />
@@ -259,7 +278,7 @@ export function ProfileForm({
           </p>
         )}
         <Button type="submit" disabled={submitting} className="w-full sm:w-auto">
-          {submitting ? "Saving" : submitLabel}
+          {submitting ? t.profiles.saving : submitLabel}
         </Button>
       </form>
     </Form>

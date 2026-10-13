@@ -1,6 +1,7 @@
 import { getRouteApi } from "@tanstack/react-router";
 import { FileClock } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { getIntlTag, useT } from "@/common/hooks/use-locale";
 import { EmptyState } from "@/common/components/empty-state";
 import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
@@ -29,6 +30,7 @@ function usePrintWhenReady(ready: boolean) {
 }
 
 function Content() {
+  const t = useT();
   const { reportId } = route.useParams();
   const report = useReport(reportId);
   const profiles = useProfiles();
@@ -45,28 +47,23 @@ function Content() {
 
   if (report.isPending || profiles.isPending) return <LoadingState variant="page" />;
   if (report.isError) {
-    return <ErrorState message="We could not load this report." onRetry={() => report.refetch()} />;
+    return <ErrorState message={t.reports.export.loadError} onRetry={() => report.refetch()} />;
   }
   if (profiles.isError) {
     return (
-      <ErrorState message="We could not load the profile." onRetry={() => profiles.refetch()} />
+      <ErrorState message={t.reports.export.profileError} onRetry={() => profiles.refetch()} />
     );
   }
   if (comparisonFailed) {
     const failed = reports.isError ? reports : paired;
-    return (
-      <ErrorState
-        message="We could not load the previous report."
-        onRetry={() => failed.refetch()}
-      />
-    );
+    return <ErrorState message={t.reports.export.previousError} onRetry={() => failed.refetch()} />;
   }
   if (report.data.status !== "done") {
     return (
       <EmptyState
         icon={FileClock}
-        title="This report is not ready"
-        body="You can export a report only after MediWise reads it."
+        title={t.reports.export.notReadyTitle}
+        body={t.reports.export.notReadyBody}
       />
     );
   }
@@ -82,7 +79,7 @@ function Content() {
           : undefined
       }
       person={profileDetails(profiles.data.find((profile) => profile.id === report.data.profileId))}
-      generatedOn={new Date().toLocaleDateString("en-IN", dateOptions)}
+      generatedOn={new Date().toLocaleDateString(getIntlTag(), dateOptions)}
       onPrint={() => window.print()}
       actions={<ShareReportContainer reportId={reportId} />}
     />

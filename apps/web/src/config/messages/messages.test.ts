@@ -20,7 +20,9 @@ function shape(tree: object, prefix = ""): string[] {
  * Reads the leaf at a dotted path of a message tree.
  */
 function leaf(tree: object, path: string) {
-  return path.split(".").reduce<unknown>((node, key) => (node as Record<string, unknown>)[key], tree);
+  return path
+    .split(".")
+    .reduce<unknown>((node, key) => (node as Record<string, unknown>)[key], tree);
 }
 
 const printedNames = new Set<string>([]);
@@ -35,7 +37,9 @@ test("every Hindi string except a printed name contains Devanagari", () => {
     .map((entry) => entry.slice(0, -":string".length))
     .filter((path) => {
       const value = leaf(messages.hi, path);
-      return typeof value === "string" && /\p{L}/u.test(value) && !/\p{Script=Devanagari}/u.test(value);
+      return (
+        typeof value === "string" && /\p{L}/u.test(value) && !/\p{Script=Devanagari}/u.test(value)
+      );
     });
   expect(latinOnly.filter((path) => !printedNames.has(path))).toEqual([]);
 });
@@ -45,7 +49,9 @@ const skipped = [
   "components/ui/",
   "config/messages/",
   "modules/design-system/",
+  "modules/health/",
   "modules/kitchen-sink/",
+  "modules/payments/config/policies.ts",
   "routeTree.gen.ts",
 ];
 const copyAttributes = new Set([

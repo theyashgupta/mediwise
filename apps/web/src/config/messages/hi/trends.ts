@@ -1,3 +1,83 @@
 import type { Messages } from "..";
+import { plural } from "../plural";
+import { review } from "../review";
 
-export const trends: Messages["trends"] = {};
+export const trends: Messages["trends"] = {
+  direction: {
+    improving: review("सुधर रहा है"),
+    worsening: review("बिगड़ रहा है"),
+    stable: review("स्थिर"),
+  },
+  verdict: {
+    improved: review("सुधरा"),
+    worsened: review("बिगड़ा"),
+    same: "वैसा ही",
+    new: "नया",
+    gone: "दोबारा जाँच नहीं हुई",
+  },
+  summary: {
+    improved: (n: number) => review(`${n} में सुधार`),
+    worsened: (n: number) => review(`${n} में गिरावट`),
+    same: (n: number) => `${n} में बदलाव नहीं`,
+    new: (n: number) => plural("hi", n, { one: `${n} नया`, other: `${n} नए` }),
+    gone: (n: number) => `${n} की दोबारा जाँच नहीं हुई`,
+  },
+  upload: "रिपोर्ट अपलोड करें",
+  columns: {
+    marker: "मार्कर",
+    trend: "ट्रेंड",
+    latest: "ताज़ा",
+    lastChange: "पिछला बदलाव",
+    change: "बदलाव",
+    status: "स्थिति",
+    date: "तारीख",
+    a: "रिपोर्ट A",
+    b: "रिपोर्ट B",
+  },
+  list: {
+    title: "ट्रेंड",
+    description: "हर मार्कर एक रिपोर्ट से अगली रिपोर्ट तक कैसे बदलता है।",
+    compare: "रिपोर्ट की तुलना करें",
+    loadError: "हम आपके ट्रेंड लोड नहीं कर सके।",
+    noTrendsTitle: "अभी कोई ट्रेंड नहीं",
+    noTrendsBody: "ट्रेंड देखने के लिए दूसरी रिपोर्ट अपलोड करें।",
+    noSharedTitle: "अभी कोई साझा मार्कर नहीं",
+    noSharedBody:
+      "ट्रेंड के लिए एक मार्कर दो रिपोर्ट में होना चाहिए। आपकी किन्हीं दो रिपोर्ट में एक ही मार्कर नहीं है।",
+  },
+  controls: {
+    all: "सभी",
+    filter: "कैटेगरी से छाँटें",
+    sort: "क्रम",
+    sortBy: "इस क्रम में:",
+    sorts: { change: "सबसे बड़ा बदलाव", name: "नाम" },
+  },
+  detail: {
+    back: "सभी ट्रेंड",
+    loadError: "हम यह ट्रेंड लोड नहीं कर सके।",
+    emptyTitle: "इस मार्कर का कोई मान नहीं",
+    emptyBody: "इस प्रोफ़ाइल की किसी रिपोर्ट में यह मार्कर नहीं है।",
+    values: (n: number, name: string) => `${name} के ${n} मान`,
+    sinceBefore: "पिछली रिपोर्ट के बाद से।",
+    band: review("आपकी प्रोफ़ाइल के लिए सबसे अच्छी रेंज"),
+    labNote: (n: number) =>
+      review(`इस चार्ट में ${n} लैब के नतीजे हैं। रेंज हर लैब में अलग हो सकती है।`),
+  },
+  compare: {
+    title: "रिपोर्ट की तुलना करें",
+    description: "देखें कि दो रिपोर्ट के बीच क्या बदला।",
+    loadError: "हम इन रिपोर्ट की तुलना नहीं कर सके।",
+    notFoundTitle: "हमें ये रिपोर्ट नहीं मिलीं",
+    notFoundBody: "एक प्रोफ़ाइल की दो रिपोर्ट चुनें।",
+    latestTwo: "सबसे नई दो रिपोर्ट की तुलना करें",
+    emptyTitle: "अभी तुलना के लिए कुछ नहीं",
+    emptyBody: "दो रिपोर्ट की तुलना के लिए दूसरी रिपोर्ट अपलोड करें।",
+    firstReport: "यह इस प्रोफ़ाइल की पहली रिपोर्ट है। रिपोर्ट A के लिए कोई पुरानी रिपोर्ट चुनें।",
+    changedOnly: "सिर्फ़ बदले हुए",
+    noChange: review("इन रिपोर्ट के बीच किसी मार्कर की स्थिति नहीं बदली।"),
+    notMeasured: "मापा नहीं गया",
+    reportA: "रिपोर्ट A",
+    reportB: "रिपोर्ट B",
+    select: "एक रिपोर्ट चुनें",
+  },
+};

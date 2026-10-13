@@ -1,4 +1,5 @@
 import { getT } from "@/common/hooks/use-locale";
+
 export type Range = { low?: number; high?: number };
 
 export type Band = { from: number; to: number };

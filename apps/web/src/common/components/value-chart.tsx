@@ -61,8 +61,11 @@ function StatusDot({ cx, cy, payload }: DotProps) {
 
 export function ValueChart({ points, band, bandLabel, unit, precision }: ValueChartProps) {
   const t = useT();
-  const config = { value: { label: t.common.chart.value, color: "var(--chart-1)" } } satisfies ChartConfig;
-  const format = (n: number) => n.toLocaleString(getIntlTag(), { maximumFractionDigits: precision });
+  const config = {
+    value: { label: t.common.chart.value, color: "var(--chart-1)" },
+  } satisfies ChartConfig;
+  const format = (n: number) =>
+    n.toLocaleString(getIntlTag(), { maximumFractionDigits: precision });
   const [low, high] = chartDomain(
     points.map((point) => point.value),
     band,

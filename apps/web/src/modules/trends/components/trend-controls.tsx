@@ -1,3 +1,4 @@
+import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 import type { TrendSort, Trends } from "../types";
 
@@ -9,10 +10,7 @@ type TrendControlsProps = {
   onSortChange: (sort: TrendSort) => void;
 };
 
-const sorts: { value: TrendSort; label: string }[] = [
-  { value: "change", label: "Biggest change" },
-  { value: "name", label: "Name" },
-];
+const sorts: TrendSort[] = ["change", "name"];
 
 export function TrendControls({
   categories,
@@ -21,10 +19,11 @@ export function TrendControls({
   onCategoryChange,
   onSortChange,
 }: TrendControlsProps) {
-  const chips = [{ key: null, label: "All" }, ...categories];
+  const t = useT();
+  const chips = [{ key: null, label: t.trends.controls.all }, ...categories];
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-      <div role="group" aria-label="Filter by category" className="flex flex-wrap gap-2">
+      <div role="group" aria-label={t.trends.controls.filter} className="flex flex-wrap gap-2">
         {chips.map(({ key, label }) => (
           <Button
             key={key ?? "all"}
@@ -37,9 +36,13 @@ export function TrendControls({
           </Button>
         ))}
       </div>
-      <div role="group" aria-label="Sort" className="flex shrink-0 items-center gap-2">
-        <span className="text-sm text-muted-foreground">Sort by</span>
-        {sorts.map(({ value, label }) => (
+      <div
+        role="group"
+        aria-label={t.trends.controls.sort}
+        className="flex shrink-0 items-center gap-2"
+      >
+        <span className="text-sm text-muted-foreground">{t.trends.controls.sortBy}</span>
+        {sorts.map((value) => (
           <Button
             key={value}
             size="sm"
@@ -47,7 +50,7 @@ export function TrendControls({
             aria-pressed={sort === value}
             onClick={() => onSortChange(value)}
           >
-            {label}
+            {t.trends.controls.sorts[value]}
           </Button>
         ))}
       </div>

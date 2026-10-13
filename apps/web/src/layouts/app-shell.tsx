@@ -1,5 +1,6 @@
 import { Link, Outlet, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useT } from "@/common/hooks/use-locale";
 import { Logo } from "@/common/components/brand/logo";
 import { cn } from "@/lib/utils";
 import { AppBreadcrumb } from "./app-breadcrumb";
@@ -73,6 +74,7 @@ function useShellShortcuts(onToggleSidebar: () => void, setShowShortcuts: (open:
 export function AppShell() {
   const [collapsed, setCollapsed] = useSidebarCollapsed();
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const t = useT();
   const toggleSidebar = useCallback(() => setCollapsed((value) => !value), [setCollapsed]);
   useShellShortcuts(toggleSidebar, setShowShortcuts);
 
@@ -83,7 +85,7 @@ export function AppShell() {
         href="#content"
         className="sr-only z-50 rounded-md bg-background px-3 py-2 focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:ring-[3px] focus:ring-ring/50"
       >
-        Skip to content
+        {t.shell.skipToContent}
       </a>
 
       <div className="contents print:hidden">

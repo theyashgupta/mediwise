@@ -4,6 +4,7 @@ import { EmptyState } from "@/common/components/empty-state";
 import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
 import { PageHeader } from "@/common/components/page-header";
+import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 import { useActiveProfile } from "@/modules/profiles";
 import { YearReviewView } from "../components/year-review-view";
@@ -18,42 +19,40 @@ export function YearReviewContainer() {
   const profile = profiles.find((p) => p.id === search.profileId) ?? active;
   const review = useYearReview(profile?.id);
   const data = review.data;
+  const t = useT();
 
   return (
     <>
       <PageHeader
-        title="Year in review"
+        title={t.yearReview.title}
         description={
           data && profile
-            ? `${profile.name} · ${formatReviewDate(data.from)} to ${formatReviewDate(data.to)}`
+            ? `${profile.name} · ${t.yearReview.period(formatReviewDate(data.from), formatReviewDate(data.to))}`
             : profile?.name
         }
         actions={
           data && (
             <Button variant="outline" className="print:hidden" onClick={() => window.print()}>
               <Printer aria-hidden />
-              Print
+              {t.yearReview.page.print}
             </Button>
           )
         }
       />
       {(!profile || review.isPending) && <LoadingState variant="list" />}
       {review.isError && (
-        <ErrorState
-          message="We could not load the year in review."
-          onRetry={() => review.refetch()}
-        />
+        <ErrorState message={t.yearReview.page.loadError} onRetry={() => review.refetch()} />
       )}
       {data === null && (
         <EmptyState
           icon={CalendarRange}
-          title="No year in review yet"
-          body="A year in review needs two reports from one year. Upload a second report to see what changed."
+          title={t.yearReview.page.emptyTitle}
+          body={t.yearReview.page.emptyBody}
           action={
             <Button asChild>
               <Link to="/reports/upload">
                 <Upload aria-hidden />
-                Upload a report
+                {t.yearReview.page.upload}
               </Link>
             </Button>
           }

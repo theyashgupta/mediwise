@@ -1,4 +1,5 @@
 import { FileImage } from "lucide-react";
+import { useT } from "@/common/hooks/use-locale";
 import { formatPlainDate } from "@/common/utils/date";
 import { Section } from "@/common/components/section";
 import { StatusBadge } from "@/common/components/status-badge";
@@ -11,33 +12,31 @@ type StudyListProps = {
   images: string[];
 };
 
-const impressionLabels: Partial<Record<Study["kind"], string>> = {
-  ecg: "Printed interpretation",
-  examination: "Doctor's verdict",
-};
-
 const dateOptions = { day: "numeric", month: "short", year: "numeric" } as const;
 
 function StudyCard({ study }: { study: Study }) {
+  const t = useT();
+  const impressionLabels: Partial<Record<Study["kind"], string>> =
+    t.report.studies.impressionLabels;
   const impression = printedLines(study.impression);
   const findings = printedLines(study.findings);
   const familyHistory = printedLines(study.familyHistory);
   const pathology = [
-    { label: "Result", value: study.result },
-    { label: "Specimen", value: study.specimen },
-    { label: "Adequacy", value: study.adequacy },
+    { label: t.report.studies.result, value: study.result },
+    { label: t.report.studies.specimen, value: study.specimen },
+    { label: t.report.studies.adequacy, value: study.adequacy },
   ].filter((row) => row.value);
   const source = [
     study.performedAt && formatPlainDate(study.performedAt, dateOptions),
-    study.signedBy && `Signed by ${study.signedBy}`,
-    study.fileName && `${study.fileName}, page ${study.page}`,
+    study.signedBy && t.report.studies.signedBy(study.signedBy),
+    study.fileName && t.report.studies.page(study.fileName, study.page),
   ].filter(Boolean);
   return (
     <article className="flex h-full flex-col gap-4 rounded-xl border bg-card p-5">
       <div className="space-y-1.5">
         <h3 className="text-sm font-medium text-muted-foreground">
           {studyTitle(study)}
-          <span> · {impressionLabels[study.kind] ?? "Impression"}</span>
+          <span> · {impressionLabels[study.kind] ?? t.report.studies.impression}</span>
         </h3>
         {impression.length > 0 ? (
           impression.map((line) => (
@@ -46,7 +45,7 @@ function StudyCard({ study }: { study: Study }) {
             </p>
           ))
         ) : (
-          <p className="text-muted-foreground">The report prints no impression.</p>
+          <p className="text-muted-foreground">{t.report.studies.noImpression}</p>
         )}
       </div>
       {pathology.length > 0 && (
@@ -60,7 +59,7 @@ function StudyCard({ study }: { study: Study }) {
         </dl>
       )}
       {study.measurements.length > 0 && (
-        <ul className="divide-y rounded-lg border" aria-label="Measurements">
+        <ul className="divide-y rounded-lg border" aria-label={t.report.studies.measurements}>
           {study.measurements.map((measurement) => (
             <li
               key={measurement.key}
@@ -83,7 +82,9 @@ function StudyCard({ study }: { study: Study }) {
       )}
       {findings.length > 0 && (
         <details className="text-sm">
-          <summary className="cursor-pointer text-muted-foreground">Findings as printed</summary>
+          <summary className="cursor-pointer text-muted-foreground">
+            {t.report.studies.findings}
+          </summary>
           <ul className="space-y-1 pt-2">
             {findings.map((line, index) => (
               <li key={index}>{line}</li>
@@ -93,7 +94,9 @@ function StudyCard({ study }: { study: Study }) {
       )}
       {familyHistory.length > 0 && (
         <details className="text-sm">
-          <summary className="cursor-pointer text-muted-foreground">Family history</summary>
+          <summary className="cursor-pointer text-muted-foreground">
+            {t.report.studies.familyHistory}
+          </summary>
           <ul className="space-y-1 pt-2">
             {familyHistory.map((line, index) => (
               <li key={index}>{line}</li>
@@ -104,7 +107,7 @@ function StudyCard({ study }: { study: Study }) {
       {study.filmName && (
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
           <FileImage className="size-4 shrink-0" aria-hidden />
-          We keep the image {study.filmName} with this study.
+          {t.report.studies.image(study.filmName)}
         </p>
       )}
       {source.length > 0 && (
@@ -115,13 +118,10 @@ function StudyCard({ study }: { study: Study }) {
 }
 
 export function StudyList({ studies, images }: StudyListProps) {
+  const t = useT();
   if (studies.length === 0 && images.length === 0) return null;
   return (
-    <Section
-      id="studies"
-      title="Studies"
-      description="MediWise copies these words and values from the printed reports. It does not read scan images or ECG traces."
-    >
+    <Section id="studies" title={t.report.studies.title} description={t.report.studies.description}>
       <ul className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
         {studies.map((study) => (
           <li key={study.id} id={`study-${study.id}`} className="scroll-mt-20">
@@ -135,9 +135,7 @@ export function StudyList({ studies, images }: StudyListProps) {
                 <FileImage className="size-4 shrink-0 text-muted-foreground" aria-hidden />
                 <span className="min-w-0 truncate">{name}</span>
               </h3>
-              <p className="text-sm text-muted-foreground">
-                This is an image without a report. Upload the radiologist&apos;s report to read it.
-              </p>
+              <p className="text-sm text-muted-foreground">{t.report.studies.imageOnly}</p>
             </article>
           </li>
         ))}

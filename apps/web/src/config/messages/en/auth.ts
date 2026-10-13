@@ -1,1 +1,80 @@
-export const auth = {};
+export const auth = {
+  errors: {
+    invalid_credentials: "The email or the password is not correct.",
+    email_not_confirmed: "Confirm your email first. Open the link that we sent to you.",
+    user_already_exists: "An account with this email exists. Sign in.",
+    weak_password: "This password is too weak. Use a longer password.",
+    same_password: "Use a password that is different from your current password.",
+    over_email_send_rate_limit: "We sent too many emails. Wait one hour, then try again.",
+    over_request_rate_limit: "You tried too many times. Wait a few minutes, then try again.",
+    provider_disabled: "Google sign-in is not available yet. Use your email and password.",
+    access_denied: "You stopped the Google sign-in. You can try again or use your email.",
+    oauth_failed: "We could not sign you in with Google. Try again.",
+  },
+  errorFallback: "We could not complete this. Try again.",
+  validation: {
+    email: "Enter a valid email.",
+    passwordRequired: "Enter your password.",
+    passwordMin: "Use at least 8 characters.",
+    passwordMismatch: "The two passwords are not the same.",
+  },
+  fields: {
+    email: "Email",
+    password: "Password",
+    forgotPassword: "Forgot your password?",
+    newPassword: "New password",
+    confirmPassword: "Type the new password again",
+  },
+  buttons: {
+    signIn: "Sign in",
+    signingIn: "Signing in",
+    createAccount: "Create account",
+    creatingAccount: "Creating account",
+    sendLink: "Send reset link",
+    sendingLink: "Sending link",
+    savePassword: "Save password",
+    saving: "Saving",
+  },
+  google: {
+    continue: "Continue with Google",
+    opening: "Opening Google",
+    divider: "or use your email",
+  },
+  goToSignIn: "Go to sign in",
+  passwordChanged: "We changed your password.",
+  login: {
+    title: "Sign in",
+    description: "Sign in to see your reports.",
+    noAccount: "No account?",
+    createAccount: "Create an account",
+  },
+  signup: {
+    title: "Create an account",
+    description: "Upload your reports and see every marker explained.",
+    haveAccount: "Have an account?",
+    signIn: "Sign in",
+    confirmTitle: "Confirm your email",
+    confirmDescription: (email: string) =>
+      `We sent a link to ${email}. Open the link to confirm your account.`,
+  },
+  forgot: {
+    title: "Reset your password",
+    description: "Enter your email. We send you a link to set a new password.",
+    sentTitle: "Open the link in your email",
+    sentDescription: (email: string) =>
+      `If an account uses ${email}, we sent a link to it. Open the link to set a new password.`,
+  },
+  reset: {
+    invalidTitle: "This link does not work",
+    invalidDescription: "The link is not valid or it expired. Ask for a new link.",
+    sendNewLink: "Send a new link",
+    title: "Set a new password",
+    forEmail: (email: string) => `For ${email}.`,
+  },
+  security: {
+    changePassword: "Change password",
+    google: "Google",
+    googleLinked: "Your account is linked to Google. You can sign in with Google.",
+    googleNotLinked: "Your account is not linked to Google.",
+  },
+};

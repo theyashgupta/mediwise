@@ -1,40 +1,41 @@
 import { FileText, House, Settings, TrendingUp, Users } from "lucide-react";
+import type { Messages } from "@/config/messages";
 import type { FileRoutesById } from "@/routeTree.gen";
 
 export const focusRing = "outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 export const navItems = [
-  { to: "/", label: "Home", icon: House, key: "h" },
-  { to: "/reports", label: "Reports", icon: FileText, key: "r" },
-  { to: "/trends", label: "Trends", icon: TrendingUp, key: "t" },
-  { to: "/profiles", label: "Profiles", icon: Users, key: "p" },
-  { to: "/settings", label: "Settings", icon: Settings, key: "s" },
+  { to: "/", name: "home", icon: House, key: "h" },
+  { to: "/reports", name: "reports", icon: FileText, key: "r" },
+  { to: "/trends", name: "trends", icon: TrendingUp, key: "t" },
+  { to: "/profiles", name: "profiles", icon: Users, key: "p" },
+  { to: "/settings", name: "settings", icon: Settings, key: "s" },
 ] as const;
 
 export type NavPath = (typeof navItems)[number]["to"];
 
 type AppRouteId = Extract<keyof FileRoutesById, `/_app/${string}`>;
 
-type Page = { title: string; parent?: AppRouteId; upload?: true };
+type Page = { name: keyof Messages["shell"]["pages"]; parent?: AppRouteId; upload?: true };
 
 export const pages: Record<AppRouteId, Page> = {
-  "/_app/": { title: "Home", upload: true },
-  "/_app/reports/": { title: "Reports", upload: true },
-  "/_app/reports/upload": { title: "Upload a report", parent: "/_app/reports/" },
-  "/_app/reports/$reportId": { title: "Report", parent: "/_app/reports/" },
+  "/_app/": { name: "home", upload: true },
+  "/_app/reports/": { name: "reports", upload: true },
+  "/_app/reports/upload": { name: "upload", parent: "/_app/reports/" },
+  "/_app/reports/$reportId": { name: "report", parent: "/_app/reports/" },
   "/_app/reports/$reportId_/markers/$markerKey": {
-    title: "Marker",
+    name: "marker",
     parent: "/_app/reports/$reportId",
   },
-  "/_app/trends/": { title: "Trends" },
-  "/_app/trends/$markerKey": { title: "Trend", parent: "/_app/trends/" },
-  "/_app/compare": { title: "Compare reports", parent: "/_app/trends/" },
-  "/_app/profiles": { title: "Profiles" },
-  "/_app/year-review": { title: "Year in review", parent: "/_app/profiles" },
-  "/_app/settings": { title: "Settings" },
-  "/_app/credits": { title: "Report credits", parent: "/_app/settings" },
-  "/_app/dev/kitchen-sink": { title: "Kitchen sink" },
-  "/_app/design": { title: "Design" },
+  "/_app/trends/": { name: "trends" },
+  "/_app/trends/$markerKey": { name: "trend", parent: "/_app/trends/" },
+  "/_app/compare": { name: "compare", parent: "/_app/trends/" },
+  "/_app/profiles": { name: "profiles" },
+  "/_app/year-review": { name: "yearReview", parent: "/_app/profiles" },
+  "/_app/settings": { name: "settings" },
+  "/_app/credits": { name: "credits", parent: "/_app/settings" },
+  "/_app/dev/kitchen-sink": { name: "kitchenSink" },
+  "/_app/design": { name: "design" },
 };
 
 /**

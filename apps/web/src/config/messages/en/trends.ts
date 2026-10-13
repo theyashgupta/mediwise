@@ -1,1 +1,77 @@
-export const trends = {};
+import { plural } from "../plural";
+
+export const trends = {
+  direction: { improving: "Improving", worsening: "Worsening", stable: "Stable" },
+  verdict: {
+    improved: "Improved",
+    worsened: "Worsened",
+    same: "Same",
+    new: "New",
+    gone: "Not retested",
+  },
+  summary: {
+    improved: (n: number) => `${n} improved`,
+    worsened: (n: number) => `${n} worsened`,
+    same: (n: number) => `${n} same`,
+    new: (n: number) => `${n} new`,
+    gone: (n: number) => `${n} not retested`,
+  },
+  upload: "Upload a report",
+  columns: {
+    marker: "Marker",
+    trend: "Trend",
+    latest: "Latest",
+    lastChange: "Last change",
+    change: "Change",
+    status: "Status",
+    date: "Date",
+    a: "A",
+    b: "B",
+  },
+  list: {
+    title: "Trends",
+    description: "How each marker changes from one report to the next.",
+    compare: "Compare reports",
+    loadError: "We could not load your trends.",
+    noTrendsTitle: "No trends yet",
+    noTrendsBody: "Upload a second report to see trends.",
+    noSharedTitle: "No shared markers yet",
+    noSharedBody: "A trend needs one marker in two reports. Your reports do not share a marker.",
+  },
+  controls: {
+    all: "All",
+    filter: "Filter by category",
+    sort: "Sort",
+    sortBy: "Sort by",
+    sorts: { change: "Biggest change", name: "Name" },
+  },
+  detail: {
+    back: "All trends",
+    loadError: "We could not load this trend.",
+    emptyTitle: "No values for this marker",
+    emptyBody: "This profile has no report with this marker.",
+    values: (n: number, name: string) =>
+      plural("en", n, { one: `${n} value for ${name}`, other: `${n} values for ${name}` }),
+    sinceBefore: "since the report before.",
+    band: "Optimal range for your profile",
+    labNote: (n: number) => `This chart has results from ${n} labs. Ranges can differ by lab.`,
+  },
+  compare: {
+    title: "Compare reports",
+    description: "See what changed between two reports.",
+    loadError: "We could not compare these reports.",
+    notFoundTitle: "We could not find these reports",
+    notFoundBody: "Select two reports of one profile.",
+    latestTwo: "Compare the latest two reports",
+    emptyTitle: "Nothing to compare yet",
+    emptyBody: "Upload a second report to compare two reports.",
+    firstReport:
+      "This report is the first report for this profile. Select an earlier report as report A.",
+    changedOnly: "Changed only",
+    noChange: "No marker changed status between these reports.",
+    notMeasured: "Not measured",
+    reportA: "Report A",
+    reportB: "Report B",
+    select: "Select a report",
+  },
+};

@@ -8,6 +8,7 @@ import { markers } from "./markers";
 import { me } from "./me";
 import { payments } from "./payments";
 import { profiles } from "./profiles";
+import { report } from "./report";
 import { reports } from "./reports";
 import { settings } from "./settings";
 import { trends } from "./trends";
@@ -23,6 +24,7 @@ export const hi: Messages = {
   me,
   payments,
   profiles,
+  report,
   reports,
   settings,
   trends,

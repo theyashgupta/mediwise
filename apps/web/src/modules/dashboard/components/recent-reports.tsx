@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import { Section } from "@/common/components/section";
+import { useT } from "@/common/hooks/use-locale";
 import { formatPlainDate } from "@/common/utils/date";
 import { groupVisits, ReportStatusBadge } from "@/modules/reports";
 import type { RecentReport } from "../types";
@@ -10,16 +11,17 @@ type RecentReportsProps = {
 };
 
 export function RecentReports({ reports }: RecentReportsProps) {
+  const text = useT().dashboard.recent;
   return (
     <Section
       id="recent-reports"
-      title="Recent visits"
+      title={text.title}
       action={
         <Link
           to="/reports"
           className="rounded-sm text-sm font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
-          All reports
+          {text.all}
         </Link>
       }
     >
@@ -34,14 +36,16 @@ export function RecentReports({ reports }: RecentReportsProps) {
                 className="flex items-center gap-3 py-3 pr-3 pl-4 outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset"
               >
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate font-medium">{report.labName ?? "Report"}</span>
+                  <span className="block truncate font-medium">
+                    {report.labName ?? text.fallbackTitle}
+                  </span>
                   <span className="block truncate text-sm text-muted-foreground">
                     {formatPlainDate(report.date, {
                       day: "numeric",
                       month: "short",
                       year: "numeric",
                     })}
-                    {report.fileNames.length > 0 && ` · ${report.fileNames.length} files`}
+                    {report.fileNames.length > 0 && ` · ${text.files(report.fileNames.length)}`}
                   </span>
                 </span>
                 {report.status === "done" && report.score !== null ? (

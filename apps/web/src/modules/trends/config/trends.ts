@@ -1,24 +1,20 @@
+import { getT } from "@/common/hooks/use-locale";
 import { formatValue } from "@/modules/markers";
 import type { Change, Comparison, CompareRow, Direction, TrendItem, TrendSort } from "../types";
 
-export const directionStyles: Record<Direction, { label: string; text: string; badge: string }> = {
-  improving: { label: "Improving", text: "text-optimal", badge: "bg-optimal-soft text-optimal" },
-  worsening: { label: "Worsening", text: "text-risk", badge: "bg-risk-soft text-risk" },
-  stable: {
-    label: "Stable",
-    text: "text-muted-foreground",
-    badge: "bg-muted text-muted-foreground",
-  },
+export const directionStyles: Record<Direction, { text: string; badge: string }> = {
+  improving: { text: "text-optimal", badge: "bg-optimal-soft text-optimal" },
+  worsening: { text: "text-risk", badge: "bg-risk-soft text-risk" },
+  stable: { text: "text-muted-foreground", badge: "bg-muted text-muted-foreground" },
 };
 
-export const verdictStyles: Record<CompareRow["verdictChange"], { label: string; badge: string }> =
-  {
-    improved: { label: "Improved", badge: "bg-optimal-soft text-optimal" },
-    worsened: { label: "Worsened", badge: "bg-risk-soft text-risk" },
-    same: { label: "Same", badge: "bg-muted text-muted-foreground" },
-    new: { label: "New", badge: "bg-muted text-foreground" },
-    gone: { label: "Not retested", badge: "bg-muted text-muted-foreground" },
-  };
+export const verdictStyles: Record<CompareRow["verdictChange"], string> = {
+  improved: "bg-optimal-soft text-optimal",
+  worsened: "bg-risk-soft text-risk",
+  same: "bg-muted text-muted-foreground",
+  new: "bg-muted text-foreground",
+  gone: "bg-muted text-muted-foreground",
+};
 
 /** Returns the unit to print, or nothing for a ratio. */
 export function displayUnit(unit: string | null) {
@@ -33,7 +29,7 @@ export function displayUnit(unit: string | null) {
  */
 export function formatChange(change: Change, precision: number, unit: string | null) {
   const digits = Math.max(precision, 2);
-  if (!change || Number(change.absolute.toFixed(digits)) === 0) return "No change";
+  if (!change || Number(change.absolute.toFixed(digits)) === 0) return getT().markers.noChange;
   const sign = change.absolute > 0 ? "+" : "−";
   const shown = displayUnit(unit);
   const absolute = `${sign}${formatValue(Math.abs(change.absolute), digits)}${shown ? ` ${shown}` : ""}`;
@@ -73,13 +69,14 @@ export function sparklinePoints(values: number[], width: number, height: number)
 
 /** Writes the one-line count of how markers changed between two reports. */
 export function summaryLine(summary: Comparison["summary"]) {
+  const t = getT().trends.summary;
   const parts = [
-    `${summary.improved} improved`,
-    `${summary.worsened} worsened`,
-    `${summary.same} same`,
-    `${summary.new} new`,
+    t.improved(summary.improved),
+    t.worsened(summary.worsened),
+    t.same(summary.same),
+    t.new(summary.new),
   ];
-  if (summary.gone > 0) parts.push(`${summary.gone} not retested`);
+  if (summary.gone > 0) parts.push(t.gone(summary.gone));
   return parts.join(", ");
 }
 

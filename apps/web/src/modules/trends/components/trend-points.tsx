@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { StatusBadge } from "@/common/components/status-badge";
+import { useT } from "@/common/hooks/use-locale";
 import { MarkerValue, markerLink, studiesLink } from "@/modules/reports";
 import type { TrendDetail } from "../types";
 
@@ -12,22 +13,23 @@ type TrendPointsProps = {
 };
 
 export function TrendPoints({ markerKey, category, points, unit, precision }: TrendPointsProps) {
+  const t = useT();
   return (
     <div className="overflow-x-auto rounded-lg border bg-card">
       <table className="w-full text-left">
         <thead className="border-b text-sm text-muted-foreground">
           <tr>
             <th scope="col" className="p-4 font-medium">
-              Date
+              {t.trends.columns.date}
             </th>
             <th scope="col" className="p-4 font-medium">
-              Lab
+              {t.common.chart.lab}
             </th>
             <th scope="col" className="p-4 text-right font-medium">
-              Value
+              {t.common.chart.value}
             </th>
             <th scope="col" className="p-4 font-medium">
-              Status
+              {t.trends.columns.status}
             </th>
           </tr>
         </thead>
@@ -44,7 +46,9 @@ export function TrendPoints({ markerKey, category, points, unit, precision }: Tr
                   {point.date}
                 </Link>
               </td>
-              <td className="p-4 text-muted-foreground">{point.labName ?? "Not printed"}</td>
+              <td className="p-4 text-muted-foreground">
+                {point.labName ?? t.common.chart.notPrinted}
+              </td>
               <td className="p-4 text-right">
                 <MarkerValue
                   value={point.value}

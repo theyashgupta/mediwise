@@ -1,4 +1,5 @@
 import { FileText } from "lucide-react";
+import { useT } from "@/common/hooks/use-locale";
 import { Section } from "@/common/components/section";
 import { StatusBadge } from "@/common/components/status-badge";
 import { Badge } from "@/components/ui/badge";
@@ -14,12 +15,13 @@ type FindingListProps = {
 };
 
 export function FindingList({ reportId, detail }: FindingListProps) {
+  const t = useT();
   if (detail.findings.length === 0) return null;
   return (
     <Section
       id="findings"
-      title="Findings"
-      description="What changed since your last report, and which results go together."
+      title={t.report.findings.title}
+      description={t.report.findings.description}
     >
       <ul className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
         {detail.findings.slice(0, maxFindingCards).map((finding) => {
@@ -28,7 +30,7 @@ export function FindingList({ reportId, detail }: FindingListProps) {
             <li key={finding.title}>
               <InsightCard title={finding.title} badge={<StatusBadge status={finding.severity} />}>
                 <p className="text-sm">{finding.body}</p>
-                <ul className="mt-auto flex flex-wrap gap-1.5" aria-label="Cited in this finding">
+                <ul className="mt-auto flex flex-wrap gap-1.5" aria-label={t.report.findings.cited}>
                   {chips.studies.map((study) => (
                     <li key={study.id}>
                       <Badge asChild variant="outline" className={chipClass}>

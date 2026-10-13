@@ -1,3 +1,4 @@
+import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,14 +25,14 @@ export function RemoveProfileDialog({
   onConfirm,
   onOpenChange,
 }: RemoveProfileDialogProps) {
+  const t = useT();
+  const text = t.profiles.remove;
   return (
     <Dialog open={name !== undefined} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Remove {name}?</DialogTitle>
-          <DialogDescription>
-            This deletes the profile and every report uploaded for it. You cannot undo this.
-          </DialogDescription>
+          <DialogTitle>{text.title(name ?? "")}</DialogTitle>
+          <DialogDescription>{text.description}</DialogDescription>
         </DialogHeader>
         {error && (
           <p role="alert" className="text-sm text-destructive">
@@ -40,10 +41,10 @@ export function RemoveProfileDialog({
         )}
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline">{text.cancel}</Button>
           </DialogClose>
           <Button variant="destructive" onClick={onConfirm} disabled={removing}>
-            {removing ? "Removing" : "Remove"}
+            {removing ? text.removing : text.confirm}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Logo } from "@/common/components/brand/logo";
 import { Disclaimer } from "@/common/components/disclaimer";
 import { PageHeader } from "@/common/components/page-header";
+import { getIntlTag, useT } from "@/common/hooks/use-locale";
 import { policies, policyLinks, policyUpdated, type PolicyPage as Page } from "../config/policies";
 
 type PolicyPageProps = {
@@ -9,14 +10,21 @@ type PolicyPageProps = {
 };
 
 export function PolicyPage({ page }: PolicyPageProps) {
+  const t = useT();
   const policy = policies[page];
+  const updated = new Intl.DateTimeFormat(getIntlTag(), {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(policyUpdated));
   return (
     <div className="mx-auto flex min-h-svh max-w-measure flex-col gap-10 px-4 py-12 md:px-8">
       <Link to="/" className="w-fit">
         <Logo className="text-lg" />
       </Link>
       <main>
-        <PageHeader title={policy.title} description={`Last change: ${policyUpdated}`} />
+        <PageHeader title={policy.title} description={t.payments.policy.lastChange(updated)} />
         <div className="space-y-10">
           {policy.sections.map((section) => (
             <section key={section.heading} className="space-y-3">
@@ -29,7 +37,7 @@ export function PolicyPage({ page }: PolicyPageProps) {
         </div>
       </main>
       <footer className="mt-auto space-y-4 border-t pt-6">
-        <nav aria-label="Policies">
+        <nav aria-label={t.payments.policy.nav}>
           <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
             {policyLinks.map((link) => (
               <li key={link.page}>
@@ -37,7 +45,7 @@ export function PolicyPage({ page }: PolicyPageProps) {
                   to={link.to}
                   className="text-muted-foreground hover:text-foreground data-[status=active]:font-medium data-[status=active]:text-foreground"
                 >
-                  {link.label}
+                  {t.payments.policyLinks[link.page]}
                 </Link>
               </li>
             ))}

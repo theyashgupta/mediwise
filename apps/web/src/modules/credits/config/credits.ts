@@ -1,6 +1,8 @@
+import { getT } from "@/common/hooks/use-locale";
+
 /** Turns a credit balance into the label shown next to the upload button. */
 export function creditsLeftLabel(credits: number) {
-  return credits === 1 ? "1 report left" : `${Math.max(credits, 0)} reports left`;
+  return getT().credits.left(Math.max(credits, 0));
 }
 
 /**

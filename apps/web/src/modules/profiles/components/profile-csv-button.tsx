@@ -1,4 +1,5 @@
 import { FileSpreadsheet } from "lucide-react";
+import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 
 type ProfileCsvButtonProps = {
@@ -14,12 +15,13 @@ export function ProfileCsvButton({
   error,
   onDownload,
 }: ProfileCsvButtonProps) {
+  const text = useT().profiles.csv;
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <Button variant="outline" size="sm" onClick={onDownload} disabled={downloading}>
           <FileSpreadsheet aria-hidden />
-          {downloading ? "Preparing file" : "Download all values (CSV)"}
+          {downloading ? text.preparing : text.download}
         </Button>
         <span className="text-sm text-muted-foreground">{caption}</span>
       </div>

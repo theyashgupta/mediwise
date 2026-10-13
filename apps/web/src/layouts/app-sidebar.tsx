@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import type { ReactNode } from "react";
+import { useT } from "@/common/hooks/use-locale";
 import { Logo, LogoMark } from "@/common/components/brand/logo";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -23,6 +24,7 @@ type AppSidebarProps = {
 };
 
 export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
+  const t = useT();
   return (
     <aside
       data-collapsed={collapsed}
@@ -31,32 +33,32 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
       <div className="flex h-12 shrink-0 items-center px-4">
         <Link
           to="/"
-          aria-label={collapsed ? "MediWise home" : undefined}
+          aria-label={collapsed ? t.shell.home : undefined}
           className={cn("-m-1 rounded-md p-1", focusRing)}
         >
           {collapsed ? <LogoMark /> : <Logo />}
         </Link>
       </div>
 
-      <nav aria-label="Main" className="mt-4 flex-1 overflow-y-auto px-2">
+      <nav aria-label={t.shell.mainNav} className="mt-4 flex-1 overflow-y-auto px-2">
         <p className="mb-1 h-6 px-3 text-xs leading-6 font-medium text-muted-foreground group-data-[collapsed=true]/sidebar:invisible">
-          Menu
+          {t.shell.menu}
         </p>
         <ul className="space-y-0.5">
-          {navItems.map(({ to, label, icon: Icon }) => (
+          {navItems.map(({ to, name, icon: Icon }) => (
             <li key={to}>
-              <Hint show={collapsed} label={label}>
+              <Hint show={collapsed} label={t.shell.nav[name]}>
                 <Link
                   to={to}
                   activeOptions={{ exact: to === "/" }}
-                  aria-label={collapsed ? label : undefined}
+                  aria-label={collapsed ? t.shell.nav[name] : undefined}
                   className={cn(
                     "flex h-8 items-center gap-2.5 rounded-md px-3 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground data-[status=active]:bg-primary/10 data-[status=active]:font-medium data-[status=active]:text-primary",
                     focusRing,
                   )}
                 >
                   <Icon className="size-4 shrink-0" aria-hidden />
-                  {!collapsed && <span className="truncate">{label}</span>}
+                  {!collapsed && <span className="truncate">{t.shell.nav[name]}</span>}
                 </Link>
               </Hint>
             </li>
@@ -70,14 +72,15 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
           show
           label={
             <>
-              {collapsed ? "Expand" : "Collapse"} the sidebar <kbd className="font-mono">[</kbd>
+              {collapsed ? t.shell.expandSidebar : t.shell.collapseSidebar}{" "}
+              <kbd className="font-mono">[</kbd>
             </>
           }
         >
           <button
             type="button"
             onClick={onToggle}
-            aria-label={collapsed ? "Expand the sidebar" : "Collapse the sidebar"}
+            aria-label={collapsed ? t.shell.expandSidebar : t.shell.collapseSidebar}
             aria-expanded={!collapsed}
             className={cn(
               "flex h-8 items-center gap-2.5 rounded-md px-3 text-sm text-muted-foreground hover:bg-accent hover:text-foreground",
@@ -90,7 +93,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
             ) : (
               <PanelLeftClose className="size-4" aria-hidden />
             )}
-            {!collapsed && "Collapse"}
+            {!collapsed && t.shell.collapse}
           </button>
         </Hint>
       </div>

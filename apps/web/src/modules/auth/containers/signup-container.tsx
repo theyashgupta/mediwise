@@ -1,10 +1,12 @@
 import { Link, useNavigate } from "@tanstack/react-router";
+import { useT } from "@/common/hooks/use-locale";
 import { AuthCard } from "../components/auth-card";
 import { CredentialsForm } from "../components/credentials-form";
 import { GoogleButton } from "../components/google-button";
 import { useGoogleSignIn, useSignUp } from "../hooks/use-auth";
 
 export function SignupContainer() {
+  const t = useT();
   const signUp = useSignUp();
   const google = useGoogleSignIn();
   const navigate = useNavigate();
@@ -12,14 +14,14 @@ export function SignupContainer() {
   if (signUp.isSuccess && !signUp.data.data.session) {
     return (
       <AuthCard
-        title="Confirm your email"
-        description={`We sent a link to ${signUp.variables.email}. Open the link to confirm your account.`}
+        title={t.auth.signup.confirmTitle}
+        description={t.auth.signup.confirmDescription(signUp.variables.email)}
         footer={
           <Link
             to="/login"
             className="font-medium text-foreground underline-offset-4 hover:underline"
           >
-            Go to sign in
+            {t.auth.goToSignIn}
           </Link>
         }
       />
@@ -28,16 +30,16 @@ export function SignupContainer() {
 
   return (
     <AuthCard
-      title="Create an account"
-      description="Upload your reports and see every marker explained."
+      title={t.auth.signup.title}
+      description={t.auth.signup.description}
       footer={
         <p>
-          Have an account?{" "}
+          {t.auth.signup.haveAccount}{" "}
           <Link
             to="/login"
             className="font-medium text-foreground underline-offset-4 hover:underline"
           >
-            Sign in
+            {t.auth.signup.signIn}
           </Link>
         </p>
       }

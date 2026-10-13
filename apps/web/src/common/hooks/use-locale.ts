@@ -69,17 +69,22 @@ export async function syncLocale(session: Session) {
     if (saved !== getLocale()) applyLocale(saved);
     return;
   }
-  if (getLocale() !== defaultLocale) await supabase.auth.updateUser({ data: { locale: getLocale() } });
+  if (getLocale() !== defaultLocale)
+    await supabase.auth.updateUser({ data: { locale: getLocale() } });
 }
 
 /**
  * Returns the active locale and re-renders the caller when it changes.
  */
 export function useLocale() {
-  return useSyncExternalStore((listener) => {
-    listeners.add(listener);
-    return () => listeners.delete(listener);
-  }, getLocale);
+  return useSyncExternalStore(
+    (listener) => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+    getLocale,
+    getLocale,
+  );
 }
 
 /**

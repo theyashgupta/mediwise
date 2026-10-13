@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowDownRight, ArrowRight, ArrowUpRight } from "lucide-react";
 import { ScoreRing } from "@/common/components/score-ring";
 import { StatTile } from "@/common/components/surface/stat-tile";
+import { useT } from "@/common/hooks/use-locale";
 import { formatPlainDate } from "@/common/utils/date";
 import { statusStyles } from "@/common/utils/status";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ function ScoreChange({
   delta: NonNullable<LatestReport["deltaSincePrevious"]>;
   latestDate: string;
 }) {
+  const t = useT();
   const change = scoreChange(delta, latestDate);
   const Arrow = delta.score > 0 ? ArrowUpRight : delta.score < 0 ? ArrowDownRight : ArrowRight;
   return (
@@ -47,12 +49,16 @@ function ScoreChange({
         <Arrow className="size-3.5" aria-hidden />
         {change.value}
       </span>
-      <span className="text-sm text-muted-foreground">since your visit of {change.since}</span>
+      <span className="text-sm text-muted-foreground">
+        {t.dashboard.latest.since(change.since)}
+      </span>
     </p>
   );
 }
 
 export function LatestReportCard({ report }: LatestReportCardProps) {
+  const t = useT();
+  const text = t.dashboard.latest;
   const date = formatPlainDate(report.date, { day: "numeric", month: "short", year: "numeric" });
   const total = statuses.reduce((sum, status) => sum + report.counts[status], 0);
   return (
@@ -67,10 +73,10 @@ export function LatestReportCard({ report }: LatestReportCardProps) {
         <div className="space-y-2">
           <p className="text-sm text-muted-foreground">
             {date}
-            {report.coverage !== null && ` · Measures ${report.coverage}% of core markers`}
+            {report.coverage !== null && ` · ${text.coverage(report.coverage)}`}
           </p>
           <h2 id="latest-report" className="text-2xl font-semibold tracking-tight text-balance">
-            {report.labName ?? "Your latest report"}
+            {report.labName ?? text.fallbackTitle}
           </h2>
           {report.deltaSincePrevious && (
             <ScoreChange delta={report.deltaSincePrevious} latestDate={report.date} />
@@ -90,11 +96,11 @@ export function LatestReportCard({ report }: LatestReportCardProps) {
                 />
               ))}
             </svg>
-            <dl className="grid grid-cols-3 gap-2 sm:max-w-md" aria-label="Markers by status">
+            <dl className="grid grid-cols-3 gap-2 sm:max-w-md" aria-label={text.byStatus}>
               {statuses.map((status) => (
                 <StatTile
                   key={status}
-                  label={statusStyles[status].label}
+                  label={t.common.status[status]}
                   value={report.counts[status]}
                   status={status}
                   className="bg-background px-3 py-2"
@@ -105,7 +111,7 @@ export function LatestReportCard({ report }: LatestReportCardProps) {
         )}
         <Button asChild>
           <Link to="/reports/$reportId" params={{ reportId: report.id }}>
-            Open report
+            {text.open}
             <ArrowRight aria-hidden />
           </Link>
         </Button>

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useId } from "react";
 
 type SettingsSectionProps = {
   title: string;
@@ -7,7 +7,7 @@ type SettingsSectionProps = {
 };
 
 export function SettingsSection({ title, description, children }: SettingsSectionProps) {
-  const id = `settings-${title.toLowerCase().replaceAll(" ", "-")}`;
+  const id = useId();
   return (
     <section
       aria-labelledby={id}

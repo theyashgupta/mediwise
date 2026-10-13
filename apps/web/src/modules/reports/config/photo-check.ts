@@ -1,3 +1,5 @@
+import { getT } from "@/common/hooks/use-locale";
+
 export type PhotoFlags = { small: boolean; dark: boolean; blurred: boolean };
 
 const checkSide = 512;
@@ -34,10 +36,11 @@ export function photoFlags(width: number, height: number, grey: ArrayLike<number
 /** Returns one warning per flag, in a fixed order: small, dark, blurred. */
 export function photoWarnings(flags: PhotoFlags | undefined) {
   if (!flags) return [];
+  const { photo } = getT().reports.upload;
   return [
-    flags.small && "This photo is small. Take it again closer to the page.",
-    flags.dark && "This photo is dark. Take it again in good light.",
-    flags.blurred && "This photo is blurred. Hold the phone still and take it again.",
+    flags.small && photo.small,
+    flags.dark && photo.dark,
+    flags.blurred && photo.blurred,
   ].filter((warning) => warning !== false);
 }
 

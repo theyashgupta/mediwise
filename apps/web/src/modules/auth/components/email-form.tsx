@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -20,6 +21,7 @@ type EmailFormProps = {
 };
 
 export function EmailForm({ submitting, error, onSubmit }: EmailFormProps) {
+  const t = useT();
   const form = useForm<EmailInput>({
     resolver: zodResolver(emailSchema),
     defaultValues: { email: "" },
@@ -33,7 +35,7 @@ export function EmailForm({ submitting, error, onSubmit }: EmailFormProps) {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{t.auth.fields.email}</FormLabel>
               <FormControl>
                 <Input type="email" autoComplete="email" {...field} />
               </FormControl>
@@ -43,7 +45,7 @@ export function EmailForm({ submitting, error, onSubmit }: EmailFormProps) {
         />
         <FormError message={error} />
         <Button type="submit" disabled={submitting} className="w-full">
-          {submitting ? "Sending link" : "Send reset link"}
+          {submitting ? t.auth.buttons.sendingLink : t.auth.buttons.sendLink}
         </Button>
       </form>
     </Form>

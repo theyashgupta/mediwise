@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronsUpDown, Users } from "lucide-react";
+import { useT } from "@/common/hooks/use-locale";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -12,7 +13,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { relationLabels } from "../config/labels";
 import type { Profile } from "../types";
 
 export type ProfileSwitcherPlacement = "sidebar" | "sidebar-collapsed" | "inline";
@@ -39,11 +39,12 @@ function Initial({ name, className }: { name?: string; className?: string }) {
 }
 
 export function ProfileSwitcher({ profiles, active, placement, onSelect }: ProfileSwitcherProps) {
-  const name = active?.name ?? "Loading";
-  const relation = active && relationLabels[active.relation];
+  const t = useT();
+  const name = active?.name ?? t.common.loading;
+  const relation = active && t.profiles.relation[active.relation];
   const trigger = (
     <DropdownMenuTrigger
-      aria-label={placement === "sidebar-collapsed" ? `Profile: ${name}` : undefined}
+      aria-label={placement === "sidebar-collapsed" ? t.profiles.switcher.label(name) : undefined}
       className={cn(
         "flex items-center gap-2 rounded-md text-left outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 data-[state=open]:bg-accent",
         placement === "sidebar" && "h-11 w-full px-2",
@@ -86,7 +87,7 @@ export function ProfileSwitcher({ profiles, active, placement, onSelect }: Profi
         }
       >
         <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-          Viewing reports for
+          {t.profiles.switcher.viewingFor}
         </DropdownMenuLabel>
         <DropdownMenuRadioGroup value={active?.id} onValueChange={onSelect}>
           {profiles.map((profile) => (
@@ -94,7 +95,7 @@ export function ProfileSwitcher({ profiles, active, placement, onSelect }: Profi
               <Initial name={profile.name} className="size-5 text-xs" />
               <span className="min-w-0 flex-1 truncate">{profile.name}</span>
               <span className="text-xs text-muted-foreground">
-                {relationLabels[profile.relation]}
+                {t.profiles.relation[profile.relation]}
               </span>
             </DropdownMenuRadioItem>
           ))}
@@ -103,7 +104,7 @@ export function ProfileSwitcher({ profiles, active, placement, onSelect }: Profi
         <DropdownMenuItem asChild>
           <Link to="/profiles">
             <Users aria-hidden />
-            Manage profiles
+            {t.profiles.switcher.manage}
           </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>

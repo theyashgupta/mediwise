@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
 import { useState } from "react";
+import { getIntlTag, useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 
 type ConsentPromptProps = {
@@ -10,8 +11,6 @@ type ConsentPromptProps = {
   error?: string;
   onConfirm: () => void;
 };
-
-const names = new Intl.ListFormat("en", { type: "conjunction" });
 
 function ConsentLine({
   checked,
@@ -42,6 +41,9 @@ export function ConsentPrompt({
   error,
   onConfirm,
 }: ConsentPromptProps) {
+  const t = useT();
+  const text = t.profiles.consent;
+  const names = new Intl.ListFormat(getIntlTag(), { type: "conjunction" });
   const [permission, setPermission] = useState(false);
   const [guardian, setGuardian] = useState(false);
   const ready =
@@ -54,26 +56,25 @@ export function ConsentPrompt({
           <ShieldCheck className="size-4" aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
-          <h2 className="font-medium">Confirm your family profiles</h2>
+          <h2 className="font-medium">{text.title}</h2>
           <p className="text-sm text-muted-foreground">
-            MediWise records the date of each confirmation. If you do not have permission, remove
-            the profile on the{" "}
+            {text.bodyBefore}{" "}
             <Link to="/profiles" className="underline underline-offset-4">
-              Profiles
+              {text.bodyLink}
             </Link>{" "}
-            page.
+            {text.bodyAfter}
           </p>
         </div>
       </div>
       <div className="space-y-3">
         {permissionNames.length > 0 && (
           <ConsentLine checked={permission} onChange={setPermission}>
-            {`I have the permission of ${names.format(permissionNames)} to add their reports.`}
+            {text.permission(names.format(permissionNames))}
           </ConsentLine>
         )}
         {guardianNames.length > 0 && (
           <ConsentLine checked={guardian} onChange={setGuardian}>
-            {`I am the parent or guardian of ${names.format(guardianNames)}.`}
+            {text.guardian(names.format(guardianNames))}
           </ConsentLine>
         )}
       </div>
@@ -88,7 +89,7 @@ export function ConsentPrompt({
         disabled={!ready || confirming}
         onClick={onConfirm}
       >
-        {confirming ? "Saving" : "Confirm"}
+        {confirming ? t.profiles.saving : text.confirm}
       </Button>
     </section>
   );

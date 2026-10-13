@@ -1,9 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { CalendarRange, Pencil, Trash2 } from "lucide-react";
+import { useT } from "@/common/hooks/use-locale";
 import { ageOn } from "@/common/utils/age";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { approximateBirthNote, relationLabels, rowCountLabel } from "../config/labels";
 import type { Profile } from "../types";
 import { ProfileCsvButton } from "./profile-csv-button";
 
@@ -16,10 +16,6 @@ type ProfileCardProps = {
   onDownload: () => void;
 };
 
-function plural(count: number, word: string) {
-  return `${count} ${word}${count === 1 ? "" : "s"}`;
-}
-
 export function ProfileCard({
   profile,
   onEdit,
@@ -28,10 +24,12 @@ export function ProfileCard({
   downloadError,
   onDownload,
 }: ProfileCardProps) {
+  const t = useT();
+  const text = t.profiles.card;
   const details = [
-    relationLabels[profile.relation],
-    profile.dateOfBirth ? plural(ageOn(profile.dateOfBirth), "year") : "Date of birth missing",
-    profile.reportCount === 0 ? "No reports" : plural(profile.reportCount, "report"),
+    t.profiles.relation[profile.relation],
+    profile.dateOfBirth ? text.years(ageOn(profile.dateOfBirth)) : text.dateOfBirthMissing,
+    profile.reportCount === 0 ? text.noReports : text.reports(profile.reportCount),
   ];
   return (
     <article className="flex h-full flex-col gap-4 rounded-xl border bg-card px-4 py-4">
@@ -47,8 +45,8 @@ export function ProfileCard({
           <p className="text-sm text-muted-foreground">{details.join(" · ")}</p>
           {profile.dateOfBirthApproximate && (
             <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
-              <Badge variant="secondary">Approximate</Badge>
-              {approximateBirthNote}
+              <Badge variant="secondary">{t.profiles.approximate}</Badge>
+              {t.profiles.approximateBirthNote}
             </p>
           )}
         </div>
@@ -58,13 +56,13 @@ export function ProfileCard({
               <Link
                 to="/year-review"
                 search={{ profileId: profile.id }}
-                aria-label={`Year in review for ${profile.name}`}
+                aria-label={text.yearReview(profile.name)}
               >
                 <CalendarRange aria-hidden />
               </Link>
             </Button>
           )}
-          <Button variant="ghost" size="icon" onClick={onEdit} aria-label={`Edit ${profile.name}`}>
+          <Button variant="ghost" size="icon" onClick={onEdit} aria-label={text.edit(profile.name)}>
             <Pencil aria-hidden />
           </Button>
           {!profile.isSelf && (
@@ -72,7 +70,7 @@ export function ProfileCard({
               variant="ghost"
               size="icon"
               onClick={onRemove}
-              aria-label={`Remove ${profile.name}`}
+              aria-label={text.remove(profile.name)}
             >
               <Trash2 aria-hidden />
             </Button>
@@ -80,7 +78,7 @@ export function ProfileCard({
         </div>
       </div>
       <ProfileCsvButton
-        caption={rowCountLabel(profile.valueCount)}
+        caption={t.profiles.rows(profile.valueCount)}
         downloading={downloading}
         error={downloadError}
         onDownload={onDownload}

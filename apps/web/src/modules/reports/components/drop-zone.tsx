@@ -1,20 +1,30 @@
 import { maxFileBytes, maxFiles, maxTotalBytes, reportMimes } from "@mediwise/shared";
 import { FileUp } from "lucide-react";
 import { useState } from "react";
+import { useT } from "@/common/hooks/use-locale";
 import { cn } from "@/lib/utils";
-
-const photoTips = [
-  "Use daylight or a bright room.",
-  "Fit one full page in each photo.",
-  "Hold the phone flat above the page.",
-];
 
 type DropZoneProps = {
   disabled: boolean;
   onFiles: (files: File[]) => void;
 };
 
+const mb = 1024 * 1024;
+
+export function MonoNumbers({ text }: { text: string }) {
+  return text.split(/(\d+(?:\.\d+)?)/).map((part, index) =>
+    index % 2 ? (
+      <span key={index} className="font-mono">
+        {part}
+      </span>
+    ) : (
+      part
+    ),
+  );
+}
+
 export function DropZone({ disabled, onFiles }: DropZoneProps) {
+  const t = useT();
   const [dragging, setDragging] = useState(false);
   return (
     <label
@@ -38,14 +48,14 @@ export function DropZone({ disabled, onFiles }: DropZoneProps) {
         <FileUp className="size-6" aria-hidden />
       </span>
       <span className="space-y-1">
-        <span className="block text-lg font-medium">Drop your report here, or choose files</span>
+        <span className="block text-lg font-medium">{t.reports.upload.drop}</span>
         <span className="block text-sm text-muted-foreground">
-          Up to <span className="font-mono">{maxFiles}</span> PDFs or photos,{" "}
-          <span className="font-mono">{maxFileBytes / 1024 / 1024}</span> MB each and{" "}
-          <span className="font-mono">{maxTotalBytes / 1024 / 1024}</span> MB in total
+          <MonoNumbers
+            text={t.reports.upload.limits(maxFiles, maxFileBytes / mb, maxTotalBytes / mb)}
+          />
         </span>
         <span className="flex flex-wrap justify-center gap-x-4 gap-y-1 pt-2 text-xs text-muted-foreground">
-          {photoTips.map((tip) => (
+          {t.reports.upload.tips.map((tip) => (
             <span key={tip}>{tip}</span>
           ))}
         </span>

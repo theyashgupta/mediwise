@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { CircleAlert, LoaderCircle } from "lucide-react";
+import { useT } from "@/common/hooks/use-locale";
 import { PageHeader } from "@/common/components/page-header";
 import { ProblemError } from "@/common/utils/problem-error";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import { useSharedFiles } from "../hooks/use-shared-files";
 import { useUploadReport } from "../hooks/use-upload-report";
 
 export function UploadReportContainer() {
+  const t = useT();
   const navigate = useNavigate();
   const { profile } = useActiveProfile();
   const me = useMe();
@@ -41,13 +43,10 @@ export function UploadReportContainer() {
 
   return (
     <>
-      <PageHeader
-        title="Upload a report"
-        description="We read every marker and explain it in plain English."
-      />
+      <PageHeader title={t.reports.upload.title} description={t.reports.upload.description} />
       <div className="max-w-2xl space-y-6">
         <div className="flex flex-wrap items-center gap-2 text-sm">
-          <span className="text-muted-foreground">This report is for</span>
+          <span className="text-muted-foreground">{t.reports.upload.reportFor}</span>
           <ProfileSwitcherContainer placement="inline" />
         </div>
         <DropZone
@@ -96,7 +95,7 @@ export function UploadReportContainer() {
             }
           >
             {uploading && <LoaderCircle className="animate-spin" aria-hidden />}
-            {uploading ? "Uploading" : "Read my report"}
+            {uploading ? t.reports.upload.uploading : t.reports.upload.submit}
           </Button>
           {me.data && (
             <Link to="/credits" className="text-sm text-muted-foreground hover:underline">

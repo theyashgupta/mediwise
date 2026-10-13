@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import { Section } from "@/common/components/section";
+import { useT } from "@/common/hooks/use-locale";
 import { StatusBadge } from "@/common/components/status-badge";
 import { statusStyles } from "@/common/utils/status";
 import { cn } from "@/lib/utils";
@@ -17,10 +18,11 @@ const rowLink =
   "outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset";
 
 export function AttentionList({ reportId, markers, flaggedCount }: AttentionListProps) {
+  const text = useT().dashboard.attention;
   return (
     <Section
       id="needs-attention"
-      title="Needs attention"
+      title={text.title}
       action={
         flaggedCount > 0 && (
           <Link
@@ -29,15 +31,13 @@ export function AttentionList({ reportId, markers, flaggedCount }: AttentionList
             search={{ show: "attention" }}
             className="rounded-sm text-sm font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
-            See all {flaggedCount}
+            {text.seeAll(flaggedCount)}
           </Link>
         )
       }
     >
       {markers.length === 0 ? (
-        <p className="rounded-xl border bg-card p-4 text-muted-foreground">
-          All scored markers are in their optimal range.
-        </p>
+        <p className="rounded-xl border bg-card p-4 text-muted-foreground">{text.none}</p>
       ) : (
         <ul className="divide-y overflow-hidden rounded-xl border bg-card">
           {markers.map((marker) => (

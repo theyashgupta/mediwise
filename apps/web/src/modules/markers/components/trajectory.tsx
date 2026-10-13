@@ -1,4 +1,5 @@
 import { ValueChart } from "@/common/components/value-chart";
+import { useT } from "@/common/hooks/use-locale";
 import type { Status } from "@/common/utils/status";
 import { formatDelta } from "../config/marker";
 import type { Bounds } from "../types";
@@ -19,10 +20,11 @@ type TrajectoryProps = {
 };
 
 export function Trajectory({ points, band, unit, precision }: TrajectoryProps) {
+  const t = useT();
   if (points.length < 2) {
     return (
       <p className="rounded-xl border bg-card p-5 text-muted-foreground">
-        This is the first value. The next report shows the direction of change.
+        {t.markers.trajectory.first}
       </p>
     );
   }
@@ -38,13 +40,13 @@ export function Trajectory({ points, band, unit, precision }: TrajectoryProps) {
             {formatDelta(current.value, previous.value, precision)}
             {unit ? ` ${unit}` : ""}
           </span>{" "}
-          since the report of {previous.date}.
+          {t.markers.trajectory.since(previous.date)}
         </p>
       )}
       <ValueChart
         points={points}
         band={band}
-        bandLabel="Optimal range for this report"
+        bandLabel={t.markers.trajectory.band}
         unit={unit}
         precision={precision}
       />

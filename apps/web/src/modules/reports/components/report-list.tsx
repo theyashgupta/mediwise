@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronRight, LoaderCircle } from "lucide-react";
+import { useT } from "@/common/hooks/use-locale";
 import { ScoreRing } from "@/common/components/score-ring";
 import { formatReportDate } from "../config/report";
-import { reportStatusLabels, statusGroupOrder } from "../config/status";
+import { statusGroupOrder } from "../config/status";
 import { groupVisits } from "../config/visits";
 import type { ReportSummary } from "../types";
 import { ReportStatusBadge } from "./report-status-badge";
@@ -12,6 +13,7 @@ type ReportListProps = {
 };
 
 export function ReportList({ reports }: ReportListProps) {
+  const t = useT();
   return (
     <div className="space-y-8">
       {statusGroupOrder.map((status) => {
@@ -20,7 +22,7 @@ export function ReportList({ reports }: ReportListProps) {
         return (
           <section key={status} aria-labelledby={`reports-${status}`} className="space-y-3">
             <h2 id={`reports-${status}`} className="px-1 text-sm font-semibold">
-              {reportStatusLabels[status]}
+              {t.report.status[status]}
             </h2>
             <ul className="divide-y overflow-hidden rounded-xl border bg-card">
               {groupVisits(group).map((visit) => (
@@ -41,17 +43,21 @@ export function ReportList({ reports }: ReportListProps) {
                       ) : (
                         <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
                           {(report.status === "queued" || report.status === "processing") && (
-                            <LoaderCircle className="size-5 animate-spin" aria-label="Reading" />
+                            <LoaderCircle
+                              className="size-5 animate-spin"
+                              aria-label={t.reports.list.reading}
+                            />
                           )}
                         </span>
                       )}
                       <span className="min-w-0 flex-1">
                         <span className="block truncate font-medium">
-                          {report.labName ?? "Report"}
+                          {report.labName ?? t.reports.list.report}
                         </span>
                         <span className="block text-sm text-muted-foreground">
                           {formatReportDate(report.collectedAt, report.createdAt)}
-                          {report.markerCount > 0 && ` · ${report.markerCount} markers`}
+                          {report.markerCount > 0 &&
+                            ` · ${t.report.markerCount(report.markerCount)}`}
                         </span>
                         {report.fileNames.length > 0 && (
                           <span className="block truncate text-sm text-muted-foreground">

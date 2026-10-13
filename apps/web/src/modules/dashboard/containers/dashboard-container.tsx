@@ -3,6 +3,7 @@ import { FileText, Upload } from "lucide-react";
 import { EmptyState } from "@/common/components/empty-state";
 import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
+import { useT } from "@/common/hooks/use-locale";
 import { downloadFile } from "@/common/utils/download";
 import { Button } from "@/components/ui/button";
 import { ConsentPromptContainer, useActiveProfile } from "@/modules/profiles";
@@ -23,17 +24,19 @@ import { useFamily } from "../hooks/use-family";
 import type { RetestDate } from "../types";
 
 function UploadButton() {
+  const t = useT();
   return (
     <Button asChild>
       <Link to="/reports/upload">
         <Upload aria-hidden />
-        Upload a report
+        {t.dashboard.upload}
       </Link>
     </Button>
   );
 }
 
 export function DashboardContainer() {
+  const text = useT().dashboard;
   const { profile, setActiveProfileId } = useActiveProfile();
   const dashboard = useDashboard(profile?.id);
   const family = useFamily();
@@ -65,32 +68,29 @@ export function DashboardContainer() {
         <ConsentPromptContainer />
         {profile && incomplete && (
           <ProfilePrompt
-            title={`Complete ${profile.name}’s profile`}
-            body="Add a date of birth and a sex. MediWise uses them to score each marker against the correct range."
-            action="Complete profile"
+            title={text.incomplete.title(profile.name)}
+            body={text.incomplete.body}
+            action={text.incomplete.action}
             to="/profiles"
           />
         )}
         {profile && !incomplete && profile.dateOfBirthApproximate && !birthPromptDismissed && (
           <ProfilePrompt
-            title={`Check ${profile.name}’s date of birth`}
-            body="We calculated it from the age on a report. Some ranges change with age, so enter the exact date."
-            action="Enter the date"
+            title={text.approximateBirth.title(profile.name)}
+            body={text.approximateBirth.body}
+            action={text.approximateBirth.action}
             to={profile.isSelf ? "/settings" : "/profiles"}
             onAction={dismissBirthPrompt}
           />
         )}
         {(!profile || dashboard.isPending) && <LoadingState variant="page" />}
         {dashboard.isError && (
-          <ErrorState
-            message="We could not load your dashboard."
-            onRetry={() => dashboard.refetch()}
-          />
+          <ErrorState message={text.loadError} onRetry={() => dashboard.refetch()} />
         )}
         {data && data.processingCount > 0 && <ProcessingCard count={data.processingCount} />}
         {lastFailed && (
           <ReportFailed
-            message={lastFailed.error ?? "We could not read your latest report."}
+            message={lastFailed.error ?? text.readFailed}
             retrying={retry.isPending}
             retryError={retry.error?.message}
             onRetry={() => retry.mutate(lastFailed.id, { onSuccess: () => dashboard.refetch() })}
@@ -104,8 +104,8 @@ export function DashboardContainer() {
         {isEmpty && (
           <EmptyState
             icon={FileText}
-            title="Upload your first report"
-            body="Upload a PDF or photos of a report. We read every marker and explain it in plain English. We score each marker against ranges for your age, sex and ancestry."
+            title={text.empty.title}
+            body={text.empty.body}
             action={<UploadButton />}
           />
         )}

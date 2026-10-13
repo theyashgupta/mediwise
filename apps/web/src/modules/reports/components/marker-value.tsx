@@ -1,3 +1,4 @@
+import { getIntlTag, useT } from "@/common/hooks/use-locale";
 import { cn } from "@/lib/utils";
 
 type MarkerValueProps = {
@@ -9,10 +10,11 @@ type MarkerValueProps = {
 };
 
 export function MarkerValue({ value, valueText, unit, precision, className }: MarkerValueProps) {
+  const t = useT();
   const text =
     value === null
-      ? (valueText ?? "No value")
-      : value.toLocaleString("en-IN", { maximumFractionDigits: precision });
+      ? (valueText ?? t.report.markers.noValue)
+      : value.toLocaleString(getIntlTag(), { maximumFractionDigits: precision });
   return (
     <span className={cn("font-medium whitespace-nowrap", value !== null && "font-mono", className)}>
       {text}

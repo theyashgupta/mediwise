@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useT } from "@/common/hooks/use-locale";
 import { cn } from "@/lib/utils";
 import { MarkerValue } from "@/modules/reports";
 import { directionStyles } from "../config/trends";
@@ -14,6 +15,7 @@ const columns =
   "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 sm:grid-cols-[minmax(0,1fr)_6rem_10rem_13rem]";
 
 export function TrendList({ items }: TrendListProps) {
+  const t = useT();
   return (
     <div className="overflow-hidden rounded-xl border bg-card">
       <div
@@ -23,10 +25,10 @@ export function TrendList({ items }: TrendListProps) {
           "hidden border-b px-4 py-2 text-xs font-medium text-muted-foreground sm:grid",
         )}
       >
-        <span>Marker</span>
-        <span>Trend</span>
-        <span className="text-right">Latest</span>
-        <span className="text-right">Last change</span>
+        <span>{t.trends.columns.marker}</span>
+        <span>{t.trends.columns.trend}</span>
+        <span className="text-right">{t.trends.columns.latest}</span>
+        <span className="text-right">{t.trends.columns.lastChange}</span>
       </div>
       <ul className="divide-y">
         {items.map((item) => {
@@ -45,7 +47,7 @@ export function TrendList({ items }: TrendListProps) {
                 <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
                   <span className="font-medium break-words">{item.name}</span>
                   <span className={cn("rounded-md px-1.5 py-0.5 text-xs font-medium", style.badge)}>
-                    {style.label}
+                    {t.trends.direction[item.direction]}
                   </span>
                 </span>
                 <Sparkline

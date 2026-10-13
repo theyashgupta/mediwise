@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, CalendarRange } from "lucide-react";
+import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 import { formatReviewDate } from "../config/year-review";
 import type { YearReview } from "../types";
@@ -10,11 +11,14 @@ type YearReviewCardProps = {
 };
 
 export function YearReviewCard({ review, profileId }: YearReviewCardProps) {
+  const t = useT();
   const { score, moved, stillAtRisk } = review;
   const facts = [
-    score.from !== null && score.to !== null ? `Score ${score.from} → ${score.to}` : undefined,
-    `${moved.length} ${moved.length === 1 ? "marker" : "markers"} moved`,
-    `${stillAtRisk.length} still at risk`,
+    score.from !== null && score.to !== null
+      ? t.yearReview.card.score(score.from, score.to)
+      : undefined,
+    t.yearReview.card.moved(moved.length),
+    t.yearReview.card.stillAtRisk(stillAtRisk.length),
   ].filter(Boolean);
   return (
     <section
@@ -25,16 +29,17 @@ export function YearReviewCard({ review, profileId }: YearReviewCardProps) {
         <CalendarRange className="mt-1 size-5 shrink-0 text-primary" aria-hidden />
         <div className="min-w-0 space-y-1">
           <h2 id="year-review-card" className="text-lg font-semibold tracking-tight">
-            Year in review
+            {t.yearReview.title}
           </h2>
           <p className="text-sm text-muted-foreground">
-            {formatReviewDate(review.from)} to {formatReviewDate(review.to)} · {facts.join(" · ")}
+            {t.yearReview.period(formatReviewDate(review.from), formatReviewDate(review.to))} ·{" "}
+            {facts.join(" · ")}
           </p>
         </div>
       </div>
       <Button asChild variant="outline" className="self-start sm:self-center">
         <Link to="/year-review" search={{ profileId }}>
-          Open the review
+          {t.yearReview.card.open}
           <ArrowRight aria-hidden />
         </Link>
       </Button>

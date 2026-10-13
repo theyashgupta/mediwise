@@ -1,4 +1,5 @@
 import { Copy, LoaderCircle, MessageCircle } from "lucide-react";
+import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -32,15 +33,13 @@ export function ShareDialog({
   onEnd,
   onOpenChange,
 }: ShareDialogProps) {
+  const t = useT();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Share with your doctor</DialogTitle>
-          <DialogDescription>
-            Your doctor can open this link without an account. Anyone with the link can see this
-            report. Send it only to your doctor.
-          </DialogDescription>
+          <DialogTitle>{t.reports.share.button}</DialogTitle>
+          <DialogDescription>{t.reports.share.description}</DialogDescription>
         </DialogHeader>
         {error && (
           <p role="alert" className="text-sm text-destructive">
@@ -50,7 +49,7 @@ export function ShareDialog({
         {!link && !error && (
           <p className="flex items-center gap-2 text-sm text-muted-foreground">
             <LoaderCircle className="size-4 animate-spin" aria-hidden />
-            Making the link
+            {t.reports.share.making}
           </p>
         )}
         {link && (
@@ -59,26 +58,26 @@ export function ShareDialog({
               <Input
                 readOnly
                 value={link.url}
-                aria-label="Link to this report"
+                aria-label={t.reports.share.linkLabel}
                 onFocus={(event) => event.currentTarget.select()}
               />
               <Button variant="outline" onClick={onCopy}>
                 <Copy aria-hidden />
-                {copied ? "Copied" : "Copy"}
+                {copied ? t.reports.share.copied : t.reports.share.copy}
               </Button>
             </div>
-            <p className="text-sm text-muted-foreground">This link ends on {link.endsOn}.</p>
+            <p className="text-sm text-muted-foreground">{t.reports.share.endsOn(link.endsOn)}</p>
           </div>
         )}
         {link && (
           <DialogFooter>
             <Button variant="ghost" onClick={onEnd} disabled={ending}>
-              {ending ? "Ending the link" : "End link"}
+              {ending ? t.reports.share.ending : t.reports.share.end}
             </Button>
             <Button asChild>
               <a href={whatsAppLink(link.url)} target="_blank" rel="noreferrer">
                 <MessageCircle aria-hidden />
-                Send on WhatsApp
+                {t.reports.share.whatsApp}
               </a>
             </Button>
           </DialogFooter>

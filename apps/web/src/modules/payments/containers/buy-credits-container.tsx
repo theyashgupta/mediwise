@@ -1,5 +1,6 @@
 import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
+import { useT } from "@/common/hooks/use-locale";
 import { ProblemError } from "@/common/utils/problem-error";
 import { PackList } from "../components/pack-list";
 import { PurchaseStatus } from "../components/purchase-status";
@@ -10,6 +11,7 @@ type BuyCreditsContainerProps = {
 };
 
 export function BuyCreditsContainer({ returnedOrderId }: BuyCreditsContainerProps) {
+  const t = useT();
   const packs = usePacks();
   const buy = useBuyPack();
   const order = useOrder(buy.data ?? returnedOrderId);
@@ -17,13 +19,11 @@ export function BuyCreditsContainer({ returnedOrderId }: BuyCreditsContainerProp
 
   if (packs.isPending) return <LoadingState variant="card" />;
   if (packs.isError) {
-    return (
-      <ErrorState message="We could not load the credit packs." onRetry={() => packs.refetch()} />
-    );
+    return <ErrorState message={t.payments.buy.loadError} onRetry={() => packs.refetch()} />;
   }
   return (
     <section className="space-y-6">
-      <h2 className="text-xl font-semibold">Buy report credits</h2>
+      <h2 className="text-xl font-semibold">{t.payments.buy.title}</h2>
       <PackList
         packs={packs.data}
         buyingPackId={buy.isPending ? buy.variables : undefined}
@@ -31,9 +31,7 @@ export function BuyCreditsContainer({ returnedOrderId }: BuyCreditsContainerProp
       />
       {buy.isError && (
         <p role="alert" className="text-destructive">
-          {buy.error instanceof ProblemError
-            ? buy.error.message
-            : "The payment window did not open. Try again."}
+          {buy.error instanceof ProblemError ? buy.error.message : t.payments.buy.checkoutError}
         </p>
       )}
       {order.data && <PurchaseStatus status={status} credits={order.data.credits} />}
