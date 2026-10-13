@@ -1,5 +1,5 @@
-export const siteUrl = "https://mediwise-landing.pages.dev";
-export const appUrl = "https://mediwise.pages.dev";
+export const siteUrl = new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").origin;
+export const appUrl = new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:5173").origin;
 
 export const appLinks = {
   signIn: `${appUrl}/login`,

@@ -1,9 +1,28 @@
 import { z } from "zod";
 
+/**
+ * Parses a comma-separated origin list into the exact strings a browser sends in `Origin`.
+ *
+ * @remarks
+ * `new URL().origin` drops a trailing slash or path, which would otherwise never match and block every request.
+ */
+export function parseOrigins(list: string) {
+  return z
+    .array(z.url().transform((url) => new URL(url).origin))
+    .min(1)
+    .parse(
+      list
+        .split(",")
+        .map((origin) => origin.trim())
+        .filter(Boolean),
+    );
+}
+
 const envSchema = z
   .object({
     PORT: z.coerce.number().int().positive().default(3001),
-    WEB_ORIGIN: z.url().default("http://localhost:5173"),
+    CORS_ORIGINS: z.string().optional(),
+    WEB_ORIGIN: z.url().optional(),
     DATABASE_URL: z.url(),
     SUPABASE_URL: z.url(),
     SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
@@ -28,13 +47,17 @@ const envSchema = z
   .refine(
     (e) => !e.PAYMENTS_ENABLED || (e.CASHFREE_APP_ID && e.CASHFREE_SECRET_KEY),
     "PAYMENTS_ENABLED=true needs CASHFREE_APP_ID and CASHFREE_SECRET_KEY.",
-  );
+  )
+  .transform(({ CORS_ORIGINS, WEB_ORIGIN, ...rest }) => ({
+    ...rest,
+    CORS_ORIGINS: parseOrigins(CORS_ORIGINS ?? WEB_ORIGIN ?? "http://localhost:5173"),
+  }));
 
 /**
  * Process environment, validated once at startup.
  *
  * @remarks
- * Empty values are dropped before parsing so a `.env` copied from `.env.example` falls back to defaults.
+ * Empty values are dropped before parsing so a `.env` copied from `.env.example` falls back to defaults. `WEB_ORIGIN` is read only when `CORS_ORIGINS` is unset, for one release.
  */
 export const env = envSchema.parse(
   Object.fromEntries(Object.entries(process.env).filter(([, value]) => value !== "")),

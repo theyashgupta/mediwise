@@ -55,7 +55,7 @@ export const cashfreeProvider: PaymentProvider = {
         customer_phone: placeholderPhone,
       },
       order_meta: {
-        return_url: `${env.WEB_ORIGIN}/credits?order={order_id}`,
+        return_url: `${env.CORS_ORIGINS[0]}/credits?order={order_id}`,
         notify_url: env.PAYMENTS_WEBHOOK_URL,
       },
       order_note: order.label,

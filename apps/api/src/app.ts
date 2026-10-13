@@ -29,7 +29,7 @@ export const app = new Hono()
   .use(requestId())
   .use(requestLogger)
   .use(secureHeaders())
-  .use(cors({ origin: env.WEB_ORIGIN }))
+  .use(cors({ origin: env.CORS_ORIGINS }))
   .use(
     bodyLimit({
       maxSize: 100 * 1024,

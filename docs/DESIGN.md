@@ -253,7 +253,7 @@ Checked on 2026-10-13 at 390, 768, 1024, 1440 and 1920 px: Home, Reports, report
 
 ## Landing page (MEDI-41)
 
-`apps/landing` is the public page at `https://mediwise-landing.pages.dev`. It imports its tokens from `@mediwise/design-tokens` and uses the same fonts and logo as the app. The research behind it is in [landing-research.md](design/landing-research.md).
+`apps/landing` is the public page at `https://mediwise.theyashgupta.me`. It imports its tokens from `@mediwise/design-tokens` and uses the same fonts and logo as the app. The research behind it is in [landing-research.md](design/landing-research.md).
 
 Sections, in order: navigation, hero, marker marquee, how it works, the report story, the comparison card, features, numbers, trust, pricing, FAQ, the last call to action and the footer.
 

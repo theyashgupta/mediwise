@@ -16,8 +16,8 @@ services:
         sync: false
       - key: ANTHROPIC_API_KEY
         sync: false
-      - key: WEB_ORIGIN
-        sync: false
+      - key: CORS_ORIGINS
+        value: "https://app.mediwise.theyashgupta.me,https://mediwise.pages.dev"
       - key: RUN_WORKER
         value: "true"
       - key: CLAUDE_MONTHLY_CAP_CENTS

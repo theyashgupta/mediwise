@@ -29,7 +29,7 @@ jobs:
     needs: check
     runs-on: ubuntu-latest
     env:
-      PRODUCTION_URL: https://mediwise.pages.dev
+      PRODUCTION_URL: https://app.mediwise.theyashgupta.me
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
@@ -46,6 +46,8 @@ jobs:
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_PAYMENTS_ENABLED: ${{ vars.VITE_PAYMENTS_ENABLED || 'false' }}
           VITE_CASHFREE_MODE: ${{ vars.VITE_CASHFREE_MODE || 'sandbox' }}
+          VITE_APP_ORIGIN: https://app.mediwise.theyashgupta.me
+          VITE_LANDING_URL: https://mediwise.theyashgupta.me
       # wrangler-action would run `pnpm add` at the workspace root, which pnpm refuses. It uses this global install instead.
       - run: npm install --global wrangler@4
       - name: Deploy
