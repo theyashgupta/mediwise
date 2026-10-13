@@ -191,6 +191,7 @@ Screenshots: the demo account (made-up profile "Arjun Mehta", the two sample rep
 | - | - | - | - |
 | Dashboard | [after](design/pages/after-dashboard-light.jpg) | [after](design/pages/after-dashboard-dark.jpg) | [after](design/pages/after-dashboard-light-phone.jpg) |
 | Home, Your family (MEDI-51), 1440 and 1920 px, phone at 390 px; with only the self profile: [light](design/pages/after-family-self-light-1440.jpg), [phone](design/pages/after-family-self-light-390.jpg) | [after](design/pages/after-family-light-1440.jpg), [1920](design/pages/after-family-light-1920.jpg) | [after](design/pages/after-family-dark-1440.jpg), [1920](design/pages/after-family-dark-1920.jpg) | [light](design/pages/after-family-light-390.jpg), [dark](design/pages/after-family-dark-390.jpg) |
+| Home, Due for retest (MEDI-54). The demo report has HbA1c and ACR in range, so the two rows are added to the dashboard response in the browser for the capture | [after](design/pages/after-retest-light.jpg) | [after](design/pages/after-retest-dark.jpg) | [light](design/pages/after-retest-light-phone.jpg), [dark](design/pages/after-retest-dark-phone.jpg) |
 | Report with findings and studies (29 Mar 2025) | [after](design/pages/after-report-studies-light.jpg) | | |
 | Report | [after](design/pages/after-report-light.jpg) | [after](design/pages/after-report-dark.jpg) | [after](design/pages/after-report-light-phone.jpg) |
 | Marker | [after](design/pages/after-marker-light.jpg) | [after](design/pages/after-marker-dark.jpg) | [after](design/pages/after-marker-light-phone.jpg) |

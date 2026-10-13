@@ -1,4 +1,4 @@
-import { derived, deviation, markers } from "@mediwise/engine";
+import { derived, deviation, markers, retestDueDate } from "@mediwise/engine";
 import { getOwnedProfile } from "../profiles/index.js";
 import * as repo from "./dashboard.repo.js";
 
@@ -28,6 +28,30 @@ function rankMoveFirst(rows: AssessedMarker[], limit: number) {
 }
 
 /**
+ * Lists the suggested retest date of each marker on a report, soonest first.
+ *
+ * @remarks
+ * Returns dates only. The web marks a date as past, because "today" is the reader's day.
+ */
+function listRetests(rows: AssessedMarker[], collectedAt: string | null) {
+  if (!collectedAt) return [];
+  const byKey = new Map<string, { markerKey: string; name: string; dueOn: string }>();
+  for (const { markerKey, status, rawName } of rows) {
+    const dueOn = markerKey && status ? retestDueDate(markerKey, status, collectedAt) : undefined;
+    if (!markerKey || !dueOn) continue;
+    const seen = byKey.get(markerKey);
+    if (!seen || dueOn < seen.dueOn) {
+      byKey.set(markerKey, {
+        markerKey,
+        name: catalogByKey.get(markerKey)?.name ?? rawName,
+        dueOn,
+      });
+    }
+  }
+  return [...byKey.values()].sort((a, b) => a.dueOn.localeCompare(b.dueOn));
+}
+
+/**
  * Builds the dashboard for one profile: latest done report, what to move first, and recent reports.
  *
  * @remarks
@@ -41,7 +65,7 @@ export async function getDashboard(userId: string, profileId: string) {
     repo.countReportsInProgress(userId, profileId),
   ]);
   const previous = older.find((report) => report.date !== latest?.date);
-  if (!latest) return { latest: null, moveFirst: [], recent, processingCount };
+  if (!latest) return { latest: null, moveFirst: [], retests: [], recent, processingCount };
 
   const rows = await repo.listAssessedMarkers(latest.id);
   const counts = { optimal: 0, watch: 0, risk: 0 };
@@ -65,6 +89,7 @@ export async function getDashboard(userId: string, profileId: string) {
   return {
     latest: { ...latest, counts, deltaSincePrevious },
     moveFirst,
+    retests: listRetests(rows, latest.collectedAt),
     recent,
     processingCount,
   };

@@ -3,6 +3,7 @@ import { FileText, Upload } from "lucide-react";
 import { EmptyState } from "@/common/components/empty-state";
 import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
+import { downloadFile } from "@/common/utils/download";
 import { Button } from "@/components/ui/button";
 import { useActiveProfile } from "@/modules/profiles";
 import { ReportFailed, useRetryReport } from "@/modules/reports";
@@ -13,9 +14,12 @@ import { LatestReportCard } from "../components/latest-report-card";
 import { ProcessingCard } from "../components/processing-card";
 import { ProfilePrompt } from "../components/profile-prompt";
 import { RecentReports } from "../components/recent-reports";
+import { RetestList } from "../components/retest-list";
+import { buildRetestCalendarFile } from "../config/calendar-file";
 import { useDashboard } from "../hooks/use-dashboard";
 import { useDismissedForSession } from "../hooks/use-dismissed-for-session";
 import { useFamily } from "../hooks/use-family";
+import type { RetestDate } from "../types";
 
 function UploadButton() {
   return (
@@ -40,6 +44,18 @@ export function DashboardContainer() {
     "approximateBirthPromptDismissed",
   );
   const incomplete = profile && (!profile.dateOfBirth || !profile.sex);
+
+  const addToCalendar = (marker: RetestDate) => {
+    if (!profile || !data?.latest) return;
+    const file = buildRetestCalendarFile(
+      { profile, marker, reportDate: data.latest.date },
+      new Date(),
+    );
+    downloadFile(
+      new Blob([file], { type: "text/calendar;charset=utf-8" }),
+      `retest-${marker.markerKey}-${marker.dueOn}.ics`,
+    );
+  };
 
   return (
     <>
@@ -79,6 +95,9 @@ export function DashboardContainer() {
           />
         )}
         {data?.latest && <LatestReportCard report={data.latest} />}
+        {data && data.retests.length > 0 && (
+          <RetestList retests={data.retests} today={new Date()} onAddToCalendar={addToCalendar} />
+        )}
         {isEmpty && (
           <EmptyState
             icon={FileText}

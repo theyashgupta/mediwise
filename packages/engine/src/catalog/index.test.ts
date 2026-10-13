@@ -135,6 +135,23 @@ describe("ranges and sources", () => {
     }
   });
 
+  test("every retest interval cites a source listed on its marker, once per status", () => {
+    for (const entry of allEntries) {
+      const ids = entry.sources.map((source) => source.id);
+      const retest = entry.retest ?? [];
+      for (const item of retest) {
+        expect(sources[item.source as keyof typeof sources], entry.key).toBeDefined();
+        expect(ids, entry.key).toContain(item.source);
+      }
+      expect(new Set(retest.map((item) => item.status)).size, entry.key).toBe(retest.length);
+    }
+  });
+
+  test("only HbA1c, eGFR and urine ACR carry a retest interval", () => {
+    const keys = allEntries.filter((entry) => entry.retest).map((entry) => entry.key);
+    expect(keys.sort()).toEqual(["egfr", "hba1c", "urine_acr"]);
+  });
+
   test("no two ranges of a marker apply to the same profile", () => {
     for (const entry of allEntries) {
       entry.ranges.forEach((a, i) =>
