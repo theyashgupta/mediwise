@@ -26,13 +26,25 @@ const store = vi.hoisted(() => {
     calibratedLow: number | null;
     calibratedHigh: number | null;
   };
+  type FamilyRow = {
+    profileId: string;
+    name: string;
+    relation: "self" | "parent" | "child";
+    reportId: string | null;
+    date: string | null;
+    uploadedAt: Date | null;
+    score: number | null;
+    tier: string | null;
+  };
   const reports: Report[] = [];
   const markers = new Map<string, Marker[]>();
+  const family: FamilyRow[] = [];
   const owned = (owner: string, id: string) => owner === "alice" && id === profileId;
   const newestFirst = () => [...reports].sort((a, b) => b.date.localeCompare(a.date));
   return {
     reports,
     markers,
+    family,
     profilesRepo: {
       findProfileById: async (owner: string, id: string) =>
         owned(owner, id) ? { id, isSelf: true } : undefined,
@@ -51,6 +63,12 @@ const store = vi.hoisted(() => {
           ? reports.filter((report) => ["queued", "processing"].includes(report.status)).length
           : 0,
       listAssessedMarkers: async (reportId: string) => markers.get(reportId) ?? [],
+      listFamilyDoneReports: async (owner: string) => (owner === "alice" ? family : []),
+      countRiskMarkers: async (reportIds: string[]) =>
+        reportIds.flatMap((reportId) => {
+          const total = (markers.get(reportId) ?? []).filter((m) => m.status === "risk").length;
+          return total > 0 ? [{ reportId, total }] : [];
+        }),
     },
   };
 });
@@ -105,6 +123,7 @@ async function body() {
 
 beforeEach(() => {
   store.reports.length = 0;
+  store.family.length = 0;
   store.markers.clear();
 });
 
@@ -191,4 +210,70 @@ test("another user's profile answers 404", async () => {
 
 test("a missing profile id answers 400", async () => {
   expect((await app.request("/dashboard")).status).toBe(400);
+});
+
+test("the family lists each profile with its latest done report and its markers at risk", async () => {
+  const self = { profileId: "p-self", name: "Arjun", relation: "self" as const };
+  const parent = { profileId: "p-parent", name: "Meena", relation: "parent" as const };
+  const child = { profileId: "p-child", name: "Kabir", relation: "child" as const };
+  const report = (id: string, date: string, uploadedAt: string, score: number) => ({
+    reportId: id,
+    date,
+    uploadedAt: new Date(uploadedAt),
+    score,
+    tier: "silver",
+  });
+  store.family.push(
+    { ...self, ...report("self-old", "2026-03-12", "2026-03-14T10:00:00Z", 70) },
+    { ...self, ...report("self-new", "2026-09-01", "2026-09-02T10:00:00Z", 74) },
+    { ...parent, reportId: null, date: null, uploadedAt: null, score: null, tier: null },
+    { ...child, ...report("child-old", "2025-02-10", "2025-02-11T10:00:00Z", 81) },
+  );
+  store.markers.set("self-old", [marker("ldl", 30, "risk")]);
+  store.markers.set("self-new", [
+    marker("hba1c", 40, "risk"),
+    marker("tsh", 21, "risk"),
+    marker("ldl", 22, "watch"),
+  ]);
+  store.markers.set("child-old", [marker("glucose", 15, "optimal")]);
+
+  const res = await client.dashboard.family.$get();
+  expect(res.status).toBe(200);
+  expect(await res.json()).toEqual([
+    {
+      id: "p-self",
+      name: "Arjun",
+      relation: "self",
+      latest: { id: "self-new", date: "2026-09-01", score: 74, tier: "silver", riskCount: 2 },
+    },
+    { id: "p-parent", name: "Meena", relation: "parent", latest: null },
+    {
+      id: "p-child",
+      name: "Kabir",
+      relation: "child",
+      latest: { id: "child-old", date: "2025-02-10", score: 81, tier: "silver", riskCount: 0 },
+    },
+  ]);
+});
+
+test("two done reports from the same date pick the one uploaded last", async () => {
+  const self = { profileId: "p-self", name: "Arjun", relation: "self" as const, tier: "gold" };
+  store.family.push(
+    {
+      ...self,
+      reportId: "late",
+      date: "2026-09-01",
+      uploadedAt: new Date("2026-09-03"),
+      score: 72,
+    },
+    {
+      ...self,
+      reportId: "early",
+      date: "2026-09-01",
+      uploadedAt: new Date("2026-09-02"),
+      score: 70,
+    },
+  );
+  const [row] = await (await client.dashboard.family.$get()).json();
+  expect(row?.latest?.id).toBe("late");
 });

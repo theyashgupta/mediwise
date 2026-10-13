@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, isNotNull, ne, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, isNotNull, ne, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import { profiles, reportMarkers, reports } from "../../db/schema.js";
 import { reportFileNames } from "../reports/index.js";
@@ -79,4 +79,39 @@ export async function listAssessedMarkers(reportId: string) {
     })
     .from(reportMarkers)
     .where(and(eq(reportMarkers.reportId, reportId), isNotNull(reportMarkers.status)));
+}
+
+/**
+ * Lists every profile of the owner with each of its done reports, one row per pair.
+ *
+ * @remarks
+ * One join reads both tables once for the whole family. A profile with no done report comes back once, with a null report.
+ */
+export async function listFamilyDoneReports(ownerUserId: string) {
+  return db
+    .select({
+      profileId: profiles.id,
+      name: profiles.name,
+      relation: profiles.relation,
+      reportId: reports.id,
+      date: sql<
+        string | null
+      >`coalesce(${reports.collectedAt}, ${reports.reportedAt}, (${reports.createdAt} at time zone 'UTC')::date)::text`,
+      uploadedAt: reports.createdAt,
+      score: reports.score,
+      tier: reports.tier,
+    })
+    .from(profiles)
+    .leftJoin(reports, and(eq(reports.profileId, profiles.id), eq(reports.status, "done")))
+    .where(eq(profiles.ownerUserId, ownerUserId))
+    .orderBy(desc(profiles.isSelf), asc(profiles.createdAt));
+}
+
+export async function countRiskMarkers(reportIds: string[]) {
+  if (reportIds.length === 0) return [];
+  return db
+    .select({ reportId: reportMarkers.reportId, total: count() })
+    .from(reportMarkers)
+    .where(and(inArray(reportMarkers.reportId, reportIds), eq(reportMarkers.status, "risk")))
+    .groupBy(reportMarkers.reportId);
 }
