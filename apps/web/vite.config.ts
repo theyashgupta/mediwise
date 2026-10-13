@@ -46,7 +46,7 @@ function serviceWorkerPlugin(): Plugin {
     apply: "build",
     writeBundle({ dir = "dist" }, bundle) {
       const names = Object.keys(bundle)
-        .filter((name) => name !== "index.html" && !name.endsWith(".map"))
+        .filter((name) => name !== "index.html" && !name.endsWith(".map") && !name.startsWith("."))
         .sort();
       const html = bundle["index.html"];
       const version = createHash("sha256")

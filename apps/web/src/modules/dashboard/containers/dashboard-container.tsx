@@ -26,7 +26,7 @@ import { isMeasuredRecently } from "../config/report-age";
 import { useDashboard } from "../hooks/use-dashboard";
 import { useDismissedForSession } from "../hooks/use-dismissed-for-session";
 import { useFamily } from "../hooks/use-family";
-import { useInstallOffer } from "../hooks/use-install-offer";
+import { useInstallOffer } from "@/common/hooks/use-install-prompt";
 import type { RetestDate } from "../types";
 
 function UploadButton() {
