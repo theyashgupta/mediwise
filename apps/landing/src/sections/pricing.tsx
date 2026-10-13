@@ -39,7 +39,7 @@ export function Pricing({ locale }: { locale: Locale }) {
                 {pack.credits === 1 ? t.forOneReport : t.perReport(pack.perReport)}
               </p>
               <a
-                href={appLinks.signUp}
+                href={appLinks.signUp(locale)}
                 className={cn("mt-8", best ? buttonStyles.primary : buttonStyles.outline)}
               >
                 {site.readReport}

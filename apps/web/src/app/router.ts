@@ -1,8 +1,11 @@
 import { createRouter } from "@tanstack/react-router";
-import { syncLocale } from "@/common/hooks/use-locale";
+import { adoptLangParam, syncLocale } from "@/common/hooks/use-locale";
 import { queryClient } from "@/config/query-client";
 import { supabase } from "@/lib/supabase";
 import { routeTree } from "@/routeTree.gen";
+
+const landingUrl = new URL(location.href);
+if (adoptLangParam(landingUrl)) history.replaceState(history.state, "", landingUrl);
 
 export const router = createRouter({ routeTree, scrollRestoration: true });
 
