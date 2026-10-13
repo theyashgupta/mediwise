@@ -290,8 +290,8 @@ export async function listEarlierValues(userId: string, reportId: string) {
 }
 
 function toHeader(report: StoredReport) {
-  const { id, labName, collectedAt, createdAt, score, tier } = report;
-  return { id, labName, collectedAt, createdAt, score, tier };
+  const { id, labName, collectedAt, createdAt, score, tier, fileName } = report;
+  return { id, labName, collectedAt, createdAt, score, tier, fileName };
 }
 
 /**
