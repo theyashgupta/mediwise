@@ -3,6 +3,7 @@ import { join, relative } from "node:path";
 import ts from "typescript";
 import { expect, test } from "vitest";
 import { messages } from ".";
+import { review } from "./review";
 
 /**
  * Lists every leaf of a message tree as `path:kind`, where kind is the type and, for a function, its arity.
@@ -49,6 +50,23 @@ test("every Hindi string except a printed name contains Devanagari", () => {
     .filter(([, text]) => /\p{L}/u.test(text) && !/\p{Script=Devanagari}/u.test(text))
     .map(([path]) => path);
   expect(latinOnly.filter((path) => !printedNames.has(path))).toEqual([]);
+});
+
+test("every message function gives text in both languages", () => {
+  for (const tree of [messages.en, messages.hi]) {
+    expect(texts(tree).filter(([, text]) => !text.trim() || text.includes("undefined"))).toEqual(
+      [],
+    );
+  }
+});
+
+test("the pack name is singular for one credit in English and the same word in Hindi", () => {
+  expect([1, 5].map(messages.en.pricing.pack)).toEqual(["1 report", "5 reports"]);
+  expect([1, 5].map(messages.hi.pricing.pack)).toEqual(["1 रिपोर्ट", "5 रिपोर्ट"]);
+});
+
+test("review returns the Hindi string unchanged", () => {
+  expect(review("मेरी रिपोर्ट")).toBe("मेरी रिपोर्ट");
 });
 
 test("Hindi strings keep Latin digits and use no semicolons", () => {
