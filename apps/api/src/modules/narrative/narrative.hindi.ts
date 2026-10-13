@@ -28,21 +28,24 @@ Form rules:
 2. Give each Hindi item the number n of its English item. Each sentence has 20 Hindi words or fewer. End a sentence with "।" and a question with "?".
 3. Do not use a semicolon. Use active voice.
 4. Keep every number exactly as the English writes it, in Latin digits. Do not add or drop a number. Do not use Devanagari digits.
-5. Keep every printed name exactly as the English writes it, in Latin script, for example HbA1c, LDL cholesterol or Vitamin D. Keep units (mg/dL), study names (ECG) and text in quotation marks as written.
+5. Keep every printed name from the list exactly as the English writes it, in Latin script, for example HbA1c, LDL cholesterol, Potassium or Vitamin D. Never write a printed name in Devanagari. Keep units (mg/dL), dates, study names (ECG) and text in quotation marks as written.
+6. Write every other word in Hindi. "High homocysteine" becomes "ज़्यादा Homocysteine". "Kidney markers" becomes "किडनी के मार्कर". "Normal" becomes "सामान्य".
 
 Content rules:
-6. Say what the English says and nothing more. Do not add a cause, a diagnosis, a drug, a dose or a fact. Do not drop a fact.
-7. Keep every hedge. "May be low" becomes "कम हो सकता है", never "कम है". Never make a hedge into a fact.
-8. Use these status names: optimal is "सबसे अच्छा", watch is "ध्यान दें", risk is "जोखिम". A calibrated range is a "कैलिब्रेटेड रेंज".
-9. Do not use the words "निदान" or "बीमारी" unless the English item names a diagnosis or a disease.
+7. Say what the English says and nothing more. Do not add a cause, a diagnosis, a drug, a dose or a fact. Do not drop a fact.
+8. Keep every hedge. "May be low" becomes "कम हो सकता है", never "कम है". Never make a hedge into a fact.
+9. Write a status like this: optimal is "सबसे अच्छी स्थिति में", watch is "ध्यान दें वाली स्थिति में", risk is "जोखिम वाली स्थिति में". A calibrated range is a "कैलिब्रेटेड रेंज".
+10. Do not use the words "निदान" or "बीमारी" unless the English item names a diagnosis or a disease.
 
 Example, as write_hindi input for the items "1. LDL cholesterol is 162 mg/dL, which has risk status." and "2. Vitamin D may be low. Retest it in 8 to 12 weeks.":
-{"items":[{"n":1,"text":"LDL cholesterol 162 mg/dL है, जो जोखिम स्थिति में है।"},{"n":2,"text":"Vitamin D कम हो सकता है। 8 से 12 हफ़्ते में इसका दोबारा टेस्ट करें।"}]}`;
+{"items":[{"n":1,"text":"LDL cholesterol 162 mg/dL है, जो जोखिम वाली स्थिति में है।"},{"n":2,"text":"Vitamin D कम हो सकता है। 8 से 12 हफ़्ते में इसका दोबारा टेस्ट करें।"}]}`;
 
+const maxFixRounds = 2;
 const diagnosisEn = /\bdiagnos|\bdisease\b/i;
 const diagnosisHi = /निदान|बीमारी/;
 
 export type HindiProblem = { message: string; index?: number };
+export type HindiUsage = StepUsage & { rejections?: string[] };
 
 /**
  * Lists every reason the Hindi items break the Hindi copy rules or do not match the English items one for one.
@@ -79,13 +82,13 @@ function numbered(texts: string[], numbers: number[]) {
  * Puts the English report text into Hindi and returns each English string with its Hindi text once every item passes.
  *
  * @remarks
- * A rejected call gets one more call with the failed items alone. A second rejection returns null, and the report
- * stays in English, so a reader never sees a mix of checked and unchecked Hindi.
+ * Rejected items go back alone, for up to two fix calls. A rejection after that returns null, and the report stays
+ * in English, so a reader never sees a mix of checked and unchecked Hindi.
  */
 export async function writeHindi(
   english: string[],
   printedNames: string[],
-  usage: StepUsage,
+  usage: HindiUsage,
 ): Promise<Map<string, string> | null> {
   if (english.length === 0) return new Map();
   const names: Anthropic.TextBlockParam = {
@@ -98,25 +101,32 @@ export async function writeHindi(
     return parsed.success ? parsed.data.items : [];
   };
 
-  const all = english.map((_, i) => i + 1);
-  const first = await call(`English items:\n${numbered(english, all)}`);
-  const problems = validateHindi(english, first, printedNames);
-  if (problems.length === 0) return new Map(first.map(({ n, text }) => [english[n - 1]!, text]));
-  if (problems.some(({ index }) => index === undefined)) return null;
+  /** Keeps the rule part of each message, before any quoted report text, so usage never stores health values. */
+  const reject = (found: HindiProblem[]) => {
+    usage.rejections = [
+      ...(usage.rejections ?? []),
+      ...found.map(({ message }) => message.split(":")[0]!),
+    ];
+  };
 
-  const failed = [...new Set(problems.map(({ index }) => index!))];
-  const reasons = failed.map((index) => {
-    const found = first.find(({ n }) => n === index + 1);
-    const why = problems.filter((problem) => problem.index === index).map(({ message }) => message);
-    return `${index + 1}. English: ${english[index]}\n   Your Hindi: ${found?.text ?? "none"}\n   ${why.join(" ")}`;
-  });
-  const fixes = await call(
-    `We rejected these items. Write a new Hindi text for each one that passes every rule.\n${reasons.join("\n")}\nCall write_hindi with exactly these numbers: ${failed.map((index) => index + 1).join(", ")}.`,
-  );
-  const merged = [
-    ...first.filter(({ n }) => !failed.includes(n - 1)),
-    ...fixes.filter(({ n }) => failed.includes(n - 1)),
-  ];
-  if (validateHindi(english, merged, printedNames).length > 0) return null;
-  return new Map(merged.map(({ n, text }) => [english[n - 1]!, text]));
+  let items = await call(`English items:\n${numbered(english, english.map((_, i) => i + 1))}`);
+  for (let round = 0; ; round++) {
+    const problems = validateHindi(english, items, printedNames);
+    reject(problems);
+    if (problems.length === 0) return new Map(items.map(({ n, text }) => [english[n - 1]!, text]));
+    if (round === maxFixRounds || problems.some(({ index }) => index === undefined)) return null;
+    const failed = [...new Set(problems.map(({ index }) => index!))];
+    const reasons = failed.map((index) => {
+      const found = items.find(({ n }) => n === index + 1);
+      const why = problems.filter((problem) => problem.index === index).map(({ message }) => message);
+      return `${index + 1}. English: ${english[index]}\n   Your Hindi: ${found?.text ?? "none"}\n   ${why.join(" ")}`;
+    });
+    const fixes = await call(
+      `We rejected these items. Write a new Hindi text for each one that passes every rule.\n${reasons.join("\n")}\nCall write_hindi with exactly these numbers: ${failed.map((index) => index + 1).join(", ")}.`,
+    );
+    items = [
+      ...items.filter(({ n }) => !failed.includes(n - 1)),
+      ...fixes.filter(({ n }) => failed.includes(n - 1)),
+    ];
+  }
 }

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { stepUsage } from "../extraction/index.js";
-import { validateHindi, writeHindi } from "./narrative.hindi.js";
+import { type HindiUsage, validateHindi, writeHindi } from "./narrative.hindi.js";
 
 const edge = vi.hoisted(() => ({ create: vi.fn() }));
 vi.mock("../../lib/anthropic.js", () => ({ anthropic: { messages: { create: edge.create } } }));
@@ -84,10 +84,14 @@ describe("writeHindi", () => {
     expect(retry.messages[0]!.content[1]!.text).toContain("exactly these numbers: 1.");
   });
 
-  test("a second rejection returns null, so the report stays in English", async () => {
+  test("a third rejection returns null and records each rule, so the report stays in English", async () => {
     edge.create
       .mockResolvedValueOnce(toolUse([{ n: 1, text: long }, hindi[1]!]))
+      .mockResolvedValueOnce(toolUse([{ n: 1, text: long }]))
       .mockResolvedValueOnce(toolUse([{ n: 1, text: long }]));
-    expect(await writeHindi(english, names, stepUsage("claude-haiku-5-5"))).toBeNull();
+    const usage: HindiUsage = stepUsage("claude-haiku-5-5");
+    expect(await writeHindi(english, names, usage)).toBeNull();
+    expect(edge.create).toHaveBeenCalledTimes(3);
+    expect(usage.rejections).toEqual(Array(3).fill("It has a sentence of 21 Hindi words"));
   });
 });

@@ -60,7 +60,7 @@ export function devanagariWordCount(sentence: string): number {
   return sentence.split(/\s+/).filter((word) => /\p{Script=Devanagari}/u.test(word)).length;
 }
 
-const hedgeEn = /\b(may|might|can|could|often|usually|likely|possible|suggests?)\b/i;
+const hedgeEn = /\b(may|might|can|could|often|usually|likely|possible)\b/i;
 const hedgeHi = /सक(?:त|े|ी|ा)|संभव|शायद|अक्सर|आम तौर|आमतौर|ज़्यादातर|ज्यादातर|कभी-कभी|संकेत|लगभग/;
 
 /**
