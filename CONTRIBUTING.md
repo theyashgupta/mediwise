@@ -52,6 +52,16 @@ pnpm check
 
 CI runs the same command on every push and every pull request. Run `pnpm format` before you commit. On a machine with 8 GB of RAM, do not run `pnpm check` and `pnpm dev` at the same time.
 
+CI also runs the end-to-end suite after `pnpm check`: sign up, add a profile, upload a sample, open the report, the doctor export and the CSV, and sign out. It runs against a local Supabase and never calls Claude. Run it on your machine before you change a page in the main flow:
+
+```sh
+supabase start --workdir apps/e2e
+pnpm e2e
+supabase stop --workdir apps/e2e
+```
+
+You need Docker and the Supabase CLI. Tests find elements by `data-testid` only. [docs/testing.md](docs/testing.md) has the details.
+
 If you change extraction or mapping, also run `pnpm eval:extraction`. It reads the two sample reports with Claude and prints every difference from their golden files. It costs about 1 US cent and stops before 1 USD.
 
 ## Commit messages

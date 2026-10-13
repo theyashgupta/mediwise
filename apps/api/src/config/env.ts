@@ -35,6 +35,7 @@ const envSchema = z
     ANTHROPIC_NARRATIVE_MODEL: z.string().min(1).default("claude-haiku-5-5"),
     ANTHROPIC_FINDINGS_MODEL: z.string().min(1).default("claude-haiku-5-5"),
     RUN_WORKER: z.stringbool().default(false),
+    CLAUDE_STUB: z.stringbool().default(false),
     CLAUDE_MONTHLY_CAP_CENTS: z.coerce.number().int().nonnegative().default(2000),
     CLAUDE_HARD_STOP: z.stringbool().default(false),
     ADMIN_USER_ID: z.string().min(1).optional(),
@@ -47,6 +48,10 @@ const envSchema = z
   .refine(
     (e) => !e.PAYMENTS_ENABLED || (e.CASHFREE_APP_ID && e.CASHFREE_SECRET_KEY),
     "PAYMENTS_ENABLED=true needs CASHFREE_APP_ID and CASHFREE_SECRET_KEY.",
+  )
+  .refine(
+    (e) => !(e.CLAUDE_STUB && e.NODE_ENV === "production"),
+    "CLAUDE_STUB=true is for the e2e suite only, never in production.",
   )
   .transform(({ CORS_ORIGINS, WEB_ORIGIN, ...rest }) => ({
     ...rest,

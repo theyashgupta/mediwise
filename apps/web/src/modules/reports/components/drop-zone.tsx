@@ -66,6 +66,7 @@ export function DropZone({ disabled, onFiles }: DropZoneProps) {
         accept={[...reportMimes, ".heic"].join(",")}
         disabled={disabled}
         className="sr-only"
+        data-testid="upload-input"
         onChange={(event) => {
           onFiles([...(event.target.files ?? [])]);
           event.target.value = "";

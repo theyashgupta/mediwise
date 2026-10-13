@@ -40,7 +40,7 @@ export function CredentialsForm({ mode, submitting, error, onSubmit }: Credentia
             <FormItem>
               <FormLabel>{t.auth.fields.email}</FormLabel>
               <FormControl>
-                <Input type="email" autoComplete="email" {...field} />
+                <Input type="email" autoComplete="email" data-testid="auth-email" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -66,6 +66,7 @@ export function CredentialsForm({ mode, submitting, error, onSubmit }: Credentia
                 <Input
                   type="password"
                   autoComplete={signIn ? "current-password" : "new-password"}
+                  data-testid="auth-password"
                   {...field}
                 />
               </FormControl>
@@ -74,7 +75,7 @@ export function CredentialsForm({ mode, submitting, error, onSubmit }: Credentia
           )}
         />
         <FormError message={error} />
-        <Button type="submit" disabled={submitting} className="w-full">
+        <Button type="submit" disabled={submitting} className="w-full" data-testid="auth-submit">
           {signIn
             ? submitting
               ? t.auth.buttons.signingIn

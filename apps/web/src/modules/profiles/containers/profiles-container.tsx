@@ -56,7 +56,7 @@ export function ProfilesContainer() {
         description={text.description}
         actions={
           profiles.data && (
-            <Button onClick={() => openSheet("new")} disabled={atLimit}>
+            <Button onClick={() => openSheet("new")} disabled={atLimit} data-testid="profile-add">
               <Plus aria-hidden />
               {text.add}
             </Button>

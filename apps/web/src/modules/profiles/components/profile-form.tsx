@@ -78,10 +78,12 @@ function CheckboxField({
   checked,
   onChange,
   label,
+  testId,
 }: {
   checked?: boolean;
   onChange: (checked: boolean) => void;
   label: string;
+  testId: string;
 }) {
   return (
     <FormItem className="flex items-start gap-3">
@@ -89,6 +91,7 @@ function CheckboxField({
         <input
           type="checkbox"
           className="mt-0.5 size-4 shrink-0 accent-primary"
+          data-testid={testId}
           checked={checked ?? false}
           onChange={(event) => onChange(event.target.checked)}
         />
@@ -106,22 +109,28 @@ function SelectField({
   onChange,
   placeholder,
   options,
+  testId,
 }: {
   value?: string;
   onChange: (value: string) => void;
   placeholder: string;
   options: Option[];
+  testId: string;
 }) {
   return (
     <Select value={value ?? ""} onValueChange={onChange}>
       <FormControl>
-        <SelectTrigger className="w-full">
+        <SelectTrigger className="w-full" data-testid={testId}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
       </FormControl>
       <SelectContent>
         {options.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
+          <SelectItem
+            key={option.value}
+            value={option.value}
+            data-testid={`${testId}-${option.value}`}
+          >
             {option.label}
           </SelectItem>
         ))}
@@ -165,7 +174,11 @@ export function ProfileForm({
               <FormItem>
                 <FormLabel>{text.name}</FormLabel>
                 <FormControl>
-                  <Input autoComplete={isSelf ? "name" : "off"} {...field} />
+                  <Input
+                    autoComplete={isSelf ? "name" : "off"}
+                    data-testid="profile-name"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -183,6 +196,7 @@ export function ProfileForm({
                   value={field.value}
                   onChange={field.onChange}
                   placeholder={text.relationPlaceholder}
+                  testId="profile-relation"
                   options={memberRelations.map((value) => ({
                     value,
                     label: t.profiles.relation[value],
@@ -203,7 +217,7 @@ export function ProfileForm({
                 {approximateBirth && <Badge variant="secondary">{t.profiles.approximate}</Badge>}
               </FormLabel>
               <FormControl>
-                <Input type="date" min="1900-01-01" {...field} />
+                <Input type="date" min="1900-01-01" data-testid="profile-dob" {...field} />
               </FormControl>
               {approximateBirth && (
                 <FormDescription>{t.profiles.approximateBirthNote}</FormDescription>
@@ -222,6 +236,7 @@ export function ProfileForm({
                 value={field.value}
                 onChange={field.onChange}
                 placeholder={text.sexPlaceholder}
+                testId="profile-sex"
                 options={sexes.map((value) => ({ value, label: t.profiles.sex[value] }))}
               />
               <FormDescription>{text.sexHint}</FormDescription>
@@ -239,6 +254,7 @@ export function ProfileForm({
                 value={field.value}
                 onChange={field.onChange}
                 placeholder={text.ancestryPlaceholder}
+                testId="profile-ancestry"
                 options={ancestries.map((value) => ({ value, label: t.profiles.ancestry[value] }))}
               />
               <FormDescription>{text.ancestryHint}</FormDescription>
@@ -255,6 +271,7 @@ export function ProfileForm({
                 checked={field.value}
                 onChange={field.onChange}
                 label={text.permission}
+                testId="profile-permission"
               />
             )}
           />
@@ -268,6 +285,7 @@ export function ProfileForm({
                 checked={field.value}
                 onChange={field.onChange}
                 label={text.guardian}
+                testId="profile-guardian"
               />
             )}
           />
@@ -277,7 +295,12 @@ export function ProfileForm({
             {error}
           </p>
         )}
-        <Button type="submit" disabled={submitting} className="w-full sm:w-auto">
+        <Button
+          type="submit"
+          disabled={submitting}
+          className="w-full sm:w-auto"
+          data-testid="profile-submit"
+        >
           {submitting ? t.profiles.saving : submitLabel}
         </Button>
       </form>

@@ -45,6 +45,7 @@ export function ProfileSwitcher({ profiles, active, placement, onSelect }: Profi
   const trigger = (
     <DropdownMenuTrigger
       aria-label={placement === "sidebar-collapsed" ? t.profiles.switcher.label(name) : undefined}
+      data-testid={`profile-switcher-${placement}`}
       className={cn(
         "flex items-center gap-2 rounded-md text-left outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 data-[state=open]:bg-accent",
         placement === "sidebar" && "h-11 w-full px-2",
@@ -91,7 +92,7 @@ export function ProfileSwitcher({ profiles, active, placement, onSelect }: Profi
         </DropdownMenuLabel>
         <DropdownMenuRadioGroup value={active?.id} onValueChange={onSelect}>
           {profiles.map((profile) => (
-            <DropdownMenuRadioItem key={profile.id} value={profile.id}>
+            <DropdownMenuRadioItem key={profile.id} value={profile.id} data-testid="profile-option">
               <Initial name={profile.name} className="size-5 text-xs" />
               <span className="min-w-0 flex-1 truncate">{profile.name}</span>
               <span className="text-xs text-muted-foreground">

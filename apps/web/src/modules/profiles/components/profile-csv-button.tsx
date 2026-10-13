@@ -19,7 +19,13 @@ export function ProfileCsvButton({
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <Button variant="outline" size="sm" onClick={onDownload} disabled={downloading}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onDownload}
+          disabled={downloading}
+          data-testid="profile-csv"
+        >
           <FileSpreadsheet aria-hidden />
           {downloading ? text.preparing : text.download}
         </Button>
