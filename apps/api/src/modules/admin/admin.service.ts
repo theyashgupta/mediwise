@@ -148,8 +148,8 @@ export async function getOverview(now = new Date()) {
     credits: {
       granted: ledger.grant ?? 0,
       purchased: ledger.purchase ?? 0,
-      spentOnReads: -((ledger.upload ?? 0) + (ledger.refund ?? 0)),
-      spentOnQuestions: -(ledger.questions ?? 0),
+      spentOnReads: 0 - ((ledger.upload ?? 0) + (ledger.refund ?? 0)),
+      spentOnQuestions: 0 - (ledger.questions ?? 0),
     },
     people,
     alerts: alertsFor(spend.monthCents, spend.capCents, queue.oldestQueuedMs),
