@@ -1,6 +1,6 @@
 import { and, eq, gte, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
-import { jobs, paymentOrders, profiles, reports } from "../../db/schema.js";
+import { assistantQuestions, jobs, paymentOrders, profiles, reports } from "../../db/schema.js";
 
 /**
  * Lists this month's jobs with their owner and token counts, so the service can price each one per model.
@@ -22,6 +22,20 @@ export async function listJobsThisMonth() {
     .leftJoin(reports, sql`${reports.id}::text = ${jobs.payload}->>'reportId'`)
     .leftJoin(profiles, eq(profiles.id, reports.profileId))
     .where(gte(jobs.updatedAt, sql`date_trunc('month', now())`));
+}
+
+/**
+ * Lists this month's assistant questions with their owner and token usage, cleared ones included.
+ *
+ * @remarks
+ * ponytail: one row per question priced in JS with no index on `created_at`, add one past about 100,000 questions a
+ * month.
+ */
+export async function listQuestionsThisMonth() {
+  return db
+    .select({ userId: assistantQuestions.userId, usage: assistantQuestions.usage })
+    .from(assistantQuestions)
+    .where(gte(assistantQuestions.createdAt, sql`date_trunc('month', now())`));
 }
 
 /**

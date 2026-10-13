@@ -10,6 +10,7 @@ const edge = vi.hoisted(() => ({
 }));
 
 vi.mock("../modules/spend/spend.repo.js", () => ({
+  listQuestionsThisMonth: async () => [],
   listJobsThisMonth: async () => [{ userId: null, status: "done", usage: null, ...edge.tokens }],
   parkJob: async (id: string) => edge.jobs.set(id, "paused_budget"),
   resumeParkedJobs: async () => {

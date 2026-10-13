@@ -2,7 +2,9 @@ import { eq } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { expect, test } from "vitest";
 import { db } from "../db/client.js";
-import { jobs, profiles, reports } from "../db/schema.js";
+import { env } from "../config/env.js";
+import { assistantQuestions, jobs, profiles, reports } from "../db/schema.js";
+import { getSpendSummary, isOverBudget } from "../modules/spend/spend.service.js";
 import { parkIfOverBudget } from "./budget.js";
 
 /**
@@ -55,4 +57,51 @@ test("the monthly Claude cap lets a job run below the limit and parks it at the 
   const [report] = await db.select().from(reports).where(eq(reports.id, atCap.reportId));
   expect(job?.status).toBe("paused_budget");
   expect(report?.status).toBe("paused");
+});
+
+/** Inserts an assistant question whose Haiku 5.5 output costs 1 cent: 20,000 output tokens at 50 cents per million. */
+async function insertQuestionSpend(
+  userId: string,
+  extra: Partial<typeof assistantQuestions.$inferInsert> = {},
+) {
+  await db.insert(assistantQuestions).values({
+    userId,
+    question: "",
+    answer: { sentences: [] },
+    usage: {
+      model: "claude-haiku-5-5",
+      inputTokens: 0,
+      cachedInputTokens: 0,
+      cacheWriteTokens: 0,
+      outputTokens: 20_000,
+    },
+    ...extra,
+  });
+}
+
+test("an assistant question counts in the month total and in its user's row, also after clear", async () => {
+  const userId = randomUUID();
+  const before = await getSpendSummary();
+
+  await insertQuestionSpend(userId);
+  await insertQuestionSpend(userId, { clearedAt: new Date() });
+  await insertQuestionSpend(userId, {
+    createdAt: new Date(new Date().setUTCDate(0)),
+  });
+
+  const after = await getSpendSummary();
+  expect(after.costCents - before.costCents).toBeCloseTo(2);
+  expect(after.questions - before.questions).toBe(2);
+});
+
+test("assistant questions alone can reach the monthly cap", async () => {
+  const cap = env.CLAUDE_MONTHLY_CAP_CENTS;
+  try {
+    env.CLAUDE_MONTHLY_CAP_CENTS = (await getSpendSummary()).costCents + 0.5;
+    expect(await isOverBudget()).toBe(false);
+    await insertQuestionSpend(randomUUID());
+    expect(await isOverBudget()).toBe(true);
+  } finally {
+    env.CLAUDE_MONTHLY_CAP_CENTS = cap;
+  }
 });
