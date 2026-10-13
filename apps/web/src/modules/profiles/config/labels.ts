@@ -28,3 +28,7 @@ export const ancestryLabels: Record<Ancestry, string> = {
 
 export const approximateBirthNote =
   "We calculated this date from the age on a report. Enter the exact date.";
+
+export function rowCountLabel(count: number) {
+  return `${count} ${count === 1 ? "row" : "rows"}`;
+}

@@ -117,6 +117,7 @@ test("the signed-in export lists the full name, the date of birth and the sex", 
       ancestry: "south_asian",
       isSelf: false,
       reportCount: 1,
+      valueCount: 0,
     }),
   ).toEqual([
     ["Name", "Asha Rao"],
