@@ -57,6 +57,8 @@ Never commit a secret. Put API values in the Render dashboard only. The web valu
 | `CLAUDE_MONTHLY_CAP_CENTS` | no | Default `2000` (20 USD). Over the cap, the worker pauses every read and logs one warning per hour. Raise it and restart the service to resume the paused reads. |
 | `CLAUDE_HARD_STOP` | no | Default `false`. Set `true` to refuse every new upload with a 503. Reads already in the queue still run. |
 | `ADMIN_USER_ID` | no | Supabase user id that can open `/admin`, call `GET /admin/spend` and `GET /admin/overview`, and that gets `costCents` in `GET /reports/:id`. Empty means the route answers 404 for everyone and no report shows a cost. |
+| `ASSISTANT_ENABLED` | no | Default `false`. When `false`, every assistant route answers 404 and the web hides the Ask page entry points. |
+| `ASSISTANT_REVIEW` | no | Default `false`. With `ASSISTANT_ENABLED=true`, only accounts that agree to the review on the Ask page can ask. The web reads it from `GET /me`, so no web variable exists. |
 | `PAYMENTS_ENABLED` | no | Default `false`. When `false`, every `/payments` route answers 404. Set `true` only when the maintainer says enable. |
 | `CASHFREE_APP_ID` | when payments are on | Cashfree app id. The API does not start with `PAYMENTS_ENABLED=true` and no app id. |
 | `CASHFREE_SECRET_KEY` | when payments are on | Cashfree secret key. It also verifies the webhook signature. Server only. |
