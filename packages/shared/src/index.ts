@@ -58,18 +58,55 @@ const dateOfBirthSchema = z.iso
     "Date of birth is in the future",
   );
 
-/** Body of `POST /profiles`. The web profile form uses the same schema. */
-export const profileInputSchema = z.object({
+const profileFieldsSchema = z.object({
   name: z.string().trim().min(1, "Enter a name").max(80, "Enter a name of 80 characters or fewer"),
   relation: z.enum(relations, "Choose a relation"),
   dateOfBirth: dateOfBirthSchema,
   sex: z.enum(sexes, "Choose a sex"),
   ancestry: z.enum(ancestries, "Choose an ancestry"),
+  permissionConfirmed: z.boolean().optional(),
+  guardianConfirmed: z.boolean().optional(),
+});
+
+export const adultAge = 18;
+
+/**
+ * Tells whether a person born on this ISO date is younger than 18 on `today`.
+ *
+ * @remarks
+ * Compares the month and day as text, so a birthday on 29 February counts from 1 March in other years.
+ */
+export function isMinor(dateOfBirth: string, today = new Date()) {
+  const now = today.toISOString().slice(0, 10);
+  const age =
+    Number(now.slice(0, 4)) -
+    Number(dateOfBirth.slice(0, 4)) -
+    (now.slice(5) < dateOfBirth.slice(5) ? 1 : 0);
+  return age < adultAge;
+}
+
+export const permissionMessage = "Confirm that you have this person’s permission";
+export const guardianMessage = "Confirm that you are this child’s parent or guardian";
+
+/**
+ * Body of `POST /profiles`. The web profile form uses the same schema.
+ *
+ * @remarks
+ * A family member needs the owner's permission tick, and a child also needs the guardian tick. The self profile needs neither.
+ */
+export const profileInputSchema = profileFieldsSchema.superRefine((input, ctx) => {
+  if (input.relation === "self") return;
+  if (!input.permissionConfirmed) {
+    ctx.addIssue({ code: "custom", path: ["permissionConfirmed"], message: permissionMessage });
+  }
+  if (isMinor(input.dateOfBirth) && !input.guardianConfirmed) {
+    ctx.addIssue({ code: "custom", path: ["guardianConfirmed"], message: guardianMessage });
+  }
 });
 export type ProfileInput = z.infer<typeof profileInputSchema>;
 
-/** Body of `PATCH /profiles/:id`. */
-export const profileUpdateSchema = profileInputSchema.partial();
+/** Body of `PATCH /profiles/:id`. A true consent flag records the date it was first given. */
+export const profileUpdateSchema = profileFieldsSchema.partial();
 export type ProfileUpdate = z.infer<typeof profileUpdateSchema>;
 
 export const reportMimes = [
@@ -160,7 +197,7 @@ export const createReportSchema = z.object({ profileId: z.uuid(), files: reportF
 export type CreateReportInput = z.infer<typeof createReportSchema>;
 
 /** Body of `PATCH /me`. The name is the self profile's name. */
-export const updateMeSchema = profileInputSchema.pick({ name: true });
+export const updateMeSchema = profileFieldsSchema.pick({ name: true });
 export type UpdateMeInput = z.infer<typeof updateMeSchema>;
 
 /** Body of `DELETE /me`. The literal guards against a delete sent by mistake. */
