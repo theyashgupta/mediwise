@@ -68,7 +68,9 @@ export async function getSharedExport(token: string, locale: TextLocale = "en") 
     },
     report: {
       header: {
+        title: header.title,
         labName: header.labName,
+        labs: report.labs,
         collectedAt: header.collectedAt,
         reportedAt: header.reportedAt,
       },

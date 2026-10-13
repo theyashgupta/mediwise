@@ -110,7 +110,7 @@ export async function deleteEpisode(id: string) {
 /** Lists the ids of an episode's done reports in visit order, reports of one date in upload order. */
 export async function listEpisodeReports(episodeId: string) {
   return db
-    .select({ id: reports.id })
+    .select({ id: reports.id, title: reports.title })
     .from(reports)
     .where(and(eq(reports.episodeId, episodeId), eq(reports.status, "done")))
     .orderBy(visitDate, reports.createdAt);

@@ -1,3 +1,4 @@
+export { checkedLabName } from "./extraction.header.js";
 export {
   callTool,
   extractReport,

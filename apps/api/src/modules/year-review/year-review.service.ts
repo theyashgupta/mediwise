@@ -53,7 +53,9 @@ export function buildYearReview(reports: Loaded["reports"], series: Loaded["seri
   const broad = scored.filter((report) => cap(report) === broadest);
   const [firstBroad, lastBroad] = [broad[0], broad.at(-1)];
   const twoDates = firstBroad && lastBroad && visitDate(firstBroad) !== visitDate(lastBroad);
-  const labs = new Set(inWindow.flatMap((report) => report.labName?.trim().toLowerCase() ?? []));
+  const labs = new Set(
+    inWindow.flatMap((report) => report.labNames.map((name) => name.trim().toLowerCase())),
+  );
 
   const moved = [];
   const stillAtRisk = [];

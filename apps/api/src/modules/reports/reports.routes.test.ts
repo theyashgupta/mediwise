@@ -4,6 +4,7 @@ import { handleError } from "../../common/problem.js";
 import { env } from "../../config/env.js";
 import type { AuthEnv } from "../../middleware/auth.js";
 import { reportsRoutes } from "./reports.routes.js";
+import { backfillReportTitles } from "./reports.service.js";
 
 const store = vi.hoisted(() => {
   type Report = {
@@ -13,6 +14,8 @@ const store = vi.hoisted(() => {
     status: string;
     createdAt: Date;
     note?: string | null;
+    title?: string | null;
+    titleEdited?: boolean;
   };
   type File = {
     id?: string;
@@ -36,12 +39,14 @@ const store = vi.hoisted(() => {
   const links: object[] = [];
   const insights: { current?: object; usage?: object } = {};
   const credits = new Map<string, { balance: number; readsToday: number }>();
-  const view = ({ id, profileId, status, createdAt, note }: Report) => ({
+  const view = ({ id, profileId, status, createdAt, note, title, titleEdited }: Report) => ({
     id,
     profileId,
     status,
     createdAt,
     note: note ?? null,
+    title: title ?? null,
+    titleEdited: titleEdited ?? false,
     markerCount: 0,
   });
   const find = (owner: string, id: string) =>
@@ -147,6 +152,32 @@ const store = vi.hoisted(() => {
         if (!report) return undefined;
         report.note = note;
         return { note };
+      },
+      updateReportTitle: async (owner: string, id: string, title: string, titleEdited: boolean) => {
+        const report = find(owner, id);
+        if (!report) return undefined;
+        Object.assign(report, { title, titleEdited });
+        return { title, titleEdited };
+      },
+      findTitleFacts: async (id: string) => {
+        const report = reports.find((stored) => stored.id === id);
+        return (
+          report && {
+            collectedAt: "2025-02-01",
+            createdAt: report.createdAt,
+            markerKeys: [...Array.from({ length: 45 }, () => "hba1c"), null, "systolic_bp"],
+            studies: [
+              { kind: "ultrasound" as const, performedAt: "2025-02-01" },
+              { kind: "ultrasound" as const, performedAt: "2025-02-11" },
+            ],
+          }
+        );
+      },
+      listRuleTitledReportIds: async () =>
+        reports.filter((report) => !report.titleEdited).map((report) => report.id),
+      saveRuleTitle: async (id: string, title: string) => {
+        const report = reports.find((stored) => stored.id === id);
+        if (report && !report.titleEdited) report.title = title;
       },
       requeueFailedReport: async (owner: string, id: string) => {
         const report = find(owner, id);
@@ -386,6 +417,45 @@ test("a saved note comes back with the report, and an empty note clears it", asy
 
   await call("PUT", `/reports/${body.id}/note`, "alice", { note: " " });
   expect(await (await call("GET", `/reports/${body.id}`)).json()).toMatchObject({ note: null });
+});
+
+test("a renamed report keeps the user's title, and an empty title gives back the rule title", async () => {
+  const { body } = await create([pdf]);
+  const renamed = await call("PUT", `/reports/${body.id}/title`, "alice", {
+    title: "  Feb checkup and scans  ",
+  });
+  expect(renamed.status).toBe(200);
+  expect(await renamed.json()).toEqual({ title: "Feb checkup and scans", titleEdited: true });
+  expect(await (await call("GET", `/reports/${body.id}`)).json()).toMatchObject({
+    header: { title: "Feb checkup and scans", titleEdited: true },
+  });
+
+  const restored = await call("PUT", `/reports/${body.id}/title`, "alice", { title: "" });
+  expect(await restored.json()).toEqual({
+    title: "1 to 11 Feb 2025 · blood panel (46 markers), ultrasound x2",
+    titleEdited: false,
+  });
+});
+
+test("a title of 61 characters returns 400, and another user's report returns 404", async () => {
+  const { body } = await create([pdf]);
+  const long = await call("PUT", `/reports/${body.id}/title`, "alice", { title: "a".repeat(61) });
+  expect(long.status).toBe(400);
+  expect(JSON.stringify(await long.json())).toContain("Write 60 characters or fewer");
+  expect((await call("PUT", `/reports/${body.id}/title`, "bob", { title: "Hi" })).status).toBe(404);
+});
+
+test("the backfill sets the rule title of every report the user did not rename", async () => {
+  const first = (await create([pdf])).body;
+  const second = (await create([pdf])).body;
+  await call("PUT", `/reports/${second.id}/title`, "alice", { title: "My own title" });
+
+  expect(await backfillReportTitles()).toBe(1);
+  const title = async (id: string) =>
+    ((await (await call("GET", `/reports/${id}`)).json()) as { header: { title: string } }).header
+      .title;
+  expect(await title(first.id)).toBe("1 to 11 Feb 2025 · blood panel (46 markers), ultrasound x2");
+  expect(await title(second.id)).toBe("My own title");
 });
 
 test("a note of 1,001 characters returns 400, and another user's report returns 404", async () => {

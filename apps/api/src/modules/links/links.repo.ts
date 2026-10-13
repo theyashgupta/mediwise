@@ -127,7 +127,7 @@ export async function updateLinkState(
   return link;
 }
 
-/** Lists the links of a report that are not dismissed, with the date and lab of the other report. */
+/** Lists the links of a report that are not dismissed, with the date, lab and title of the other report. */
 export async function listLinks(reportId: string) {
   const links = await db
     .select(linkColumns)
@@ -145,7 +145,12 @@ export async function listLinks(reportId: string) {
     others.length === 0
       ? []
       : await db
-          .select({ id: reports.id, labName: reports.labName, date: visitDate })
+          .select({
+            id: reports.id,
+            labName: reports.labName,
+            title: reports.title,
+            date: visitDate,
+          })
           .from(reports)
           .where(inArray(reports.id, others));
   return links.flatMap((link, index) => {

@@ -53,6 +53,7 @@ const printed = z.string().nullable();
  */
 const studiesSchema = z.object({
   ageYears: z.number().optional().describe("Patient age in years, as printed"),
+  labName: z.string().trim().min(1).optional(),
   studies: z.array(
     z.object({
       page: z.number().int(),
@@ -104,6 +105,7 @@ const studiesSystem = `You copy what is printed on health check pages: imaging r
 - Skip a printed value that has no key in the list. Skip a field that is empty on the page.
 - Never copy the patient's name, phone number, email address, employer, address or any ID number.
 - ageYears is the patient's age in years as printed. Leave it out when no age is printed.
+- labName is the lab, hospital or imaging centre printed on the letterhead of page 1, for example "Lakeview Imaging Centre". It is never a doctor or a patient. Leave it out when no letterhead is printed.
 
 Keys, one key: name per line:
 ${measurementEntries.map(({ key, name }) => `${key}: ${name}`).join("\n")}`;
@@ -175,14 +177,15 @@ export function toMeasurement(
 }
 
 /**
- * Reads the studies on one file's study pages with one Claude call, and returns them with the patient age as printed.
+ * Reads the studies on one file's study pages with one Claude call, and returns them with the age and lab as printed.
  *
  * @remarks
  * A result that fails validation gets one more call with the errors, then the file has no studies. A study page that
  * Claude cannot read never fails the lab read of the same report.
  */
 export async function readStudies(pages: StudyPage[], usage: StepUsage) {
-  if (pages.length === 0) return { studies: [] as StudyDraft[], ageYears: undefined };
+  const none = { studies: [] as StudyDraft[], ageYears: undefined, labName: undefined };
+  if (pages.length === 0) return none;
   const blocks = pageBlocks(pages);
   const ask = "Record every study on these pages with the record_studies tool.";
   let errors = "";
@@ -222,12 +225,12 @@ export async function readStudies(pages: StudyPage[], usage: StepUsage) {
           }),
         };
       });
-      return { studies, ageYears: parsed.data.ageYears };
+      return { studies, ageYears: parsed.data.ageYears, labName: parsed.data.labName };
     }
     errors =
       input === undefined ? "No record_studies call was made." : z.prettifyError(parsed.error);
   }
-  return { studies: [] as StudyDraft[], ageYears: undefined };
+  return none;
 }
 
 /** Tells whether a measurement key is a vital, which the report keeps with its markers. */

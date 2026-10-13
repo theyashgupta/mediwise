@@ -125,6 +125,7 @@ export async function getOwnedProfile(userId: string, id: string) {
 const csvHeader = [
   "Type",
   "Report date",
+  "Report",
   "Lab",
   "Marker key",
   "Marker name",
@@ -145,6 +146,7 @@ type ExportReport = {
   reportId: string;
   reportDate: string;
   collectedAt: string | null;
+  title: string | null;
   labName: string | null;
 };
 
@@ -171,10 +173,11 @@ function rangeText(low: number | null, high: number | null) {
   return null;
 }
 
-/** Gives the report columns of one export row: date, lab and the visit id the web groups reports by. */
+/** Gives the report columns of one export row: date, title, lab and the visit id the web groups reports by. */
 function reportCells(report: ExportReport) {
   return {
     reportDate: report.reportDate,
+    title: report.title,
     lab: report.labName,
     visitId: report.collectedAt ? `visit-${report.collectedAt}` : report.reportId,
     reportId: report.reportId,
@@ -246,6 +249,7 @@ export async function exportProfileCsv(userId: string, id: string) {
     ...rows.map((row) => [
       row.type,
       row.reportDate,
+      row.title,
       row.lab,
       row.key,
       row.name,

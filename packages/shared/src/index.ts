@@ -208,6 +208,14 @@ export const reportNoteSchema = z.object({
 });
 export type ReportNoteInput = z.infer<typeof reportNoteSchema>;
 
+export const maxReportTitleLength = 60;
+
+/** Body of `PUT /reports/:id/title`. An empty title gives the report its rule-made title again. */
+export const reportTitleSchema = z.object({
+  title: z.string().trim().max(maxReportTitleLength, "Write 60 characters or fewer"),
+});
+export type ReportTitleInput = z.infer<typeof reportTitleSchema>;
+
 export const maxEpisodeNoteLength = 200;
 
 /**

@@ -33,7 +33,9 @@ import { stepUsage } from "../extraction/index.js";
 import { writeHindi } from "../narrative/index.js";
 import { getOwnedProfile } from "../profiles/index.js";
 import { claudeCostCents } from "../spend/index.js";
+import { isVital } from "../studies/index.js";
 import * as repo from "./reports.repo.js";
+import { ruleTitle } from "./reports.title.js";
 
 const pageSize = 20;
 const draftLifetimeMs = 60 * 60 * 1000;
@@ -159,11 +161,21 @@ export async function getReportDetail(userId: string, id: string, locale: TextLo
     ...read,
     ...withClaudeText(settled, locale, insights?.translations),
     studies: storedStudies.map((study) => toStudy(study, locale)),
+    labs: [
+      ...new Set([
+        ...read.categories.flatMap((category) => category.labNames),
+        ...storedStudies.flatMap((study) => study.labName ?? []),
+      ]),
+    ],
     files,
     links,
     ...(locale === "en"
       ? {}
-      : { translation: done ? (insights?.translations?.[locale]?.status ?? ("missing" as const)) : null }),
+      : {
+          translation: done
+            ? (insights?.translations?.[locale]?.status ?? ("missing" as const))
+            : null,
+        }),
   };
   if (!env.ADMIN_USER_ID || userId !== env.ADMIN_USER_ID) return detail;
   return { ...detail, costCents: await reportCostCents(id) };
@@ -188,8 +200,7 @@ function withClaudeText<T extends ClaudeText>(
 ): T {
   const stored = locale === "en" ? undefined : translations?.[locale];
   if (stored?.status !== "done") return text;
-  const put = (english: string) =>
-    stored.text[english] ?? localizeAlertHeadline(english, locale);
+  const put = (english: string) => stored.text[english] ?? localizeAlertHeadline(english, locale);
   return {
     ...text,
     findings: text.findings.map((finding) => ({
@@ -277,6 +288,7 @@ function toStudy(study: Awaited<ReturnType<typeof repo.listStudies>>[number], lo
     performedAt: study.performedAt,
     signedBy: study.signedBy,
     fileName: study.fileName,
+    labName: study.labName,
     page: study.pageIndex + 1,
     filmName: study.filmName,
     measurements: study.measurements
@@ -341,6 +353,7 @@ function toMarkerRow(row: StoredMarker, entry: Marker, locale: TextLocale) {
         : null,
     labRange: toRange(row.labRangeLow, row.labRangeHigh),
     calibratedRange: toRange(row.calibratedLow, row.calibratedHigh),
+    labName: row.labName,
   };
 }
 
@@ -387,7 +400,11 @@ function buildReportDetail(
     }
     if (seen.has(known.entry.key)) continue;
     seen.add(known.entry.key);
-    mapped.push({ row: toMarkerRow(row, known.entry, locale), entry: known.entry, order: known.order });
+    mapped.push({
+      row: toMarkerRow(row, known.entry, locale),
+      entry: known.entry,
+      order: known.order,
+    });
   }
   const byOrder = (a: { order: number }, b: { order: number }) => a.order - b.order;
   mapped.sort(byOrder);
@@ -414,6 +431,8 @@ function buildReportDetail(
     error: report.error,
     createdAt: report.createdAt,
     header: {
+      title: report.title,
+      titleEdited: report.titleEdited,
       labName: report.labName,
       collectedAt: report.collectedAt,
       reportedAt: report.reportedAt,
@@ -430,7 +449,8 @@ function buildReportDetail(
     categories: categories.flatMap(({ key }) => {
       const label = categoryLabel(key, locale);
       const items = mapped.filter(({ entry }) => entry.category === key).map(({ row }) => row);
-      return items.length > 0 ? [{ key, label, markers: items }] : [];
+      const labNames = [...new Set(items.flatMap((row) => row.labName ?? []))];
+      return items.length > 0 ? [{ key, label, labNames, markers: items }] : [];
     }),
     derived: derivedRows.map(({ row }) => row),
     unmapped,
@@ -523,6 +543,7 @@ export async function getMarkerDetail(
   return {
     report: {
       id: report.id,
+      title: report.title,
       labName: report.labName,
       collectedAt: report.collectedAt,
       createdAt: report.createdAt,
@@ -534,7 +555,11 @@ export async function getMarkerDetail(
       ? (entry.sources.find((source) => source.id === range.source) ?? null)
       : null,
     history: [...history.values()],
-    knowledge: { whatItIs: text.whatItIs, whyItMatters: text.whyItMatters, whatMovesIt: text.whatMovesIt },
+    knowledge: {
+      whatItIs: text.whatItIs,
+      whyItMatters: text.whyItMatters,
+      whatMovesIt: text.whatMovesIt,
+    },
     southAsianNote: text.southAsianNote ?? null,
     sources: entry.sources,
     followUps: detail.followUps.filter((followUp) => followUp.markerKey === markerKey),
@@ -548,6 +573,37 @@ export async function setReportNote(userId: string, id: string, note: string) {
   const row = await repo.updateReportNote(userId, id, note || null);
   if (!row) throw new AppError(404, "We could not find this report");
   return row;
+}
+
+/** Builds the rule title of a stored report from its lab date, markers and studies. */
+async function storedRuleTitle(id: string) {
+  const facts = await repo.findTitleFacts(id);
+  if (!facts) return undefined;
+  return ruleTitle({
+    markerCount: facts.markerKeys.filter((key) => !key || !isVital(key)).length,
+    markerDate: facts.collectedAt,
+    studies: facts.studies,
+    uploadDate: facts.createdAt.toISOString().slice(0, 10),
+  });
+}
+
+/** Saves the title the user wrote, or gives the report its rule title again when the title is empty. */
+export async function setReportTitle(userId: string, id: string, title: string) {
+  await getReport(userId, id);
+  const next = title || (await storedRuleTitle(id));
+  const row = next && (await repo.updateReportTitle(userId, id, next, title !== ""));
+  if (!row) throw new AppError(404, "We could not find this report");
+  return row;
+}
+
+/** Sets the rule title of every done report whose title the user did not write, and returns the count. */
+export async function backfillReportTitles() {
+  const ids = await repo.listRuleTitledReportIds();
+  for (const id of ids) {
+    const title = await storedRuleTitle(id);
+    if (title) await repo.saveRuleTitle(id, title);
+  }
+  return ids.length;
 }
 
 export async function retryReport(userId: string, id: string) {
