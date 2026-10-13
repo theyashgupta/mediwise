@@ -31,6 +31,7 @@ export function PackList({ packs, buyingPackId, onBuy }: PackListProps) {
                 }
                 disabled={buyingPackId !== undefined}
                 onClick={() => onBuy(pack.id)}
+                data-testid={`pack-buy-${pack.id}`}
               >
                 {buyingPackId === pack.id ? t.payments.buy.opening : t.payments.buy.buy}
               </Button>

@@ -60,9 +60,11 @@ export function ShareReportContainer({ reportId, glass = false }: ShareReportCon
   return (
     <>
       {glass ? (
-        <GlassButton onClick={start}>{label}</GlassButton>
+        <GlassButton onClick={start} data-testid="report-share">
+          {label}
+        </GlassButton>
       ) : (
-        <Button variant="outline" onClick={start}>
+        <Button variant="outline" onClick={start} data-testid="report-share">
           {label}
         </Button>
       )}

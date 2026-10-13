@@ -1,11 +1,24 @@
 import { randomUUID } from "node:crypto";
 import { AppError } from "../../common/errors.js";
+import { env } from "../../config/env.js";
 import { log } from "../../middleware/logger.js";
 import { cashfreeProvider } from "./payments.cashfree.js";
 import { paymentCurrency, paymentPacks } from "./payments.config.js";
+import type { PaymentProvider } from "./payments.provider.js";
 import * as repo from "./payments.repo.js";
 
-const provider = cashfreeProvider;
+const provider: PaymentProvider = env.CASHFREE_STUB
+  ? {
+      ...cashfreeProvider,
+      /**
+       * Returns a made-up payment session in place of the Cashfree order call, for the e2e suite.
+       *
+       * @remarks
+       * The webhook check stays real, so an order is credited only by a webhook signed with the secret key.
+       */
+      createOrder: ({ orderId }) => Promise.resolve({ sessionId: `session_stub_${orderId}` }),
+    }
+  : cashfreeProvider;
 
 export function listPacks() {
   return paymentPacks;

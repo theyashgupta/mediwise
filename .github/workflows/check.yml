@@ -19,6 +19,8 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install --yes poppler-utils
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
+      # Prints the coverage summary of every package and fails when one drops below its threshold.
+      - run: pnpm coverage
 
   e2e:
     needs: check
