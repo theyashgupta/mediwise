@@ -18,6 +18,18 @@ A file that ends in `.db.test.ts` runs only in the db project (`apps/api/vitest.
 - History tests seed the dense fixture with `insertDenseHistory` from `apps/api/src/db/dense-history.ts`, the same rows as `db:seed-history`. A test named "audit row N" covers row N of [research/continuous-history.md](research/continuous-history.md).
 - In CI the `e2e` job runs `pnpm test:db` after `supabase start` and before `pnpm e2e`.
 
+### Row level security
+
+`apps/api/src/db/rls.db.test.ts` checks that the public anon key cannot reach a table through PostgREST.
+
+- PostgREST serves only the `postgres` database, so this file applies the migrations there too, the same as `pnpm e2e`. It writes its rows for two new users and deletes them at the end.
+- It reads the table list from the `CREATE TABLE` lines in `apps/api/src/db/migrations`. A new table fails the suite until `seedRows` writes a row to it.
+- For each table: the anon key, with user A's session and with no session, reads no row and updates or deletes no row of user B. The service role reads the rows of both users.
+- No table has a policy. The API reads as `mediwise_app`, which bypasses RLS, so PostgREST shows no row to a user, also not the user's own rows. A new policy fails the suite until the test changes with it.
+- The local keys come from `supabase status`. The test has no key in it.
+
+`apps/api/src/modules/shares/shares.db.test.ts` checks the share link. A request with no session and an open token reads the export of the shared report only: no other report of the owner, no data of another user, no user id, report id or token hash. A wrong or ended token reads nothing.
+
 Run it on your machine:
 
 ```sh
