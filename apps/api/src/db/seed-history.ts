@@ -5,7 +5,19 @@ import { denseHistoryReports, insertDenseHistory } from "./dense-history.js";
 
 const usage =
   "Usage: pnpm --filter @mediwise/api db:seed-history <email> [last report date YYYY-MM-DD]";
-const [email, lastDate = new Date().toISOString().slice(0, 10)] = process.argv.slice(2);
+
+/**
+ * Returns today's date on the local clock as YYYY-MM-DD.
+ *
+ * @remarks
+ * The e2e specs count report dates back from the local day. Before 05:30 in India the UTC day is still yesterday.
+ */
+function localToday() {
+  const now = new Date();
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
+}
+
+const [email, lastDate = localToday()] = process.argv.slice(2);
 
 if (!email || !/^\d{4}-\d{2}-\d{2}$/.test(lastDate)) {
   log.error(usage);

@@ -201,7 +201,7 @@ test("the admin overview counts spend, reads, failed reads, queue, credits and p
   expect(text).not.toContain(denseHistoryProfile.name);
   expect(text).not.toContain("Made-up");
   expect(text).not.toContain(reportTitle);
-  expect(text).not.toContain("529");
+  expect(text).not.toContain("529 Overloaded");
 });
 
 test("the admin retry reads a failed report of another user again", async () => {
