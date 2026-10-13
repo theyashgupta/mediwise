@@ -22,8 +22,8 @@ const visitDate = sql<string>`coalesce(${reports.collectedAt}, ${reports.created
  *
  * @remarks
  * The select lists are the privacy boundary: no note, episode name, family history, signing doctor, profile name, date
- * of birth or file name is read, so none can reach a prompt. Age comes out of SQL, so the date of birth never leaves the
- * database.
+ * of birth or file name is read, so none can reach a prompt. Age comes out of SQL, so the date of birth never leaves
+ * the database.
  */
 export async function findSnapshot(profileId: string): Promise<Snapshot | undefined> {
   const [person] = await db

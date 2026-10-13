@@ -653,8 +653,8 @@ function render(
  *
  * @remarks
  * Above the token cap it cuts, in order: optimal values older than 24 months that have a newer value, study findings
- * text, then reports older than the newest 48, and more old reports until the block fits. The block names what it
- * left out, so the model can refuse with `not_in_data`.
+ * text, then reports older than the newest 48, and more old reports until the block fits, found by binary search. The
+ * block names what it left out, so the model can refuse with `not_in_data`.
  */
 export function buildContext(snapshot: Snapshot): AssistantContext {
   const settlements = settle(snapshot, byReportOrder(snapshot.reports));
@@ -695,10 +695,10 @@ export function buildContext(snapshot: Snapshot): AssistantContext {
 
   const base = current;
   const newestFirst = byReportOrder(base.reports).reverse();
-  for (let count = Math.min(keptReports, newestFirst.length); ; count -= 1) {
+  const keepNewest = (count: number) => {
     const keep = new Set(newestFirst.slice(0, count).map(({ id }) => id));
     const kept = (reportId: string) => keep.has(reportId);
-    context = render(
+    return render(
       {
         ...base,
         reports: base.reports.filter(({ id }) => kept(id)),
@@ -713,6 +713,13 @@ export function buildContext(snapshot: Snapshot): AssistantContext {
       [...cuts, `Older reports not included: ${base.reports.length - count}.`],
       settlements,
     );
-    if (count <= 1 || estimateTokens(context.text) <= maxContextTokens) return context;
+  };
+  let low = 1;
+  let high = Math.min(keptReports, newestFirst.length);
+  while (low < high) {
+    const middle = Math.ceil((low + high) / 2);
+    if (estimateTokens(keepNewest(middle).text) <= maxContextTokens) low = middle;
+    else high = middle - 1;
   }
+  return keepNewest(low);
 }

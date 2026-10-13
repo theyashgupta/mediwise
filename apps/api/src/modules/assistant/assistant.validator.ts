@@ -182,8 +182,8 @@ function describeDate({ year, month: monthNumber, day }: DatePart) {
  * Splits one text into sentences, with each quoted part held as one token.
  *
  * @remarks
- * A printed study line can hold full stops and many words. The copy rules govern MediWise's own words, so a quote counts
- * as one word and never ends a sentence.
+ * A printed study line can hold full stops and many words. The copy rules govern MediWise's own words, so a quote
+ * counts as one word and never ends a sentence.
  */
 function splitSentences(text: string) {
   const quotes: string[] = [];
