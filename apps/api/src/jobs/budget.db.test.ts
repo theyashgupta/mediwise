@@ -79,7 +79,7 @@ async function insertQuestionSpend(
   });
 }
 
-test("an assistant question counts in the month total and in its user's row, also after clear", async () => {
+test("an assistant question counts in the month total, also after clear, and last month adds nothing", async () => {
   const userId = randomUUID();
   const before = await getSpendSummary();
 
