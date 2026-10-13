@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import repeat from "../../../../../packages/engine/fixtures/repeat-study.json" with { type: "json" };
+import repeat from "@mediwise/engine/fixtures/repeat-study.json" with { type: "json" };
 import {
   buildContext,
   day,
@@ -330,5 +330,23 @@ describe("buildContext", () => {
     ).toBeGreaterThanOrEqual(12);
     expect(text).toContain(`Left out to keep this short: ${cuts.join(" ")}`);
     expect(text).not.toContain("R49:");
+  });
+
+  test("two rows of one marker in one report give one value, the scored one", () => {
+    const duplicated = snapshot();
+    duplicated.markers.push({
+      ...marker(yearlyId, "hba1c", 15, null),
+    });
+    const { text, refs } = buildContext(duplicated);
+    expect(text.match(/R3:hba1c /g)).toHaveLength(1);
+    expect(refs.get("R3:hba1c")?.fact).toContain("R3:hba1c 6.1 % watch");
+    expect(refs.get("R3:hba1c")?.numbers).not.toContain(15);
+  });
+
+  test("a value reference allows its value, ranges and signed change, never the digits of its reference", () => {
+    const { refs } = buildContext(snapshot());
+    expect(refs.get("R3:hba1c")?.numbers).toEqual([6.1, 4, 5.6, 4, 5.6, 0.2]);
+    expect(refs.get("R2:tsh")?.numbers).toContain(-4);
+    expect(refs.get("R3")?.numbers).toEqual([81, 100, 3]);
   });
 });

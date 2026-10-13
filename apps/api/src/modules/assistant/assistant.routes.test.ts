@@ -395,4 +395,65 @@ describe("assistant routes", () => {
     expect(cleared.status).toBe(204);
     expect(store.rows).toHaveLength(0);
   });
+
+  test("a Claude error stores the fallback copy and the request still answers", async () => {
+    store.create.mockRejectedValueOnce(new Error("network down"));
+    const response = await ask({ question: "What was my HbA1c?" });
+    expect(response.status).toBe(201);
+    expect(await response.json()).toMatchObject({
+      refusalKind: "fallback",
+      copy: refusalCopy.fallback,
+    });
+    expect(store.rows).toHaveLength(1);
+  });
+
+  test("emergency and flagged questions never go back to Claude as chat history", async () => {
+    await ask({ question: "I want to die" });
+    store.create.mockResolvedValueOnce(toolUse(good));
+    const flagged = (await (await ask({ question: "Flag me?" })).json()) as { id: string };
+    await app.request(`/questions/${flagged.id}/flag`, { method: "POST" });
+    store.create.mockResolvedValueOnce(toolUse(good));
+    await ask({ question: "Kept?" });
+    store.create.mockResolvedValueOnce(toolUse(good));
+    await ask({ question: "Next?" });
+
+    const body = store.create.mock.calls.at(-1)![0] as Anthropic.MessageCreateParamsNonStreaming;
+    const sent = JSON.stringify(body.messages);
+    expect(sent).toContain("Question: Kept?");
+    expect(sent).not.toContain("I want to die");
+    expect(sent).not.toContain("Flag me?");
+  });
+
+  test("a profile with no read report refuses with not_in_data and makes no Claude call", async () => {
+    store.state.snapshot = { ...snapshot, reports: [], markers: [] };
+    const response = await ask({ question: "What was my HbA1c?" });
+    expect(await response.json()).toMatchObject({
+      refusalKind: "not_in_data",
+      copy: refusalCopy.not_in_data,
+    });
+    expect(store.create).not.toHaveBeenCalled();
+  });
+
+  test("a failed insert answers 500 and logs only the error code, never the question", async () => {
+    const lines: string[] = [];
+    const spy = vi.spyOn(console, "error").mockImplementation((...args) => {
+      lines.push(args.map(String).join(" "));
+    });
+    const insert = store.repo.insertQuestion;
+    store.repo.insertQuestion = async () => {
+      throw Object.assign(new Error('insert failed params: ["My secret question?"]'), {
+        cause: { code: "22021" },
+      });
+    };
+    const response = await ask({ question: "I want to die" });
+    store.repo.insertQuestion = insert;
+    spy.mockRestore();
+    expect(response.status).toBe(500);
+    expect(lines.join("\n")).toContain("assistant insert failed code=22021");
+    expect(lines.join("\n")).not.toContain("secret");
+  });
+
+  test("a question with a NUL character answers 400", async () => {
+    expect((await ask({ question: "What was my\u0000 HbA1c?" })).status).toBe(400);
+  });
 });

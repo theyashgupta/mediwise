@@ -99,7 +99,8 @@ export async function findSnapshot(profileId: string): Promise<Snapshot | undefi
         })
         .from(studies)
         .innerJoin(reportFiles, eq(reportFiles.id, studies.reportFileId))
-        .where(inArray(studies.reportId, reportIds)),
+        .where(inArray(studies.reportId, reportIds))
+        .orderBy(asc(studies.reportId), asc(studies.pageIndex)),
       db
         .select({
           id: findings.id,
@@ -204,7 +205,9 @@ export async function isProfileReport(profileId: string, reportId: string) {
   const [row] = await db
     .select({ id: reports.id })
     .from(reports)
-    .where(and(eq(reports.id, reportId), eq(reports.profileId, profileId)));
+    .where(
+      and(eq(reports.id, reportId), eq(reports.profileId, profileId), eq(reports.status, "done")),
+    );
   return row !== undefined;
 }
 

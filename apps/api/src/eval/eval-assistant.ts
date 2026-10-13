@@ -75,7 +75,7 @@ async function evalAssistant() {
         outcome = { kind: "gate", refuseKind: gated, sentences: [] };
       } else {
         const usage = stepUsage(model);
-        const { input, rules, problems } = await writeAnswer(
+        const { input, problems } = await writeAnswer(
           contexts[item.profile],
           askText(item.question, []),
           usage,
@@ -83,8 +83,8 @@ async function evalAssistant() {
         const cost = stepCostCents(usage);
         spent += cost;
         calls++;
-        if (input && rules.length === 0) firstTry++;
-        for (const rule of rules) reasons.set(rule, (reasons.get(rule) ?? 0) + 1);
+        if (input && problems.length === 0) firstTry++;
+        for (const { rule } of problems) reasons.set(rule, (reasons.get(rule) ?? 0) + 1);
         outcome = input
           ? { kind: input.kind, refuseKind: input.refuseKind, sentences: shownSentences(input) }
           : { kind: "fallback", sentences: [] };

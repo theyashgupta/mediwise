@@ -117,6 +117,7 @@ export type ContextRef = {
   cite: AssistantCite;
   fact: string;
   dates: string[];
+  numbers: number[];
   names?: string[];
   keys?: string[];
   text?: string;
@@ -156,6 +157,22 @@ export function day(date: string) {
  */
 export function estimateTokens(text: string) {
   return Math.ceil(text.length / charsPerToken);
+}
+
+/**
+ * Lists the numbers a text states, without thousands separators.
+ *
+ * @remarks
+ * A sign is kept only when it touches the digits, as in "+16" or "-31", so a change keeps its direction.
+ */
+export function numbersIn(text: string) {
+  return (text.replace(/(\d),(?=\d{3}\b)/g, "$1").match(/(?<![\w.])[+-]?\d+(?:\.\d+)?/g) ?? []).map(
+    Number,
+  );
+}
+
+function present(...values: (number | null | undefined)[]) {
+  return values.filter((value): value is number => typeof value === "number");
 }
 
 function range(low: number | null, high: number | null) {
@@ -203,6 +220,7 @@ function visitOf(snapshot: Snapshot, report: SnapshotReport): Visit {
     ),
     studies: snapshot.studies
       .filter(({ reportId }) => reportId === report.id)
+      .toSorted((a, b) => a.pageIndex - b.pageIndex)
       .map(({ id, kind, bodyRegion, performedAt, labName, impression, result, measurements }) => ({
         id,
         kind,
@@ -230,7 +248,7 @@ function visitOf(snapshot: Snapshot, report: SnapshotReport): Visit {
  */
 function settle(snapshot: Snapshot, ordered: SnapshotReport[]) {
   const visits = new Map(ordered.map((report) => [report.id, visitOf(snapshot, report)]));
-  const dates = [...new Set(ordered.map(({ date }) => date))];
+  const gap = typicalGapDays([...new Set(ordered.map(({ date }) => date))]);
   const settlements = new Map<string, Settlement>();
   for (const report of ordered) {
     const findings = snapshot.findings.filter(({ reportId }) => reportId === report.id);
@@ -250,7 +268,6 @@ function settle(snapshot: Snapshot, ordered: SnapshotReport[]) {
       })
       .map(({ id }) => ({ ...visits.get(id)!, reportId: id, linked: linked.has(id) }));
     const current = visits.get(report.id)!;
-    const gap = typicalGapDays(dates);
     for (const finding of findings) {
       const settlement = settleFinding(finding, current, later, gap);
       if (settlement) settlements.set(finding.id, settlement);
@@ -271,14 +288,20 @@ function quoted(text: string | null) {
  *
  * @remarks
  * Every list has a fixed order (reports by date, markers by key), so the same data gives the same bytes and the cache
- * hits. Only the absolute change between the last two values is shown: the server computes no other number.
+ * hits.
  */
-function render(snapshot: Snapshot, cuts: string[]): AssistantContext {
+function render(
+  snapshot: Snapshot,
+  cuts: string[],
+  settlements: Map<string, Settlement>,
+): AssistantContext {
   const refs = new Map<string, ContextRef>();
   const lines: string[] = [];
   const ordered = byReportOrder(snapshot.reports);
   const number = new Map(ordered.map((report, index) => [report.id, `R${index + 1}`]));
   const reportOf = new Map(ordered.map((report) => [report.id, report]));
+  const position = new Map(ordered.map(({ id }, index) => [id, index]));
+  const byPosition = (a: string, b: string) => position.get(a)! - position.get(b)!;
   const add = (ref: string, value: ContextRef) => refs.set(ref, value);
 
   lines.push(
@@ -295,11 +318,10 @@ function render(snapshot: Snapshot, cuts: string[]): AssistantContext {
     return { text: lines.join("\n"), refs, settled: [], cuts };
   }
 
-  const episodeNumber = new Map(
-    snapshot.episodes
-      .toSorted((a, b) => a.startedOn.localeCompare(b.startedOn) || a.id.localeCompare(b.id))
-      .map((episode, index) => [episode.id, `E${index + 1}`]),
+  const episodes = snapshot.episodes.toSorted(
+    (a, b) => a.startedOn.localeCompare(b.startedOn) || a.id.localeCompare(b.id),
   );
+  const episodeNumber = new Map(episodes.map((episode, index) => [episode.id, `E${index + 1}`]));
   lines.push("", `Reports, oldest first (${ordered.length} in total):`);
   for (const report of ordered) {
     const ref = number.get(report.id)!;
@@ -312,15 +334,25 @@ function render(snapshot: Snapshot, cuts: string[]): AssistantContext {
     lines.push(fact);
     add(ref, {
       cite: { kind: "report", reportId: report.id, target: null },
-      fact: `${fact} One of ${ordered.length} reports.`,
+      fact,
       dates: [report.date],
+      numbers: present(report.score, report.coverage, ordered.length),
     });
   }
 
   const values = new Map<string, { marker: SnapshotMarker; report: SnapshotReport }[]>();
+  const scoredFirst = snapshot.markers.toSorted(
+    (a, b) =>
+      Number(a.status === null) - Number(b.status === null) ||
+      (a.value ?? 0) - (b.value ?? 0) ||
+      (a.valueText ?? "").localeCompare(b.valueText ?? ""),
+  );
   for (const report of ordered) {
-    for (const marker of snapshot.markers) {
-      if (marker.reportId !== report.id || !marker.markerKey) continue;
+    const seen = new Set<string>();
+    for (const marker of scoredFirst) {
+      if (marker.reportId !== report.id || !marker.markerKey || seen.has(marker.markerKey))
+        continue;
+      seen.add(marker.markerKey);
       values.set(marker.markerKey, [...(values.get(marker.markerKey) ?? []), { marker, report }]);
     }
   }
@@ -357,6 +389,7 @@ function render(snapshot: Snapshot, cuts: string[]): AssistantContext {
         cite: { kind: "follow_up", reportId: engine.id, target: followUp.id },
         fact,
         dates: [engine.date],
+        numbers: numbersIn(fact.slice(id.length)),
         names: [followUp.title],
         text: `${followUp.why} ${followUp.nextAction}`,
       });
@@ -374,6 +407,7 @@ function render(snapshot: Snapshot, cuts: string[]): AssistantContext {
         cite: { kind: "pattern", reportId: engine.id, target: pattern.key },
         fact,
         dates: [engine.date],
+        numbers: numbersIn(`${name} ${whatItSuggests} ${whatToDo}`),
         names: [name],
         text: `${whatItSuggests} ${whatToDo}`,
       });
@@ -417,6 +451,17 @@ function render(snapshot: Snapshot, cuts: string[]): AssistantContext {
         cite: { kind: "value", reportId: report.id, target: key },
         fact: `${header} ${line.trim()}${extra.length > 0 ? `, ${extra.join(", ")}` : ""}`,
         dates: [report.date, ...(due ? [due] : [])],
+        numbers: [
+          ...present(
+            marker.value,
+            marker.labRangeLow,
+            marker.labRangeHigh,
+            newest.calibratedLow,
+            newest.calibratedHigh,
+            isLast ? change : undefined,
+          ),
+          ...numbersIn(marker.valueText ?? ""),
+        ],
       });
     }
     if (change !== undefined) {
@@ -429,13 +474,10 @@ function render(snapshot: Snapshot, cuts: string[]): AssistantContext {
     lines.push("", "Retest dates from the newest value of each marker:", ...retestLines);
   }
 
-  const settlements = settle(snapshot, ordered);
   const studyRef = new Map<string, string>();
   const studies = snapshot.studies.toSorted(
     (a, b) =>
-      ordered.indexOf(reportOf.get(a.reportId)!) - ordered.indexOf(reportOf.get(b.reportId)!) ||
-      a.pageIndex - b.pageIndex ||
-      a.id.localeCompare(b.id),
+      byPosition(a.reportId, b.reportId) || a.pageIndex - b.pageIndex || a.id.localeCompare(b.id),
   );
   const perReport = new Map<string, number>();
   for (const study of studies) {
@@ -447,9 +489,7 @@ function render(snapshot: Snapshot, cuts: string[]): AssistantContext {
   const findings = snapshot.findings
     .filter(({ id }) => settlements.get(id)?.state !== "settled")
     .toSorted(
-      (a, b) =>
-        ordered.indexOf(reportOf.get(a.reportId)!) - ordered.indexOf(reportOf.get(b.reportId)!) ||
-        a.rank - b.rank,
+      (a, b) => byPosition(a.reportId, b.reportId) || a.rank - b.rank || a.id.localeCompare(b.id),
     );
   if (findings.length > 0) lines.push("", "Findings:");
   for (const [index, finding] of findings.entries()) {
@@ -469,6 +509,7 @@ function render(snapshot: Snapshot, cuts: string[]): AssistantContext {
       cite: { kind: "finding", reportId: finding.reportId, target: finding.id },
       fact,
       dates: [report.date, ...(confirmed ? [confirmed.date] : [])],
+      numbers: numbersIn(`${finding.title} ${finding.body}${later}`),
     });
   }
 
@@ -498,6 +539,10 @@ function render(snapshot: Snapshot, cuts: string[]): AssistantContext {
       cite: { kind: "study", reportId: study.reportId, target: study.id },
       fact: block.join(" "),
       dates: [...new Set([date, report.date])],
+      numbers: [
+        ...numbersIn(block.slice(1).join(" ")),
+        ...study.measurements.flatMap(({ value }) => present(value)),
+      ],
       names: [study.kind, study.bodyRegion ?? "", study.labName ?? report.labName ?? ""],
       keys: study.measurements.map(({ key }) => key),
       quotes: [
@@ -515,10 +560,9 @@ function render(snapshot: Snapshot, cuts: string[]): AssistantContext {
     )
     .toSorted(
       (a, b) =>
-        ordered.indexOf(reportOf.get(a.earlierReportId)!) -
-          ordered.indexOf(reportOf.get(b.earlierReportId)!) ||
-        ordered.indexOf(reportOf.get(a.laterReportId)!) -
-          ordered.indexOf(reportOf.get(b.laterReportId)!),
+        byPosition(a.earlierReportId, b.earlierReportId) ||
+        byPosition(a.laterReportId, b.laterReportId) ||
+        a.id.localeCompare(b.id),
     );
   const settled = snapshot.findings.flatMap((finding) => {
     const settlement = settlements.get(finding.id);
@@ -536,6 +580,7 @@ function render(snapshot: Snapshot, cuts: string[]): AssistantContext {
       cite: { kind: "link", reportId: earlier.id, target: later.id },
       fact,
       dates: [earlier.date, later.date],
+      numbers: [],
     });
   }
   for (const { finding, settlement } of settled) {
@@ -546,19 +591,17 @@ function render(snapshot: Snapshot, cuts: string[]): AssistantContext {
       cite: { kind: "link", reportId: finding.reportId, target: settlement.reportId },
       fact,
       dates: [settlement.earlierDate, settlement.date],
+      numbers: numbersIn(`${settlement.earlier} ${settlement.later}`),
       quotes: [settlement.earlier, settlement.later],
       settlement,
     });
   }
 
-  const episodes = snapshot.episodes.toSorted(
-    (a, b) => a.startedOn.localeCompare(b.startedOn) || a.id.localeCompare(b.id),
-  );
   if (episodes.length > 0) lines.push("", "Workups (episodes):");
   for (const episode of episodes) {
     const id = episodeNumber.get(episode.id)!;
     const members = ordered.filter(({ episodeId }) => episodeId === episode.id);
-    const fact = `${id}: ${day(episode.startedOn)} to ${episode.endedOn ? day(episode.endedOn) : "now (open)"}. Reports: ${members.map((report) => `${number.get(report.id)} (${day(report.date)})`).join(", ") || "none"}.${episode.summary ? ` Summary: ${episode.summary.join(" ")}` : ""}`;
+    const fact = `${id}: ${day(episode.startedOn)} to ${episode.endedOn ? day(episode.endedOn) : "now (open)"}. Reports: ${members.map((report) => `${number.get(report.id)} (${day(report.date)})`).join(", ") || "none"}.${episode.summary?.length ? ` Summary: ${episode.summary.join(" ")}` : ""}`;
     lines.push(fact);
     add(id, {
       cite: { kind: "episode", reportId: null, target: episode.id },
@@ -568,14 +611,11 @@ function render(snapshot: Snapshot, cuts: string[]): AssistantContext {
         ...(episode.endedOn ? [episode.endedOn] : []),
         ...members.map(({ date }) => date),
       ],
+      numbers: numbersIn((episode.summary ?? []).join(" ")),
     });
   }
 
-  const described = keys.flatMap((key) => {
-    const entry =
-      markers.find((marker) => marker.key === key) ?? derived.find((marker) => marker.key === key);
-    return entry ? [entry] : [];
-  });
+  const described = keys.flatMap((key) => catalog.get(key) ?? []);
   if (described.length > 0) lines.push("", "What each marker is (MediWise catalog):");
   for (const entry of described) {
     const { whatItIs, whyItMatters, whatMovesIt } = markerText(entry, "en");
@@ -587,6 +627,7 @@ function render(snapshot: Snapshot, cuts: string[]): AssistantContext {
       cite: { kind: "catalog", reportId: null, target: entry.key },
       fact,
       dates: [],
+      numbers: numbersIn(text),
       text,
     });
   }
@@ -608,33 +649,32 @@ function render(snapshot: Snapshot, cuts: string[]): AssistantContext {
  * left out, so the model can refuse with `not_in_data`.
  */
 export function buildContext(snapshot: Snapshot): AssistantContext {
+  const settlements = settle(snapshot, byReportOrder(snapshot.reports));
   let current = snapshot;
   let cuts: string[] = [];
-  let context = render(current, cuts);
+  let context = render(current, cuts, settlements);
   if (estimateTokens(context.text) <= maxContextTokens) return context;
 
   const ordered = byReportOrder(current.reports);
   const newestDate = ordered.at(-1)!.date;
   const dateOf = new Map(ordered.map(({ id, date }) => [id, date]));
-  const lastIndex = new Map<string, number>();
-  ordered.forEach((report, index) => {
-    for (const { reportId, markerKey } of current.markers) {
-      if (reportId === report.id && markerKey) lastIndex.set(markerKey, index);
-    }
-  });
-  const indexOf = new Map(ordered.map(({ id }, index) => [id, index]));
+  const newestOf = new Map<string, string>();
+  for (const { reportId, markerKey } of current.markers) {
+    const date = dateOf.get(reportId)!;
+    if (markerKey && date > (newestOf.get(markerKey) ?? "")) newestOf.set(markerKey, date);
+  }
   const kept = current.markers.filter(
     ({ reportId, markerKey, status }) =>
       !(
         status === "optimal" &&
         markerKey &&
         daysBetween(dateOf.get(reportId)!, newestDate) > oldValueDays &&
-        lastIndex.get(markerKey)! > indexOf.get(reportId)!
+        newestOf.get(markerKey)! > dateOf.get(reportId)!
       ),
   );
   cuts = [`Older optimal values: ${current.markers.length - kept.length}.`];
   current = { ...current, markers: kept };
-  context = render(current, cuts);
+  context = render(current, cuts, settlements);
   if (estimateTokens(context.text) <= maxContextTokens) return context;
 
   cuts = [...cuts, "Study findings text (the impression stays)."];
@@ -642,7 +682,7 @@ export function buildContext(snapshot: Snapshot): AssistantContext {
     ...current,
     studies: current.studies.map((study) => ({ ...study, findingsText: null })),
   };
-  context = render(current, cuts);
+  context = render(current, cuts, settlements);
   if (estimateTokens(context.text) <= maxContextTokens) return context;
 
   const base = current;
@@ -663,6 +703,7 @@ export function buildContext(snapshot: Snapshot): AssistantContext {
         ),
       },
       [...cuts, `Older reports not included: ${base.reports.length - count}.`],
+      settlements,
     );
     if (count <= 1 || estimateTokens(context.text) <= maxContextTokens) return context;
   }

@@ -121,7 +121,11 @@ beforeAll(async () => {
     .returning();
   reportId = await insertReport(profileId, 5.9, { episodeId: episode!.id });
   const sibling = await insertProfile(userId, "Sibling");
-  await insertReport(sibling, 777.77, {});
+  const [siblingEpisode] = await db
+    .insert(schema.episodes)
+    .values({ profileId: sibling, name: `${marker}-sibling-episode`, startedOn: "2026-08-01" })
+    .returning();
+  await insertReport(sibling, 777.77, { episodeId: siblingEpisode!.id });
   otherProfileId = await insertProfile(otherUserId, "Other");
   otherReportId = await insertReport(otherProfileId, 5.1, {});
 });
@@ -131,12 +135,14 @@ beforeEach(async () => {
   await clearQuestions(userId, profileId);
 });
 
-test("no left-out field and no other profile reaches the Anthropic request", async () => {
+test("no left-out field and no other profile reaches the Anthropic request, also with chat history", async () => {
   edge.create.mockResolvedValue(answer(good));
   await askQuestion(userId, profileId, { question: "What was my HbA1c?", reportId });
+  await askQuestion(userId, profileId, { question: "And before that?", reportId });
 
   const sent = JSON.stringify(edge.create.mock.calls);
   expect(sent).toContain("R1:hba1c 5.9 %");
+  expect(sent).toContain("Question: What was my HbA1c?");
   expect(sent).toContain("Liver is normal in size.");
   expect(sent).not.toContain(marker);
   expect(sent).not.toContain("1901");
