@@ -18,6 +18,12 @@ describe("gateQuestion", () => {
     "I am thinking about suicide",
     "I want to end my life",
     "CHEST PAIN now",
+    "I can’t breathe",
+    "I want to  kill  myself",
+    "I want to die",
+    "I overdosed on my pills",
+    "There is pain in my chest",
+    "I have trouble breathing",
   ])("%s is an emergency", (question) => {
     expect(gateQuestion(question)).toBe("emergency");
   });
@@ -27,6 +33,7 @@ describe("gateQuestion", () => {
     "What is the right dosage for my thyroid tablet?",
     "How much vitamin B12 should I take?",
     "How many iron tablets can I take a day?",
+    "Is 1000 mg of vitamin C okay?",
   ])("%s is a dose question", (question) => {
     expect(gateQuestion(question)).toBe("treatment");
   });
@@ -39,6 +46,8 @@ describe("gateQuestion", () => {
     "How many reports do I have this year?",
     "Should I worry about my vitamin D?",
     "Which reports are in my thyroid workup?",
+    "My glucose was 110 mg/dL, is that in range?",
+    "There is a faint line on my test strip",
   ])("%s passes the gate", (question) => {
     expect(gateQuestion(question)).toBeUndefined();
   });
