@@ -145,6 +145,7 @@ supabase stop --workdir apps/e2e
 
 - `supabase start` uses `apps/e2e/supabase/config.toml`. That file turns off the services the suite does not use and creates the private `reports` bucket. It is not in the root `supabase` folder, so `supabase config push` never reads it.
 - `pnpm e2e` applies the Drizzle migrations to the local database. Then it starts the API on port 3101 and the web on port 5174, with the same commands as `pnpm dev`. It also builds the web and serves the build with `vite preview` on port 5175 for the offline spec. The API and the web get the local Supabase URL and keys, not the values in `apps/*/.env`. The API gets `ADMIN_USER_ID` set to the fixed id of the demo account, so only that account opens `/admin`.
+- The dev web server always gets `NODE_ENV=development`. A shell with `NODE_ENV=production` would otherwise turn off the dev-only `/dev/kitchen-sink` page that `score-ring.spec.ts` opens.
 - The suite does not use a running `pnpm dev`. That process uses `apps/api/.env`, which has the real Claude key and the dev Supabase project.
 - On a machine with 8 GB of RAM, do not run `pnpm e2e` together with `pnpm check` or `pnpm dev`. Stop Supabase when you are done.
 - Each run makes a new user. The local database keeps the old users until `supabase stop`.
