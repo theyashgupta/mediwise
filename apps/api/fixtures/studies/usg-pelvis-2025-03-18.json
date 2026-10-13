@@ -1,0 +1,18 @@
+{
+  "labId": "LV25031801",
+  "labName": "Lakeview Imaging Centre",
+  "ageYears": 42,
+  "studies": [
+    {
+      "page": 1,
+      "kind": "ultrasound",
+      "bodyRegion": "Pelvis",
+      "performedAt": "2025-03-18",
+      "signedBy": "Dr. A. Kumar",
+      "findings": "Uterus is anteverted and normal in size, measuring 7.8 x 4.1 x 3.6 cm.\nEndometrial thickness is 6 mm.\nLeft ovary is normal in size and echotexture.\nA 4.2 x 3.1 cm complex mass is seen in the right adnexa.\nNo free fluid in the pouch of Douglas.",
+      "impression": "A 4.2 x 3.1 cm complex mass in the right adnexa.",
+      "familyHistory": null,
+      "measurements": []
+    }
+  ]
+}
