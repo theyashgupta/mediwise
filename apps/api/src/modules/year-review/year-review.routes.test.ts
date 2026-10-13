@@ -56,6 +56,11 @@ const store = vi.hoisted(() => {
 vi.mock("../profiles/profiles.repo.js", () => store.profilesRepo);
 vi.mock("../trends/trends.repo.js", () => store.trendsRepo);
 vi.mock("./year-review.repo.js", () => store.repo);
+vi.mock("../links/links.repo.js", () => ({
+  listProfileLinks: async () => [],
+  listLinks: async () => [],
+  listReportsAfter: async () => [],
+}));
 vi.mock("../../lib/anthropic.js", () => ({ anthropic: { messages: { create: store.create } } }));
 
 type Reading = { value: number; status: string; date: string };

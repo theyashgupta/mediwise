@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { changeMark, dateOptions, rangeText, unitText, valueText } from "../config/export";
 import { conditionValue, formatReportDate } from "../config/report";
 import { printedLines, studyTitle } from "../config/studies";
+import { SequenceSteps } from "./sequence-steps";
 import type { ExportDetail, ExportReport, MarkerRow } from "../types";
 
 type PreviousValues = Map<string, number | string>;
@@ -147,6 +148,10 @@ export function ReportExport({
     [text.collectedOn, header.collectedAt && formatPlainDate(header.collectedAt, dateOptions)],
     [text.reportedOn, header.reportedAt && formatPlainDate(header.reportedAt, dateOptions)],
   ];
+  const sequences = [
+    ...report.findings.flatMap(({ title, sequence }) => (sequence ? [{ title, ...sequence }] : [])),
+    ...report.settled,
+  ];
   const groups: MarkerGroup[] = [
     ...report.categories.map(({ key, label, markers }) => ({ key, label, rows: markers })),
     ...(report.derived.length > 0
@@ -250,6 +255,23 @@ export function ReportExport({
                   {finding.title} ({t.common.status[finding.severity]})
                 </p>
                 <p>{finding.body}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {sequences.length > 0 && (
+        <section aria-labelledby="export-sequences" className="space-y-2">
+          <h2 id="export-sequences" className="text-base font-semibold print:text-[11pt]">
+            {text.sequences}
+          </h2>
+          <p className="text-muted-foreground">{text.sequencesNote}</p>
+          <ul className="space-y-3 print:space-y-2">
+            {sequences.map((item) => (
+              <li key={item.title} className="break-inside-avoid space-y-1">
+                <p className="font-medium">{item.title}</p>
+                <SequenceSteps sequence={item} />
               </li>
             ))}
           </ul>

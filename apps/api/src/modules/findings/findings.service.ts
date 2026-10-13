@@ -1,5 +1,13 @@
 import type Anthropic from "@anthropic-ai/sdk";
-import { derived, type FindingDraft, markers, studyMarkers, type Visit } from "@mediwise/engine";
+import {
+  alertKeys,
+  derived,
+  type FindingDraft,
+  markers,
+  type Settlement,
+  studyMarkers,
+  type Visit,
+} from "@mediwise/engine";
 import { z } from "zod";
 import { callTool, type StepUsage } from "../extraction/index.js";
 
@@ -71,6 +79,7 @@ Content rules:
 9. Do not name a drug. Do not give a supplement dose.
 10. Use the status names optimal, watch and risk. Use the direction words improving, worsening and stable as the facts give them.
 11. Do not write about the lab or the test method. MediWise adds that note itself.
+12. A finding marked settled is not a current result. Say that the later report settles it. Do not name its line or marker in any other finding.
 
 Three bodies that pass every rule, as write_findings input:
 ${JSON.stringify({ findings: findingExamples })}`;
@@ -84,10 +93,14 @@ export type FindingRule =
   | "diagnosis_word"
   | "uncited"
   | "unknown_key"
-  | "unknown_marker";
+  | "unknown_marker"
+  | "settled_as_current";
 export type FindingProblem = { rule: FindingRule; message: string };
 export type FindingsUsage = StepUsage & { rejections?: FindingRule[]; dropped?: number };
-export type Finding = Omit<FindingDraft, "facts" | "note" | "askDoctor" | "direction"> & {
+export type Finding = Omit<
+  FindingDraft,
+  "facts" | "note" | "askDoctor" | "direction" | "settlement"
+> & {
   body: string;
 };
 
@@ -96,10 +109,12 @@ export type Finding = Omit<FindingDraft, "facts" | "note" | "askDoctor" | "direc
  *
  * @remarks
  * Present names are cut out of the text before the search, so "fasting glucose" never counts as a bare "glucose".
+ * A sentence that states a settled alert line or names a settled marker passes only when it also says "settle".
  */
 export function validateFindingBody(
   { body, citedKeys }: Pick<Body, "body" | "citedKeys">,
   allowed: Set<string>,
+  settled: Pick<Settlement, "alertKeys" | "subject" | "markerKey">[] = [],
 ): FindingProblem[] {
   const problems: FindingProblem[] = [];
   const sentences = body.split(/(?<=[.!?])\s+/);
@@ -115,6 +130,19 @@ export function validateFindingBody(
       problems.push({
         rule: "long_sentence",
         message: `"${sentence}" has ${words} words. Use ${maxWords} or fewer.`,
+      });
+    }
+    const stated = alertKeys([sentence]);
+    const lower = sentence.toLowerCase();
+    const current = settled.find(
+      ({ alertKeys: keys, subject, markerKey }) =>
+        keys.some((key) => stated.has(key)) ||
+        (markerKey !== undefined && namedIn(lower, subject.toLowerCase())),
+    );
+    if (current && !/\bsettle/i.test(sentence)) {
+      problems.push({
+        rule: "settled_as_current",
+        message: `"${sentence}" names a settled result as current. Say that the later report settles it.`,
       });
     }
   }
@@ -157,7 +185,7 @@ function findingFacts(drafts: FindingDraft[], studyRefs: Map<string, string>) {
       const cite = [...draft.citedKeys, ...draft.citedStudyIds.map((id) => studyRefs.get(id))];
       return [
         `Finding ${index + 1}: ${draft.title}`,
-        `Kind: ${draft.kind}. Severity: ${draft.severity}.`,
+        `Kind: ${draft.kind}. Severity: ${draft.severity}.${draft.settlement?.state === "settled" ? " Settled." : ""}`,
         `Cite list: ${cite.join(", ")}`,
         ...draft.facts.map((fact) => `- ${fact}`),
       ].join("\n");
@@ -187,6 +215,9 @@ export async function writeFindings(
   const studyIds = [...new Set(drafts.flatMap(({ citedStudyIds }) => citedStudyIds))];
   const studyRefs = new Map(studyIds.map((id, index) => [id, `study_${index + 1}`]));
   const allowed = new Set([...allowedKeys, ...studyRefs.values()]);
+  const settled = drafts.flatMap(({ settlement }) =>
+    settlement?.state === "settled" ? [settlement] : [],
+  );
   const facts: Anthropic.TextBlockParam = {
     type: "text",
     text: findingFacts(drafts, studyRefs),
@@ -206,7 +237,7 @@ export async function writeFindings(
     numbers.map((number) => {
       const body = bodies.find((item) => item.number === number);
       const problems: FindingProblem[] = body
-        ? validateFindingBody(body, allowed)
+        ? validateFindingBody(body, allowed, settled)
         : [{ rule: "missing", message: "You wrote no body for it." }];
       return { number, body, problems };
     });

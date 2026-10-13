@@ -20,6 +20,7 @@ import { env } from "../../config/env.js";
 import { createSignedUploadUrl, list, remove } from "../../lib/storage.js";
 import { assertCanAddReport } from "../credits/index.js";
 import { listFindings } from "../findings/index.js";
+import { listReportLinks, loadSequence, settleStored } from "../links/index.js";
 import { getOwnedProfile } from "../profiles/index.js";
 import { claudeCostCents } from "../spend/index.js";
 import * as repo from "./reports.repo.js";
@@ -111,13 +112,17 @@ export async function getReport(userId: string, id: string) {
  *
  * @remarks
  * The engine never runs here: statuses, score and follow-ups are what processing stored, so a catalog change cannot move an old report.
+ * Only the split into open and settled findings is new on each load, because a link can change after the read.
  */
 export async function getReportDetail(userId: string, id: string) {
   const report = await getReport(userId, id);
-  const [storedFiles, storedStudies, findings] = await Promise.all([
+  const done = report.status === "done";
+  const [storedFiles, storedStudies, storedFindings, sequence, links] = await Promise.all([
     repo.listReportFiles(id),
-    report.status === "done" ? repo.listStudies(id) : [],
-    report.status === "done" ? listFindings(id) : [],
+    done ? repo.listStudies(id) : [],
+    done ? listFindings(id) : [],
+    done ? loadSequence(id) : undefined,
+    done ? listReportLinks(id) : [],
   ]);
   const files = describeFiles(storedFiles, storedStudies);
   const read =
@@ -131,7 +136,25 @@ export async function getReportDetail(userId: string, id: string) {
           ])),
         )
       : buildReportDetail(report, [], []);
-  const detail = { ...read, studies: storedStudies.map(toStudy), findings, files };
+  const settled = sequence
+    ? settleStored(id, sequence.current, sequence.later, {
+        findings: storedFindings,
+        doctorQuestions: read.doctorQuestions,
+        narrative: read.narrative,
+      })
+    : {
+        findings: storedFindings.map((finding) => ({ ...finding, sequence: null })),
+        settled: [],
+        doctorQuestions: read.doctorQuestions,
+        narrative: read.narrative,
+      };
+  const detail = {
+    ...read,
+    ...settled,
+    studies: storedStudies.map(toStudy),
+    files,
+    links,
+  };
   if (!env.ADMIN_USER_ID || userId !== env.ADMIN_USER_ID) return detail;
   return { ...detail, costCents: await reportCostCents(id) };
 }

@@ -1,0 +1,219 @@
+import {
+  alertHeadline,
+  alertHeadlineStart,
+  daysBetween,
+  type FindingDraft,
+  type LaterVisit,
+  openQuestions,
+  repeatMarkerDays,
+  repeatStudyDays,
+  repeatsStudy,
+  type Settlement,
+  settleFinding,
+  type Visit,
+} from "@mediwise/engine";
+import type { Narrative, ReportLinkKind } from "@mediwise/shared";
+import { AppError } from "../../common/errors.js";
+import { findVisit } from "../findings/index.js";
+import { withHeadline } from "../narrative/index.js";
+import * as repo from "./links.repo.js";
+
+type Dated = { id: string; date: string; createdAt: Date };
+type StoredFinding = Pick<
+  FindingDraft,
+  "kind" | "severity" | "title" | "citedKeys" | "citedStudyIds"
+> & { body: string };
+
+/** Puts two reports in visit order. Reports of one date go in upload order. */
+function inOrder(a: Dated, b: Dated): [Dated, Dated] {
+  const days = daysBetween(a.date, b.date);
+  return days > 0 || (days === 0 && a.createdAt <= b.createdAt) ? [a, b] : [b, a];
+}
+
+/**
+ * Proposes a link to every done report of the profile with a study of the same kind and region within 90 days.
+ *
+ * @remarks
+ * Runs on every read, so an older report uploaded after a newer one still finds it. A pair that already has a row keeps it,
+ * so a dismissed proposal never comes back.
+ */
+export async function proposeLinks(
+  profileId: string,
+  report: Dated,
+  current: Pick<Visit, "date" | "studies">,
+) {
+  if (current.studies.length === 0) return;
+  const near = await repo.listNearReports(profileId, report.id, current.date, repeatStudyDays);
+  const rows = [];
+  for (const other of near) {
+    const visit = (await findVisit(other.id))?.visit;
+    if (!visit || !repeatsStudy(current, visit)) continue;
+    const [earlier, later] = inOrder(report, other);
+    const kind: ReportLinkKind = earlier.date === later.date ? "second_opinion" : "repeat";
+    rows.push({ earlierReportId: earlier.id, laterReportId: later.id, kind });
+  }
+  await repo.insertDetectedLinks(rows);
+}
+
+/**
+ * Loads the reports that can settle a finding of this report: every linked later report, and every report of the next 30 days.
+ *
+ * @remarks
+ * Only a linked report can settle a study alert. The 30 days serve marker repeats, which need no link.
+ */
+export async function listLaterVisits(
+  profileId: string,
+  reportId: string,
+  date: string,
+): Promise<LaterVisit[]> {
+  const [links, soon] = await Promise.all([
+    repo.listLinks(reportId),
+    repo.listReportsAfter(profileId, reportId, date, repeatMarkerDays),
+  ]);
+  const linked = new Set(
+    links.filter((link) => link.earlierReportId === reportId).map((link) => link.laterReportId),
+  );
+  const ids = [...new Set([...linked, ...soon.map(({ id }) => id)])];
+  const visits = await Promise.all(
+    ids.map(async (id) => {
+      const found = await findVisit(id);
+      return found ? [{ ...found.visit, reportId: id, linked: linked.has(id) }] : [];
+    }),
+  );
+  return visits.flat().toSorted((a, b) => a.date.localeCompare(b.date));
+}
+
+function step(reportId: string, date: string, text: string) {
+  return { reportId, date, text };
+}
+
+/**
+ * Splits the stored findings of a report into open ones and settled ones, by the reports linked to it now.
+ *
+ * @remarks
+ * Runs on every page load, so a confirm or a dismiss changes the page with no new read. The questions and the engine
+ * headline sentence lose a settled finding the same way.
+ */
+export function settleStored(
+  reportId: string,
+  current: Visit,
+  later: LaterVisit[],
+  stored: { findings: StoredFinding[]; doctorQuestions: string[]; narrative: Narrative | null },
+) {
+  const states = stored.findings.map((finding) => ({
+    finding,
+    settlement: settleFinding(finding, current, later),
+  }));
+  const sequence = (settlement: Settlement) => ({
+    state: settlement.state,
+    earlier: step(reportId, current.date, settlement.earlier),
+    later: step(settlement.reportId, settlement.date, settlement.later),
+  });
+  const settled = states.flatMap(({ finding, settlement }) =>
+    settlement?.state === "settled" ? [{ settlement, finding }] : [],
+  );
+  const narrative = stored.narrative && {
+    sections: stored.narrative.sections.map((section) => ({
+      ...section,
+      sentences: section.sentences.filter(({ text }) => !text.startsWith(alertHeadlineStart)),
+    })),
+  };
+  const headline = alertHeadline(
+    current,
+    states.map(({ finding, settlement }) => ({ ...finding, settlement })),
+  );
+  return {
+    findings: states.flatMap(({ finding, settlement }) =>
+      settlement?.state === "settled"
+        ? []
+        : [
+            {
+              ...finding,
+              severity: settlement?.severity ?? finding.severity,
+              sequence: settlement ? sequence(settlement) : null,
+            },
+          ],
+    ),
+    settled: settled.map(({ finding, settlement }) => ({
+      kind: finding.kind,
+      title: finding.title,
+      ...sequence(settlement),
+    })),
+    doctorQuestions: openQuestions(
+      stored.doctorQuestions,
+      settled.map(({ settlement }) => settlement),
+    ),
+    narrative: narrative && withHeadline(narrative, headline),
+  };
+}
+
+/** Loads a done report's visit with every later visit that can settle its findings. */
+export async function loadSequence(reportId: string) {
+  const found = await findVisit(reportId);
+  if (!found) return undefined;
+  const later = await listLaterVisits(found.profileId, reportId, found.visit.date);
+  return { current: found.visit, later };
+}
+
+/** Lists the links of a report for its page, each named from this report's side. */
+export async function listReportLinks(reportId: string) {
+  const links = await repo.listLinks(reportId);
+  return links.map(({ id, kind, state, createdBy, earlierReportId, other }) => ({
+    id,
+    kind,
+    state,
+    createdBy,
+    role: earlierReportId === reportId ? ("earlier" as const) : ("later" as const),
+    other,
+  }));
+}
+
+/**
+ * Links two done reports of one profile, in visit order, as the user asked.
+ *
+ * @remarks
+ * Another user's report answers 404, the same as a report that does not exist.
+ */
+export async function linkReports(
+  userId: string,
+  reportId: string,
+  otherId: string,
+  kind: ReportLinkKind,
+) {
+  if (reportId === otherId) throw new AppError(422, "Select a different report");
+  const [report, other] = await Promise.all([
+    repo.findOwnedReport(userId, reportId),
+    repo.findOwnedReport(userId, otherId),
+  ]);
+  if (!report || !other) throw new AppError(404, "We could not find this report");
+  if (report.profileId !== other.profileId) {
+    throw new AppError(422, "Select a report of the same person");
+  }
+  if (report.status !== "done" || other.status !== "done") {
+    throw new AppError(422, "Wait until we read both reports");
+  }
+  const [earlier, later] = inOrder(report, other);
+  await repo.upsertUserLink({ earlierReportId: earlier.id, laterReportId: later.id, kind });
+  return listReportLinks(reportId);
+}
+
+/** Confirms or dismisses one link of an owned report. */
+export async function setLinkState(
+  userId: string,
+  reportId: string,
+  linkId: string,
+  state: "confirmed" | "dismissed",
+) {
+  const report = await repo.findOwnedReport(userId, reportId);
+  if (!report) throw new AppError(404, "We could not find this report");
+  const link = await repo.updateLinkState(reportId, linkId, state);
+  if (!link) throw new AppError(404, "We could not find this link");
+  return listReportLinks(reportId);
+}
+
+/** Lists the report id pairs of a profile's links that are not dismissed, for the trend chart. */
+export async function listLinkedPairs(profileId: string) {
+  return (await repo.listProfileLinks(profileId)).map(
+    ({ earlierReportId, laterReportId }) => `${earlierReportId}:${laterReportId}`,
+  );
+}

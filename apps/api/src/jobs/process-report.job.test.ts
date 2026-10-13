@@ -105,6 +105,9 @@ const edge = vi.hoisted(() => ({
   filledBirths: [] as unknown[][],
   previous: undefined as Visit | undefined,
   note: null as string | null,
+  visits: new Map<string, Visit>(),
+  near: [] as { id: string; date: string; createdAt: Date }[],
+  links: [] as { earlierReportId: string; laterReportId: string; kind: string }[],
 }));
 
 vi.mock("../lib/anthropic.js", () => ({ anthropic: { messages: { create: edge.create } } }));
@@ -163,6 +166,23 @@ vi.mock("../modules/reports/reports.repo.js", () => ({
 
 vi.mock("../modules/findings/findings.repo.js", () => ({
   findPreviousVisit: async () => edge.previous,
+  findVisit: async (id: string) => {
+    const visit = edge.visits.get(id);
+    return visit && { profileId: "profile-1", patterns: [], visit };
+  },
+}));
+vi.mock("../modules/links/links.repo.js", () => ({
+  listNearReports: async () => edge.near,
+  listReportsAfter: async () => [],
+  insertDetectedLinks: async (rows: typeof edge.links) => edge.links.push(...rows),
+  listLinks: async (reportId: string) =>
+    edge.links.map((link, index) => ({
+      ...link,
+      id: `link-${index}`,
+      createdBy: "detector",
+      state: "proposed",
+      other: { id: link.earlierReportId === reportId ? link.laterReportId : link.earlierReportId },
+    })),
 }));
 
 /** Writes a report in the compact shape the record_extraction tool returns. */
@@ -261,6 +281,9 @@ beforeEach(() => {
   edge.filledBirths.length = 0;
   edge.previous = undefined;
   edge.note = null;
+  edge.visits.clear();
+  edge.near.length = 0;
+  edge.links.length = 0;
   addFile(0, labPdf);
 });
 
@@ -1160,6 +1183,54 @@ test("An adnexal mass line is the first finding, a doctor question and the first
   );
   expect(report.narrative.sections[0]?.sentences.map(({ text }) => text)).toEqual([
     "Ask your doctor about a line in your ultrasound report.",
+    "Most markers are optimal.",
+  ]);
+});
+
+test("a later ultrasound of the same region with no alert line settles the mass line on a re-read", async () => {
+  const later: Visit = {
+    date: "2024-04-22",
+    labName: null,
+    markers: [],
+    studies: [
+      {
+        id: "later-study",
+        kind: "ultrasound",
+        bodyRegion: "abdomen & pelvis",
+        impression: "Uterus and both ovaries are normal.\nNo adnexal mass or lesion is seen.",
+        result: null,
+        measurements: [],
+      },
+    ],
+  };
+  edge.visits.set("later-report", later);
+  edge.near.push({ id: "later-report", date: later.date, createdAt: new Date("2024-04-23") });
+  edge.files.length = 0;
+  addFile(0, textPdf([labPage, xrayPage]));
+  edge.create
+    .mockResolvedValueOnce(classified("lab_panel", "imaging_report"))
+    .mockResolvedValueOnce(studies(pelvisUsgStudy))
+    .mockResolvedValueOnce(toolUse("record_extraction", compact(extraction)))
+    .mockResolvedValueOnce(toolUse("map_markers", mappings))
+    .mockResolvedValueOnce(toolUse("write_narrative", draft))
+    .mockRejectedValueOnce(new Error("overloaded"));
+
+  await read();
+
+  expect(edge.links).toEqual([
+    { earlierReportId: reportId, laterReportId: "later-report", kind: "repeat" },
+  ]);
+  const [[, report, , , , , findings]] = edge.saved as [
+    [string, { doctorQuestions: string[]; narrative: typeof narrative }, ...unknown[]],
+  ];
+  expect(findings).toEqual([
+    expect.objectContaining({
+      kind: "study_alert",
+      body: "Settled by the report of 22 Apr 2024.",
+    }),
+  ]);
+  expect(report.doctorQuestions.some((question) => question.includes("adnexa"))).toBe(false);
+  expect(report.narrative.sections[0]?.sentences.map(({ text }) => text)).toEqual([
     "Most markers are optimal.",
   ]);
 });

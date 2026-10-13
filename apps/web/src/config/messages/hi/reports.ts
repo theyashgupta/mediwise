@@ -117,6 +117,8 @@ export const reports: Messages["reports"] = {
     moveFirst: review("पहले इन पर काम करें"),
     patterns: "पैटर्न",
     findings: "नतीजे",
+    sequences: "दोबारा की गई जाँचें",
+    sequencesNote: review("हर हिस्से में एक नतीजा और उसे दोहराने वाली बाद की रिपोर्ट है।"),
     questions: "डॉक्टर से पूछने के सवाल",
     markers: "मार्कर",
     studies: "स्टडी",

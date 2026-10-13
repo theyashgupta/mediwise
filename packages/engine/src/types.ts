@@ -157,6 +157,20 @@ export type FindingSeverity = Exclude<MarkerStatus, "unknown">;
 
 export type TrendDirection = "improving" | "worsening" | "stable";
 
+export type LaterVisit = Visit & { reportId: string; linked: boolean };
+
+export type Settlement = {
+  state: "settled" | "confirmed";
+  reportId: string;
+  date: string;
+  earlier: string;
+  later: string;
+  subject: string;
+  alertKeys: string[];
+  markerKey?: string;
+  severity?: FindingSeverity;
+};
+
 export type FindingDraft = {
   kind: FindingKind;
   severity: FindingSeverity;
@@ -169,4 +183,5 @@ export type FindingDraft = {
   fallback?: string;
   note?: string;
   askDoctor?: string;
+  settlement?: Settlement;
 };

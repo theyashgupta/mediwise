@@ -5,6 +5,8 @@ import {
   pageClasses,
   relations,
   reportStatuses,
+  reportLinkKinds,
+  reportLinkStates,
   findingKinds,
   findingSeverities,
   sexes,
@@ -14,6 +16,7 @@ import { sql } from "drizzle-orm";
 import type { ReportUsage } from "../modules/extraction/index.js";
 import {
   boolean,
+  check,
   date,
   doublePrecision,
   index,
@@ -215,6 +218,35 @@ export const findings = pgTable(
     rank: integer().notNull(),
   },
   (t) => [index("findings_report_id_idx").on(t.reportId)],
+);
+
+/**
+ * One report that repeats an earlier report of the same profile, or gives a second opinion on it.
+ *
+ * @remarks
+ * The detector writes a `proposed` row and the user confirms or dismisses it. Only a dismissed row stops a later report from
+ * settling an alert of the earlier one.
+ */
+export const reportLinks = pgTable(
+  "report_links",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    earlierReportId: uuid("earlier_report_id")
+      .notNull()
+      .references(() => reports.id, { onDelete: "cascade" }),
+    laterReportId: uuid("later_report_id")
+      .notNull()
+      .references(() => reports.id, { onDelete: "cascade" }),
+    kind: text({ enum: reportLinkKinds }).notNull(),
+    createdBy: text("created_by", { enum: ["user", "detector"] }).notNull(),
+    state: text({ enum: reportLinkStates }).notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    uniqueIndex("report_links_pair_idx").on(t.earlierReportId, t.laterReportId),
+    check("report_links_two_reports", sql`${t.earlierReportId} <> ${t.laterReportId}`),
+    index("report_links_later_report_id_idx").on(t.laterReportId),
+  ],
 );
 
 export const followUps = pgTable("follow_ups", {

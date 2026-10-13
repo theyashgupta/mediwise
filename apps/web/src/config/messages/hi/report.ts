@@ -69,6 +69,39 @@ export const report: Messages["report"] = {
     description: review("आपकी पिछली रिपोर्ट के बाद क्या बदला, और कौन से नतीजे एक साथ जुड़े हैं।"),
     cited: "इस नतीजे में बताए गए",
   },
+  settled: {
+    title: review("बाद की रिपोर्ट से तय"),
+    description: review(
+      "बाद की एक रिपोर्ट इन नतीजों का जवाब देती है। हर लाइन छपी हुई रिपोर्ट से ली गई है।",
+    ),
+    settledBy: (date: string) => review(`${date} की रिपोर्ट ने इसे तय किया।`),
+  },
+  sequence: {
+    confirmedBy: (date: string) => review(`${date} की रिपोर्ट में यह नतीजा फिर से आया।`),
+    steps: "तारीख के क्रम में नतीजे",
+  },
+  links: {
+    title: "जुड़ी हुई रिपोर्ट",
+    description: review(
+      "किसी रिपोर्ट की दोबारा जाँच या दूसरी राय। बाद की रिपोर्ट पहले की रिपोर्ट की किसी लाइन को तय कर सकती है।",
+    ),
+    repeatOf: (report: string, date: string) => `${date} की ${report} की दोबारा जाँच`,
+    secondOpinionOf: (report: string, date: string) => `${date} की ${report} पर दूसरी राय`,
+    repeatedIn: (report: string, date: string) => `${date} की ${report} में दोबारा जाँच`,
+    secondOpinionIn: (report: string, date: string) => `${date} की ${report} में दूसरी राय`,
+    proposed: review(
+      "MediWise ने यह जोड़ी ढूँढी। अगर बाद की रिपोर्ट वही जाँच दोहराती है, तो इसकी पुष्टि करें।",
+    ),
+    confirm: "पुष्टि करें",
+    dismiss: "खारिज करें",
+    otherReport: "रिपोर्ट",
+    kind: "प्रकार",
+    kinds: { repeat: "दोबारा जाँच", second_opinion: "दूसरी राय" },
+    add: "रिपोर्ट जोड़ें",
+    adding: "जोड़ रहे हैं",
+    failed: "हम लिंक सेव नहीं कर सके। फिर से कोशिश करें।",
+    unnamed: "आपकी रिपोर्ट",
+  },
   moveFirst: {
     title: review("पहले इन पर काम करें"),
     description: review("इन मार्कर पर पहले काम करें, इसी क्रम में।"),
