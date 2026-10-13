@@ -1,8 +1,8 @@
-import { Phone, Screen, type ScreenName } from "@/components/phone";
+import { PhoneSteps, type PhoneStep } from "@/components/phone-steps";
 import { SectionHeader } from "@/components/section-header";
 import { facts } from "@/lib/facts";
 
-const steps: { title: string; body: string; screen: ScreenName; alt: string }[] = [
+const steps: PhoneStep[] = [
   {
     title: "Upload",
     body: `Add your report as a PDF or as photos. You can add up to ${facts.maxFiles} files in one report.`,
@@ -11,7 +11,7 @@ const steps: { title: string; body: string; screen: ScreenName; alt: string }[] 
   },
   {
     title: "Understand",
-    body: "MediWise explains every marker in plain English. It scores each marker against ranges for your age, sex and ancestry.",
+    body: "MediWise explains every marker in plain English or Hindi. It scores each marker against ranges for your age, sex and ancestry.",
     screen: "marker",
     alt: "The Vitamin B12 page: what the marker is, the value, and where it sits in the range.",
   },
@@ -37,20 +37,7 @@ export function HowItWorks() {
       >
         You do not need to know what a marker means. MediWise reads the report and tells you.
       </SectionHeader>
-      <ol className="mt-14 grid gap-12 md:grid-cols-3 md:gap-8">
-        {steps.map((step, index) => (
-          <li key={step.title} className="reveal flex flex-col">
-            <p className="font-mono text-sm text-primary">0{index + 1}</p>
-            <h3 className="mt-2 text-xl font-semibold">{step.title}</h3>
-            <p className="mt-2 text-muted-foreground">{step.body}</p>
-            <div className="mt-8 px-6 md:px-2 lg:px-6">
-              <Phone className="mx-auto max-w-[260px]">
-                <Screen name={step.screen} alt={step.alt} />
-              </Phone>
-            </div>
-          </li>
-        ))}
-      </ol>
+      <PhoneSteps steps={steps} />
     </section>
   );
 }

@@ -51,7 +51,7 @@ export function Hero() {
               <Screen
                 name="report"
                 priority
-                alt="A MediWise report: 65 of 80 markers sit in the calibrated ranges, score 87, and a B12 deficiency pattern."
+                alt="A MediWise report: 67 of 81 markers sit in the calibrated ranges, and urine albumin is the one to move first. Score 89, Platinum."
               />
             </Phone>
           </div>

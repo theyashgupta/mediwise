@@ -1,4 +1,12 @@
-import { categories, derived, markers, patterns, sources, type Category } from "@mediwise/engine";
+import {
+  categories,
+  derived,
+  markers,
+  patterns,
+  repeatStudyDays,
+  sources,
+  type Category,
+} from "@mediwise/engine";
 import { maxFileBytes, maxFiles, maxProfilesPerUser, maxTotalBytes } from "@mediwise/shared";
 import { paymentPacks } from "../../../api/src/modules/payments/payments.config";
 
@@ -33,6 +41,7 @@ export const facts = {
   maxFileMb: megabytes(maxFileBytes),
   maxTotalMb: megabytes(maxTotalBytes),
   maxProfiles: maxProfilesPerUser,
+  repeatStudyDays,
   firstPack,
   cheapest,
   cheapestPaise: Math.round(cheapest.amount / cheapest.credits),

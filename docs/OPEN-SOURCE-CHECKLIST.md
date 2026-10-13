@@ -11,7 +11,7 @@ Result of each MEDI-48 check before the repository goes public. Checked on 2026-
 - [x] **Tests and code.** No test or prompt contains a real patient, family member, doctor, lab, insurer, patient ID or city. The dev user is `dev-user`.
 - [x] **Docs.** Docs name the maintainer by role. `docs/tickets/NOTES.md` has no family name and no health finding.
 - [x] **Screenshots.** OCR (tesseract) of all 161 tracked images finds no real name, email, birth date, lab or hospital. Every screenshot that showed real data is now from the demo account, or is deleted when it showed old UI.
-- [x] **Demo GIF.** The OCR of each frame of `docs/assets/demo.gif` finds no real name.
+- [x] **Demo GIF.** The OCR of each frame of `docs/assets/demo.gif` finds no real name. Checked again after the MEDI-87 recording on 2026-10-13: 200 frames, only made-up names.
 - [x] **Secrets, working tree.** `gitleaks dir` on the tracked files: no leaks. `.gitleaks.toml` allows only the made-up JWT secret in `apps/api/vitest.config.ts`.
 - [x] **Secrets, history.** `gitleaks git` over all refs, 231 commits: no leaks.
 - [ ] **Personal data, history.** 51 commits before MEDI-48 hold personal data. The data is real lab values with a name, a family member's scan results, a birth date, an email, and lab, hospital and doctor names. Two commit messages also hold a name. A history rewrite or a fresh public history must remove them. This needs a decision from the maintainer. The list is at the end of this file.
@@ -19,7 +19,7 @@ Result of each MEDI-48 check before the repository goes public. Checked on 2026-
 ## 2. README
 
 - [x] Centred hero with `docs/assets/banner.png` (from `scripts/generate-brand-assets.mjs`), a tagline and badges for CI, licence, Node and pull requests.
-- [x] `docs/assets/demo.gif`: an upload of `sample-2025.pdf` to the finished report on the demo account, 19 seconds, 1.4 MB.
+- [x] `docs/assets/demo.gif` (MEDI-87): an upload of the repeat scan in `apps/api/fixtures/episode` on the demo account, the auto-link, the Settled block, then the switch to Hindi. 20 seconds, 842 kB.
 - [x] Sections: what it does, how a report becomes a score, stack, quick start, self-hosting, project structure, contributing, licence.
 - [x] The text follows `.claude/rules/copy.md`: no sentence over 20 words, no semicolon, no em dash.
 - [x] A local render shows the banner (1280 px) and the GIF (960 px). The CI badge shows only after the repository is public.
