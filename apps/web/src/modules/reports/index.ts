@@ -1,4 +1,5 @@
 export { formatReportDate, markerLink, studiesLink, validateReportSearch } from "./config/report";
+export { validateUploadSearch } from "./config/shared-files";
 export { groupVisits } from "./config/visits";
 export { ReportContainer } from "./containers/report-container";
 export { ReportExportContainer } from "./containers/report-export-container";

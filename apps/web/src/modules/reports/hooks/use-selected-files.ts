@@ -1,5 +1,5 @@
 import { reportFilesSchema } from "@mediwise/shared";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 /**
  * Describes a browser file the way `POST /reports` expects it.
@@ -21,10 +21,11 @@ export function fileErrors(files: File[]) {
 
 export function useSelectedFiles() {
   const [files, setFiles] = useState<File[]>([]);
+  const add = useCallback((added: File[]) => setFiles((current) => [...current, ...added]), []);
   return {
     files,
     errors: fileErrors(files),
-    add: (added: File[]) => setFiles((current) => [...current, ...added]),
+    add,
     remove: (index: number) => setFiles((current) => current.filter((_, i) => i !== index)),
   };
 }

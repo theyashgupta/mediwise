@@ -290,6 +290,24 @@ scripts/smoke.sh
 
 Do not type a secret into a shared terminal log. Load the values from a git-ignored file with `set -a; . ./smoke.env; set +a` first.
 
+## Share from WhatsApp on Android
+
+The manifest `share_target` sends a shared PDF or photo to `POST /share-target`. `sw.js` keeps the files in Cache Storage and opens `/reports/upload?shared=1`. Only an installed app shows in the Android share sheet. iOS Safari has no share target.
+
+Do this test on an Android phone after each deploy that changes `sw.js` or the manifest:
+
+1. Open Chrome and go to https://app.mediwise.theyashgupta.me. Sign in.
+2. Open the Chrome menu. Select "Add to Home screen", then "Install".
+3. If MediWise was installed before the deploy, remove it and install it again. Chrome can keep the old manifest for up to one day.
+4. Open WhatsApp. Open a chat that has a lab PDF. Touch and hold the PDF. Select the share icon, then MediWise.
+5. Make sure that MediWise opens "Upload a report" with the PDF in the list.
+6. Make sure that this line shows above the list: "We added 1 file from another app. Check the profile. Then select Read my report."
+7. Make sure that no upload starts. Select the profile, then select "Read my report". The upload uses one credit.
+8. Do steps 4 to 7 again with a JPG photo.
+9. Sign out. Do step 4 again. Sign in. Make sure that the PDF is in the list after sign-in.
+
+To see Cache Storage, connect the phone with USB and open `chrome://inspect` on the Mac. Select the MediWise page, then Application, Cache Storage. After step 5 it has no entries.
+
 ## Deploy a change
 
 - Merge to `main` and push. Render builds and deploys `main` on its own.

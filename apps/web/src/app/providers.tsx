@@ -4,6 +4,9 @@ import { useTheme } from "@/common/hooks/use-theme";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { queryClient } from "@/config/query-client";
+import { registerServiceWorker } from "./service-worker";
+
+registerServiceWorker();
 
 function ThemedToaster() {
   const { theme } = useTheme();
