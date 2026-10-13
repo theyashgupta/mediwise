@@ -492,10 +492,12 @@ The ticket targets were performance 85, accessibility 100, best practices 95 and
 
 | Page | Performance | Accessibility | Best practices | SEO |
 | - | - | - | - | - |
-| Home | 58 | 100 | 95 | 58 |
-| Report | 51 | 100 | 95 | 58 |
-| Trends | 55 | 100 | 95 | 58 |
+| Home | 76 | 100 | 95 | 58 |
+| Report | 78 | 100 | 95 | 58 |
+| Trends | 77 | 100 | 95 | 58 |
 | Landing | 75 | 100 | 95 | 95 |
+
+MEDI-92 raised the app performance budgets from 58, 51 and 55. The numbers are in [Report page performance](#report-page-performance-medi-92).
 
 The two CI runs of 2026-10-13, GitHub `ubuntu-latest`. Each cell is the median of 3 Lighthouse runs, with the runs in brackets. Accessibility, best practices and SEO were the same in both runs: 100, 100, 63 on the app and 100, 100, 100 on the landing.
 
@@ -549,3 +551,29 @@ Lighthouse opens its tab in the signed-in browser with `disableStorageReset`, so
 | 5 | The report page renders 2,287 elements. | `dom-size`: 2,287 elements. Style and layout 506 ms, rendering 113 ms. | Part of the render delay of cause 3. |
 
 Other audits did not cost points: render-blocking CSS is 160 ms (our CSS) and 0 ms (the Google Fonts CSS), and `unused-javascript` and `unused-css-rules` found nothing over the threshold.
+
+### Changes
+
+| Cause | Change |
+| - | - |
+| 1 | The page area under the header is at least one screen high (`min-h-svh`), so the footer starts under the first screen. Home also showed two shifts of its own: the install banner (Chrome fires `beforeinstallprompt` at any time) and the family list (its own request) came in above or beside the loading state. Both now show when the dashboard request is done. |
+| 2 | `apps/web/package.json` has `"sideEffects": ["**/*.css"]`. The bundler then drops each barrel export that a route file does not use, and each route loads its own code. First load is 272 kB (was 481 kB). Recharts loads only on the pages that draw a chart. |
+| 3, 5 | The report renders the header and the summary first. The sections under the summary render after the first paint (`AfterFirstPaint`, `useDeferredValue` with an initial value), so React splits that work into short tasks. The LCP element is in the summary. |
+| 4 | The API compresses responses (`hono/compress`, gzip) and allows a browser to keep a CORS preflight for 10 minutes (`maxAge: 600`). |
+
+Not done, because the measurement did not show a need: a second request for the study text and the translations (the report request takes 35 ms), lazy dialogs, preconnect (each script comes from the cache), font changes (the web fonts did not shift the page after change 1), image sizes and unused CSS (both audits pass).
+
+### After
+
+The two CI runs after the changes. Each cell is the median of 3 runs, with the runs in brackets.
+
+| Page | Before | Run 2, `bc74f27` (index 2650, 5.30x) | Run 3, `de63a49` (index 2651, 5.30x) | Lowest median | Budget |
+| - | - | - | - | - | - |
+| Home | 78 (75, 78, 88) | 86 (86, 87, 85) | 89 (80, 90, 89) | 86 | 76 |
+| Report | 74 (79, 73, 74) | 90 (90, 89, 92) | 88 (90, 88, 87) | 88 | 78 |
+| Trends | 79 (82, 79, 79) | 87 (87, 91, 87) | 92 (91, 92, 92) | 87 | 77 |
+| Landing | 88 (88, 89, 85) | 85 (89, 84, 85) | 85 (85, 85, 85) | 85 | 75 |
+
+Report page metrics, before and after (run 3): LCP 2.1 s to 1.4 s, TBT 784 to 873 ms to 418 to 495 ms, CLS 0.154 to 0.001. INP on `/trends` stays at 192 ms. Accessibility stays at 100 on each page.
+
+The MEDI-88 runs of 2026-10-13 scored the report 60 to 63 on an earlier build, and the "before" run above scored 74. The CI runners differ from day to day, so compare runs of one day only.
