@@ -1,17 +1,20 @@
 import { setWaitingWorker } from "@/common/hooks/use-app-update";
 
 /**
- * Registers `/sw.js`, which keeps the app shell for offline use and receives files that another app shares on Android.
+ * Registers `/sw.js` after the page loads. The worker keeps the app shell for offline use and receives files that another app shares on Android.
  *
  * @remarks
- * A registration failure only turns off the offline shell and sharing into the app, so it stays silent.
+ * The first install downloads the whole shell, so it waits until the page has its own files.
  */
 export function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
-  navigator.serviceWorker
-    .register("/sw.js")
-    .then(watchForUpdate)
-    .catch(() => undefined);
+  const register = () =>
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then(watchForUpdate)
+      .catch(() => undefined);
+  if (document.readyState === "complete") void register();
+  else window.addEventListener("load", () => void register(), { once: true });
 }
 
 /**
