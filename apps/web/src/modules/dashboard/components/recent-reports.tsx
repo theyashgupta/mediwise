@@ -38,7 +38,7 @@ export function RecentReports({ reports }: RecentReportsProps) {
               >
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-medium">
-                    {report.labName ?? text.fallbackTitle}
+                    {report.title ?? text.fallbackTitle}
                   </span>
                   <span className="block truncate text-sm text-muted-foreground">
                     {formatPlainDate(report.date, {

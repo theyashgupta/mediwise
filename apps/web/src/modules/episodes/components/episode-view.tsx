@@ -106,7 +106,7 @@ export function EpisodeView({ episode }: EpisodeViewProps) {
                   params={{ reportId: row.reportId }}
                   className="font-medium underline-offset-4 hover:underline"
                 >
-                  {row.labName ?? text.timeline.unnamedLab}
+                  {row.title ?? text.timeline.unnamedReport}
                 </Link>
                 <p className="text-sm text-muted-foreground">
                   {[

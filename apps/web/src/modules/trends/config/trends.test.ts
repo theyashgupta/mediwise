@@ -37,22 +37,17 @@ test("the summary names a marker that was not retested only when there is one", 
   );
 });
 
-test("two reports of one date from one lab get the file name, other reports keep date and lab", () => {
-  const report = (
-    id: string,
-    collectedAt: string,
-    labName: string | null,
-    fileName: string | null,
-  ) =>
-    ({ id, collectedAt, createdAt: `${collectedAt}T08:00:00Z`, labName, fileName }) as ReportHeader;
+test("two reports with one title get the file name, other reports keep their title or date", () => {
+  const report = (id: string, collectedAt: string, title: string | null, fileName: string | null) =>
+    ({ id, collectedAt, createdAt: `${collectedAt}T08:00:00Z`, title, fileName }) as ReportHeader;
   const labels = reportLabels([
-    report("a", "2026-02-10", "Lab", "blood.pdf"),
-    report("b", "2026-02-10", "Lab", "urine.pdf"),
-    report("c", "2026-02-10", "Other lab", "thyroid.pdf"),
+    report("a", "2026-02-10", "10 Feb 2026 · blood panel (20 markers)", "blood.pdf"),
+    report("b", "2026-02-10", "10 Feb 2026 · blood panel (20 markers)", "urine.pdf"),
+    report("c", "2026-02-10", "10 Feb 2026 · ultrasound", "scan.pdf"),
     report("d", "2025-02-10", null, "old.pdf"),
   ]);
-  expect(labels.get("a")).toBe("10 Feb 2026, Lab, blood.pdf");
-  expect(labels.get("b")).toBe("10 Feb 2026, Lab, urine.pdf");
-  expect(labels.get("c")).toBe("10 Feb 2026, Other lab");
+  expect(labels.get("a")).toBe("10 Feb 2026 · blood panel (20 markers), blood.pdf");
+  expect(labels.get("b")).toBe("10 Feb 2026 · blood panel (20 markers), urine.pdf");
+  expect(labels.get("c")).toBe("10 Feb 2026 · ultrasound");
   expect(labels.get("d")).toBe("10 Feb 2025");
 });

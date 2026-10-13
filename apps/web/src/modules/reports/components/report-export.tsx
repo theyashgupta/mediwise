@@ -162,7 +162,8 @@ export function ReportExport({
   const { header } = report;
   const details: ExportDetail[] = [
     ...person,
-    [text.lab, header.labName],
+    [text.report, header.title],
+    [text.labs, report.labs.join(", ")],
     [text.collectedOn, header.collectedAt && formatPlainDate(header.collectedAt, dateOptions)],
     [text.reportedOn, header.reportedAt && formatPlainDate(header.reportedAt, dateOptions)],
   ];
@@ -175,8 +176,13 @@ export function ReportExport({
     earlier.length > 0
       ? { values: new Map(earlier.map((item) => [item.markerKey, item])), dated: !source }
       : undefined;
+  const severalLabs = new Set(report.categories.flatMap(({ labNames }) => labNames)).size > 1;
   const groups: MarkerGroup[] = [
-    ...report.categories.map(({ key, label, markers }) => ({ key, label, rows: markers })),
+    ...report.categories.map(({ key, label, labNames, markers }) => ({
+      key,
+      label: severalLabs && labNames.length > 0 ? `${label} · ${labNames.join(", ")}` : label,
+      rows: markers,
+    })),
     ...(report.derived.length > 0
       ? [{ key: "ratios", label: text.ratios, rows: report.derived }]
       : []),
@@ -332,6 +338,7 @@ export function ReportExport({
                 <p className="font-medium">
                   {studyTitle(study)}
                   {study.performedAt && `, ${formatPlainDate(study.performedAt, dateOptions)}`}
+                  {study.labName && `, ${study.labName}`}
                   {study.signedBy && `, ${text.signedBy(study.signedBy)}`}
                 </p>
                 {printedLines(study.impression).map((line) => (

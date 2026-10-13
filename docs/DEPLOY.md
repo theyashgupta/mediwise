@@ -428,6 +428,23 @@ Migrations are SQL files in `apps/api/src/db/migrations`, applied by Drizzle. `0
 
 3. Read the migration SQL before you apply it. If it drops or renames a column, stop and ask the maintainer.
 
+### Report titles (MEDI-80)
+
+Do these steps in this order on `mediwise-prod`:
+
+1. Apply migration `0023_report_titles` before you deploy the API. It adds `reports.title`, `reports.title_edited`, `report_files.lab_name` and `report_markers.report_file_id`. It drops nothing.
+2. Deploy the API and the web.
+3. Set the titles of the existing reports:
+
+   ```sh
+   cd apps/api
+   (set -a; . ./.env.prod; set +a; pnpm db:backfill-titles)
+   ```
+
+4. Make sure that the log line gives the number of done reports.
+
+A report read before MEDI-80 has no lab for each file. Its markers show the lab of the report, and its studies show no lab. To get the lab of each file and study, read the report again with `pnpm db:reread-reports --keep-classes`. That costs one read for each report.
+
 ## Roll back
 
 - Web: Cloudflare Pages, the project, Deployments. Open the last good production deploy, click the menu, Rollback to this deployment. This does not rebuild.
@@ -443,6 +460,7 @@ Run these from `apps/api` with the target environment loaded.
 | Command | What it does |
 |---|---|
 | `pnpm db:reread-reports` | Reads every `done` report again with Claude. It classifies the pages of every file again (one Haiku call per file) and stores the new classes. Add `--keep-classes` to use the stored classes. One Claude extraction and one narrative call per report. A report that fails stays `done` with its old data. |
+| `pnpm db:backfill-titles` | Sets the title of every `done` report from the title rule: the dates, then the blood panel and the study types. It does not change a title that the user wrote. It makes no Claude call. |
 | `pnpm db:claim-dev-data <user-id>` | Moves every profile of `DEV_USER_ID` to a Supabase user. Dev only. |
 
 ## Logs

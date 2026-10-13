@@ -95,17 +95,17 @@ export function validateCompareSearch(search: Record<string, unknown>): { a?: st
 }
 
 /**
- * Labels each report by its date and lab, keyed by report id.
+ * Labels each report by its title, or its date when it has none, keyed by report id.
  *
  * @remarks
- * Two reports of one date from one lab add the name of their first file, so the picker never shows one text twice.
+ * Two reports with one title add the name of their first file, so the picker never shows one text twice.
  */
 export function reportLabels(reports: ReportHeader[]) {
   const base = new Map(
-    reports.map((report) => {
-      const date = formatReportDate(report.collectedAt, report.createdAt);
-      return [report.id, report.labName ? `${date}, ${report.labName}` : date];
-    }),
+    reports.map((report) => [
+      report.id,
+      report.title ?? formatReportDate(report.collectedAt, report.createdAt),
+    ]),
   );
   const counts = new Map<string, number>();
   for (const label of base.values()) counts.set(label, (counts.get(label) ?? 0) + 1);

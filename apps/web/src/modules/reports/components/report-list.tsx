@@ -53,7 +53,7 @@ export function ReportList({ reports }: ReportListProps) {
                       )}
                       <span className="min-w-0 flex-1">
                         <span className="block truncate font-medium">
-                          {report.labName ?? t.reports.list.report}
+                          {report.title ?? t.reports.list.report}
                         </span>
                         <span className="block text-sm text-muted-foreground">
                           {formatReportDate(report.collectedAt, report.createdAt)}

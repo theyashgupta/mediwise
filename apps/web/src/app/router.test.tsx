@@ -11,7 +11,13 @@ const shared = {
   expiresAt: "2026-10-20T06:00:00.000Z",
   person: { firstName: "Arjun", age: 36 },
   report: {
-    header: { labName: "Made-up Labs", collectedAt: "2026-09-01", reportedAt: null },
+    header: {
+      title: "1 Sep 2026 · blood panel (24 markers)",
+      labName: "Made-up Labs",
+      collectedAt: "2026-09-01",
+      reportedAt: null,
+    },
+    labs: ["Made-up Labs"],
     moveFirst: [],
     patterns: [],
     findings: [],

@@ -28,6 +28,7 @@ const episode: EpisodeDetail = {
     reportId: `r${index}`,
     date,
     labName: index === 1 ? null : "Made-up Diagnostics",
+    title: index === 1 ? "10 Feb 2025 · ultrasound" : null,
     markerCount: index === 1 ? 0 : 4,
     flaggedCount: index === 1 ? 0 : 2,
     studies: index === 1 ? [{ kind: "ultrasound", bodyRegion: "Pelvis" }] : [],
@@ -77,7 +78,8 @@ test("the page shows the summary, every report in date order, the repeated marke
   expect(html.indexOf("3 Feb 2025")).toBeLessThan(html.indexOf("17 Mar 2025"));
   expect(html).toContain("4 markers, 2 with watch or risk status");
   expect(html).toContain("Ultrasound, Pelvis");
-  expect(html).toContain("Lab name not printed");
+  expect(html).toContain(">10 Feb 2025 · ultrasound</a>");
+  expect(html).not.toContain("Made-up Diagnostics");
   expect(html).toContain("4.6 → 3.9 → 2.4 µIU/mL");
   expect(html).toContain("Since the episode started");
   expect(html).toContain("Improving");

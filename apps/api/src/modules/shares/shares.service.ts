@@ -70,10 +70,10 @@ export async function getSharedExport(token: string, locale: TextLocale = "en") 
       header: {
         title: header.title,
         labName: header.labName,
-        labs: report.labs,
         collectedAt: header.collectedAt,
         reportedAt: header.reportedAt,
       },
+      labs: report.labs,
       note: report.note,
       moveFirst: report.moveFirst,
       patterns: report.patterns,

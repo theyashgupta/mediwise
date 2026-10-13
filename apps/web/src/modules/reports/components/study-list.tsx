@@ -27,6 +27,7 @@ function StudyCard({ study }: { study: Study }) {
     { label: t.report.studies.adequacy, value: study.adequacy },
   ].filter((row) => row.value);
   const source = [
+    study.labName && t.report.labs([study.labName]),
     study.performedAt && formatPlainDate(study.performedAt, dateOptions),
     study.signedBy && t.report.studies.signedBy(study.signedBy),
     study.fileName && t.report.studies.page(study.fileName, study.page),

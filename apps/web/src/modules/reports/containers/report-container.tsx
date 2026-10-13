@@ -25,6 +25,7 @@ import { ReportLinks } from "../components/report-links";
 import { ReportNote } from "../components/report-note";
 import { ReportStatusBadge } from "../components/report-status-badge";
 import { ReportSummary } from "../components/report-summary";
+import { ReportTitle } from "../components/report-title";
 import { SettledList } from "../components/settled-list";
 import { StudyList } from "../components/study-list";
 import { UnmeasuredList } from "../components/unmeasured-list";
@@ -36,6 +37,7 @@ import { useDeleteReport } from "../hooks/use-delete-report";
 import { useReport, useReports } from "../hooks/use-reports";
 import { useRetryReport } from "../hooks/use-retry-report";
 import { useUpdateReportNote } from "../hooks/use-update-report-note";
+import { useUpdateReportTitle } from "../hooks/use-update-report-title";
 import type { MarkerFilter } from "../types";
 import { SharedLinksContainer } from "./shared-links-container";
 import { ShareReportContainer } from "./share-report-container";
@@ -48,10 +50,11 @@ export function ReportContainer() {
   const navigate = useNavigate();
   const t = useT();
   const report = useReport(reportId);
-  useCrumbLabel(`/reports/${reportId}`, report.data?.header.labName);
+  useCrumbLabel(`/reports/${reportId}`, report.data?.header.title);
   const retry = useRetryReport();
   const remove = useDeleteReport();
   const saveNote = useUpdateReportNote();
+  const saveTitle = useUpdateReportTitle();
   const links = useReportLinks();
   const siblings = useReports(report.data?.profileId);
   const translation = useReportTranslation(reportId, report.data?.translation);
@@ -89,16 +92,28 @@ export function ReportContainer() {
   }
 
   const description = [
-    formatReportDate(header.collectedAt, report.data.createdAt),
-    header.markerCount > 0 && t.report.markerCount(header.markerCount),
+    (header.titleEdited || !header.title) &&
+      formatReportDate(header.collectedAt, report.data.createdAt),
+    report.data.labs.length > 0 && t.report.labs(report.data.labs),
   ]
     .filter(Boolean)
     .join(" · ");
+  const title = header.title ?? t.report.title;
 
   return (
     <>
       <PageHeader
-        title={header.labName ?? t.report.title}
+        title={title}
+        heading={
+          <ReportTitle
+            key={`${reportId}:${title}`}
+            title={title}
+            edited={header.titleEdited}
+            saving={saveTitle.isPending}
+            failed={saveTitle.isError && saveTitle.variables.reportId === reportId}
+            onSave={(next) => saveTitle.mutate({ reportId, title: next })}
+          />
+        }
         description={description}
         glass
         actions={
@@ -187,7 +202,7 @@ export function ReportContainer() {
               )
               .map((item) => ({
                 id: item.id,
-                label: `${item.labName ?? t.report.title}, ${formatReportDate(item.collectedAt, item.createdAt)}`,
+                label: item.title ?? formatReportDate(item.collectedAt, item.createdAt),
               }))}
             busy={links.link.isPending || links.update.isPending}
             failed={links.link.isError || links.update.isError}
