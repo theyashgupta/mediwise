@@ -336,7 +336,11 @@ function render(
       cite: { kind: "report", reportId: report.id, target: null },
       fact,
       dates: [report.date],
-      numbers: present(report.score, report.coverage, ordered.length),
+      numbers: present(
+        report.score,
+        report.score === null ? null : (report.coverage ?? 100),
+        ordered.length,
+      ),
     });
   }
 
@@ -460,7 +464,7 @@ function render(
             newest.calibratedHigh,
             isLast ? change : undefined,
           ),
-          ...numbersIn(marker.valueText ?? ""),
+          ...numbersIn(`${marker.valueText ?? ""} ${marker.unit ?? ""} ${unit}`),
         ],
       });
     }
@@ -541,7 +545,10 @@ function render(
       dates: [...new Set([date, report.date])],
       numbers: [
         ...numbersIn(block.slice(1).join(" ")),
-        ...study.measurements.flatMap(({ value }) => present(value)),
+        ...study.measurements.flatMap(({ value, unit }) => [
+          ...present(value),
+          ...numbersIn(unit ?? ""),
+        ]),
       ],
       names: [study.kind, study.bodyRegion ?? "", study.labName ?? report.labName ?? ""],
       keys: study.measurements.map(({ key }) => key),

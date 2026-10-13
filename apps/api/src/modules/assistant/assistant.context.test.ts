@@ -349,4 +349,10 @@ describe("buildContext", () => {
     expect(refs.get("R2:tsh")?.numbers).toContain(-4);
     expect(refs.get("R3")?.numbers).toEqual([81, 100, 3]);
   });
+
+  test("a scored report with no coverage allows the 100 the block prints", () => {
+    const open = snapshot();
+    open.reports[0]!.coverage = null;
+    expect(buildContext(open).refs.get("R3")?.numbers).toEqual([81, 100, 3]);
+  });
 });

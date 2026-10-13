@@ -187,7 +187,7 @@ export async function askQuestion(userId: string, profileId: string, body: AskQu
     input = written.input;
     rules = written.problems.map(({ rule }) => rule);
   } catch (error) {
-    failure = error instanceof Anthropic.APIError ? String(error.status) : "call";
+    failure = error instanceof Anthropic.APIError ? String(error.status) : (error as Error).name;
   }
   const refusalKind: AssistantRefusalKind | null = !input
     ? "fallback"

@@ -105,6 +105,12 @@ refs.set("R3:S1", {
   names: ["ultrasound", "Abdomen"],
   quotes: ["No evidence of malignancy."],
 });
+refs.set("R6:platelets", {
+  cite: { kind: "value", reportId: "r6", target: "platelets" },
+  fact: "platelets: Platelet count, unit 10^3/µL. R6:platelets 250 10^3/µL optimal, lab range 150 to 2000, 4 Aug 2026",
+  dates: ["2026-08-04"],
+  numbers: [250, 150, 2000, 10, 3],
+});
 refs.set("R6:vitamin_b12", {
   cite: { kind: "value", reportId: "r6", target: "vitamin_b12" },
   fact: "vitamin_b12: Vitamin B12, unit pg/mL. R6:vitamin_b12 2000 pg/mL watch, 4 Aug 2026, change between the last two values -0.3",
@@ -366,5 +372,16 @@ describe("validateAnswer", () => {
       "treatment_word",
     );
     expect(rules("Ask your doctor about atorvastatin.", ["R6:hba1c"])).toContain("treatment_word");
+  });
+
+  test("a unit with digits, and a range end near 2000 after a word, stay numbers", () => {
+    expect(rules("Your platelets were 250 10^3/µL on 4 Aug 2026.", ["R6:platelets"])).toEqual([]);
+    expect(rules("The lab range runs from 150 to 2000 10^3/µL.", ["R6:platelets"])).toEqual([]);
+  });
+
+  test("unknown_ref: a made-up reference in the text fails", () => {
+    expect(rules("Report R7 holds your HbA1c of 5.9% on 4 Aug 2026.", ["R6:hba1c"])).toContain(
+      "unknown_ref",
+    );
   });
 });

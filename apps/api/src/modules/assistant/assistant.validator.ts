@@ -81,6 +81,7 @@ const yearAfterWord =
   /\b(?:in|of|since|from|until|till|to|during|by|before|after|year)\s+((?:19|20)\d{2})\b/gi;
 const numberToken = /(?<![\w.])[+-]?\d+(?:\.\d+)?/g;
 const refToken = /\b(?:R\d+(?::S\d+|:[a-z0-9_]+)?|[FLE]\d+|[PUC]:[a-z0-9_]+)\b/g;
+const refShape = /\b(?:R\d+(?::S\d+|:[a-z0-9_]+)?|[PUC]:[a-z0-9_]+)\b/;
 const quotePattern = /["“]([^"“”]+)["”]/g;
 const diagnosisWords =
   /\byou (?:may |might |could |probably |likely |possibly )?have\b|\bdiagnos(?!tics?\b)|\bdisease|\bdisorder|\bsyndrome|\bcancer|\btumou?r|\bmalignan|\bdiabetic|\bdiabetes|\bprediabetes|\bhypothyroid|\bhyperthyroid|\banaemi|\banemi|\bdeficien|\bfailure\b|\binfection|\bhypertension\b|\bpcos\b|\bpolycystic\b|\bcirrhosis\b/i;
@@ -241,7 +242,10 @@ function checkSentence(
     add("uncited", `"${text}" cites no reference. Cite the facts of every sentence.`);
   }
   if (bare.includes(";")) add("semicolon", `"${text}" has a semicolon.`);
-  if ([...bare.matchAll(refToken)].some(([token]) => context.refs.has(token))) {
+  if (
+    refShape.test(bare) ||
+    [...bare.matchAll(refToken)].some(([token]) => context.refs.has(token))
+  ) {
     add(
       "unknown_ref",
       `"${text}" writes a reference in the text. Put references in cites only, and name the report by its date.`,
@@ -253,13 +257,17 @@ function checkSentence(
 
   const { rest, parts } = takeDates(bare);
   const citedDates = cited.flatMap(({ dates }) => dates);
-  for (const part of parts.filter((part) => !citedDates.some((date) => matchesDate(part, date)))) {
+  const allowed = cited.flatMap(({ numbers }) => numbers);
+  const valueLike = ({ year, month: monthNumber }: DatePart) =>
+    monthNumber === undefined && allowed.includes(Number(year));
+  for (const part of parts.filter(
+    (part) => !valueLike(part) && !citedDates.some((date) => matchesDate(part, date)),
+  )) {
     add(
       "wrong_date",
       `"${text}" states ${describeDate(part)}, which is not a date of a cited reference.`,
     );
   }
-  const allowed = cited.flatMap(({ numbers }) => numbers);
   for (const token of rest.match(numberToken) ?? []) {
     const value = Number(token);
     const known = /^[+-]/.test(token)
