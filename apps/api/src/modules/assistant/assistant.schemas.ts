@@ -5,7 +5,7 @@ export const assistantParamsSchema = z.object({ id: z.uuid() });
 export const askQuestionSchema = z.object({
   question: z
     .string()
-    .transform((text) => text.replace(/[​-‍﻿]/g, "").trim())
+    .transform((text) => text.replace(/[\u200B-\u200D\uFEFF]/g, "").trim())
     .pipe(
       z
         .string()
