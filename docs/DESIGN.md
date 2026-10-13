@@ -521,3 +521,31 @@ The `perf` job took 5 min 34 s, the `e2e` job 4 min 4 s and the `check` job 2 mi
 - **SEO 63 on the app is a baseline for a signed-in app, not a target.** `robots.txt` closes the signed-in pages to crawlers, so the `is-crawlable` audit fails. Do not open them to raise the score.
 - **Why the app scores low.** Home loads 473 kB of gzipped JavaScript and CSS before the first render, with the `trends` chunk (141 kB, it holds Recharts) in the first load. FCP is about 3.9 s and LCP about 4.2 s on simulated slow 4G. Splitting Recharts out of the first load is the next step, and the budgets go up with it.
 - **Change a budget from CI numbers only.** The CI runner is not loaded by other sessions. Set a performance budget 10 under the lowest CI median of at least two runs, and update these tables.
+
+## Report page performance (MEDI-92)
+
+Target: Lighthouse performance 75 or more on a phone for the report page, Home and trends, in all three CI runs.
+
+### Before
+
+CI run [38462186996](https://github.com/theyashgupta/mediwise/actions/runs/38462186996) on `main` at `1215491` (benchmark index 2588, 5.18x). Each cell is the median of 3 runs, with the runs in brackets.
+
+| Page | Performance | FCP | LCP | TBT | CLS |
+| - | - | - | - | - | - |
+| Home | 78 (75, 78, 88) | 0.7 s | 1.2 s | 470 to 614 ms | 0.201, 0.201, 0 |
+| Report | 74 (79, 73, 74) | 0.7 s | 2.1 s | 784 to 873 ms | 0, 0.154, 0.154 |
+| Trends | 79 (82, 79, 79) | 0.7 s | 1.2 to 1.7 s | 469 to 581 ms | 0.154 in each run |
+
+Lighthouse opens its tab in the signed-in browser with `disableStorageReset`, so each JavaScript file comes from the HTTP cache (0 kB transferred). The network is not the bottleneck. The score is lost on CLS, TBT and the LCP render delay.
+
+### Top five causes
+
+| # | Cause | Evidence | Estimated saving |
+| - | - | - | - |
+| 1 | The shell footer moves when the page content arrives. | The footer sits 64 px under the loading state, inside the first screen. Layout shift 0.154 (report, trends) and 0.201 (Home). On the report the web fonts that load after first paint add to the same shift. | CLS to 0. Home run 3 had CLS 0 and scored 88 against 75 and 78. About 6 to 12 points. |
+| 2 | Each module and Recharts load before the first render. | The route files import their search validators from module barrels (`@/modules/reports`). The route tree is in the entry, and the web package has no `sideEffects` field, so the bundler keeps each barrel export: the 87-byte route chunks are empty, and `chart` (98 kB) and `trends` (47 kB, the containers of reports, episodes, trends and profiles) are in the first load. First load is 480 kB gzip. The entry chunk runs 1,079 ms of script on the report. | First load 480 kB to 272 kB, the report page 330 kB with no Recharts. Most of the TBT of 780 to 870 ms. |
+| 3 | The LCP element waits for the data and a large render. | LCP is the verdict heading at 2.1 s: TTFB 459 ms, render delay 1,651 ms. The report request starts at 311 ms and ends at 346 ms; the rest is script and render. | Comes with causes 2 and 5. |
+| 4 | The API sends JSON with no compression. | `uses-text-compression`: 28 kB for the report, 5 kB for the report list. | 32 KiB, 300 ms by the Lighthouse estimate. |
+| 5 | The report page renders 2,287 elements. | `dom-size`: 2,287 elements. Style and layout 506 ms, rendering 113 ms. | Part of the render delay of cause 3. |
+
+Other audits did not cost points: render-blocking CSS is 160 ms (our CSS) and 0 ms (the Google Fonts CSS), and `unused-javascript` and `unused-css-rules` found nothing over the threshold.
