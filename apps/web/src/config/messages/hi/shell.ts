@@ -43,10 +43,10 @@ export const shell: Messages["shell"] = {
     show: "कीबोर्ड शॉर्टकट दिखाएँ",
     then: "फिर",
   },
+  footer: { nav: "जानकारी और नीतियाँ", about: "MediWise के बारे में" },
   offline: {
     title: "आप ऑफ़लाइन हैं",
     body: "अपनी रिपोर्ट देखने के लिए इंटरनेट से जुड़ें। MediWise इस डिवाइस पर कोई रिपोर्ट नहीं रखता।",
   },
   update: { available: "अपडेट उपलब्ध है", action: "अपडेट करें" },
-  footer: { nav: "जानकारी और नीतियाँ", about: "MediWise के बारे में" },
 };

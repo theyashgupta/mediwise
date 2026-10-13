@@ -10,7 +10,7 @@ import { readCallback } from "../config/callback";
  */
 export async function requireSession({ location }: { location: ParsedLocation }) {
   const { data } = await supabase.auth.getSession();
-  if (!data.session && navigator.onLine) {
+  if (!data.session && navigator.onLine !== false) {
     throw redirect({ to: "/login", search: location.href === "/" ? {} : { next: location.href } });
   }
 }
