@@ -12,6 +12,7 @@ const store = vi.hoisted(() => {
     name: string;
     relation: string;
     dateOfBirth: string | null;
+    dateOfBirthApproximate: boolean;
     sex: string | null;
     ancestry: string;
     isSelf: boolean;
@@ -29,7 +30,13 @@ const store = vi.hoisted(() => {
       findProfileById: async (owner: string, id: string) => find(owner, id),
       countProfilesByOwner: async (owner: string) => owned(owner).length,
       insertProfile: async (owner: string, input: ProfileInput) => {
-        const row = { ...input, id: crypto.randomUUID(), ownerUserId: owner, isSelf: false };
+        const row = {
+          ...input,
+          dateOfBirthApproximate: false,
+          id: crypto.randomUUID(),
+          ownerUserId: owner,
+          isSelf: false,
+        };
         rows.push(row);
         return row;
       },
@@ -41,12 +48,17 @@ const store = vi.hoisted(() => {
           name,
           relation: "self",
           dateOfBirth: null,
+          dateOfBirthApproximate: false,
           sex: null,
           ancestry: "unknown",
           isSelf: true,
         });
       },
-      updateProfile: async (owner: string, id: string, input: ProfileUpdate) => {
+      updateProfile: async (
+        owner: string,
+        id: string,
+        input: ProfileUpdate & { dateOfBirthApproximate?: boolean },
+      ) => {
         const row = find(owner, id);
         return row && Object.assign(row, input);
       },
@@ -145,6 +157,21 @@ test("a family member is updated and removed", async () => {
   expect(await res.json()).toMatchObject({ name: "Asha Rao", relation: "parent" });
   expect((await call("DELETE", `/profiles/${id}`)).status).toBe(204);
   expect((await call("PATCH", `/profiles/${id}`, "alice", { name: "x" })).status).toBe(404);
+});
+
+test("saving a date of birth clears the approximate flag, other changes keep it", async () => {
+  const { id } = await createMember();
+  const row = store.rows.find((profile) => profile.id === id)!;
+  row.dateOfBirthApproximate = true;
+
+  const renamed = await call("PATCH", `/profiles/${id}`, "alice", { name: "Asha Rao" });
+  expect(await renamed.json()).toMatchObject({ dateOfBirthApproximate: true });
+
+  const dated = await call("PATCH", `/profiles/${id}`, "alice", { dateOfBirth: "1960-03-01" });
+  expect(await dated.json()).toMatchObject({
+    dateOfBirth: "1960-03-01",
+    dateOfBirthApproximate: false,
+  });
 });
 
 test("an invalid body returns a 400 problem", async () => {

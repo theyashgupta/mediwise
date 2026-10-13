@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { rangeText, unitText, valueText } from "./export";
+import { birthDateTerm, rangeText, unitText, valueText } from "./export";
 
 test("a range prints both bounds, one open bound in words, or a dash when missing", () => {
   expect(rangeText({ low: 13, high: 17 })).toBe("13 to 17");
@@ -18,4 +18,9 @@ test("a ratio or a missing unit prints a dash", () => {
   expect(unitText("mg/dL")).toBe("mg/dL");
   expect(unitText("ratio")).toBe("-");
   expect(unitText(null)).toBe("-");
+});
+
+test("an approximate date of birth prints with its label, an exact one prints plain", () => {
+  expect(birthDateTerm(true)).toBe("Date of birth (approximate)");
+  expect(birthDateTerm(false)).toBe("Date of birth");
 });

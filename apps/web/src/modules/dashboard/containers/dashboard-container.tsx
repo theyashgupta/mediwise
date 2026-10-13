@@ -7,12 +7,13 @@ import { Button } from "@/components/ui/button";
 import { useActiveProfile } from "@/modules/profiles";
 import { ReportFailed, useRetryReport } from "@/modules/reports";
 import { AttentionList } from "../components/attention-list";
-import { CompleteProfilePrompt } from "../components/complete-profile-prompt";
 import { DashboardGreeting } from "../components/dashboard-greeting";
 import { LatestReportCard } from "../components/latest-report-card";
 import { ProcessingCard } from "../components/processing-card";
+import { ProfilePrompt } from "../components/profile-prompt";
 import { RecentReports } from "../components/recent-reports";
 import { useDashboard } from "../hooks/use-dashboard";
+import { useDismissedForSession } from "../hooks/use-dismissed-for-session";
 
 function UploadButton() {
   return (
@@ -32,13 +33,31 @@ export function DashboardContainer() {
   const data = dashboard.data;
   const isEmpty = data?.recent.length === 0;
   const lastFailed = data?.recent[0]?.status === "failed" ? data.recent[0] : undefined;
+  const [birthPromptDismissed, dismissBirthPrompt] = useDismissedForSession(
+    "approximateBirthPromptDismissed",
+  );
+  const incomplete = profile && (!profile.dateOfBirth || !profile.sex);
 
   return (
     <>
       <DashboardGreeting firstName={profile?.name.split(" ")[0]} now={new Date()} />
       <div className="space-y-10">
-        {profile && (!profile.dateOfBirth || !profile.sex) && (
-          <CompleteProfilePrompt name={profile.name} />
+        {profile && incomplete && (
+          <ProfilePrompt
+            title={`Complete ${profile.name}’s profile`}
+            body="Add a date of birth and a sex. MediWise uses them to score each marker against the correct range."
+            action="Complete profile"
+            to="/profiles"
+          />
+        )}
+        {profile && !incomplete && profile.dateOfBirthApproximate && !birthPromptDismissed && (
+          <ProfilePrompt
+            title={`Check ${profile.name}’s date of birth`}
+            body="We calculated it from the age on a report. Some ranges change with age, so enter the exact date."
+            action="Enter the date"
+            to={profile.isSelf ? "/settings" : "/profiles"}
+            onAction={dismissBirthPrompt}
+          />
         )}
         {(!profile || dashboard.isPending) && <LoadingState variant="page" />}
         {dashboard.isError && (

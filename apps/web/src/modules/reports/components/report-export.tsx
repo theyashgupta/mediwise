@@ -6,7 +6,7 @@ import { statusStyles } from "@/common/utils/status";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { type Profile, sexLabels } from "@/modules/profiles";
-import { rangeText, unitText, valueText } from "../config/export";
+import { birthDateTerm, rangeText, unitText, valueText } from "../config/export";
 import { conditionValue } from "../config/report";
 import { printedLines, studyTitle } from "../config/studies";
 import type { MarkerRow, ReportDetail } from "../types";
@@ -88,7 +88,10 @@ export function ReportExport({ report, profile, generatedOn, onPrint }: ReportEx
   const { header } = report;
   const details = [
     ["Name", profile?.name],
-    ["Date of birth", profile?.dateOfBirth && formatPlainDate(profile.dateOfBirth, dateOptions)],
+    [
+      birthDateTerm(profile?.dateOfBirthApproximate),
+      profile?.dateOfBirth && formatPlainDate(profile.dateOfBirth, dateOptions),
+    ],
     ["Sex", profile?.sex && sexLabels[profile.sex]],
     ["Lab", header.labName],
     ["Collected on", header.collectedAt && formatPlainDate(header.collectedAt, dateOptions)],

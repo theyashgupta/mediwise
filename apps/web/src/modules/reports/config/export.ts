@@ -13,6 +13,11 @@ export function valueText(value: number | null, text: string | null, precision =
     : value.toLocaleString("en-IN", { maximumFractionDigits: precision });
 }
 
+/** Names the date of birth row, so a doctor sees when the date came from a printed age. */
+export function birthDateTerm(approximate: boolean | undefined) {
+  return approximate ? "Date of birth (approximate)" : "Date of birth";
+}
+
 /** Returns the unit to print, or a dash for a ratio or a missing unit. */
 export function unitText(unit: string | null) {
   return unit && unit !== "ratio" ? unit : "-";

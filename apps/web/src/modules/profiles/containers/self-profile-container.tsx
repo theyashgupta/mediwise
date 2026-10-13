@@ -25,6 +25,7 @@ export function SelfProfileContainer() {
         ancestry: self.ancestry,
       }}
       isSelf
+      approximateBirth={self.dateOfBirthApproximate}
       hideName
       submitLabel="Save profile"
       submitting={update.isPending}
