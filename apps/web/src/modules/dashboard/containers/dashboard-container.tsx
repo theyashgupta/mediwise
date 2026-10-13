@@ -124,7 +124,7 @@ export function DashboardContainer() {
             action={<UploadButton />}
           />
         )}
-        {family.data && (
+        {!dashboard.isPending && family.data && (
           <FamilyList
             members={family.data}
             activeId={profile?.id}
