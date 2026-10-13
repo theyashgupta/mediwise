@@ -24,6 +24,7 @@ export const shell: Messages["shell"] = {
     credits: "रिपोर्ट क्रेडिट",
     kitchenSink: "किचन सिंक",
     design: "डिज़ाइन",
+    admin: "ऑपरेटर",
   },
   breadcrumb: "आप यहाँ हैं",
   home: "MediWise होम",

@@ -37,6 +37,7 @@ export const pages: Record<AppRouteId, Page> = {
   "/_app/credits": { name: "credits", parent: "/_app/settings" },
   "/_app/dev/kitchen-sink": { name: "kitchenSink" },
   "/_app/design": { name: "design" },
+  "/_app/admin": { name: "admin" },
 };
 
 /**

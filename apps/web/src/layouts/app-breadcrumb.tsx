@@ -15,7 +15,7 @@ export function AppBreadcrumb({ className, innerOnly }: AppBreadcrumbProps) {
   const labels = useCrumbLabels();
   const t = useT();
   const match = useMatches({ select: (matches) => matches.at(-1) });
-  if (!match) return null;
+  if (!match || match.status === "notFound") return null;
   const trail = pageTrail(match.routeId).map(({ id, page }) => {
     const href = fillPath(router.routesById[id].fullPath, match.params);
     return { href, label: labels.get(href) ?? t.shell.pages[page.name] };

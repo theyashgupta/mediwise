@@ -9,6 +9,7 @@ import { env } from "./config/env.js";
 import { auth } from "./middleware/auth.js";
 import { requestLogger } from "./middleware/logger.js";
 import { reportCreateLimit } from "./middleware/rate-limit.js";
+import { adminRoutes } from "./modules/admin/index.js";
 import { profileQuestionsRoutes, questionsRoutes } from "./modules/assistant/index.js";
 import { dashboardRoutes } from "./modules/dashboard/index.js";
 import {
@@ -65,7 +66,8 @@ export const app = new Hono()
   .route("/trends", trendsRoutes)
   .route("/compare", compareRoutes)
   .route("/payments", paymentsRoutes)
-  .route("/admin", spendRoutes);
+  .route("/admin", spendRoutes)
+  .route("/admin", adminRoutes);
 
 app.onError(handleError);
 app.notFound((c) => problem(c, 404, "Not Found"));

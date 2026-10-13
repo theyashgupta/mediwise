@@ -22,6 +22,7 @@ export const shell = {
     credits: "Report credits",
     kitchenSink: "Kitchen sink",
     design: "Design",
+    admin: "Operator",
   },
   breadcrumb: "Breadcrumb",
   home: "MediWise home",

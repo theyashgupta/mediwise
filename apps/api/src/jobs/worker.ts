@@ -2,6 +2,7 @@ import { and, eq, lt, lte, or, sql } from "drizzle-orm";
 import { db } from "../db/client.js";
 import { jobs } from "../db/schema.js";
 import { log } from "../middleware/logger.js";
+import { logAlerts } from "../modules/admin/index.js";
 import { type ReportUsage, reportUsage, usageTotals } from "../modules/extraction/index.js";
 import { parkIfOverBudget, resumeIfUnderBudget } from "./budget.js";
 import { failProcessReport, handleProcessReport } from "./process-report.job.js";
@@ -100,6 +101,7 @@ async function runJob(job: Job) {
 async function tick() {
   try {
     await resumeIfUnderBudget();
+    await logAlerts();
     const job = await claimJob();
     if (job && !(await parkIfOverBudget(job))) await runJob(job);
   } catch (error) {
