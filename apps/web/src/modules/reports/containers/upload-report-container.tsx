@@ -8,7 +8,9 @@ import { useMe } from "@/modules/me";
 import { ProfileSwitcherContainer, useActiveProfile } from "@/modules/profiles";
 import { DropZone } from "../components/drop-zone";
 import { FilePreviewList } from "../components/file-preview-list";
+import { sharedFilesLine } from "../config/shared-files";
 import { useSelectedFiles } from "../hooks/use-selected-files";
+import { useSharedFiles } from "../hooks/use-shared-files";
 import { useUploadReport } from "../hooks/use-upload-report";
 
 export function UploadReportContainer() {
@@ -16,6 +18,7 @@ export function UploadReportContainer() {
   const { profile } = useActiveProfile();
   const me = useMe();
   const selected = useSelectedFiles();
+  const sharedCount = useSharedFiles(selected.add);
   const { upload, progress } = useUploadReport();
   const uploading = upload.isPending;
   const messages = upload.error ? [...selected.errors, upload.error.message] : selected.errors;
@@ -52,6 +55,11 @@ export function UploadReportContainer() {
             selected.add(files);
           }}
         />
+        {sharedCount > 0 && selected.files.length > 0 && (
+          <p role="status" className="text-sm">
+            {sharedFilesLine(sharedCount)}
+          </p>
+        )}
         {selected.files.length > 0 && (
           <FilePreviewList
             files={selected.files}
