@@ -128,7 +128,15 @@ const store = vi.hoisted(() => {
           .toSorted((a, b) => a.date.localeCompare(b.date))
           .map(({ id }) => ({ id })),
       setReportEpisode: async (reportId: string, episode: { id: string; date: string } | null) => {
-        reports.find((r) => r.id === reportId)!.episodeId = episode?.id ?? null;
+        const report = reports.find((r) => r.id === reportId)!;
+        const left = episodes.find((row) => row.id === report.episodeId);
+        report.episodeId = episode?.id ?? null;
+        const oldest = (id: string) =>
+          reports
+            .filter((r) => r.episodeId === id)
+            .map((r) => r.date)
+            .sort()[0];
+        if (left && left.id !== episode?.id) left.startedOn = oldest(left.id) ?? left.startedOn;
         const target = episodes.find((row) => row.id === episode?.id);
         if (target && episode && episode.date < target.startedOn) target.startedOn = episode.date;
       },
@@ -368,7 +376,7 @@ describe("changes", () => {
     expect(res.status).toBe(400);
   });
 
-  test("a report leaves its episode, joins it again, and an older report moves the start back", async () => {
+  test("a report leaves its episode and joins it again, and an older report moves the start back until it leaves", async () => {
     const id = await createWorkup();
     const path = `/reports/${ids.reports[0]}/episode`;
     expect((await call("PUT", path, { episodeId: null })).body).toEqual({ episodeId: null });
@@ -376,6 +384,8 @@ describe("changes", () => {
     await call("PUT", path, { episodeId: id });
     await call("PUT", `/reports/${ids.yearly}/episode`, { episodeId: id });
     expect(store.episodes[0]?.startedOn).toBe("2024-09-10");
+    await call("PUT", `/reports/${ids.yearly}/episode`, { episodeId: null });
+    expect(store.episodes[0]?.startedOn).toBe("2025-02-03");
   });
 
   test("a deleted episode frees its reports", async () => {

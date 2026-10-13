@@ -168,7 +168,7 @@ const summaryExample = {
       text: "TSH moved from risk status to optimal status across three values.",
       citedKeys: ["tsh"],
     },
-    { text: "The second pelvis ultrasound shows no cyst.", citedKeys: ["study_3"] },
+    { text: "The pelvis ultrasound of March shows no cyst.", citedKeys: ["study_c"] },
   ],
 };
 
@@ -185,8 +185,9 @@ Rules:
 8. Keep every hedge. "May be low" stays "may be low". Never make a hedge into a fact.
 9. Do not use diagnosis words. Do not write "you have", "diagnosed" or "disease".
 10. Do not suggest a test, a retest or a scan. Do not tell the reader what to do. Do not name a drug.
-11. Use these words: report, marker, value, study, status. Use the status names optimal, watch and risk. Use the direction words improving, worsening and stable as the facts give them.
+11. Use these words: report, marker, value, study, status. Use the status names optimal, watch and risk. Give each marker one direction word, the one the facts give: improving, worsening or stable.
 12. Keep the medical names the facts use, for example HbA1c or LDL.
+13. Name a study by its kind, body region and month. Do not count studies or give them an order number.
 
 A summary that passes every rule, as write_summary input:
 ${JSON.stringify(summaryExample)}`;
@@ -218,8 +219,14 @@ function summaryTool(keys: string[]): Anthropic.Tool {
   };
 }
 
+/**
+ * Gives each study a key with a letter, not a number.
+ *
+ * @remarks
+ * Claude read `study_3` as "the third ultrasound" when it was the second of its kind, so a key carries no order.
+ */
 function studyKey(index: number) {
-  return `study_${index + 1}`;
+  return `study_${String.fromCharCode(97 + (index % 26))}${index >= 26 ? index : ""}`;
 }
 
 /**

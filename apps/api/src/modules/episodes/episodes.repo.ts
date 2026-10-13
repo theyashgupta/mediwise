@@ -117,20 +117,33 @@ export async function listEpisodeReports(episodeId: string) {
 }
 
 /**
- * Points a report at an episode, or at none, and moves the episode start back when the report is older.
+ * Points a report at an episode, or at none, and keeps the start of each episode it touches on its oldest report.
  *
  * @remarks
- * Moving the start keeps every report of an episode on or after its start date.
+ * The episode a report leaves starts again on its oldest remaining report, never after its end date, so a stray
+ * old report attached by mistake does not stretch the episode for good.
  */
 export async function setReportEpisode(
   reportId: string,
   episode: { id: string; date: string } | null,
 ) {
   await db.transaction(async (tx) => {
+    const [before] = await tx
+      .select({ episodeId: reports.episodeId })
+      .from(reports)
+      .where(eq(reports.id, reportId));
     await tx
       .update(reports)
       .set({ episodeId: episode?.id ?? null })
       .where(eq(reports.id, reportId));
+    const left = before?.episodeId;
+    if (left && left !== episode?.id) {
+      const oldest = sql`coalesce((select min(${visitDate}::date) from ${reports} where ${reports.episodeId} = ${left}), ${episodes.startedOn})`;
+      await tx
+        .update(episodes)
+        .set({ startedOn: sql`least(${oldest}, coalesce(${episodes.endedOn}, ${oldest}))` })
+        .where(eq(episodes.id, left));
+    }
     if (episode) {
       await tx
         .update(episodes)
