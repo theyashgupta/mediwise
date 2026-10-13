@@ -37,13 +37,23 @@ export async function createProfile(userId: string, input: ProfileInput) {
   return repo.insertProfile(userId, input);
 }
 
+/**
+ * Updates a profile the user owns.
+ *
+ * @remarks
+ * A saved date of birth is one the user set, so it clears the approximate flag the report reader left.
+ */
 export async function updateProfile(userId: string, id: string, input: ProfileUpdate) {
   const profile = await getOwnedProfile(userId, id);
   if (input.relation && (input.relation === "self") !== profile.isSelf) {
     throw new AppError(409, "The self relation cannot change");
   }
   if (Object.keys(input).length === 0) return profile;
-  const updated = await repo.updateProfile(userId, id, input);
+  const updated = await repo.updateProfile(
+    userId,
+    id,
+    input.dateOfBirth ? { ...input, dateOfBirthApproximate: false } : input,
+  );
   if (!updated) throw new AppError(404, "We could not find this profile");
   return updated;
 }

@@ -48,6 +48,7 @@ export function ProfileSheet({
               }
             }
             isSelf={profile?.isSelf ?? false}
+            approximateBirth={profile?.dateOfBirthApproximate}
             submitLabel={profile ? "Save changes" : "Add profile"}
             submitting={submitting}
             error={error}

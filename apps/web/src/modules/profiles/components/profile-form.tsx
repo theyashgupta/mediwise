@@ -8,6 +8,7 @@ import {
 } from "@mediwise/shared";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -26,13 +27,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ancestryLabels, relationLabels, sexLabels } from "../config/labels";
+import { ancestryLabels, approximateBirthNote, relationLabels, sexLabels } from "../config/labels";
 
 type ProfileFormValues = z.input<typeof profileInputSchema>;
 
 type ProfileFormProps = {
   defaultValues?: Partial<ProfileFormValues>;
   isSelf: boolean;
+  approximateBirth?: boolean;
   hideName?: boolean;
   submitLabel: string;
   submitting: boolean;
@@ -76,6 +78,7 @@ function SelectField({
 export function ProfileForm({
   defaultValues,
   isSelf,
+  approximateBirth = false,
   hideName = false,
   submitLabel,
   submitting,
@@ -136,10 +139,14 @@ export function ProfileForm({
           name="dateOfBirth"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Date of birth</FormLabel>
+              <FormLabel>
+                Date of birth
+                {approximateBirth && <Badge variant="secondary">Approximate</Badge>}
+              </FormLabel>
               <FormControl>
                 <Input type="date" min="1900-01-01" {...field} />
               </FormControl>
+              {approximateBirth && <FormDescription>{approximateBirthNote}</FormDescription>}
               <FormMessage />
             </FormItem>
           )}

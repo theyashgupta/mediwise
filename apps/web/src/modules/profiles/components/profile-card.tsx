@@ -1,7 +1,8 @@
 import { Pencil, Trash2 } from "lucide-react";
 import { ageOn } from "@/common/utils/age";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { relationLabels } from "../config/labels";
+import { approximateBirthNote, relationLabels } from "../config/labels";
 import type { Profile } from "../types";
 
 type ProfileCardProps = {
@@ -31,6 +32,12 @@ export function ProfileCard({ profile, onEdit, onRemove }: ProfileCardProps) {
       <div className="min-w-0 flex-1">
         <h2 className="truncate font-medium">{profile.name}</h2>
         <p className="text-sm text-muted-foreground">{details.join(" · ")}</p>
+        {profile.dateOfBirthApproximate && (
+          <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+            <Badge variant="secondary">Approximate</Badge>
+            {approximateBirthNote}
+          </p>
+        )}
       </div>
       <div className="flex shrink-0 gap-1">
         <Button variant="ghost" size="icon" onClick={onEdit} aria-label={`Edit ${profile.name}`}>

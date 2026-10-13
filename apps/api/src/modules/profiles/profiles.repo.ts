@@ -8,6 +8,7 @@ const profileColumns = {
   name: profiles.name,
   relation: profiles.relation,
   dateOfBirth: profiles.dateOfBirth,
+  dateOfBirthApproximate: profiles.dateOfBirthApproximate,
   sex: profiles.sex,
   ancestry: profiles.ancestry,
   isSelf: profiles.isSelf,
@@ -60,10 +61,14 @@ export async function insertSelfProfileIfMissing(ownerUserId: string, name: stri
     .onConflictDoNothing();
 }
 
-export async function updateProfile(ownerUserId: string, id: string, input: ProfileUpdate) {
+export async function updateProfile(
+  ownerUserId: string,
+  id: string,
+  input: ProfileUpdate & { dateOfBirthApproximate?: boolean },
+) {
   const [row] = await db
     .update(profiles)
-    .set(input.dateOfBirth ? { ...input, dateOfBirthApproximate: false } : input)
+    .set(input)
     .where(and(eq(profiles.id, id), eq(profiles.ownerUserId, ownerUserId)))
     .returning(profileColumns);
   return row;

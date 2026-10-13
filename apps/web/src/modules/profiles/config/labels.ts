@@ -25,3 +25,6 @@ export const ancestryLabels: Record<Ancestry, string> = {
   mixed: "Mixed",
   unknown: "Not sure",
 };
+
+export const approximateBirthNote =
+  "We calculated this date from the age on a report. Enter the exact date.";
