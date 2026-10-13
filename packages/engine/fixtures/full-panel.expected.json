@@ -1,0 +1,2233 @@
+{
+  "markers": [
+    {
+      "markerKey": "hemoglobin",
+      "value": 13.4,
+      "unit": "g/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 13,
+        "optimalHigh": 16.5,
+        "watchLow": 11,
+        "watchHigh": 18.5,
+        "source": "whoAnaemia2024"
+      },
+      "labRange": {
+        "low": 13,
+        "high": 17
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "rbc_count",
+      "value": 4.9,
+      "unit": "10^6/µL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 4.5,
+        "optimalHigh": 5.5,
+        "watchLow": 4,
+        "watchHigh": 6,
+        "source": "dacie2017"
+      },
+      "labRange": {
+        "low": 4.5,
+        "high": 5.5
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "hematocrit",
+      "value": 41.5,
+      "unit": "%",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 40,
+        "optimalHigh": 50,
+        "watchLow": 36,
+        "watchHigh": 54,
+        "source": "dacie2017"
+      },
+      "labRange": {
+        "low": 40,
+        "high": 50
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "mcv",
+      "value": 84.7,
+      "unit": "fL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 83,
+        "optimalHigh": 101,
+        "watchLow": 78,
+        "watchHigh": 105,
+        "source": "dacie2017"
+      },
+      "labRange": {
+        "low": 83,
+        "high": 101
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "mch",
+      "value": 27.3,
+      "unit": "pg",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 27,
+        "optimalHigh": 32,
+        "watchLow": 25,
+        "watchHigh": 34,
+        "source": "dacie2017"
+      },
+      "labRange": {
+        "low": 27,
+        "high": 32
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "mchc",
+      "value": 32.3,
+      "unit": "g/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 31.5,
+        "optimalHigh": 34.5,
+        "watchLow": 30,
+        "watchHigh": 36,
+        "source": "dacie2017"
+      },
+      "labRange": {
+        "low": 31.5,
+        "high": 34.5
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "rdw_cv",
+      "value": 14.6,
+      "unit": "%",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 14,
+        "watchLow": null,
+        "watchHigh": 15.5,
+        "source": "dacie2017"
+      },
+      "labRange": {
+        "low": 11.6,
+        "high": 14
+      },
+      "deviation": 0.043
+    },
+    {
+      "markerKey": "rdw_sd",
+      "value": 44.1,
+      "unit": "fL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 46,
+        "watchLow": null,
+        "watchHigh": 52,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 39,
+        "high": 46
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "wbc_count",
+      "value": 7.2,
+      "unit": "10^3/µL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 4,
+        "optimalHigh": 10,
+        "watchLow": 3,
+        "watchHigh": 12,
+        "source": "dacie2017"
+      },
+      "labRange": {
+        "low": 4,
+        "high": 10
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "neutrophils_pct",
+      "value": 58,
+      "unit": "%",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 40,
+        "optimalHigh": 75,
+        "watchLow": 35,
+        "watchHigh": 80,
+        "source": "dacie2017"
+      },
+      "labRange": {
+        "low": 40,
+        "high": 80
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "lymphocytes_pct",
+      "value": 32,
+      "unit": "%",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 20,
+        "optimalHigh": 40,
+        "watchLow": 15,
+        "watchHigh": 50,
+        "source": "dacie2017"
+      },
+      "labRange": {
+        "low": 20,
+        "high": 40
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "monocytes_pct",
+      "value": 6,
+      "unit": "%",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 2,
+        "optimalHigh": 10,
+        "watchLow": 1,
+        "watchHigh": 12,
+        "source": "dacie2017"
+      },
+      "labRange": {
+        "low": 2,
+        "high": 10
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "eosinophils_pct",
+      "value": 3.5,
+      "unit": "%",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 6,
+        "watchLow": null,
+        "watchHigh": 10,
+        "source": "dacie2017"
+      },
+      "labRange": {
+        "low": 1,
+        "high": 6
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "basophils_pct",
+      "value": 0.5,
+      "unit": "%",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 1,
+        "watchLow": null,
+        "watchHigh": 2,
+        "source": "dacie2017"
+      },
+      "labRange": {
+        "low": 0,
+        "high": 2
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "neutrophils_abs",
+      "value": 4.18,
+      "unit": "10^3/µL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 2,
+        "optimalHigh": 7,
+        "watchLow": 1.5,
+        "watchHigh": 8,
+        "source": "dacie2017"
+      },
+      "labRange": {
+        "low": 2,
+        "high": 7
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "lymphocytes_abs",
+      "value": 2.3,
+      "unit": "10^3/µL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 1,
+        "optimalHigh": 3,
+        "watchLow": 0.8,
+        "watchHigh": 4,
+        "source": "dacie2017"
+      },
+      "labRange": {
+        "low": 1,
+        "high": 3
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "monocytes_abs",
+      "value": 0.43,
+      "unit": "10^3/µL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 0.2,
+        "optimalHigh": 1,
+        "watchLow": 0.1,
+        "watchHigh": 1.2,
+        "source": "dacie2017"
+      },
+      "labRange": {
+        "low": 0.2,
+        "high": 1
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "eosinophils_abs",
+      "value": 0.25,
+      "unit": "10^3/µL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 0.5,
+        "watchLow": null,
+        "watchHigh": 1.5,
+        "source": "dacie2017"
+      },
+      "labRange": {
+        "low": 0.02,
+        "high": 0.5
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "basophils_abs",
+      "value": 0.04,
+      "unit": "10^3/µL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 0.1,
+        "watchLow": null,
+        "watchHigh": 0.2,
+        "source": "dacie2017"
+      },
+      "labRange": {
+        "low": 0,
+        "high": 0.1
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "platelet_count",
+      "value": 245,
+      "unit": "10^3/µL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 150,
+        "optimalHigh": 410,
+        "watchLow": 100,
+        "watchHigh": 450,
+        "source": "dacie2017"
+      },
+      "labRange": {
+        "low": 150,
+        "high": 410
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "mpv",
+      "value": 10.2,
+      "unit": "fL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 7.5,
+        "optimalHigh": 11.5,
+        "watchLow": 6.5,
+        "watchHigh": 12.5,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 7.5,
+        "high": 11.5
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "pdw",
+      "value": 12.1,
+      "unit": "fL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 9,
+        "optimalHigh": 17,
+        "watchLow": 8,
+        "watchHigh": 19,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 9,
+        "high": 17
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "plateletcrit",
+      "value": 0.25,
+      "unit": "%",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 0.17,
+        "optimalHigh": 0.35,
+        "watchLow": 0.12,
+        "watchHigh": 0.45,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 0.17,
+        "high": 0.35
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "p_lcr",
+      "value": 27,
+      "unit": "%",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 13,
+        "optimalHigh": 43,
+        "watchLow": 10,
+        "watchHigh": 50,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 13,
+        "high": 43
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "esr",
+      "value": 12,
+      "unit": "mm/hr",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 15,
+        "watchLow": null,
+        "watchHigh": 30,
+        "source": "dacie2017"
+      },
+      "labRange": {
+        "low": 0,
+        "high": 15
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "glucose_fasting",
+      "value": 108,
+      "unit": "mg/dL",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": 70,
+        "optimalHigh": 99,
+        "watchLow": 54,
+        "watchHigh": 125,
+        "source": "ada2025"
+      },
+      "labRange": {
+        "low": 70,
+        "high": 100
+      },
+      "deviation": 0.31
+    },
+    {
+      "markerKey": "glucose_postprandial",
+      "value": 152,
+      "unit": "mg/dL",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": 70,
+        "optimalHigh": 139,
+        "watchLow": 54,
+        "watchHigh": 199,
+        "source": "ada2025"
+      },
+      "labRange": {
+        "low": 70,
+        "high": 140
+      },
+      "deviation": 0.188
+    },
+    {
+      "markerKey": "hba1c",
+      "value": 6.1,
+      "unit": "%",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 5.6,
+        "watchLow": null,
+        "watchHigh": 6.4,
+        "source": "ada2025"
+      },
+      "labRange": {
+        "low": 4,
+        "high": 5.6
+      },
+      "deviation": 0.089
+    },
+    {
+      "markerKey": "estimated_average_glucose",
+      "value": 128,
+      "unit": "mg/dL",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 114,
+        "watchLow": null,
+        "watchHigh": 137,
+        "source": "ada2025"
+      },
+      "deviation": 0.123
+    },
+    {
+      "markerKey": "insulin_fasting",
+      "value": 16.8,
+      "unit": "µIU/mL",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": 2,
+        "optimalHigh": 12,
+        "watchLow": 2,
+        "watchHigh": 25,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 2.6,
+        "high": 24.9
+      },
+      "deviation": 0.48
+    },
+    {
+      "markerKey": "total_cholesterol",
+      "value": 236,
+      "unit": "mg/dL",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 199,
+        "watchLow": null,
+        "watchHigh": 239,
+        "source": "ncepAtp3"
+      },
+      "labRange": {
+        "low": null,
+        "high": 200
+      },
+      "deviation": 0.186
+    },
+    {
+      "markerKey": "hdl_cholesterol",
+      "value": 36,
+      "unit": "mg/dL",
+      "status": "risk",
+      "calibrated": {
+        "optimalLow": 60,
+        "optimalHigh": null,
+        "watchLow": 40,
+        "watchHigh": null,
+        "source": "ncepAtp3"
+      },
+      "labRange": {
+        "low": 40,
+        "high": 60
+      },
+      "deviation": -0.4
+    },
+    {
+      "markerKey": "ldl_cholesterol",
+      "value": 162,
+      "unit": "mg/dL",
+      "status": "risk",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 99,
+        "watchLow": null,
+        "watchHigh": 129,
+        "source": "lai2023"
+      },
+      "labRange": {
+        "low": null,
+        "high": 100
+      },
+      "deviation": 0.636
+    },
+    {
+      "markerKey": "triglycerides",
+      "value": 238,
+      "unit": "mg/dL",
+      "status": "risk",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 149,
+        "watchLow": null,
+        "watchHigh": 199,
+        "source": "ncepAtp3"
+      },
+      "labRange": {
+        "low": null,
+        "high": 150
+      },
+      "deviation": 0.597
+    },
+    {
+      "markerKey": "vldl_cholesterol",
+      "value": 47.6,
+      "unit": "mg/dL",
+      "status": "risk",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 30,
+        "watchLow": null,
+        "watchHigh": 40,
+        "source": "ncepAtp3"
+      },
+      "labRange": {
+        "low": null,
+        "high": 30
+      },
+      "deviation": 0.587
+    },
+    {
+      "markerKey": "bilirubin_total",
+      "value": 0.8,
+      "unit": "mg/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 1.2,
+        "watchLow": null,
+        "watchHigh": 2,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 0.3,
+        "high": 1.2
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "bilirubin_direct",
+      "value": 0.2,
+      "unit": "mg/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 0.3,
+        "watchLow": null,
+        "watchHigh": 0.5,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 0,
+        "high": 0.3
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "bilirubin_indirect",
+      "value": 0.6,
+      "unit": "mg/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 1,
+        "watchLow": null,
+        "watchHigh": 1.8,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 0,
+        "high": 1
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "ast",
+      "value": 31,
+      "unit": "U/L",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 35,
+        "watchLow": null,
+        "watchHigh": 70,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": null,
+        "high": 35
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "alt",
+      "value": 58,
+      "unit": "U/L",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 33,
+        "watchLow": null,
+        "watchHigh": 66,
+        "source": "acg2017"
+      },
+      "labRange": {
+        "low": null,
+        "high": 45
+      },
+      "deviation": 0.758
+    },
+    {
+      "markerKey": "alp",
+      "value": 88,
+      "unit": "U/L",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 40,
+        "optimalHigh": 130,
+        "watchLow": 30,
+        "watchHigh": 160,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 40,
+        "high": 130
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "ggt",
+      "value": 72,
+      "unit": "U/L",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 61,
+        "watchLow": null,
+        "watchHigh": 120,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": null,
+        "high": 55
+      },
+      "deviation": 0.18
+    },
+    {
+      "markerKey": "total_protein",
+      "value": 7.4,
+      "unit": "g/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 6.4,
+        "optimalHigh": 8.3,
+        "watchLow": 6,
+        "watchHigh": 8.8,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 6.4,
+        "high": 8.3
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "albumin",
+      "value": 4.5,
+      "unit": "g/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 3.5,
+        "optimalHigh": null,
+        "watchLow": 3,
+        "watchHigh": null,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 3.5,
+        "high": 5.2
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "creatinine",
+      "value": 0.96,
+      "unit": "mg/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 0.7,
+        "optimalHigh": 1.3,
+        "watchLow": 0.6,
+        "watchHigh": 1.5,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 0.7,
+        "high": 1.3
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "blood_urea",
+      "value": 26,
+      "unit": "mg/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 15,
+        "optimalHigh": 40,
+        "watchLow": 10,
+        "watchHigh": 50,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 15,
+        "high": 40
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "bun",
+      "value": 12.1,
+      "unit": "mg/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 7,
+        "optimalHigh": 20,
+        "watchLow": 5,
+        "watchHigh": 25,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 7,
+        "high": 20
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "uric_acid",
+      "value": 7.6,
+      "unit": "mg/dL",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 6.8,
+        "watchLow": null,
+        "watchHigh": 8,
+        "source": "eularGout2016"
+      },
+      "labRange": {
+        "low": 3.5,
+        "high": 7.2
+      },
+      "deviation": 0.118
+    },
+    {
+      "markerKey": "sodium",
+      "value": 139,
+      "unit": "mmol/L",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 136,
+        "optimalHigh": 145,
+        "watchLow": 133,
+        "watchHigh": 148,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 136,
+        "high": 145
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "potassium",
+      "value": 4.4,
+      "unit": "mmol/L",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 3.5,
+        "optimalHigh": 5,
+        "watchLow": 3.2,
+        "watchHigh": 5.5,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 3.5,
+        "high": 5.1
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "chloride",
+      "value": 102,
+      "unit": "mmol/L",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 98,
+        "optimalHigh": 107,
+        "watchLow": 95,
+        "watchHigh": 110,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 98,
+        "high": 107
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "calcium",
+      "value": 9.4,
+      "unit": "mg/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 8.6,
+        "optimalHigh": 10.2,
+        "watchLow": 8.2,
+        "watchHigh": 10.6,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 8.6,
+        "high": 10.2
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "phosphorus",
+      "value": 3.6,
+      "unit": "mg/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 2.5,
+        "optimalHigh": 4.5,
+        "watchLow": 2.2,
+        "watchHigh": 5,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 2.5,
+        "high": 4.5
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "magnesium",
+      "value": 2.1,
+      "unit": "mg/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 1.7,
+        "optimalHigh": 2.4,
+        "watchLow": 1.5,
+        "watchHigh": 2.6,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 1.7,
+        "high": 2.4
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "total_t3",
+      "value": 112,
+      "unit": "ng/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 80,
+        "optimalHigh": 200,
+        "watchLow": 60,
+        "watchHigh": 220,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 80,
+        "high": 200
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "total_t4",
+      "value": 8.1,
+      "unit": "µg/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 5,
+        "optimalHigh": 12,
+        "watchLow": 4.5,
+        "watchHigh": 13.5,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 5,
+        "high": 12
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "tsh",
+      "value": 5.8,
+      "unit": "µIU/mL",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": 0.45,
+        "optimalHigh": 4.12,
+        "watchLow": 0.1,
+        "watchHigh": 10,
+        "source": "ataAace2012"
+      },
+      "labRange": {
+        "low": 0.45,
+        "high": 4.12
+      },
+      "deviation": 0.458
+    },
+    {
+      "markerKey": "free_t4",
+      "value": 1.1,
+      "unit": "ng/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 0.9,
+        "optimalHigh": 1.7,
+        "watchLow": 0.7,
+        "watchHigh": 2,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 0.9,
+        "high": 1.7
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "vitamin_d",
+      "value": 14.2,
+      "unit": "ng/mL",
+      "status": "risk",
+      "calibrated": {
+        "optimalLow": 30,
+        "optimalHigh": 100,
+        "watchLow": 20,
+        "watchHigh": 150,
+        "source": "endoVitD2011"
+      },
+      "labRange": {
+        "low": 30,
+        "high": 100
+      },
+      "deviation": -0.226
+    },
+    {
+      "markerKey": "vitamin_b12",
+      "value": 186,
+      "unit": "pg/mL",
+      "status": "risk",
+      "calibrated": {
+        "optimalLow": 300,
+        "optimalHigh": null,
+        "watchLow": 200,
+        "watchHigh": null,
+        "source": "bsh2014"
+      },
+      "labRange": {
+        "low": 211,
+        "high": 911
+      },
+      "deviation": -0.38
+    },
+    {
+      "markerKey": "folate",
+      "value": 9.8,
+      "unit": "ng/mL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 4,
+        "optimalHigh": null,
+        "watchLow": 3,
+        "watchHigh": null,
+        "source": "whoFolate2015"
+      },
+      "labRange": {
+        "low": 4,
+        "high": null
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "iron",
+      "value": 72,
+      "unit": "µg/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 65,
+        "optimalHigh": 175,
+        "watchLow": 50,
+        "watchHigh": 200,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 65,
+        "high": 175
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "tibc",
+      "value": 340,
+      "unit": "µg/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 250,
+        "optimalHigh": 450,
+        "watchLow": 220,
+        "watchHigh": 500,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 250,
+        "high": 450
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "uibc",
+      "value": 268,
+      "unit": "µg/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 110,
+        "optimalHigh": 370,
+        "watchLow": 90,
+        "watchHigh": 420,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 110,
+        "high": 370
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "ferritin",
+      "value": 38,
+      "unit": "ng/mL",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": 45,
+        "optimalHigh": 300,
+        "watchLow": 15,
+        "watchHigh": 500,
+        "source": "aga2020"
+      },
+      "labRange": {
+        "low": 30,
+        "high": 400
+      },
+      "deviation": -0.027
+    },
+    {
+      "markerKey": "hs_crp",
+      "value": 2.4,
+      "unit": "mg/L",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 1,
+        "watchLow": null,
+        "watchHigh": 3,
+        "source": "ahaCdc2003"
+      },
+      "labRange": {
+        "low": null,
+        "high": 1
+      },
+      "deviation": 1.4
+    },
+    {
+      "markerKey": "homocysteine",
+      "value": 18.2,
+      "unit": "µmol/L",
+      "status": "risk",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 12,
+        "watchLow": null,
+        "watchHigh": 15,
+        "source": "refsum2004"
+      },
+      "labRange": {
+        "low": null,
+        "high": 15
+      },
+      "deviation": 0.517
+    },
+    {
+      "markerKey": "urine_ph",
+      "value": 6,
+      "unit": "pH",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 5,
+        "optimalHigh": 7.5,
+        "watchLow": 4.5,
+        "watchHigh": 8,
+        "source": "simerville2005"
+      },
+      "labRange": {
+        "low": 5,
+        "high": 7.5
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "urine_specific_gravity",
+      "value": 1.02,
+      "unit": "ratio",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 1.005,
+        "optimalHigh": 1.03,
+        "watchLow": 1.002,
+        "watchHigh": 1.035,
+        "source": "simerville2005"
+      },
+      "labRange": {
+        "low": 1.005,
+        "high": 1.03
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "urine_protein",
+      "value": 0,
+      "unit": "grade",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 0,
+        "watchLow": null,
+        "watchHigh": 1,
+        "source": "simerville2005"
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "urine_glucose",
+      "value": 0,
+      "unit": "grade",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 0,
+        "watchLow": null,
+        "watchHigh": 1,
+        "source": "simerville2005"
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "urine_ketones",
+      "value": 0,
+      "unit": "grade",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 0,
+        "watchLow": null,
+        "watchHigh": 1,
+        "source": "simerville2005"
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "urine_blood",
+      "value": 0,
+      "unit": "grade",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 0,
+        "watchLow": null,
+        "watchHigh": 1,
+        "source": "simerville2005"
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "urine_pus_cells",
+      "value": 2,
+      "unit": "/hpf",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 5,
+        "watchLow": null,
+        "watchHigh": 10,
+        "source": "simerville2005"
+      },
+      "labRange": {
+        "low": null,
+        "high": 5
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "urine_epithelial_cells",
+      "value": 1,
+      "unit": "/hpf",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 5,
+        "watchLow": null,
+        "watchHigh": 15,
+        "source": "eclmUrinalysis2000"
+      },
+      "labRange": {
+        "low": null,
+        "high": 5
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "urine_rbc",
+      "value": 0,
+      "unit": "/hpf",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 2,
+        "watchLow": null,
+        "watchHigh": 5,
+        "source": "simerville2005"
+      },
+      "labRange": {
+        "low": null,
+        "high": 2
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "urine_bilirubin",
+      "value": 0,
+      "unit": "grade",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 0,
+        "watchLow": null,
+        "watchHigh": 1,
+        "source": "simerville2005"
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "urine_urobilinogen",
+      "value": 0.2,
+      "unit": "mg/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 1,
+        "watchLow": null,
+        "watchHigh": 2,
+        "source": "simerville2005"
+      },
+      "labRange": {
+        "low": null,
+        "high": 1
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "amylase",
+      "value": 64,
+      "unit": "U/L",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 100,
+        "watchLow": null,
+        "watchHigh": 300,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 28,
+        "high": 100
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "lipase",
+      "value": 38,
+      "unit": "U/L",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 60,
+        "watchLow": null,
+        "watchHigh": 180,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 13,
+        "high": 60
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "apolipoprotein_a1",
+      "value": 129,
+      "unit": "mg/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 104,
+        "optimalHigh": null,
+        "watchLow": 94,
+        "watchHigh": null,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 101,
+        "high": 215
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "smear_rbc",
+      "value": "Normocytic / Normochromic",
+      "unit": "",
+      "status": "unknown",
+      "calibrated": null,
+      "deviation": 0
+    },
+    {
+      "markerKey": "smear_wbc",
+      "value": "TLC-Normal",
+      "unit": "",
+      "status": "unknown",
+      "calibrated": null,
+      "deviation": 0
+    },
+    {
+      "markerKey": "smear_dlc",
+      "value": "No abnormal cell seen.",
+      "unit": "",
+      "status": "unknown",
+      "calibrated": null,
+      "deviation": 0
+    },
+    {
+      "markerKey": "smear_platelets",
+      "value": "Adequate on smear.",
+      "unit": "",
+      "status": "unknown",
+      "calibrated": null,
+      "deviation": 0
+    },
+    {
+      "markerKey": "smear_hemoparasite",
+      "value": "No hemoparasite seen on thin smear examined.",
+      "unit": "",
+      "status": "unknown",
+      "calibrated": null,
+      "deviation": 0
+    },
+    {
+      "markerKey": "hbsag",
+      "value": "Non Reactive",
+      "unit": "",
+      "status": "optimal",
+      "calibrated": null,
+      "deviation": 0
+    },
+    {
+      "markerKey": "anti_hbs",
+      "value": "<2.0",
+      "unit": "mIU/mL",
+      "status": "watch",
+      "calibrated": null,
+      "deviation": 0
+    },
+    {
+      "markerKey": "hcv_antibody",
+      "value": "NON REACTIVE",
+      "unit": "",
+      "status": "optimal",
+      "calibrated": null,
+      "deviation": 0
+    },
+    {
+      "markerKey": "urine_colour",
+      "value": "PALE YELLOW",
+      "unit": "",
+      "status": "unknown",
+      "calibrated": null,
+      "deviation": 0
+    },
+    {
+      "markerKey": "urine_crystals",
+      "value": "ABSENT",
+      "unit": "",
+      "status": "unknown",
+      "calibrated": null,
+      "deviation": 0
+    }
+  ],
+  "derived": [
+    {
+      "markerKey": "tc_hdl_ratio",
+      "value": 6.6,
+      "unit": "ratio",
+      "status": "risk",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 4.5,
+        "watchLow": null,
+        "watchHigh": 5,
+        "source": "millan2009"
+      },
+      "deviation": 0.467,
+      "inputs": [
+        "total_cholesterol",
+        "hdl_cholesterol"
+      ]
+    },
+    {
+      "markerKey": "ldl_hdl_ratio",
+      "value": 4.5,
+      "unit": "ratio",
+      "status": "risk",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 3,
+        "watchLow": null,
+        "watchHigh": 3.5,
+        "source": "millan2009"
+      },
+      "deviation": 0.5,
+      "inputs": [
+        "ldl_cholesterol",
+        "hdl_cholesterol"
+      ]
+    },
+    {
+      "markerKey": "non_hdl_cholesterol",
+      "value": 200,
+      "unit": "mg/dL",
+      "status": "risk",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 129,
+        "watchLow": null,
+        "watchHigh": 159,
+        "source": "lai2023"
+      },
+      "deviation": 0.55,
+      "inputs": [
+        "total_cholesterol",
+        "hdl_cholesterol"
+      ]
+    },
+    {
+      "markerKey": "tg_hdl_ratio",
+      "value": 6.6,
+      "unit": "ratio",
+      "status": "risk",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 2,
+        "watchLow": null,
+        "watchHigh": 2.9,
+        "source": "mclaughlin2003"
+      },
+      "deviation": 2.3,
+      "inputs": [
+        "triglycerides",
+        "hdl_cholesterol"
+      ]
+    },
+    {
+      "markerKey": "ast_alt_ratio",
+      "value": 0.53,
+      "unit": "ratio",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 1.5,
+        "watchLow": null,
+        "watchHigh": 1.99,
+        "source": "acg2017"
+      },
+      "deviation": 0,
+      "inputs": [
+        "ast",
+        "alt"
+      ]
+    },
+    {
+      "markerKey": "bun_creatinine_ratio",
+      "value": 12.6,
+      "unit": "ratio",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 10,
+        "optimalHigh": 20,
+        "watchLow": 8,
+        "watchHigh": 25,
+        "source": "tietz2022"
+      },
+      "deviation": 0,
+      "inputs": [
+        "bun",
+        "creatinine"
+      ]
+    },
+    {
+      "markerKey": "urea_creatinine_ratio",
+      "value": 27.1,
+      "unit": "ratio",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 21,
+        "optimalHigh": 43,
+        "watchLow": 17,
+        "watchHigh": 53,
+        "source": "tietz2022"
+      },
+      "deviation": 0,
+      "inputs": [
+        "blood_urea",
+        "creatinine"
+      ]
+    },
+    {
+      "markerKey": "transferrin_saturation",
+      "value": 21,
+      "unit": "%",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 20,
+        "optimalHigh": 45,
+        "watchLow": 16,
+        "watchHigh": 50,
+        "source": "camaschella2015"
+      },
+      "deviation": 0,
+      "inputs": [
+        "iron",
+        "tibc"
+      ]
+    },
+    {
+      "markerKey": "egfr",
+      "value": 104,
+      "unit": "mL/min/1.73m²",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 90,
+        "optimalHigh": null,
+        "watchLow": 60,
+        "watchHigh": null,
+        "source": "kdigo2024"
+      },
+      "deviation": 0,
+      "inputs": [
+        "creatinine"
+      ]
+    },
+    {
+      "markerKey": "homa_ir",
+      "value": 4.48,
+      "unit": "index",
+      "status": "risk",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 2,
+        "watchLow": null,
+        "watchHigh": 2.85,
+        "source": "endukuru2020"
+      },
+      "deviation": 1.24,
+      "inputs": [
+        "glucose_fasting",
+        "insulin_fasting"
+      ]
+    },
+    {
+      "markerKey": "globulin",
+      "value": 2.9,
+      "unit": "g/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 2,
+        "optimalHigh": 3.5,
+        "watchLow": 1.8,
+        "watchHigh": 4,
+        "source": "tietz2022"
+      },
+      "deviation": 0,
+      "inputs": [
+        "total_protein",
+        "albumin"
+      ]
+    },
+    {
+      "markerKey": "albumin_globulin_ratio",
+      "value": 1.55,
+      "unit": "ratio",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 1.1,
+        "optimalHigh": 2.5,
+        "watchLow": 0.9,
+        "watchHigh": 2.8,
+        "source": "tietz2022"
+      },
+      "deviation": 0,
+      "inputs": [
+        "albumin",
+        "globulin"
+      ]
+    }
+  ],
+  "unmapped": [
+    {
+      "rawName": "HDL/LDL",
+      "value": 0.31,
+      "unit": "Ratio"
+    }
+  ],
+  "score": {
+    "overall": 82,
+    "byCategory": {
+      "metabolic": 60,
+      "lipids": 33,
+      "inflammation": 73,
+      "kidney": 100,
+      "liver": 88,
+      "thyroid": 84,
+      "vitamins": 36,
+      "iron": 84,
+      "blood_count": 98,
+      "electrolytes": 100,
+      "urate": 60,
+      "cardiac": 20,
+      "hormones": null,
+      "bone": 100,
+      "urine": 100,
+      "vitals": null,
+      "studies": null,
+      "other": 92
+    },
+    "coverage": {
+      "measured": 14,
+      "core": 16,
+      "pct": 88
+    },
+    "capped": false,
+    "tier": "platinum",
+    "formula": "A marker in its optimal range scores 100. A marker in watch scores 60. A marker in risk scores 20. A core marker counts two times. Your score is the weighted mean of these points. When the report has fewer than half of the core markers, the highest score is 70. When the report has fewer than a quarter of the core markers, the highest score is 50."
+  },
+  "verdict": "63 of 84 markers sit in your calibrated ranges. LDL cholesterol is the one to move first.",
+  "moveFirst": [
+    {
+      "markerKey": "ldl_cholesterol",
+      "severity": "critical",
+      "reason": "LDL cholesterol is 162 mg/dL, above your optimal range of up to 99 mg/dL."
+    },
+    {
+      "markerKey": "triglycerides",
+      "severity": "critical",
+      "reason": "Triglycerides is 238 mg/dL, above your optimal range of up to 149 mg/dL."
+    },
+    {
+      "markerKey": "vldl_cholesterol",
+      "severity": "critical",
+      "reason": "VLDL cholesterol is 47.6 mg/dL, above your optimal range of up to 30 mg/dL."
+    },
+    {
+      "markerKey": "homocysteine",
+      "severity": "critical",
+      "reason": "Homocysteine is 18.2 µmol/L, above your optimal range of up to 12 µmol/L."
+    },
+    {
+      "markerKey": "hdl_cholesterol",
+      "severity": "critical",
+      "reason": "HDL cholesterol is 36 mg/dL, below your optimal range of 60 mg/dL or more."
+    }
+  ],
+  "followUps": [
+    {
+      "kind": "supplement",
+      "markerKey": "vitamin_b12",
+      "title": "Ask your doctor about a supplement for low Vitamin B12",
+      "why": "Your Vitamin B12 is below your calibrated range. Low B12 causes tiredness, tingling, memory problems and large-cell anaemia, and nerve damage can become permanent. The BSH treats under 200 pg/mL as likely deficient and 200 to 300 as a grey zone.",
+      "next": "Ask your doctor whether a supplement suits you and what dose to take. Retest in 8 to 12 weeks. Vegetarian and vegan diets, metformin, long-term acid-reducing pills and age lower it. Supplements, injections and more dairy, eggs or fish raise it.",
+      "rank": 1
+    },
+    {
+      "kind": "supplement",
+      "markerKey": "vitamin_d",
+      "title": "Ask your doctor about a supplement for low Vitamin D (25-OH)",
+      "why": "Your Vitamin D (25-OH) is below your calibrated range. The Endocrine Society's 2011 guideline calls under 20 ng/mL deficient and 30 or above sufficient. Its 2024 update stopped advising routine testing in healthy adults, but very low levels still harm bone and muscle.",
+      "next": "Ask your doctor whether a supplement suits you and what dose to take. Retest in 8 to 12 weeks. Midday sun on bare skin, supplements and fortified foods raise it. Little time outdoors, darker skin, covering clothing, obesity and some medicines lower it.",
+      "rank": 2
+    },
+    {
+      "kind": "supplement",
+      "markerKey": "ferritin",
+      "title": "Ask your doctor about a supplement for low Ferritin",
+      "why": "Your Ferritin is below your calibrated range. Low ferritin is the earliest sign of iron deficiency, often before hemoglobin falls. The WHO calls under 15 ng/mL deficient in healthy adults. The AGA uses under 45 to diagnose iron deficiency in anaemia.",
+      "next": "Ask your doctor whether a supplement suits you and what dose to take. Retest in 8 to 12 weeks. Heavy periods, blood donation, pregnancy and a low-iron diet lower it. Inflammation, infection, fatty liver and alcohol raise it, which can hide low iron.",
+      "rank": 3
+    },
+    {
+      "kind": "retest",
+      "markerKey": "ldl_cholesterol",
+      "title": "Retest LDL cholesterol in 8 to 12 weeks",
+      "why": "Your LDL cholesterol is well outside your calibrated range. LDL is the best-proven cause of heart attack and stroke, and lower is better for arteries. ATP III calls under 100 mg/dL optimal and 160 or above high.",
+      "next": "Genetics, saturated and trans fats and weight gain raise it. Soluble fibre, fewer saturated fats, exercise and medicines such as statins lower it. Book a retest in 8 to 12 weeks. Take both reports to your doctor.",
+      "rank": 4
+    },
+    {
+      "kind": "retest",
+      "markerKey": "triglycerides",
+      "title": "Retest Triglycerides in 8 to 12 weeks",
+      "why": "Your Triglycerides is well outside your calibrated range. Under 150 mg/dL is normal and 200 or above is high, by ATP III. High triglycerides with low HDL is a typical pattern of insulin resistance and raises heart risk.",
+      "next": "Sugar, refined carbohydrates, alcohol and weight gain raise them sharply. Exercise, weight loss, less sugar and alcohol, and omega-3 rich fish lower them. Book a retest in 8 to 12 weeks. Take both reports to your doctor.",
+      "rank": 5
+    },
+    {
+      "kind": "retest",
+      "markerKey": "vldl_cholesterol",
+      "title": "Retest VLDL cholesterol in 8 to 12 weeks",
+      "why": "Your VLDL cholesterol is well outside your calibrated range. Labs calculate it from triglycerides, so it rises and falls with them. It also counts toward non-HDL cholesterol, which tracks heart risk.",
+      "next": "Whatever moves triglycerides moves it. Sugar, alcohol and weight gain raise it, and exercise and weight loss lower it. Book a retest in 8 to 12 weeks. Take both reports to your doctor.",
+      "rank": 6
+    },
+    {
+      "kind": "retest",
+      "markerKey": "homocysteine",
+      "title": "Retest Homocysteine in 8 to 12 weeks",
+      "why": "Your Homocysteine is well outside your calibrated range. A high level is linked with higher risk of stroke and heart disease, and often signals low B12 or folate. Refsum and colleagues set the upper reference limit at 15 µmol/L for adults, or 12 where diets are folate-rich.",
+      "next": "Low B12 or folate, kidney disease, smoking, heavy coffee and some medicines raise it. Correcting B12 and folate usually lowers it within weeks. Book a retest in 8 to 12 weeks. Take both reports to your doctor.",
+      "rank": 7
+    },
+    {
+      "kind": "retest",
+      "markerKey": "hdl_cholesterol",
+      "title": "Retest HDL cholesterol in 8 to 12 weeks",
+      "why": "Your HDL cholesterol is well outside your calibrated range. Low HDL is under 40 mg/dL in men and under 50 in women. It is linked with higher heart risk and insulin resistance. Raising HDL with drugs did not cut heart attacks, so HDL is a signal rather than a target.",
+      "next": "Exercise, weight loss and quitting smoking raise it. Refined carbohydrates, inactivity, belly fat and smoking lower it. Book a retest in 8 to 12 weeks. Take both reports to your doctor.",
+      "rank": 8
+    },
+    {
+      "kind": "retest",
+      "markerKey": "vitamin_b12",
+      "title": "Retest Vitamin B12 in 8 to 12 weeks",
+      "why": "Your Vitamin B12 is well outside your calibrated range. Low B12 causes tiredness, tingling, memory problems and large-cell anaemia, and nerve damage can become permanent. The BSH treats under 200 pg/mL as likely deficient and 200 to 300 as a grey zone.",
+      "next": "Vegetarian and vegan diets, metformin, long-term acid-reducing pills and age lower it. Supplements, injections and more dairy, eggs or fish raise it. Book a retest in 8 to 12 weeks. Take both reports to your doctor.",
+      "rank": 9
+    },
+    {
+      "kind": "retest",
+      "markerKey": "vitamin_d",
+      "title": "Retest Vitamin D (25-OH) in 8 to 12 weeks",
+      "why": "Your Vitamin D (25-OH) is well outside your calibrated range. The Endocrine Society's 2011 guideline calls under 20 ng/mL deficient and 30 or above sufficient. Its 2024 update stopped advising routine testing in healthy adults, but very low levels still harm bone and muscle.",
+      "next": "Midday sun on bare skin, supplements and fortified foods raise it. Little time outdoors, darker skin, covering clothing, obesity and some medicines lower it. Book a retest in 8 to 12 weeks. Take both reports to your doctor.",
+      "rank": 10
+    },
+    {
+      "kind": "retest",
+      "markerKey": "anti_hbs",
+      "title": "Ask your doctor about a hepatitis B booster dose",
+      "why": "Your hepatitis B antibody level is low. Anti-HBs below 10 mIU/mL can mean that you are not protected against hepatitis B.",
+      "next": "Ask your doctor about a booster dose.",
+      "rank": 11
+    },
+    {
+      "kind": "measure",
+      "markerKey": "apolipoprotein_b",
+      "title": "Measure Apolipoprotein B",
+      "why": "Apolipoprotein B is not on this report. ApoB predicts heart risk at least as well as LDL and better when triglycerides are high. ESC/EAS sets under 100 mg/dL for moderate risk, and AHA/ACC treats 130 or above as a risk enhancer.",
+      "next": "Ask for Apolipoprotein B at your next blood test. Every LDL, VLDL and Lp(a) particle carries exactly one ApoB protein. Measuring ApoB counts the harmful particles directly.",
+      "rank": 12
+    },
+    {
+      "kind": "measure",
+      "markerKey": "lipoprotein_a",
+      "title": "Measure Lipoprotein(a)",
+      "why": "Lipoprotein(a) is not on this report. A high level raises the risk of heart attack, stroke and aortic valve narrowing, even when LDL is good. The EAS calls under 30 mg/dL low and over 50 high.",
+      "next": "Ask for Lipoprotein(a) at your next blood test. Lp(a) is an LDL-like particle with an extra protein attached. Your genes mostly set its level, and it stays about the same for life.",
+      "rank": 13
+    }
+  ],
+  "unmeasured": [
+    {
+      "markerKey": "apolipoprotein_b",
+      "name": "Apolipoprotein B",
+      "description": "A count of the particles that can build plaque in arteries."
+    },
+    {
+      "markerKey": "lipoprotein_a",
+      "name": "Lipoprotein(a)",
+      "description": "An inherited cholesterol particle that raises heart risk."
+    }
+  ],
+  "patterns": [
+    {
+      "key": "b12_deficiency",
+      "name": "B12 deficiency pattern",
+      "description": "High homocysteine with low or low-normal vitamin B12.",
+      "severity": "risk",
+      "whatItSuggests": "Your body may not get enough vitamin B12. High homocysteine can show a B12 shortage before B12 itself drops low.",
+      "whatToDo": "Speak with your doctor about these values. Ask about a B12 retest or a methylmalonic acid test.",
+      "askDoctor": [
+        "Could my high homocysteine come from low vitamin B12?",
+        "Should I have a methylmalonic acid test to check my B12 status?"
+      ],
+      "sources": [
+        {
+          "id": "bsh2014",
+          "title": "Guidelines for the diagnosis and treatment of cobalamin and folate disorders. Devalia V et al., British Committee for Standards in Haematology, Br J Haematol",
+          "year": 2014,
+          "url": "https://doi.org/10.1111/bjh.12959"
+        },
+        {
+          "id": "refsum2004",
+          "title": "Facts and recommendations about total homocysteine determinations: an expert opinion. Refsum H et al., Clin Chem",
+          "year": 2004,
+          "url": "https://doi.org/10.1373/clinchem.2003.021634"
+        },
+        {
+          "id": "yajnik2006",
+          "title": "Vitamin B12 deficiency and hyperhomocysteinemia in rural and urban Indians. Yajnik CS et al., J Assoc Physicians India",
+          "year": 2006,
+          "url": "https://pubmed.ncbi.nlm.nih.gov/17214273/"
+        }
+      ],
+      "matched": [
+        {
+          "markerKey": "homocysteine",
+          "name": "Homocysteine",
+          "value": 18.2,
+          "unit": "µmol/L"
+        },
+        {
+          "markerKey": "vitamin_b12",
+          "name": "Vitamin B12",
+          "value": 186,
+          "unit": "pg/mL"
+        }
+      ]
+    },
+    {
+      "key": "metabolic_lipid_triad",
+      "name": "Metabolic syndrome lipid triad",
+      "description": "High triglycerides and low HDL with blood sugar above the optimal range.",
+      "severity": "risk",
+      "whatItSuggests": "These values often appear together with insulin resistance. Together they may raise your heart and blood sugar risk.",
+      "whatToDo": "Ask your doctor to check your waist size and blood pressure. These two complete the check for metabolic syndrome.",
+      "askDoctor": [
+        "Should we check my waist size and blood pressure for metabolic syndrome?",
+        "How often should I retest my lipids and HbA1c?"
+      ],
+      "sources": [
+        {
+          "id": "ncepAtp3",
+          "title": "Third Report of the National Cholesterol Education Program Expert Panel on Detection, Evaluation, and Treatment of High Blood Cholesterol in Adults (ATP III) Final Report. Circulation",
+          "year": 2002,
+          "url": "https://doi.org/10.1161/circ.106.25.3143"
+        },
+        {
+          "id": "misra2009",
+          "title": "Consensus statement for diagnosis of obesity, abdominal obesity and the metabolic syndrome for Asian Indians. Misra A et al., J Assoc Physicians India",
+          "year": 2009,
+          "url": "https://pubmed.ncbi.nlm.nih.gov/19582986/"
+        }
+      ],
+      "matched": [
+        {
+          "markerKey": "triglycerides",
+          "name": "Triglycerides",
+          "value": 238,
+          "unit": "mg/dL"
+        },
+        {
+          "markerKey": "hdl_cholesterol",
+          "name": "HDL cholesterol",
+          "value": 36,
+          "unit": "mg/dL"
+        },
+        {
+          "markerKey": "glucose_fasting",
+          "name": "Fasting glucose",
+          "value": 108,
+          "unit": "mg/dL"
+        },
+        {
+          "markerKey": "hba1c",
+          "name": "HbA1c",
+          "value": 6.1,
+          "unit": "%"
+        }
+      ]
+    },
+    {
+      "key": "subclinical_hypothyroidism",
+      "name": "Subclinical hypothyroidism pattern",
+      "description": "TSH above the range while free T4 stays in the optimal range.",
+      "severity": "watch",
+      "whatItSuggests": "Your thyroid may need extra signal from TSH to make enough hormone. Free T4 is still in range.",
+      "whatToDo": "Retest TSH and free T4 in 8 to 12 weeks. Ask your doctor whether an anti-TPO antibody test suits you.",
+      "askDoctor": [
+        "My TSH is high but my free T4 is in range. Should we retest in 8 to 12 weeks?",
+        "Should I have an anti-TPO antibody test?"
+      ],
+      "sources": [
+        {
+          "id": "ataAace2012",
+          "title": "Clinical Practice Guidelines for Hypothyroidism in Adults, cosponsored by the AACE and the ATA. Garber JR et al., Thyroid",
+          "year": 2012,
+          "url": "https://doi.org/10.1089/thy.2012.0205"
+        },
+        {
+          "id": "indiaThyroid2013",
+          "title": "Prevalence of hypothyroidism in adults: An epidemiological study in eight cities of India. Unnikrishnan AG et al., Indian J Endocrinol Metab",
+          "year": 2013,
+          "url": "https://doi.org/10.4103/2230-8210.113755"
+        }
+      ],
+      "matched": [
+        {
+          "markerKey": "tsh",
+          "name": "Thyroid stimulating hormone",
+          "value": 5.8,
+          "unit": "µIU/mL"
+        },
+        {
+          "markerKey": "free_t4",
+          "name": "Free T4",
+          "value": 1.1,
+          "unit": "ng/dL"
+        }
+      ]
+    },
+    {
+      "key": "insulin_resistance",
+      "name": "Insulin resistance signal",
+      "description": "High HOMA-IR, or a triglyceride to HDL ratio above 3.",
+      "severity": "watch",
+      "whatItSuggests": "Your body may need more insulin than usual to control blood sugar. This often comes before blood sugar rises.",
+      "whatToDo": "Ask your doctor about a fasting insulin test and an HbA1c retest in 3 months.",
+      "askDoctor": [
+        "Do my values suggest insulin resistance?",
+        "Should I have a fasting insulin test with my next HbA1c?"
+      ],
+      "sources": [
+        {
+          "id": "matthews1985",
+          "title": "Homeostasis model assessment: insulin resistance and beta-cell function from fasting plasma glucose and insulin concentrations in man. Matthews DR et al., Diabetologia",
+          "year": 1985,
+          "url": "https://doi.org/10.1007/BF00280883"
+        },
+        {
+          "id": "mclaughlin2003",
+          "title": "Use of metabolic markers to identify overweight individuals who are insulin resistant. McLaughlin T et al., Ann Intern Med",
+          "year": 2003,
+          "url": "https://doi.org/10.7326/0003-4819-139-10-200311180-00007"
+        },
+        {
+          "id": "endukuru2020",
+          "title": "Cut-off Values and Clinical Utility of Surrogate Markers for Insulin Resistance and Beta-Cell Function to Identify Metabolic Syndrome and Its Components among Southern Indian Adults. Endukuru CK et al., J Obes Metab Syndr",
+          "year": 2020,
+          "url": "https://doi.org/10.7570/jomes20071"
+        }
+      ],
+      "matched": [
+        {
+          "markerKey": "homa_ir",
+          "name": "HOMA-IR",
+          "value": 4.48,
+          "unit": "index"
+        },
+        {
+          "markerKey": "triglycerides",
+          "name": "Triglycerides to HDL cholesterol ratio",
+          "value": 6.61,
+          "unit": "ratio"
+        }
+      ]
+    },
+    {
+      "key": "prediabetes",
+      "name": "Prediabetes range",
+      "description": "HbA1c or fasting glucose in the prediabetes range.",
+      "severity": "watch",
+      "whatItSuggests": "Your blood sugar is above the optimal range but below the diabetes range. Many people in this range can lower it.",
+      "whatToDo": "Retest HbA1c and fasting glucose in 3 to 6 months. Ask your doctor about a plan to lower your blood sugar.",
+      "askDoctor": [
+        "My blood sugar is in the prediabetes range. How often should I retest it?"
+      ],
+      "sources": [
+        {
+          "id": "ada2025",
+          "title": "Standards of Care in Diabetes 2025. American Diabetes Association, Diabetes Care 48 (Suppl 1)",
+          "year": 2025,
+          "url": "https://diabetesjournals.org/care/issue/48/Supplement_1"
+        },
+        {
+          "id": "icmrDiabetes2018",
+          "title": "ICMR Guidelines for Management of Type 2 Diabetes. Indian Council of Medical Research",
+          "year": 2018,
+          "url": "https://www.icmr.gov.in/icmrobject/custom_data/pdf/resource-guidelines/ICMR_GuidelinesType2diabetes2018_0.pdf"
+        }
+      ],
+      "matched": [
+        {
+          "markerKey": "hba1c",
+          "name": "HbA1c",
+          "value": 6.1,
+          "unit": "%"
+        },
+        {
+          "markerKey": "glucose_fasting",
+          "name": "Fasting glucose",
+          "value": 108,
+          "unit": "mg/dL"
+        }
+      ]
+    },
+    {
+      "key": "fatty_liver_signal",
+      "name": "Fatty liver signal",
+      "description": "High ALT, high GGT and high triglycerides together.",
+      "severity": "watch",
+      "whatItSuggests": "Fat may collect in the liver. This pattern often goes with high triglycerides and insulin resistance.",
+      "whatToDo": "Ask your doctor whether a liver ultrasound suits you.",
+      "askDoctor": [
+        "Could my liver values point to a fatty liver?",
+        "Should I have a liver ultrasound?"
+      ],
+      "sources": [
+        {
+          "id": "aasld2018",
+          "title": "The diagnosis and management of nonalcoholic fatty liver disease: Practice guidance from the American Association for the Study of Liver Diseases. Chalasani N et al., Hepatology",
+          "year": 2018,
+          "url": "https://doi.org/10.1002/hep.29367"
+        },
+        {
+          "id": "acg2017",
+          "title": "ACG Clinical Guideline: Evaluation of Abnormal Liver Chemistries. Kwo PY et al., Am J Gastroenterol",
+          "year": 2017,
+          "url": "https://doi.org/10.1038/ajg.2016.517"
+        }
+      ],
+      "matched": [
+        {
+          "markerKey": "alt",
+          "name": "ALT (SGPT)",
+          "value": 58,
+          "unit": "U/L"
+        },
+        {
+          "markerKey": "ggt",
+          "name": "Gamma-glutamyl transferase",
+          "value": 72,
+          "unit": "U/L"
+        },
+        {
+          "markerKey": "triglycerides",
+          "name": "Triglycerides",
+          "value": 238,
+          "unit": "mg/dL"
+        }
+      ]
+    },
+    {
+      "key": "gout_risk",
+      "name": "Gout risk",
+      "description": "Uric acid above the optimal range.",
+      "severity": "watch",
+      "whatItSuggests": "High uric acid can form crystals in the joints. It also often goes with high blood pressure and insulin resistance.",
+      "whatToDo": "Retest uric acid in 3 months. Speak with your doctor if a joint becomes painful or swollen.",
+      "askDoctor": [
+        "My uric acid is high. What is my risk of gout?"
+      ],
+      "sources": [
+        {
+          "id": "acrGout2020",
+          "title": "2020 American College of Rheumatology Guideline for the Management of Gout. FitzGerald JD et al., Arthritis Care Res",
+          "year": 2020,
+          "url": "https://doi.org/10.1002/acr.24180"
+        },
+        {
+          "id": "eularGout2016",
+          "title": "2016 updated EULAR evidence-based recommendations for the management of gout. Richette P et al., Ann Rheum Dis",
+          "year": 2017,
+          "url": "https://doi.org/10.1136/annrheumdis-2016-209707"
+        }
+      ],
+      "matched": [
+        {
+          "markerKey": "uric_acid",
+          "name": "Uric acid",
+          "value": 7.6,
+          "unit": "mg/dL"
+        }
+      ]
+    }
+  ],
+  "doctorQuestions": [
+    "Could my high homocysteine come from low vitamin B12?",
+    "Should I have a methylmalonic acid test to check my B12 status?",
+    "Should we check my waist size and blood pressure for metabolic syndrome?",
+    "How often should I retest my lipids and HbA1c?",
+    "My TSH is high but my free T4 is in range. Should we retest in 8 to 12 weeks?",
+    "Should I have an anti-TPO antibody test?",
+    "Do my values suggest insulin resistance?",
+    "Should I have a fasting insulin test with my next HbA1c?"
+  ]
+}

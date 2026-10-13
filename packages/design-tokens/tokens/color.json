@@ -1,0 +1,441 @@
+{
+  "color": {
+    "$type": "color",
+    "light": {
+      "background": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.985, 0.004, 80]
+        }
+      },
+      "foreground": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.23, 0.008, 60]
+        }
+      },
+      "card": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.997, 0.002, 80]
+        }
+      },
+      "card-foreground": {
+        "$value": "{color.light.foreground}"
+      },
+      "popover": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.997, 0.002, 80]
+        }
+      },
+      "popover-foreground": {
+        "$value": "{color.light.foreground}"
+      },
+      "primary": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.48, 0.075, 195]
+        }
+      },
+      "primary-foreground": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.99, 0.002, 80]
+        }
+      },
+      "secondary": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.955, 0.005, 75]
+        }
+      },
+      "secondary-foreground": {
+        "$value": "{color.light.foreground}"
+      },
+      "muted": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.955, 0.005, 75]
+        }
+      },
+      "muted-foreground": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.5, 0.01, 60]
+        }
+      },
+      "accent": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.945, 0.006, 75]
+        }
+      },
+      "accent-foreground": {
+        "$value": "{color.light.foreground}"
+      },
+      "destructive": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.52, 0.17, 25]
+        }
+      },
+      "border": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.9, 0.006, 75]
+        }
+      },
+      "input": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.87, 0.007, 75]
+        }
+      },
+      "ring": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.58, 0.085, 195]
+        }
+      },
+      "sidebar": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.97, 0.005, 75]
+        }
+      },
+      "chart-1": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.48, 0.075, 195]
+        }
+      },
+      "chart-2": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.6, 0.06, 220]
+        }
+      },
+      "chart-3": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.5, 0.04, 280]
+        }
+      },
+      "chart-4": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.55, 0.02, 60]
+        }
+      },
+      "chart-5": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.75, 0.03, 195]
+        }
+      },
+      "optimal": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.47, 0.09, 150]
+        }
+      },
+      "optimal-soft": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.95, 0.03, 150]
+        }
+      },
+      "watch": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.5, 0.1, 70]
+        }
+      },
+      "watch-soft": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.95, 0.04, 80]
+        }
+      },
+      "risk": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.5, 0.15, 40]
+        }
+      },
+      "risk-soft": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.95, 0.025, 40]
+        }
+      },
+      "unknown": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.5, 0.015, 250]
+        }
+      },
+      "unknown-soft": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.95, 0.006, 250]
+        }
+      },
+      "glass-tint-surface": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.997, 0.002, 80],
+          "alpha": 0.92
+        },
+        "$description": "card at the glass opacity"
+      },
+      "glass-tint-bar": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.985, 0.004, 80],
+          "alpha": 0.92
+        },
+        "$description": "background at the glass opacity"
+      },
+      "glass-tint-overlay": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.997, 0.002, 80],
+          "alpha": 0.92
+        },
+        "$description": "popover at the glass opacity"
+      },
+      "ambient-1": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.94, 0.03, 195]
+        }
+      },
+      "ambient-2": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.95, 0.025, 70]
+        }
+      }
+    },
+    "dark": {
+      "background": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.205, 0.004, 70]
+        }
+      },
+      "foreground": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.94, 0.004, 80]
+        }
+      },
+      "card": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.23, 0.004, 70]
+        }
+      },
+      "card-foreground": {
+        "$value": "{color.dark.foreground}"
+      },
+      "popover": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.25, 0.004, 70]
+        }
+      },
+      "popover-foreground": {
+        "$value": "{color.dark.foreground}"
+      },
+      "primary": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.78, 0.08, 195]
+        }
+      },
+      "primary-foreground": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.205, 0.004, 70]
+        }
+      },
+      "secondary": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.27, 0.004, 70]
+        }
+      },
+      "secondary-foreground": {
+        "$value": "{color.dark.foreground}"
+      },
+      "muted": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.265, 0.004, 70]
+        }
+      },
+      "muted-foreground": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.72, 0.008, 75]
+        }
+      },
+      "accent": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.29, 0.005, 70]
+        }
+      },
+      "accent-foreground": {
+        "$value": "{color.dark.foreground}"
+      },
+      "destructive": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.72, 0.15, 25]
+        }
+      },
+      "border": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.31, 0.005, 70]
+        }
+      },
+      "input": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.35, 0.005, 70]
+        }
+      },
+      "ring": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.68, 0.08, 195]
+        }
+      },
+      "sidebar": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.185, 0.004, 70]
+        }
+      },
+      "chart-1": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.78, 0.08, 195]
+        }
+      },
+      "chart-2": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.7, 0.06, 220]
+        }
+      },
+      "chart-3": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.72, 0.05, 280]
+        }
+      },
+      "chart-4": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.7, 0.015, 60]
+        }
+      },
+      "chart-5": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.55, 0.04, 195]
+        }
+      },
+      "optimal": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.8, 0.11, 150]
+        }
+      },
+      "optimal-soft": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.3, 0.04, 150]
+        }
+      },
+      "watch": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.83, 0.11, 80]
+        }
+      },
+      "watch-soft": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.31, 0.045, 75]
+        }
+      },
+      "risk": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.78, 0.12, 40]
+        }
+      },
+      "risk-soft": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.31, 0.055, 40]
+        }
+      },
+      "unknown": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.75, 0.015, 250]
+        }
+      },
+      "unknown-soft": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.3, 0.008, 250]
+        }
+      },
+      "glass-tint-surface": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.23, 0.004, 70],
+          "alpha": 0.88
+        },
+        "$description": "card at the glass opacity"
+      },
+      "glass-tint-bar": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.205, 0.004, 70],
+          "alpha": 0.88
+        },
+        "$description": "background at the glass opacity"
+      },
+      "glass-tint-overlay": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.25, 0.004, 70],
+          "alpha": 0.9
+        },
+        "$description": "popover at the glass opacity"
+      },
+      "ambient-1": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.27, 0.03, 195]
+        }
+      },
+      "ambient-2": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.25, 0.02, 60]
+        }
+      }
+    }
+  }
+}

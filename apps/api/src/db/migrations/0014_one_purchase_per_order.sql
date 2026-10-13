@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "credits_ledger_one_purchase_per_order_idx" ON "credits_ledger" USING btree ("payment_order_id") WHERE "credits_ledger"."reason" = 'purchase';

@@ -1,0 +1,318 @@
+{
+  "markers": [
+    {
+      "markerKey": "glucose_fasting",
+      "value": 110,
+      "unit": "mg/dL",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": 70,
+        "optimalHigh": 99,
+        "watchLow": 54,
+        "watchHigh": 125,
+        "source": "ada2025"
+      },
+      "labRange": {
+        "low": 70,
+        "high": 99
+      },
+      "deviation": 0.379
+    },
+    {
+      "markerKey": "hba1c",
+      "value": 7.2,
+      "unit": "mg%",
+      "status": "unknown",
+      "calibrated": null,
+      "deviation": 0
+    },
+    {
+      "markerKey": "creatinine",
+      "value": 1.1,
+      "unit": "mg/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 0.7,
+        "optimalHigh": 1.3,
+        "watchLow": 0.6,
+        "watchHigh": 1.5,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 0.7,
+        "high": 1.3
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "lipoprotein_a",
+      "value": 75,
+      "unit": "nmol/L",
+      "status": "unknown",
+      "calibrated": null,
+      "labRange": {
+        "low": null,
+        "high": 75
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "vitamin_d",
+      "value": 50,
+      "unit": "IU",
+      "status": "unknown",
+      "calibrated": null,
+      "deviation": 0
+    },
+    {
+      "markerKey": "hemoglobin",
+      "value": 14.1,
+      "unit": "",
+      "status": "unknown",
+      "calibrated": null,
+      "deviation": 0
+    }
+  ],
+  "derived": [
+    {
+      "markerKey": "egfr",
+      "value": 79,
+      "unit": "mL/min/1.73m²",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": 90,
+        "optimalHigh": null,
+        "watchLow": 60,
+        "watchHigh": null,
+        "source": "kdigo2024"
+      },
+      "deviation": -0.122,
+      "inputs": [
+        "creatinine"
+      ]
+    }
+  ],
+  "unmapped": [
+    {
+      "rawName": "Serum Zonulin",
+      "value": 48,
+      "unit": "ng/mL"
+    },
+    {
+      "rawName": "Lab Remark Index",
+      "value": 3,
+      "unit": ""
+    }
+  ],
+  "score": {
+    "overall": 70,
+    "byCategory": {
+      "metabolic": 60,
+      "lipids": null,
+      "inflammation": null,
+      "kidney": 100,
+      "liver": null,
+      "thyroid": null,
+      "vitamins": null,
+      "iron": null,
+      "blood_count": null,
+      "electrolytes": null,
+      "urate": null,
+      "cardiac": null,
+      "hormones": null,
+      "bone": null,
+      "urine": null,
+      "vitals": null,
+      "studies": null,
+      "other": null
+    },
+    "coverage": {
+      "measured": 6,
+      "core": 16,
+      "pct": 38
+    },
+    "capped": true,
+    "tier": "gold",
+    "formula": "A marker in its optimal range scores 100. A marker in watch scores 60. A marker in risk scores 20. A core marker counts two times. Your score is the weighted mean of these points. When the report has fewer than half of the core markers, the highest score is 70. When the report has fewer than a quarter of the core markers, the highest score is 50."
+  },
+  "verdict": "1 of 2 markers sit in your calibrated ranges. Fasting glucose is the one to move first.",
+  "moveFirst": [
+    {
+      "markerKey": "glucose_fasting",
+      "severity": "out_of_optimal",
+      "reason": "Fasting glucose is 110 mg/dL, above your optimal range of 70 to 99 mg/dL."
+    }
+  ],
+  "followUps": [
+    {
+      "kind": "measure",
+      "markerKey": "insulin_fasting",
+      "title": "Measure Fasting insulin",
+      "why": "Fasting insulin is not on this report. High fasting insulin with normal sugar is an early sign of insulin resistance, often years before prediabetes. Combined with glucose it gives HOMA-IR.",
+      "next": "Ask for Fasting insulin at your next blood test. Insulin is the hormone that moves sugar from blood into cells. Fasting insulin shows how hard the pancreas works to hold fasting sugar in range.",
+      "rank": 1
+    },
+    {
+      "kind": "measure",
+      "markerKey": "ldl_cholesterol",
+      "title": "Measure LDL cholesterol",
+      "why": "LDL cholesterol is not on this report. LDL is the best-proven cause of heart attack and stroke, and lower is better for arteries. ATP III calls under 100 mg/dL optimal and 160 or above high.",
+      "next": "Ask for LDL cholesterol at your next blood test. LDL cholesterol is the cholesterol that low-density lipoprotein particles carry. These particles can lodge in artery walls and build plaque.",
+      "rank": 2
+    },
+    {
+      "kind": "measure",
+      "markerKey": "hdl_cholesterol",
+      "title": "Measure HDL cholesterol",
+      "why": "HDL cholesterol is not on this report. Low HDL is under 40 mg/dL in men and under 50 in women. It is linked with higher heart risk and insulin resistance. Raising HDL with drugs did not cut heart attacks, so HDL is a signal rather than a target.",
+      "next": "Ask for HDL cholesterol at your next blood test. HDL cholesterol is the cholesterol that high-density lipoprotein carries. This lipoprotein returns cholesterol from tissues to the liver. People often call HDL good cholesterol.",
+      "rank": 3
+    },
+    {
+      "kind": "measure",
+      "markerKey": "triglycerides",
+      "title": "Measure Triglycerides",
+      "why": "Triglycerides is not on this report. Under 150 mg/dL is normal and 200 or above is high, by ATP III. High triglycerides with low HDL is a typical pattern of insulin resistance and raises heart risk.",
+      "next": "Ask for Triglycerides at your next blood test. Triglycerides are fats made from the calories you do not burn right away. They rise after meals, so a fasting test is best.",
+      "rank": 4
+    },
+    {
+      "kind": "measure",
+      "markerKey": "apolipoprotein_b",
+      "title": "Measure Apolipoprotein B",
+      "why": "Apolipoprotein B is not on this report. ApoB predicts heart risk at least as well as LDL and better when triglycerides are high. ESC/EAS sets under 100 mg/dL for moderate risk, and AHA/ACC treats 130 or above as a risk enhancer.",
+      "next": "Ask for Apolipoprotein B at your next blood test. Every LDL, VLDL and Lp(a) particle carries exactly one ApoB protein. Measuring ApoB counts the harmful particles directly.",
+      "rank": 5
+    },
+    {
+      "kind": "measure",
+      "markerKey": "hs_crp",
+      "title": "Measure High-sensitivity CRP",
+      "why": "High-sensitivity CRP is not on this report. The AHA and CDC class under 1 mg/L as low heart risk. They class 1 to 3 as average and above 3 as high. A value above 10 usually reflects a passing infection, so you should repeat the test when you are well.",
+      "next": "Ask for High-sensitivity CRP at your next blood test. hs-CRP measures the same protein as CRP but detects much lower levels. That makes it useful for spotting quiet, long-term inflammation.",
+      "rank": 6
+    },
+    {
+      "kind": "measure",
+      "markerKey": "alt",
+      "title": "Measure ALT (SGPT)",
+      "why": "ALT (SGPT) is not on this report. ALT is the most liver-specific routine enzyme, and a raised value is often the first sign of fatty liver. The ACG sets the healthy upper limit at 33 U/L for men and 25 for women. This is lower than many lab ranges.",
+      "next": "Ask for ALT (SGPT) at your next blood test. ALT is an enzyme made mostly in liver cells. When those cells are inflamed or damaged, ALT leaks into blood.",
+      "rank": 7
+    },
+    {
+      "kind": "measure",
+      "markerKey": "tsh",
+      "title": "Measure Thyroid stimulating hormone",
+      "why": "Thyroid stimulating hormone is not on this report. TSH is the most sensitive screen for an underactive or overactive thyroid. The ATA and AACE use 0.45 to 4.12 as the reference range from a large US survey. A TSH above 10 usually prompts treatment.",
+      "next": "Ask for Thyroid stimulating hormone at your next blood test. The pituitary gland makes TSH to tell the thyroid how much hormone to release. When thyroid output drops, TSH rises, and when output is high, TSH falls.",
+      "rank": 8
+    },
+    {
+      "kind": "measure",
+      "markerKey": "vitamin_b12",
+      "title": "Measure Vitamin B12",
+      "why": "Vitamin B12 is not on this report. Low B12 causes tiredness, tingling, memory problems and large-cell anaemia, and nerve damage can become permanent. The BSH treats under 200 pg/mL as likely deficient and 200 to 300 as a grey zone.",
+      "next": "Ask for Vitamin B12 at your next blood test. The body needs vitamin B12 to make red blood cells and to keep nerves healthy. It comes almost only from animal foods such as milk, curd, eggs, fish and meat.",
+      "rank": 9
+    },
+    {
+      "kind": "measure",
+      "markerKey": "ferritin",
+      "title": "Measure Ferritin",
+      "why": "Ferritin is not on this report. Low ferritin is the earliest sign of iron deficiency, often before hemoglobin falls. The WHO calls under 15 ng/mL deficient in healthy adults. The AGA uses under 45 to diagnose iron deficiency in anaemia.",
+      "next": "Ask for Ferritin at your next blood test. Ferritin is the protein that stores iron inside cells, and a small amount circulates in blood. Its blood level tracks total iron stores.",
+      "rank": 10
+    }
+  ],
+  "unmeasured": [
+    {
+      "markerKey": "insulin_fasting",
+      "name": "Fasting insulin",
+      "description": "How much insulin your body needs to keep fasting sugar steady."
+    },
+    {
+      "markerKey": "ldl_cholesterol",
+      "name": "LDL cholesterol",
+      "description": "The main cholesterol that collects in artery walls."
+    },
+    {
+      "markerKey": "hdl_cholesterol",
+      "name": "HDL cholesterol",
+      "description": "The cholesterol that removes fat from your arteries."
+    },
+    {
+      "markerKey": "triglycerides",
+      "name": "Triglycerides",
+      "description": "The main form of fat stored and carried in your blood."
+    },
+    {
+      "markerKey": "apolipoprotein_b",
+      "name": "Apolipoprotein B",
+      "description": "A count of the particles that can build plaque in arteries."
+    },
+    {
+      "markerKey": "hs_crp",
+      "name": "High-sensitivity CRP",
+      "description": "Low-grade inflammation linked with heart and metabolic risk."
+    },
+    {
+      "markerKey": "alt",
+      "name": "ALT (SGPT)",
+      "description": "The enzyme that best reflects strain on liver cells."
+    },
+    {
+      "markerKey": "tsh",
+      "name": "Thyroid stimulating hormone",
+      "description": "The brain's signal to the thyroid, the best single thyroid marker."
+    },
+    {
+      "markerKey": "vitamin_b12",
+      "name": "Vitamin B12",
+      "description": "A vitamin for nerves and red blood cells, found in animal foods."
+    },
+    {
+      "markerKey": "ferritin",
+      "name": "Ferritin",
+      "description": "Your body's iron stores."
+    }
+  ],
+  "patterns": [
+    {
+      "key": "prediabetes",
+      "name": "Prediabetes range",
+      "description": "HbA1c or fasting glucose in the prediabetes range.",
+      "severity": "watch",
+      "whatItSuggests": "Your blood sugar is above the optimal range but below the diabetes range. Many people in this range can lower it.",
+      "whatToDo": "Retest HbA1c and fasting glucose in 3 to 6 months. Ask your doctor about a plan to lower your blood sugar.",
+      "askDoctor": [
+        "My blood sugar is in the prediabetes range. How often should I retest it?"
+      ],
+      "sources": [
+        {
+          "id": "ada2025",
+          "title": "Standards of Care in Diabetes 2025. American Diabetes Association, Diabetes Care 48 (Suppl 1)",
+          "year": 2025,
+          "url": "https://diabetesjournals.org/care/issue/48/Supplement_1"
+        },
+        {
+          "id": "icmrDiabetes2018",
+          "title": "ICMR Guidelines for Management of Type 2 Diabetes. Indian Council of Medical Research",
+          "year": 2018,
+          "url": "https://www.icmr.gov.in/icmrobject/custom_data/pdf/resource-guidelines/ICMR_GuidelinesType2diabetes2018_0.pdf"
+        }
+      ],
+      "matched": [
+        {
+          "markerKey": "glucose_fasting",
+          "name": "Fasting glucose",
+          "value": 110,
+          "unit": "mg/dL"
+        }
+      ]
+    }
+  ],
+  "doctorQuestions": [
+    "My blood sugar is in the prediabetes range. How often should I retest it?"
+  ]
+}

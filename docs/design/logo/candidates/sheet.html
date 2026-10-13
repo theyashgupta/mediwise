@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Logo candidate sheet</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap"
+    />
+    <style>
+      body { margin: 0; font-family: Inter, sans-serif; width: 1180px; }
+      .theme { padding: 32px; display: grid; gap: 28px; }
+      .light { --bg: #fbfaf7; --sidebar: #f7f5f1; --border: #e0ddda; --fg: #201c19; --muted: #68625e; --primary: #176b6b; --tab: #e9e6e1; }
+      .dark { --bg: #181715; --sidebar: #141211; --border: #32302e; --fg: #eceBe8; --muted: #a8a49f; --primary: #76c8c7; --tab: #232120; }
+      .theme { background: var(--bg); color: var(--fg); }
+      h2 { margin: 0; font-size: 13px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+      .row { display: flex; align-items: flex-end; gap: 40px; }
+      .cell { display: grid; justify-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+      .cell svg { display: block; }
+      .teal { color: var(--primary); }
+      .neutral { color: var(--fg); }
+      .stack { display: grid; gap: 24px; }
+      .sidebar { width: 240px; background: var(--sidebar); border: 1px solid var(--border); border-radius: 12px; padding: 16px 12px; box-sizing: border-box; }
+      .brand { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 8px; font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
+      .brand svg { width: 24px; height: 24px; }
+      .nav { margin-top: 16px; display: grid; gap: 2px; font-size: 14px; color: var(--muted); }
+      .nav div { height: 36px; display: flex; align-items: center; padding: 0 10px; border-radius: 6px; }
+      .nav .active { background: var(--bg); color: var(--fg); font-weight: 500; box-shadow: 0 0 0 1px var(--border); }
+      .tab { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; background: var(--tab); border-radius: 8px 8px 0 0; font-size: 12px; width: 200px; box-sizing: border-box; }
+      .tab svg { width: 16px; height: 16px; }
+    </style>
+  </head>
+  <body>
+    <script type="module">
+      const name = new URLSearchParams(location.search).get("mark");
+      const svg = await (await fetch(`${name}.svg`)).text();
+      const mark = (size) => svg.replace("<svg ", `<svg width="${size}" height="${size}" `);
+      const sizes = (tone) =>
+        [16, 32, 64].map((s) => `<div class="cell ${tone}">${mark(s)}<span>${s} px</span></div>`).join("");
+      for (const theme of ["light", "dark"]) {
+        document.body.insertAdjacentHTML(
+          "beforeend",
+          `<section class="theme ${theme}">
+            <h2>${name} · ${theme}</h2>
+            <div class="row">
+              <div class="stack">
+                <div class="row">${sizes("teal")}</div>
+                <div class="row">${sizes("neutral")}</div>
+                <div class="tab teal">${mark(16)}<span style="color:var(--fg)">MediWise</span></div>
+                <div class="sidebar">
+                  <div class="brand"><span class="teal">${mark(24)}</span>MediWise</div>
+                  <div class="nav"><div class="active">Home</div><div>Reports</div><div>Trends</div></div>
+                </div>
+              </div>
+              <div class="cell teal">${mark(512)}<span>512 px</span></div>
+            </div>
+          </section>`,
+        );
+      }
+      document.body.dataset.ready = "true";
+    </script>
+  </body>
+</html>

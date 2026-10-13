@@ -1,0 +1,310 @@
+@import "tailwindcss";
+@import "@mediwise/design-tokens/tokens.css";
+
+@source "../../../web/src/common/components/brand";
+
+@custom-variant dark {
+  &:where([data-theme="dark"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme]) *) {
+      @slot;
+    }
+  }
+}
+
+/*
+ * The rupee sign sits in the latin-ext range of Inter and JetBrains Mono, so it alone would download about 100 kB
+ * of extra font files. This face draws only that sign, from a font the device already has.
+ */
+@font-face {
+  font-family: "Rupee";
+  src: local("Inter"), local("Segoe UI"), local("Roboto"), local("Helvetica Neue"), local("Arial");
+  unicode-range: U+20B9;
+}
+
+@theme {
+  --font-sans: "Rupee", var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Rupee", var(--font-jetbrains-mono), ui-monospace, monospace;
+  --font-display: var(--font-instrument-serif), ui-serif, Georgia, serif;
+
+  --text-hero: clamp(2.75rem, 1.6rem + 4.6vw, 4.75rem);
+  --text-hero--line-height: 1;
+  --text-hero--letter-spacing: -0.02em;
+
+  --container-content: 68.75rem;
+}
+
+@theme inline {
+  --shadow-2xs: var(--shadow-flat);
+  --shadow-xs: var(--shadow-flat);
+  --shadow-sm: var(--shadow-flat);
+  --shadow: var(--shadow-flat);
+  --shadow-md: var(--shadow-overlay);
+  --shadow-lg: var(--shadow-overlay);
+  --shadow-xl: var(--shadow-overlay);
+  --shadow-2xl: var(--shadow-overlay);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-optimal: var(--optimal);
+  --color-optimal-soft: var(--optimal-soft);
+  --color-watch: var(--watch);
+  --color-watch-soft: var(--watch-soft);
+  --color-risk: var(--risk);
+  --color-risk-soft: var(--risk-soft);
+  --color-unknown: var(--unknown);
+  --color-unknown-soft: var(--unknown-soft);
+}
+
+:root {
+  color-scheme: light dark;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    scroll-padding-top: 5rem;
+  }
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "cv11";
+  }
+}
+
+/*
+ * Motion. Every animation moves transform or opacity only. The OS reduced-motion setting and the
+ * Pause motion button (data-motion="paused" on the root) both stop all of it. JavaScript moves nothing
+ * itself: components/motion.tsx only sets data attributes, and the rules below animate them.
+ */
+/* Transform only: an opacity fade on the hero image delays LCP by about 1.5 s on a throttled phone. */
+@keyframes rise-in {
+  from {
+    transform: translateY(24px) scale(0.97);
+  }
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(calc(-100% - var(--gap)));
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.rise-in {
+  animation: rise-in 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.marquee {
+  --gap: 0.75rem;
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+
+.marquee-track {
+  animation: marquee var(--duration, 60s) linear infinite;
+}
+
+.marquee-track[data-reverse] {
+  animation-direction: reverse;
+}
+
+.marquee:hover .marquee-track,
+.marquee:focus-within .marquee-track {
+  animation-play-state: paused;
+}
+
+.scroll-progress {
+  display: none;
+}
+
+/* The story screens switch by data-on from story.tsx where scroll timelines are missing. */
+.story-screen {
+  opacity: 0;
+}
+
+.story-screen[data-on] {
+  opacity: 1;
+}
+
+@supports (animation-timeline: scroll()) {
+  .nav-backdrop {
+    animation: appear linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 4rem;
+  }
+
+  .scroll-progress {
+    display: block;
+    transform-origin: left;
+    animation: grow-x linear both;
+    animation-timeline: scroll(root);
+  }
+
+  /* Forwards only: before its range starts the element keeps full opacity, so a full-page capture shows it. */
+  .reveal {
+    animation: fade-up linear forwards;
+    animation-timeline: view();
+    animation-range: entry 0% entry 70%;
+  }
+}
+
+@supports (animation-timeline: view()) and (timeline-scope: --scene) {
+  .story {
+    timeline-scope: --scene-0, --scene-1, --scene-2, --scene-3;
+  }
+  .story-step:nth-child(1) {
+    view-timeline-name: --scene-0;
+  }
+  .story-step:nth-child(2) {
+    view-timeline-name: --scene-1;
+  }
+  .story-step:nth-child(3) {
+    view-timeline-name: --scene-2;
+  }
+  .story-step:nth-child(4) {
+    view-timeline-name: --scene-3;
+  }
+  .story-screen {
+    animation: scene linear both;
+    animation-range: cover 0% cover 100%;
+  }
+  .story-screen:nth-child(1) {
+    animation-name: scene-first;
+    animation-timeline: --scene-0;
+  }
+  .story-screen:nth-child(2) {
+    animation-timeline: --scene-1;
+  }
+  .story-screen:nth-child(3) {
+    animation-timeline: --scene-2;
+  }
+  .story-screen:nth-child(4) {
+    animation-name: scene-last;
+    animation-timeline: --scene-3;
+  }
+}
+
+@keyframes scene {
+  0%,
+  30% {
+    opacity: 0;
+  }
+  36%,
+  64% {
+    opacity: 1;
+  }
+  70%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes scene-first {
+  0%,
+  64% {
+    opacity: 1;
+  }
+  70%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes scene-last {
+  0%,
+  30% {
+    opacity: 0;
+  }
+  36%,
+  100% {
+    opacity: 1;
+  }
+}
+
+:root[data-motion="paused"] :not(.marquee-track),
+:root[data-motion="paused"] ::before,
+:root[data-motion="paused"] ::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+:root[data-motion="paused"] .marquee-track {
+  animation-play-state: paused !important;
+}
+
+:root[data-motion="paused"] .scroll-progress {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .scroll-progress {
+    display: none;
+  }
+  .marquee,
+  .marquee-track {
+    flex-wrap: wrap;
+    justify-content: center;
+    mask-image: none;
+  }
+  .marquee-track[aria-hidden] {
+    display: none;
+  }
+}

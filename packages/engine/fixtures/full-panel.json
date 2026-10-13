@@ -1,0 +1,606 @@
+{
+  "profile": {
+    "ageYears": 38,
+    "sex": "male",
+    "ancestry": "south_asian"
+  },
+  "values": [
+    {
+      "rawName": "Haemoglobin",
+      "value": 13.4,
+      "unit": "g/dL",
+      "labLow": 13,
+      "labHigh": 17
+    },
+    {
+      "rawName": "Total RBC Count",
+      "value": 4.9,
+      "unit": "mill/cumm",
+      "labLow": 4.5,
+      "labHigh": 5.5
+    },
+    {
+      "rawName": "PCV",
+      "value": 41.5,
+      "unit": "%",
+      "labLow": 40,
+      "labHigh": 50
+    },
+    {
+      "rawName": "MCV",
+      "value": 84.7,
+      "unit": "fL",
+      "labLow": 83,
+      "labHigh": 101
+    },
+    {
+      "rawName": "MCH",
+      "value": 27.3,
+      "unit": "pg",
+      "labLow": 27,
+      "labHigh": 32
+    },
+    {
+      "rawName": "MCHC",
+      "value": 32.3,
+      "unit": "g/dL",
+      "labLow": 31.5,
+      "labHigh": 34.5
+    },
+    {
+      "rawName": "RDW-CV",
+      "value": 14.6,
+      "unit": "%",
+      "labLow": 11.6,
+      "labHigh": 14
+    },
+    {
+      "rawName": "RDW-SD",
+      "value": 44.1,
+      "unit": "fL",
+      "labLow": 39,
+      "labHigh": 46
+    },
+    {
+      "rawName": "Total Leucocyte Count",
+      "value": 7200,
+      "unit": "cells/cumm",
+      "labLow": 4000,
+      "labHigh": 10000
+    },
+    {
+      "rawName": "Neutrophils",
+      "value": 58,
+      "unit": "%",
+      "labLow": 40,
+      "labHigh": 80
+    },
+    {
+      "rawName": "Lymphocytes",
+      "value": 32,
+      "unit": "%",
+      "labLow": 20,
+      "labHigh": 40
+    },
+    {
+      "rawName": "Monocytes",
+      "value": 6,
+      "unit": "%",
+      "labLow": 2,
+      "labHigh": 10
+    },
+    {
+      "rawName": "Eosinophils",
+      "value": 3.5,
+      "unit": "%",
+      "labLow": 1,
+      "labHigh": 6
+    },
+    {
+      "rawName": "Basophils",
+      "value": 0.5,
+      "unit": "%",
+      "labLow": 0,
+      "labHigh": 2
+    },
+    {
+      "rawName": "Absolute Neutrophil Count",
+      "value": 4.18,
+      "unit": "10^3/µL",
+      "labLow": 2,
+      "labHigh": 7
+    },
+    {
+      "rawName": "Absolute Lymphocyte Count",
+      "value": 2.3,
+      "unit": "10^3/µL",
+      "labLow": 1,
+      "labHigh": 3
+    },
+    {
+      "rawName": "Absolute Monocyte Count",
+      "value": 0.43,
+      "unit": "10^3/µL",
+      "labLow": 0.2,
+      "labHigh": 1
+    },
+    {
+      "rawName": "Absolute Eosinophil Count",
+      "value": 0.25,
+      "unit": "10^3/µL",
+      "labLow": 0.02,
+      "labHigh": 0.5
+    },
+    {
+      "rawName": "Absolute Basophil Count",
+      "value": 0.04,
+      "unit": "10^3/µL",
+      "labLow": 0,
+      "labHigh": 0.1
+    },
+    {
+      "rawName": "Platelet Count",
+      "value": 2.45,
+      "unit": "lakhs/cumm",
+      "labLow": 1.5,
+      "labHigh": 4.1
+    },
+    {
+      "rawName": "MPV",
+      "value": 10.2,
+      "unit": "fL",
+      "labLow": 7.5,
+      "labHigh": 11.5
+    },
+    {
+      "rawName": "PDW",
+      "value": 12.1,
+      "unit": "fL",
+      "labLow": 9,
+      "labHigh": 17
+    },
+    {
+      "rawName": "PCT",
+      "value": 0.25,
+      "unit": "%",
+      "labLow": 0.17,
+      "labHigh": 0.35
+    },
+    {
+      "rawName": "P-LCR",
+      "value": 27,
+      "unit": "%",
+      "labLow": 13,
+      "labHigh": 43
+    },
+    {
+      "rawName": "ESR",
+      "value": 12,
+      "unit": "mm/hr",
+      "labLow": 0,
+      "labHigh": 15
+    },
+    {
+      "rawName": "Glucose Fasting",
+      "value": 108,
+      "unit": "mg/dL",
+      "labLow": 70,
+      "labHigh": 100
+    },
+    {
+      "rawName": "Glucose Post Prandial",
+      "value": 152,
+      "unit": "mg/dL",
+      "labLow": 70,
+      "labHigh": 140
+    },
+    {
+      "rawName": "HbA1c",
+      "markerKey": "hba1c",
+      "value": 6.1,
+      "unit": "%",
+      "labLow": 4,
+      "labHigh": 5.6
+    },
+    {
+      "rawName": "Estimated Average Glucose",
+      "value": 128,
+      "unit": "mg/dL"
+    },
+    {
+      "rawName": "Insulin Fasting",
+      "value": 16.8,
+      "unit": "µIU/mL",
+      "labLow": 2.6,
+      "labHigh": 24.9
+    },
+    {
+      "rawName": "Total Cholesterol",
+      "value": 236,
+      "unit": "mg/dL",
+      "labHigh": 200
+    },
+    {
+      "rawName": "HDL Cholesterol",
+      "value": 36,
+      "unit": "mg/dL",
+      "labLow": 40,
+      "labHigh": 60
+    },
+    {
+      "rawName": "LDL Cholesterol",
+      "markerKey": "ldl_cholesterol",
+      "value": 162,
+      "unit": "mg/dL",
+      "labHigh": 100
+    },
+    {
+      "rawName": "Triglycerides",
+      "value": 238,
+      "unit": "mg/dL",
+      "labHigh": 150
+    },
+    {
+      "rawName": "VLDL Cholesterol",
+      "value": 47.6,
+      "unit": "mg/dL",
+      "labHigh": 30
+    },
+    {
+      "rawName": "Bilirubin Total",
+      "value": 0.8,
+      "unit": "mg/dL",
+      "labLow": 0.3,
+      "labHigh": 1.2
+    },
+    {
+      "rawName": "Bilirubin Direct",
+      "value": 0.2,
+      "unit": "mg/dL",
+      "labLow": 0,
+      "labHigh": 0.3
+    },
+    {
+      "rawName": "Bilirubin Indirect",
+      "value": 0.6,
+      "unit": "mg/dL",
+      "labLow": 0,
+      "labHigh": 1
+    },
+    {
+      "rawName": "SGOT",
+      "value": 31,
+      "unit": "U/L",
+      "labHigh": 35
+    },
+    {
+      "rawName": "SGPT",
+      "value": 58,
+      "unit": "U/L",
+      "labHigh": 45
+    },
+    {
+      "rawName": "Alkaline Phosphatase",
+      "value": 88,
+      "unit": "U/L",
+      "labLow": 40,
+      "labHigh": 130
+    },
+    {
+      "rawName": "GGT",
+      "value": 72,
+      "unit": "U/L",
+      "labHigh": 55
+    },
+    {
+      "rawName": "Total Protein",
+      "value": 7.4,
+      "unit": "g/dL",
+      "labLow": 6.4,
+      "labHigh": 8.3
+    },
+    {
+      "rawName": "Albumin",
+      "value": 4.5,
+      "unit": "g/dL",
+      "labLow": 3.5,
+      "labHigh": 5.2
+    },
+    {
+      "rawName": "S. Creatinine",
+      "value": 0.96,
+      "unit": "mg/dL",
+      "labLow": 0.7,
+      "labHigh": 1.3
+    },
+    {
+      "rawName": "Blood Urea",
+      "value": 26,
+      "unit": "mg/dL",
+      "labLow": 15,
+      "labHigh": 40
+    },
+    {
+      "rawName": "BUN",
+      "value": 12.1,
+      "unit": "mg/dL",
+      "labLow": 7,
+      "labHigh": 20
+    },
+    {
+      "rawName": "Uric Acid",
+      "value": 7.6,
+      "unit": "mg/dL",
+      "labLow": 3.5,
+      "labHigh": 7.2
+    },
+    {
+      "rawName": "Sodium",
+      "value": 139,
+      "unit": "mmol/L",
+      "labLow": 136,
+      "labHigh": 145
+    },
+    {
+      "rawName": "Potassium",
+      "value": 4.4,
+      "unit": "mmol/L",
+      "labLow": 3.5,
+      "labHigh": 5.1
+    },
+    {
+      "rawName": "Chloride",
+      "value": 102,
+      "unit": "mEq/L",
+      "labLow": 98,
+      "labHigh": 107
+    },
+    {
+      "rawName": "Calcium",
+      "value": 9.4,
+      "unit": "mg/dL",
+      "labLow": 8.6,
+      "labHigh": 10.2
+    },
+    {
+      "rawName": "Phosphorus",
+      "value": 3.6,
+      "unit": "mg/dL",
+      "labLow": 2.5,
+      "labHigh": 4.5
+    },
+    {
+      "rawName": "Magnesium",
+      "value": 2.1,
+      "unit": "mg/dL",
+      "labLow": 1.7,
+      "labHigh": 2.4
+    },
+    {
+      "rawName": "T3 Total",
+      "value": 112,
+      "unit": "ng/dL",
+      "labLow": 80,
+      "labHigh": 200
+    },
+    {
+      "rawName": "T4 Total",
+      "value": 8.1,
+      "unit": "µg/dL",
+      "labLow": 5,
+      "labHigh": 12
+    },
+    {
+      "rawName": "TSH Ultrasensitive",
+      "value": 5.8,
+      "unit": "µIU/mL",
+      "labLow": 0.45,
+      "labHigh": 4.12
+    },
+    {
+      "rawName": "Free T4",
+      "value": 1.1,
+      "unit": "ng/dL",
+      "labLow": 0.9,
+      "labHigh": 1.7
+    },
+    {
+      "rawName": "Vitamin D 25 Hydroxy",
+      "value": 14.2,
+      "unit": "ng/mL",
+      "labLow": 30,
+      "labHigh": 100
+    },
+    {
+      "rawName": "Vitamin B12",
+      "value": 186,
+      "unit": "pg/mL",
+      "labLow": 211,
+      "labHigh": 911
+    },
+    {
+      "rawName": "Folate",
+      "value": 9.8,
+      "unit": "ng/mL",
+      "labLow": 4
+    },
+    {
+      "rawName": "Iron",
+      "value": 72,
+      "unit": "µg/dL",
+      "labLow": 65,
+      "labHigh": 175
+    },
+    {
+      "rawName": "TIBC",
+      "value": 340,
+      "unit": "µg/dL",
+      "labLow": 250,
+      "labHigh": 450
+    },
+    {
+      "rawName": "UIBC",
+      "value": 268,
+      "unit": "µg/dL",
+      "labLow": 110,
+      "labHigh": 370
+    },
+    {
+      "rawName": "Ferritin",
+      "value": 38,
+      "unit": "ng/mL",
+      "labLow": 30,
+      "labHigh": 400
+    },
+    {
+      "rawName": "hs-CRP",
+      "value": 2.4,
+      "unit": "mg/L",
+      "labHigh": 1
+    },
+    {
+      "rawName": "Homocysteine",
+      "value": 18.2,
+      "unit": "µmol/L",
+      "labHigh": 15
+    },
+    {
+      "rawName": "Urine pH",
+      "value": 6,
+      "unit": "pH",
+      "labLow": 5,
+      "labHigh": 7.5
+    },
+    {
+      "rawName": "Specific Gravity",
+      "value": 1.02,
+      "labLow": 1.005,
+      "labHigh": 1.03
+    },
+    {
+      "rawName": "Urine Protein",
+      "value": 0,
+      "unit": "grade"
+    },
+    {
+      "rawName": "Urine Glucose",
+      "value": 0,
+      "unit": "grade"
+    },
+    {
+      "rawName": "Urine Ketones",
+      "value": 0,
+      "unit": "grade"
+    },
+    {
+      "rawName": "Urine Blood",
+      "value": 0,
+      "unit": "grade"
+    },
+    {
+      "rawName": "Pus Cells",
+      "value": 2,
+      "unit": "/hpf",
+      "labHigh": 5
+    },
+    {
+      "rawName": "Epithelial Cells",
+      "value": 1,
+      "unit": "/hpf",
+      "labHigh": 5
+    },
+    {
+      "rawName": "Urine RBC",
+      "value": 0,
+      "unit": "/hpf",
+      "labHigh": 2
+    },
+    {
+      "rawName": "Urine Bilirubin",
+      "value": 0,
+      "unit": "grade"
+    },
+    {
+      "rawName": "Urobilinogen",
+      "value": 0.2,
+      "unit": "mg/dL",
+      "labHigh": 1
+    },
+    {
+      "rawName": "Amylase",
+      "value": 64,
+      "unit": "U/L",
+      "labLow": 28,
+      "labHigh": 100
+    },
+    {
+      "rawName": "Lipase",
+      "value": 38,
+      "unit": "U/L",
+      "labLow": 13,
+      "labHigh": 60
+    },
+    {
+      "rawName": "Glycosylated Haemoglobin(Hb A1c) IFCC",
+      "value": 34.63,
+      "unit": "mmol/mol",
+      "labHigh": 39
+    },
+    {
+      "rawName": "Apolipoprotein (A)",
+      "value": 129,
+      "unit": "mg/dl",
+      "labLow": 101,
+      "labHigh": 215
+    },
+    {
+      "rawName": "Peripheral Smear Examination - RBC",
+      "value": "Normocytic / Normochromic"
+    },
+    {
+      "rawName": "Peripheral Smear Examination - WBC",
+      "value": "TLC-Normal"
+    },
+    {
+      "rawName": "Peripheral Smear Examination - DLC",
+      "value": "No abnormal cell seen."
+    },
+    {
+      "rawName": "Peripheral Smear Examination - Platelets",
+      "value": "Adequate on smear."
+    },
+    {
+      "rawName": "Peripheral Smear Examination - Hemoparasite",
+      "value": "No hemoparasite seen on thin smear examined."
+    },
+    {
+      "rawName": "HBsAg",
+      "value": "Non Reactive"
+    },
+    {
+      "rawName": "Anti Hbs Titre",
+      "value": "<2.0",
+      "unit": "mIU/mL"
+    },
+    {
+      "rawName": "HCV, IgG",
+      "value": "NON REACTIVE"
+    },
+    {
+      "rawName": "Colour",
+      "markerKey": "urine_colour",
+      "value": "PALE YELLOW"
+    },
+    {
+      "rawName": "Crystals",
+      "value": "ABSENT"
+    },
+    {
+      "rawName": "HDL/LDL",
+      "value": 0.31,
+      "unit": "Ratio",
+      "labLow": 0.3,
+      "labHigh": 0.4
+    }
+  ]
+}

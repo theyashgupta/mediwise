@@ -1,0 +1,431 @@
+{
+  "markers": [
+    {
+      "markerKey": "total_cholesterol",
+      "value": 212,
+      "unit": "mg/dL",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 199,
+        "watchLow": null,
+        "watchHigh": 239,
+        "source": "ncepAtp3"
+      },
+      "labRange": {
+        "low": null,
+        "high": 200
+      },
+      "deviation": 0.065
+    },
+    {
+      "markerKey": "triglycerides",
+      "value": 128,
+      "unit": "mg/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 149,
+        "watchLow": null,
+        "watchHigh": 199,
+        "source": "ncepAtp3"
+      },
+      "labRange": {
+        "low": null,
+        "high": 150
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "hdl_cholesterol",
+      "value": 48,
+      "unit": "mg/dL",
+      "status": "risk",
+      "calibrated": {
+        "optimalLow": 60,
+        "optimalHigh": null,
+        "watchLow": 50,
+        "watchHigh": null,
+        "source": "ncepAtp3"
+      },
+      "labRange": {
+        "low": 50,
+        "high": null
+      },
+      "deviation": -0.2
+    },
+    {
+      "markerKey": "ldl_cholesterol",
+      "value": 138,
+      "unit": "mg/dL",
+      "status": "risk",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 99,
+        "watchLow": null,
+        "watchHigh": 129,
+        "source": "lai2023"
+      },
+      "labRange": {
+        "low": null,
+        "high": 100
+      },
+      "deviation": 0.394
+    },
+    {
+      "markerKey": "vldl_cholesterol",
+      "value": 25.6,
+      "unit": "mg/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 30,
+        "watchLow": null,
+        "watchHigh": 40,
+        "source": "ncepAtp3"
+      },
+      "labRange": {
+        "low": null,
+        "high": 30
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "tc_hdl_ratio",
+      "value": 4.4,
+      "unit": "ratio",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 4,
+        "watchLow": null,
+        "watchHigh": 4.5,
+        "source": "millan2009"
+      },
+      "labRange": {
+        "low": null,
+        "high": 5
+      },
+      "deviation": 0.1
+    },
+    {
+      "markerKey": "ldl_hdl_ratio",
+      "value": 2.9,
+      "unit": "ratio",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 2.5,
+        "watchLow": null,
+        "watchHigh": 3,
+        "source": "millan2009"
+      },
+      "labRange": {
+        "low": null,
+        "high": 3.5
+      },
+      "deviation": 0.16
+    },
+    {
+      "markerKey": "non_hdl_cholesterol",
+      "value": 164,
+      "unit": "mg/dL",
+      "status": "risk",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 129,
+        "watchLow": null,
+        "watchHigh": 159,
+        "source": "lai2023"
+      },
+      "labRange": {
+        "low": null,
+        "high": 130
+      },
+      "deviation": 0.271
+    }
+  ],
+  "derived": [
+    {
+      "markerKey": "tg_hdl_ratio",
+      "value": 2.7,
+      "unit": "ratio",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 2,
+        "watchLow": null,
+        "watchHigh": 2.9,
+        "source": "mclaughlin2003"
+      },
+      "deviation": 0.35,
+      "inputs": [
+        "triglycerides",
+        "hdl_cholesterol"
+      ]
+    }
+  ],
+  "unmapped": [],
+  "score": {
+    "overall": 50,
+    "byCategory": {
+      "metabolic": null,
+      "lipids": 53,
+      "inflammation": null,
+      "kidney": null,
+      "liver": null,
+      "thyroid": null,
+      "vitamins": null,
+      "iron": null,
+      "blood_count": null,
+      "electrolytes": null,
+      "urate": null,
+      "cardiac": null,
+      "hormones": null,
+      "bone": null,
+      "urine": null,
+      "vitals": null,
+      "studies": null,
+      "other": null
+    },
+    "coverage": {
+      "measured": 3,
+      "core": 16,
+      "pct": 19
+    },
+    "capped": true,
+    "tier": "bronze",
+    "formula": "A marker in its optimal range scores 100. A marker in watch scores 60. A marker in risk scores 20. A core marker counts two times. Your score is the weighted mean of these points. When the report has fewer than half of the core markers, the highest score is 70. When the report has fewer than a quarter of the core markers, the highest score is 50."
+  },
+  "verdict": "2 of 8 markers sit in your calibrated ranges. LDL cholesterol is the one to move first.",
+  "moveFirst": [
+    {
+      "markerKey": "ldl_cholesterol",
+      "severity": "critical",
+      "reason": "LDL cholesterol is 138 mg/dL, above your optimal range of up to 99 mg/dL."
+    },
+    {
+      "markerKey": "non_hdl_cholesterol",
+      "severity": "critical",
+      "reason": "Non-HDL cholesterol is 164 mg/dL, above your optimal range of up to 129 mg/dL."
+    },
+    {
+      "markerKey": "hdl_cholesterol",
+      "severity": "critical",
+      "reason": "HDL cholesterol is 48 mg/dL, below your optimal range of 60 mg/dL or more."
+    },
+    {
+      "markerKey": "ldl_hdl_ratio",
+      "severity": "out_of_optimal",
+      "reason": "LDL to HDL ratio is 2.9, above your optimal range of up to 2.5."
+    },
+    {
+      "markerKey": "tc_hdl_ratio",
+      "severity": "out_of_optimal",
+      "reason": "Total cholesterol to HDL ratio is 4.4, above your optimal range of up to 4."
+    }
+  ],
+  "followUps": [
+    {
+      "kind": "retest",
+      "markerKey": "ldl_cholesterol",
+      "title": "Retest LDL cholesterol in 8 to 12 weeks",
+      "why": "Your LDL cholesterol is well outside your calibrated range. LDL is the best-proven cause of heart attack and stroke, and lower is better for arteries. ATP III calls under 100 mg/dL optimal and 160 or above high.",
+      "next": "Genetics, saturated and trans fats and weight gain raise it. Soluble fibre, fewer saturated fats, exercise and medicines such as statins lower it. Book a retest in 8 to 12 weeks. Take both reports to your doctor.",
+      "rank": 1
+    },
+    {
+      "kind": "retest",
+      "markerKey": "non_hdl_cholesterol",
+      "title": "Retest Non-HDL cholesterol in 8 to 12 weeks",
+      "why": "Your Non-HDL cholesterol is well outside your calibrated range. It captures risk that LDL misses when triglycerides are high, and it does not need a fasting sample. ATP III sets its goal 30 mg/dL above the LDL goal, so under 130 for most adults.",
+      "next": "The steps that lower LDL and triglycerides lower it. Less saturated fat and sugar, exercise, weight loss and statins all help. Book a retest in 8 to 12 weeks. Take both reports to your doctor.",
+      "rank": 2
+    },
+    {
+      "kind": "retest",
+      "markerKey": "hdl_cholesterol",
+      "title": "Retest HDL cholesterol in 8 to 12 weeks",
+      "why": "Your HDL cholesterol is well outside your calibrated range. Low HDL is under 40 mg/dL in men and under 50 in women. It is linked with higher heart risk and insulin resistance. Raising HDL with drugs did not cut heart attacks, so HDL is a signal rather than a target.",
+      "next": "Exercise, weight loss and quitting smoking raise it. Refined carbohydrates, inactivity, belly fat and smoking lower it. Book a retest in 8 to 12 weeks. Take both reports to your doctor.",
+      "rank": 3
+    },
+    {
+      "kind": "measure",
+      "markerKey": "glucose_fasting",
+      "title": "Measure Fasting glucose",
+      "why": "Fasting glucose is not on this report. By ADA criteria, 100 to 125 mg/dL is prediabetes, and 126 or above on two tests is diabetes. Catching the rise early gives years to reverse it.",
+      "next": "Ask for Fasting glucose at your next blood test. Fasting glucose is the sugar level in your blood after an overnight fast of at least eight hours. It reflects how well the body keeps sugar steady without food.",
+      "rank": 4
+    },
+    {
+      "kind": "measure",
+      "markerKey": "hba1c",
+      "title": "Measure HbA1c",
+      "why": "HbA1c is not on this report. By ADA criteria, 5.7% to 6.4% is prediabetes and 6.5% or above is diabetes. It does not need fasting, which makes it the most practical long-term sugar measure.",
+      "next": "Ask for HbA1c at your next blood test. HbA1c is the share of hemoglobin that has sugar stuck to it. Because red cells live about three months, it reflects average sugar over that time.",
+      "rank": 5
+    },
+    {
+      "kind": "measure",
+      "markerKey": "insulin_fasting",
+      "title": "Measure Fasting insulin",
+      "why": "Fasting insulin is not on this report. High fasting insulin with normal sugar is an early sign of insulin resistance, often years before prediabetes. Combined with glucose it gives HOMA-IR.",
+      "next": "Ask for Fasting insulin at your next blood test. Insulin is the hormone that moves sugar from blood into cells. Fasting insulin shows how hard the pancreas works to hold fasting sugar in range.",
+      "rank": 6
+    },
+    {
+      "kind": "measure",
+      "markerKey": "apolipoprotein_b",
+      "title": "Measure Apolipoprotein B",
+      "why": "Apolipoprotein B is not on this report. ApoB predicts heart risk at least as well as LDL and better when triglycerides are high. ESC/EAS sets under 100 mg/dL for moderate risk, and AHA/ACC treats 130 or above as a risk enhancer.",
+      "next": "Ask for Apolipoprotein B at your next blood test. Every LDL, VLDL and Lp(a) particle carries exactly one ApoB protein. Measuring ApoB counts the harmful particles directly.",
+      "rank": 7
+    },
+    {
+      "kind": "measure",
+      "markerKey": "lipoprotein_a",
+      "title": "Measure Lipoprotein(a)",
+      "why": "Lipoprotein(a) is not on this report. A high level raises the risk of heart attack, stroke and aortic valve narrowing, even when LDL is good. The EAS calls under 30 mg/dL low and over 50 high.",
+      "next": "Ask for Lipoprotein(a) at your next blood test. Lp(a) is an LDL-like particle with an extra protein attached. Your genes mostly set its level, and it stays about the same for life.",
+      "rank": 8
+    },
+    {
+      "kind": "measure",
+      "markerKey": "hs_crp",
+      "title": "Measure High-sensitivity CRP",
+      "why": "High-sensitivity CRP is not on this report. The AHA and CDC class under 1 mg/L as low heart risk. They class 1 to 3 as average and above 3 as high. A value above 10 usually reflects a passing infection, so you should repeat the test when you are well.",
+      "next": "Ask for High-sensitivity CRP at your next blood test. hs-CRP measures the same protein as CRP but detects much lower levels. That makes it useful for spotting quiet, long-term inflammation.",
+      "rank": 9
+    },
+    {
+      "kind": "measure",
+      "markerKey": "alt",
+      "title": "Measure ALT (SGPT)",
+      "why": "ALT (SGPT) is not on this report. ALT is the most liver-specific routine enzyme, and a raised value is often the first sign of fatty liver. The ACG sets the healthy upper limit at 33 U/L for men and 25 for women. This is lower than many lab ranges.",
+      "next": "Ask for ALT (SGPT) at your next blood test. ALT is an enzyme made mostly in liver cells. When those cells are inflamed or damaged, ALT leaks into blood.",
+      "rank": 10
+    },
+    {
+      "kind": "measure",
+      "markerKey": "creatinine",
+      "title": "Measure Creatinine",
+      "why": "Creatinine is not on this report. A rising creatinine means the kidneys filter less. Kidney decline is silent until late, so this value is the early warning.",
+      "next": "Ask for Creatinine at your next blood test. Creatinine is a waste product of normal muscle activity, and the kidneys clear it from blood. Combined with age and sex it gives the eGFR, the standard estimate of kidney function.",
+      "rank": 11
+    },
+    {
+      "kind": "measure",
+      "markerKey": "tsh",
+      "title": "Measure Thyroid stimulating hormone",
+      "why": "Thyroid stimulating hormone is not on this report. TSH is the most sensitive screen for an underactive or overactive thyroid. The ATA and AACE use 0.45 to 4.12 as the reference range from a large US survey. A TSH above 10 usually prompts treatment.",
+      "next": "Ask for Thyroid stimulating hormone at your next blood test. The pituitary gland makes TSH to tell the thyroid how much hormone to release. When thyroid output drops, TSH rises, and when output is high, TSH falls.",
+      "rank": 12
+    },
+    {
+      "kind": "measure",
+      "markerKey": "vitamin_d",
+      "title": "Measure Vitamin D (25-OH)",
+      "why": "Vitamin D (25-OH) is not on this report. The Endocrine Society's 2011 guideline calls under 20 ng/mL deficient and 30 or above sufficient. Its 2024 update stopped advising routine testing in healthy adults, but very low levels still harm bone and muscle.",
+      "next": "Ask for Vitamin D (25-OH) at your next blood test. This test measures 25-hydroxy vitamin D, the storage form made in the liver from sunlight and food. It reflects supply over the past few weeks.",
+      "rank": 13
+    },
+    {
+      "kind": "measure",
+      "markerKey": "vitamin_b12",
+      "title": "Measure Vitamin B12",
+      "why": "Vitamin B12 is not on this report. Low B12 causes tiredness, tingling, memory problems and large-cell anaemia, and nerve damage can become permanent. The BSH treats under 200 pg/mL as likely deficient and 200 to 300 as a grey zone.",
+      "next": "Ask for Vitamin B12 at your next blood test. The body needs vitamin B12 to make red blood cells and to keep nerves healthy. It comes almost only from animal foods such as milk, curd, eggs, fish and meat.",
+      "rank": 14
+    },
+    {
+      "kind": "measure",
+      "markerKey": "ferritin",
+      "title": "Measure Ferritin",
+      "why": "Ferritin is not on this report. Low ferritin is the earliest sign of iron deficiency, often before hemoglobin falls. The WHO calls under 15 ng/mL deficient in healthy adults. The AGA uses under 45 to diagnose iron deficiency in anaemia.",
+      "next": "Ask for Ferritin at your next blood test. Ferritin is the protein that stores iron inside cells, and a small amount circulates in blood. Its blood level tracks total iron stores.",
+      "rank": 15
+    },
+    {
+      "kind": "measure",
+      "markerKey": "hemoglobin",
+      "title": "Measure Hemoglobin",
+      "why": "Hemoglobin is not on this report. Low hemoglobin is anaemia, which causes tiredness, breathlessness and poor focus. Very high hemoglobin thickens the blood and is worth a check with a doctor.",
+      "next": "Ask for Hemoglobin at your next blood test. Hemoglobin is the iron-rich protein inside red blood cells. It collects oxygen in the lungs and releases it in the tissues. The test measures how much hemoglobin is in a given volume of blood.",
+      "rank": 16
+    }
+  ],
+  "unmeasured": [
+    {
+      "markerKey": "glucose_fasting",
+      "name": "Fasting glucose",
+      "description": "Your blood sugar after at least eight hours without food."
+    },
+    {
+      "markerKey": "hba1c",
+      "name": "HbA1c",
+      "description": "Your average blood sugar over the last two to three months."
+    },
+    {
+      "markerKey": "insulin_fasting",
+      "name": "Fasting insulin",
+      "description": "How much insulin your body needs to keep fasting sugar steady."
+    },
+    {
+      "markerKey": "apolipoprotein_b",
+      "name": "Apolipoprotein B",
+      "description": "A count of the particles that can build plaque in arteries."
+    },
+    {
+      "markerKey": "lipoprotein_a",
+      "name": "Lipoprotein(a)",
+      "description": "An inherited cholesterol particle that raises heart risk."
+    },
+    {
+      "markerKey": "hs_crp",
+      "name": "High-sensitivity CRP",
+      "description": "Low-grade inflammation linked with heart and metabolic risk."
+    },
+    {
+      "markerKey": "alt",
+      "name": "ALT (SGPT)",
+      "description": "The enzyme that best reflects strain on liver cells."
+    },
+    {
+      "markerKey": "creatinine",
+      "name": "Creatinine",
+      "description": "A muscle waste product that shows how well kidneys filter."
+    },
+    {
+      "markerKey": "tsh",
+      "name": "Thyroid stimulating hormone",
+      "description": "The brain's signal to the thyroid, the best single thyroid marker."
+    },
+    {
+      "markerKey": "vitamin_d",
+      "name": "Vitamin D (25-OH)",
+      "description": "Your vitamin D stores, key for bones, muscles and immunity."
+    },
+    {
+      "markerKey": "vitamin_b12",
+      "name": "Vitamin B12",
+      "description": "A vitamin for nerves and red blood cells, found in animal foods."
+    },
+    {
+      "markerKey": "ferritin",
+      "name": "Ferritin",
+      "description": "Your body's iron stores."
+    },
+    {
+      "markerKey": "hemoglobin",
+      "name": "Hemoglobin",
+      "description": "The oxygen-carrying protein in red blood cells."
+    }
+  ],
+  "patterns": [],
+  "doctorQuestions": [
+    "My LDL cholesterol is 138 mg/dL. Should we retest or investigate?",
+    "My Non-HDL cholesterol is 164 mg/dL. Should we retest or investigate?",
+    "My HDL cholesterol is 48 mg/dL. Should we retest or investigate?"
+  ]
+}

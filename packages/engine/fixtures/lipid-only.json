@@ -1,0 +1,55 @@
+{
+  "profile": {
+    "ageYears": 46,
+    "sex": "female",
+    "ancestry": "south_asian"
+  },
+  "values": [
+    {
+      "rawName": "Cholesterol Total",
+      "value": 212,
+      "unit": "mg/dL",
+      "labHigh": 200
+    },
+    {
+      "rawName": "Triglycerides",
+      "value": 128,
+      "unit": "mg/dL",
+      "labHigh": 150
+    },
+    {
+      "rawName": "HDL Cholesterol Direct",
+      "value": 48,
+      "unit": "mg/dL",
+      "labLow": 50
+    },
+    {
+      "rawName": "LDL Cholesterol",
+      "value": 138,
+      "unit": "mg/dL",
+      "labHigh": 100
+    },
+    {
+      "rawName": "VLDL",
+      "value": 25.6,
+      "unit": "mg/dL",
+      "labHigh": 30
+    },
+    {
+      "rawName": "Chol/HDL Ratio",
+      "value": 4.4,
+      "labHigh": 5
+    },
+    {
+      "rawName": "LDL/HDL Ratio",
+      "value": 2.9,
+      "labHigh": 3.5
+    },
+    {
+      "rawName": "Non-HDL Cholesterol",
+      "value": 164,
+      "unit": "mg/dL",
+      "labHigh": 130
+    }
+  ]
+}

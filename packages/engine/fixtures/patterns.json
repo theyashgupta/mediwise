@@ -1,0 +1,513 @@
+{
+  "profile": {
+    "ageYears": 40,
+    "sex": "male",
+    "ancestry": "south_asian"
+  },
+  "patterns": {
+    "b12_deficiency": {
+      "matches": [
+        {
+          "rawName": "homocysteine",
+          "markerKey": "homocysteine",
+          "value": 23.6,
+          "unit": "µmol/L"
+        },
+        {
+          "rawName": "vitamin_b12",
+          "markerKey": "vitamin_b12",
+          "value": 388.9,
+          "unit": "pg/mL"
+        }
+      ],
+      "misses": [
+        {
+          "rawName": "homocysteine",
+          "markerKey": "homocysteine",
+          "value": 23.6,
+          "unit": "µmol/L"
+        },
+        {
+          "rawName": "vitamin_b12",
+          "markerKey": "vitamin_b12",
+          "value": 520,
+          "unit": "pg/mL"
+        }
+      ]
+    },
+    "iron_deficiency_anaemia": {
+      "matches": [
+        {
+          "rawName": "ferritin",
+          "markerKey": "ferritin",
+          "value": 8,
+          "unit": "ng/mL"
+        },
+        {
+          "rawName": "hemoglobin",
+          "markerKey": "hemoglobin",
+          "value": 11.5,
+          "unit": "g/dL"
+        },
+        {
+          "rawName": "mcv",
+          "markerKey": "mcv",
+          "value": 72,
+          "unit": "fL"
+        }
+      ],
+      "misses": [
+        {
+          "rawName": "ferritin",
+          "markerKey": "ferritin",
+          "value": 8,
+          "unit": "ng/mL"
+        },
+        {
+          "rawName": "hemoglobin",
+          "markerKey": "hemoglobin",
+          "value": 14.2,
+          "unit": "g/dL"
+        },
+        {
+          "rawName": "mcv",
+          "markerKey": "mcv",
+          "value": 72,
+          "unit": "fL"
+        }
+      ]
+    },
+    "anaemia_of_inflammation": {
+      "matches": [
+        {
+          "rawName": "ferritin",
+          "markerKey": "ferritin",
+          "value": 250,
+          "unit": "ng/mL"
+        },
+        {
+          "rawName": "hemoglobin",
+          "markerKey": "hemoglobin",
+          "value": 11.5,
+          "unit": "g/dL"
+        },
+        {
+          "rawName": "hs_crp",
+          "markerKey": "hs_crp",
+          "value": 6,
+          "unit": "mg/L"
+        }
+      ],
+      "misses": [
+        {
+          "rawName": "ferritin",
+          "markerKey": "ferritin",
+          "value": 250,
+          "unit": "ng/mL"
+        },
+        {
+          "rawName": "hemoglobin",
+          "markerKey": "hemoglobin",
+          "value": 11.5,
+          "unit": "g/dL"
+        },
+        {
+          "rawName": "hs_crp",
+          "markerKey": "hs_crp",
+          "value": 0.5,
+          "unit": "mg/L"
+        }
+      ]
+    },
+    "subclinical_hypothyroidism": {
+      "matches": [
+        {
+          "rawName": "tsh",
+          "markerKey": "tsh",
+          "value": 5.41,
+          "unit": "µIU/mL"
+        },
+        {
+          "rawName": "free_t4",
+          "markerKey": "free_t4",
+          "value": 1.49,
+          "unit": "ng/dL"
+        }
+      ],
+      "misses": [
+        {
+          "rawName": "tsh",
+          "markerKey": "tsh",
+          "value": 5.41,
+          "unit": "µIU/mL"
+        },
+        {
+          "rawName": "free_t4",
+          "markerKey": "free_t4",
+          "value": 0.6,
+          "unit": "ng/dL"
+        }
+      ]
+    },
+    "overt_hypothyroidism": {
+      "matches": [
+        {
+          "rawName": "tsh",
+          "markerKey": "tsh",
+          "value": 9,
+          "unit": "µIU/mL"
+        },
+        {
+          "rawName": "free_t4",
+          "markerKey": "free_t4",
+          "value": 0.6,
+          "unit": "ng/dL"
+        }
+      ],
+      "misses": [
+        {
+          "rawName": "tsh",
+          "markerKey": "tsh",
+          "value": 9,
+          "unit": "µIU/mL"
+        },
+        {
+          "rawName": "free_t4",
+          "markerKey": "free_t4",
+          "value": 1.2,
+          "unit": "ng/dL"
+        }
+      ]
+    },
+    "hyperthyroidism": {
+      "matches": [
+        {
+          "rawName": "tsh",
+          "markerKey": "tsh",
+          "value": 0.05,
+          "unit": "µIU/mL"
+        },
+        {
+          "rawName": "free_t4",
+          "markerKey": "free_t4",
+          "value": 2.5,
+          "unit": "ng/dL"
+        }
+      ],
+      "misses": [
+        {
+          "rawName": "tsh",
+          "markerKey": "tsh",
+          "value": 0.05,
+          "unit": "µIU/mL"
+        },
+        {
+          "rawName": "free_t4",
+          "markerKey": "free_t4",
+          "value": 1.2,
+          "unit": "ng/dL"
+        },
+        {
+          "rawName": "free_t3",
+          "markerKey": "free_t3",
+          "value": 3.0,
+          "unit": "pg/mL"
+        }
+      ]
+    },
+    "metabolic_lipid_triad": {
+      "matches": [
+        {
+          "rawName": "triglycerides",
+          "markerKey": "triglycerides",
+          "value": 210,
+          "unit": "mg/dL"
+        },
+        {
+          "rawName": "hdl_cholesterol",
+          "markerKey": "hdl_cholesterol",
+          "value": 35,
+          "unit": "mg/dL"
+        },
+        {
+          "rawName": "glucose_fasting",
+          "markerKey": "glucose_fasting",
+          "value": 110,
+          "unit": "mg/dL"
+        }
+      ],
+      "misses": [
+        {
+          "rawName": "triglycerides",
+          "markerKey": "triglycerides",
+          "value": 210,
+          "unit": "mg/dL"
+        },
+        {
+          "rawName": "hdl_cholesterol",
+          "markerKey": "hdl_cholesterol",
+          "value": 35,
+          "unit": "mg/dL"
+        },
+        {
+          "rawName": "glucose_fasting",
+          "markerKey": "glucose_fasting",
+          "value": 90,
+          "unit": "mg/dL"
+        },
+        {
+          "rawName": "hba1c",
+          "markerKey": "hba1c",
+          "value": 5.2,
+          "unit": "%"
+        }
+      ]
+    },
+    "insulin_resistance": {
+      "matches": [
+        {
+          "rawName": "glucose_fasting",
+          "markerKey": "glucose_fasting",
+          "value": 95,
+          "unit": "mg/dL"
+        },
+        {
+          "rawName": "insulin_fasting",
+          "markerKey": "insulin_fasting",
+          "value": 15,
+          "unit": "µIU/mL"
+        }
+      ],
+      "misses": [
+        {
+          "rawName": "triglycerides",
+          "markerKey": "triglycerides",
+          "value": 90,
+          "unit": "mg/dL"
+        },
+        {
+          "rawName": "hdl_cholesterol",
+          "markerKey": "hdl_cholesterol",
+          "value": 55,
+          "unit": "mg/dL"
+        },
+        {
+          "rawName": "glucose_fasting",
+          "markerKey": "glucose_fasting",
+          "value": 85,
+          "unit": "mg/dL"
+        },
+        {
+          "rawName": "insulin_fasting",
+          "markerKey": "insulin_fasting",
+          "value": 5,
+          "unit": "µIU/mL"
+        }
+      ]
+    },
+    "prediabetes": {
+      "matches": [
+        {
+          "rawName": "hba1c",
+          "markerKey": "hba1c",
+          "value": 6.0,
+          "unit": "%"
+        }
+      ],
+      "misses": [
+        {
+          "rawName": "hba1c",
+          "markerKey": "hba1c",
+          "value": 7.0,
+          "unit": "%"
+        }
+      ]
+    },
+    "fatty_liver_signal": {
+      "matches": [
+        {
+          "rawName": "alt",
+          "markerKey": "alt",
+          "value": 80,
+          "unit": "U/L"
+        },
+        {
+          "rawName": "ggt",
+          "markerKey": "ggt",
+          "value": 90,
+          "unit": "U/L"
+        },
+        {
+          "rawName": "triglycerides",
+          "markerKey": "triglycerides",
+          "value": 200,
+          "unit": "mg/dL"
+        }
+      ],
+      "misses": [
+        {
+          "rawName": "alt",
+          "markerKey": "alt",
+          "value": 80,
+          "unit": "U/L"
+        },
+        {
+          "rawName": "ggt",
+          "markerKey": "ggt",
+          "value": 30,
+          "unit": "U/L"
+        },
+        {
+          "rawName": "triglycerides",
+          "markerKey": "triglycerides",
+          "value": 200,
+          "unit": "mg/dL"
+        }
+      ]
+    },
+    "kidney_watch": {
+      "matches": [
+        {
+          "rawName": "egfr",
+          "markerKey": "egfr",
+          "value": 70,
+          "unit": "mL/min/1.73m²"
+        },
+        {
+          "rawName": "urine_acr",
+          "markerKey": "urine_acr",
+          "value": 45,
+          "unit": "mg/g"
+        }
+      ],
+      "misses": [
+        {
+          "rawName": "egfr",
+          "markerKey": "egfr",
+          "value": 95,
+          "unit": "mL/min/1.73m²"
+        },
+        {
+          "rawName": "urine_acr",
+          "markerKey": "urine_acr",
+          "value": 45,
+          "unit": "mg/g"
+        }
+      ]
+    },
+    "vitamin_d_bone": {
+      "matches": [
+        {
+          "rawName": "vitamin_d",
+          "markerKey": "vitamin_d",
+          "value": 12,
+          "unit": "ng/mL"
+        },
+        {
+          "rawName": "pth",
+          "markerKey": "pth",
+          "value": 90,
+          "unit": "pg/mL"
+        }
+      ],
+      "misses": [
+        {
+          "rawName": "vitamin_d",
+          "markerKey": "vitamin_d",
+          "value": 12,
+          "unit": "ng/mL"
+        },
+        {
+          "rawName": "pth",
+          "markerKey": "pth",
+          "value": 40,
+          "unit": "pg/mL"
+        },
+        {
+          "rawName": "calcium",
+          "markerKey": "calcium",
+          "value": 9.5,
+          "unit": "mg/dL"
+        }
+      ]
+    },
+    "haemoconcentration": {
+      "matches": [
+        {
+          "rawName": "hematocrit",
+          "markerKey": "hematocrit",
+          "value": 53,
+          "unit": "%"
+        },
+        {
+          "rawName": "blood_urea",
+          "markerKey": "blood_urea",
+          "value": 48,
+          "unit": "mg/dL"
+        }
+      ],
+      "misses": [
+        {
+          "rawName": "hematocrit",
+          "markerKey": "hematocrit",
+          "value": 53,
+          "unit": "%"
+        },
+        {
+          "rawName": "blood_urea",
+          "markerKey": "blood_urea",
+          "value": 30,
+          "unit": "mg/dL"
+        }
+      ]
+    },
+    "inflammation_signal": {
+      "matches": [
+        {
+          "rawName": "esr",
+          "markerKey": "esr",
+          "value": 40,
+          "unit": "mm/hr"
+        },
+        {
+          "rawName": "hs_crp",
+          "markerKey": "hs_crp",
+          "value": 6,
+          "unit": "mg/L"
+        }
+      ],
+      "misses": [
+        {
+          "rawName": "esr",
+          "markerKey": "esr",
+          "value": 40,
+          "unit": "mm/hr"
+        },
+        {
+          "rawName": "hs_crp",
+          "markerKey": "hs_crp",
+          "value": 0.5,
+          "unit": "mg/L"
+        }
+      ]
+    },
+    "gout_risk": {
+      "matches": [
+        {
+          "rawName": "uric_acid",
+          "markerKey": "uric_acid",
+          "value": 7.5,
+          "unit": "mg/dL"
+        }
+      ],
+      "misses": [
+        {
+          "rawName": "uric_acid",
+          "markerKey": "uric_acid",
+          "value": 5.5,
+          "unit": "mg/dL"
+        }
+      ]
+    }
+  }
+}

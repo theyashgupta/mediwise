@@ -1,0 +1,40 @@
+{
+  "data": {
+    "order": {
+      "order_id": "6f1c2d3e-4b5a-4c6d-8e7f-901234567890",
+      "order_amount": 199.0,
+      "order_currency": "INR",
+      "order_tags": { "userId": "dev-user", "packId": "pack_5" },
+      "order_note": "5 report credits"
+    },
+    "payment": {
+      "cf_payment_id": "5114910439041",
+      "payment_status": "SUCCESS",
+      "payment_amount": 199.0,
+      "payment_currency": "INR",
+      "payment_message": "Simulated response message",
+      "payment_time": "2026-10-12T22:40:10+05:30",
+      "bank_reference": "1234567890",
+      "auth_id": null,
+      "payment_method": { "upi": { "channel": "collect", "upi_id": "testsuccess@gocash" } },
+      "payment_group": "upi",
+      "payment_surcharge": null
+    },
+    "customer_details": {
+      "customer_name": null,
+      "customer_id": "devuser",
+      "customer_email": "dev-user@example.com",
+      "customer_phone": "9999999999"
+    },
+    "payment_gateway_details": {
+      "gateway_name": "CASHFREE",
+      "gateway_order_id": "4523098761",
+      "gateway_payment_id": "5114910439041",
+      "gateway_status_code": null
+    },
+    "payment_offers": null,
+    "terminal_details": null
+  },
+  "event_time": "2026-10-12T22:40:12+05:30",
+  "type": "PAYMENT_SUCCESS_WEBHOOK"
+}

@@ -1,0 +1,76 @@
+import { getRouteApi } from "@tanstack/react-router";
+import { FileClock } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { EmptyState } from "@/common/components/empty-state";
+import { ErrorState } from "@/common/components/error-state";
+import { LoadingState } from "@/common/components/loading-state";
+import { useProfiles } from "@/modules/profiles";
+import { ReportExport } from "../components/report-export";
+import { useReport } from "../hooks/use-reports";
+
+const route = getRouteApi("/reports/$reportId/export");
+
+/**
+ * Opens the print dialog once, after the report and its profile are on the page.
+ *
+ * @remarks
+ * Waits for web fonts, so the print preview does not lay out the page with the fallback font. The ref stops a second dialog when React runs the effect twice in development.
+ */
+function usePrintWhenReady(ready: boolean) {
+  const printed = useRef(false);
+  useEffect(() => {
+    if (!ready || printed.current) return;
+    printed.current = true;
+    void document.fonts.ready.then(() => window.print());
+  }, [ready]);
+}
+
+function Content() {
+  const { reportId } = route.useParams();
+  const report = useReport(reportId);
+  const profiles = useProfiles();
+  const ready = report.data?.status === "done" && profiles.isSuccess;
+  usePrintWhenReady(ready);
+
+  if (report.isPending || profiles.isPending) return <LoadingState variant="page" />;
+  if (report.isError) {
+    return <ErrorState message="We could not load this report." onRetry={() => report.refetch()} />;
+  }
+  if (profiles.isError) {
+    return (
+      <ErrorState message="We could not load the profile." onRetry={() => profiles.refetch()} />
+    );
+  }
+  if (report.data.status !== "done") {
+    return (
+      <EmptyState
+        icon={FileClock}
+        title="This report is not ready"
+        body="You can export a report only after MediWise reads it."
+      />
+    );
+  }
+
+  return (
+    <ReportExport
+      report={report.data}
+      profile={profiles.data.find((profile) => profile.id === report.data.profileId)}
+      generatedOn={new Date().toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })}
+      onPrint={() => window.print()}
+    />
+  );
+}
+
+export function ReportExportContainer() {
+  return (
+    <div data-theme="light" className="min-h-svh">
+      <main className="mx-auto w-full max-w-[210mm] px-4 py-8 print:max-w-none print:p-0">
+        <Content />
+      </main>
+    </div>
+  );
+}

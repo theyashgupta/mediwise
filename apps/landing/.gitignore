@@ -1,0 +1,10 @@
+.next
+out
+next-env.d.ts
+*.tsbuildinfo
+public/favicon.svg
+public/favicon.ico
+public/apple-touch-icon.png
+public/icon-192.png
+public/icon-512.png
+public/og-image.png

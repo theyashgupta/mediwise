@@ -1,0 +1,204 @@
+import { getRouteApi, Link, useNavigate } from "@tanstack/react-router";
+import { CirclePause, FileDown, GitCompareArrows, LoaderCircle, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useCrumbLabel } from "@/common/hooks/use-crumb-label";
+import { ErrorState } from "@/common/components/error-state";
+import { LoadingState } from "@/common/components/loading-state";
+import { PageHeader } from "@/common/components/page-header";
+import { GlassButton } from "@/common/components/surface/glass";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DeleteReportDialog } from "../components/delete-report-dialog";
+import { DoctorQuestions } from "../components/doctor-questions";
+import { FindingList } from "../components/finding-list";
+import { FollowUpList } from "../components/follow-up-list";
+import { MarkerSections } from "../components/marker-sections";
+import { MoveFirstList } from "../components/move-first-list";
+import { PatternList } from "../components/pattern-list";
+import { ReportFailed } from "../components/report-failed";
+import { ReportFiles } from "../components/report-files";
+import { ReportNarrative } from "../components/report-narrative";
+import { ReportStatusBadge } from "../components/report-status-badge";
+import { ReportSummary } from "../components/report-summary";
+import { StudyList } from "../components/study-list";
+import { UnmeasuredList } from "../components/unmeasured-list";
+import { formatReportDate } from "../config/report";
+import { inProgress } from "../config/status";
+import { useDeleteReport } from "../hooks/use-delete-report";
+import { useReport } from "../hooks/use-reports";
+import { useRetryReport } from "../hooks/use-retry-report";
+import type { MarkerFilter } from "../types";
+
+const route = getRouteApi("/_app/reports/$reportId");
+
+export function ReportContainer() {
+  const { reportId } = route.useParams();
+  const { show } = route.useSearch();
+  const navigate = useNavigate();
+  const report = useReport(reportId);
+  useCrumbLabel(`/reports/${reportId}`, report.data?.header.labName);
+  const retry = useRetryReport();
+  const remove = useDeleteReport();
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+
+  if (report.isPending) return <LoadingState variant="page" />;
+  if (report.isError) {
+    return <ErrorState message="We could not load this report." onRetry={() => report.refetch()} />;
+  }
+
+  const { header, status } = report.data;
+  const filter: MarkerFilter = show === "attention" ? "attention" : "all";
+  const markerCount =
+    report.data.categories.reduce((total, category) => total + category.markers.length, 0) +
+    report.data.derived.length +
+    report.data.unmapped.length;
+
+  function setFilter(next: MarkerFilter) {
+    void navigate({
+      to: "/reports/$reportId",
+      params: { reportId },
+      search: next === "attention" ? { show: "attention" } : {},
+      replace: true,
+      resetScroll: false,
+    });
+  }
+
+  function confirmDelete() {
+    remove.mutate(reportId, {
+      onSuccess: () => {
+        toast.success("We deleted the report.");
+        void navigate({ to: "/reports" });
+      },
+    });
+  }
+
+  const description = [
+    formatReportDate(header.collectedAt, report.data.createdAt),
+    header.markerCount > 0 && `${header.markerCount} markers`,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  return (
+    <>
+      <PageHeader
+        title={header.labName ?? "Your report"}
+        description={description}
+        glass
+        actions={
+          <>
+            {status !== "done" && <ReportStatusBadge status={status} />}
+            {status === "done" && (
+              <GlassButton asChild>
+                <Link to="/compare" search={{ b: reportId }}>
+                  <GitCompareArrows aria-hidden />
+                  Compare reports
+                </Link>
+              </GlassButton>
+            )}
+            {status === "done" && (
+              <GlassButton asChild>
+                <Link to="/reports/$reportId/export" params={{ reportId }} target="_blank">
+                  <FileDown aria-hidden />
+                  Export for doctor
+                </Link>
+              </GlassButton>
+            )}
+            {status !== "processing" && (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  remove.reset();
+                  setConfirmingDelete(true);
+                }}
+              >
+                <Trash2 aria-hidden />
+                Delete report
+              </Button>
+            )}
+          </>
+        }
+      />
+      {status === "paused" && (
+        <p className="flex items-center gap-3 text-muted-foreground">
+          <CirclePause className="size-5" aria-hidden />
+          Reading is paused for now. We will read your report when reading starts again.
+        </p>
+      )}
+      {inProgress(status) && status !== "paused" && (
+        <p className="flex items-center gap-3 text-muted-foreground">
+          <LoaderCircle className="size-5 animate-spin" aria-hidden />
+          We are reading your report. This page updates when it is ready.
+        </p>
+      )}
+      {status === "failed" && (
+        <ReportFailed
+          message={report.data.error ?? "We could not read this report."}
+          retrying={retry.isPending}
+          retryError={retry.error?.message}
+          onRetry={() => retry.mutate(reportId)}
+        />
+      )}
+      {status === "done" && (
+        <div className="space-y-12">
+          {header.score !== null && <ReportSummary header={header} verdict={report.data.verdict} />}
+          <PatternList reportId={reportId} items={report.data.patterns} />
+          <FindingList reportId={reportId} detail={report.data} />
+          <StudyList studies={report.data.studies} images={report.data.files.images} />
+          <MoveFirstList reportId={reportId} items={report.data.moveFirst} />
+          {report.data.narrative && (
+            <ReportNarrative
+              reportId={reportId}
+              narrative={report.data.narrative}
+              detail={report.data}
+            />
+          )}
+          {markerCount > 0 && (
+            <Tabs defaultValue="markers" className="gap-4">
+              <TabsList className="w-full max-w-full justify-start overflow-x-auto sm:w-fit">
+                <TabsTrigger value="markers" className="text-muted-foreground">
+                  Markers ({markerCount})
+                </TabsTrigger>
+                <TabsTrigger value="follow-ups" className="text-muted-foreground">
+                  Follow-ups ({report.data.followUps.length})
+                </TabsTrigger>
+                <TabsTrigger value="unmeasured" className="text-muted-foreground">
+                  Unmeasured ({report.data.unmeasured.length})
+                </TabsTrigger>
+                <TabsTrigger value="doctor-questions" className="text-muted-foreground">
+                  Questions for your doctor ({report.data.doctorQuestions.length})
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="markers">
+                <MarkerSections
+                  reportId={reportId}
+                  detail={report.data}
+                  filter={filter}
+                  onFilterChange={setFilter}
+                />
+              </TabsContent>
+              <TabsContent value="follow-ups">
+                <FollowUpList items={report.data.followUps} />
+              </TabsContent>
+              <TabsContent value="unmeasured">
+                <UnmeasuredList items={report.data.unmeasured} />
+              </TabsContent>
+              <TabsContent value="doctor-questions">
+                <DoctorQuestions items={report.data.doctorQuestions} />
+              </TabsContent>
+            </Tabs>
+          )}
+        </div>
+      )}
+      <ReportFiles files={report.data.files} className="mt-12" />
+      <DeleteReportDialog
+        open={confirmingDelete}
+        deleting={remove.isPending}
+        error={remove.error?.message}
+        onConfirm={confirmDelete}
+        onOpenChange={setConfirmingDelete}
+      />
+    </>
+  );
+}

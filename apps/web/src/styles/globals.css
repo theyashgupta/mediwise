@@ -1,0 +1,238 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@mediwise/design-tokens/tokens.css";
+
+/*
+ * A token is defined once with light-dark(). The nearest color-scheme picks the value, so
+ * [data-theme] works on any element: the root (the user's choice) or a kitchen-sink panel.
+ */
+
+/*
+ * `dark:` follows the closest [data-theme], for one panel nested in the root at most.
+ * A light panel inside a dark root is excluded. @scope cannot do this: Tailwind nests it in the utility rule.
+ */
+@custom-variant dark {
+  &:where([data-theme="dark"] *):not(:where([data-theme="dark"] [data-theme="light"] *)) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme]) *):not(:where([data-theme="light"] *)) {
+      @slot;
+    }
+  }
+}
+
+@theme {
+  --font-heading: var(--font-sans);
+
+  --container-content: 100rem;
+  --container-measure: 72ch;
+  --container-auth: 26.25rem;
+}
+
+@theme inline {
+  --shadow-2xs: var(--shadow-flat);
+  --shadow-xs: var(--shadow-flat);
+  --shadow-sm: var(--shadow-flat);
+  --shadow: var(--shadow-flat);
+  --shadow-md: var(--shadow-overlay);
+  --shadow-lg: var(--shadow-overlay);
+  --shadow-xl: var(--shadow-overlay);
+  --shadow-2xl: var(--shadow-overlay);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-glass-surface: var(--glass-surface);
+  --color-glass-bar: var(--glass-bar);
+  --color-glass-overlay: var(--glass-overlay);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-optimal: var(--optimal);
+  --color-optimal-soft: var(--optimal-soft);
+  --color-watch: var(--watch);
+  --color-watch-soft: var(--watch-soft);
+  --color-risk: var(--risk);
+  --color-risk-soft: var(--risk-soft);
+  --color-unknown: var(--unknown);
+  --color-unknown-soft: var(--unknown-soft);
+}
+
+:root {
+  color-scheme: light dark;
+}
+
+/*
+ * Glass is solid by default and turns translucent only where backdrop-filter works, the user allows
+ * transparency and the device is not marked slow (data-glass="off", set in index.html).
+ * See docs/design/research-design-v2.md for the values and the contrast rule.
+ */
+:root,
+[data-theme] {
+  --glass-surface: var(--card);
+  --glass-bar: var(--background);
+  --glass-overlay: var(--popover);
+  --glass-filter-bar: none;
+  --glass-filter-surface: none;
+}
+
+@supports (backdrop-filter: blur(1px)) {
+  :root:not([data-glass="off"]),
+  :root:not([data-glass="off"]) [data-theme] {
+    --glass-surface: var(--glass-tint-surface);
+    --glass-bar: var(--glass-tint-bar);
+    --glass-overlay: var(--glass-tint-overlay);
+    --glass-filter-bar: blur(var(--blur-glass-bar)) saturate(140%);
+    --glass-filter-surface: blur(var(--blur-glass-surface)) saturate(140%);
+    }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root,
+  [data-theme] {
+    --glass-surface: var(--card);
+    --glass-bar: var(--background);
+    --glass-overlay: var(--popover);
+    --glass-filter-bar: none;
+    --glass-filter-surface: none;
+    }
+}
+
+@utility glass-blur-bar {
+  backdrop-filter: var(--glass-filter-bar);
+}
+
+@utility glass-blur-surface {
+  backdrop-filter: var(--glass-filter-surface);
+}
+
+/* Two soft washes behind the shell, so glass has something to frost. Fixed, so scrolling repaints nothing. */
+@utility ambient {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: -1;
+  height: 40rem;
+  pointer-events: none;
+  background:
+    radial-gradient(48rem 28rem at 12% -10%, var(--ambient-1), transparent 70%),
+    radial-gradient(40rem 24rem at 92% -6%, var(--ambient-2), transparent 70%);
+}
+
+:root {
+  color-scheme: light dark;
+}
+
+/*
+ * Tokens are declared again on every [data-theme] element. The build polyfills light-dark()
+ * with variables that resolve where a token is declared, so a nested theme must redeclare it.
+ */
+:root,
+[data-theme] {
+  --radius: 0.5rem;
+  --shadow-flat: 0 0 0 0 transparent;
+  --shadow-overlay: 0 12px 32px -8px light-dark(oklch(0.25 0.01 60 / 14%), oklch(0 0 0 / 55%));
+
+  --background: light-dark(oklch(0.985 0.004 80), oklch(0.205 0.004 70));
+  --foreground: light-dark(oklch(0.23 0.008 60), oklch(0.94 0.004 80));
+  --card: light-dark(oklch(0.997 0.002 80), oklch(0.23 0.004 70));
+  --card-foreground: var(--foreground);
+  --popover: light-dark(oklch(0.997 0.002 80), oklch(0.25 0.004 70));
+  --popover-foreground: var(--foreground);
+  --primary: light-dark(oklch(0.48 0.075 195), oklch(0.78 0.08 195));
+  --primary-foreground: light-dark(oklch(0.99 0.002 80), oklch(0.205 0.004 70));
+  --secondary: light-dark(oklch(0.955 0.005 75), oklch(0.27 0.004 70));
+  --secondary-foreground: var(--foreground);
+  --muted: light-dark(oklch(0.955 0.005 75), oklch(0.265 0.004 70));
+  --muted-foreground: light-dark(oklch(0.5 0.01 60), oklch(0.72 0.008 75));
+  --accent: light-dark(oklch(0.945 0.006 75), oklch(0.29 0.005 70));
+  --accent-foreground: var(--foreground);
+  --destructive: light-dark(oklch(0.52 0.17 25), oklch(0.72 0.15 25));
+  --border: light-dark(oklch(0.9 0.006 75), oklch(0.31 0.005 70));
+  --input: light-dark(oklch(0.87 0.007 75), oklch(0.35 0.005 70));
+  --ring: light-dark(oklch(0.58 0.085 195), oklch(0.68 0.08 195));
+  --sidebar: light-dark(oklch(0.97 0.005 75), oklch(0.185 0.004 70));
+
+  --chart-1: light-dark(oklch(0.48 0.075 195), oklch(0.78 0.08 195));
+  --chart-2: light-dark(oklch(0.6 0.06 220), oklch(0.7 0.06 220));
+  --chart-3: light-dark(oklch(0.5 0.04 280), oklch(0.72 0.05 280));
+  --chart-4: light-dark(oklch(0.55 0.02 60), oklch(0.7 0.015 60));
+  --chart-5: light-dark(oklch(0.75 0.03 195), oklch(0.55 0.04 195));
+
+  --optimal: light-dark(oklch(0.47 0.09 150), oklch(0.8 0.11 150));
+  --optimal-soft: light-dark(oklch(0.95 0.03 150), oklch(0.3 0.04 150));
+  --watch: light-dark(oklch(0.5 0.1 70), oklch(0.83 0.11 80));
+  --watch-soft: light-dark(oklch(0.95 0.04 80), oklch(0.31 0.045 75));
+  --risk: light-dark(oklch(0.5 0.15 40), oklch(0.78 0.12 40));
+  --risk-soft: light-dark(oklch(0.95 0.025 40), oklch(0.31 0.055 40));
+  --unknown: light-dark(oklch(0.5 0.015 250), oklch(0.75 0.015 250));
+  --unknown-soft: light-dark(oklch(0.95 0.006 250), oklch(0.3 0.008 250));
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  [data-theme],
+  body {
+    @apply bg-background text-foreground;
+  }
+  body {
+    @apply font-sans antialiased;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "cv11";
+  }
+}
+
+@page {
+  size: A4;
+  margin: 12mm;
+}
+
+/* Print is always black on white, whatever theme the screen uses. */
+@media print {
+  :root,
+  [data-theme] {
+    color-scheme: light;
+  }
+  :root {
+    --background: oklch(1 0 0);
+    --foreground: oklch(0 0 0);
+    --card: oklch(1 0 0);
+    --muted-foreground: oklch(0.35 0 0);
+    --border: oklch(0.75 0 0);
+    --glass-surface: var(--card);
+    --glass-bar: var(--background);
+    --glass-overlay: var(--popover);
+  }
+  .ambient {
+    display: none;
+  }
+}

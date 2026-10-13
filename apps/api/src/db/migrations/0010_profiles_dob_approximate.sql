@@ -1,0 +1,1 @@
+ALTER TABLE "profiles" ADD COLUMN "date_of_birth_approximate" boolean DEFAULT false NOT NULL;

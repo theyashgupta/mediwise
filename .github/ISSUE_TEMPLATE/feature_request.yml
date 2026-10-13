@@ -1,0 +1,46 @@
+name: Feature request
+description: Suggest a change or a new capability for MediWise.
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        MediWise reads lab reports and explains them. It does not diagnose or prescribe.
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What do you want to do that MediWise makes hard or impossible today?
+      placeholder: My lab prints vitamin D in nmol/L, and MediWise shows no range for it.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: The change you want
+      description: Describe the change. A rough idea is fine.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Other options
+      description: Workarounds you use now, or other designs you considered.
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you file
+      options:
+        - label: I searched the existing issues and this is not a duplicate.
+          required: true
+        - label: This request does not ask MediWise to diagnose or to give treatment advice.
+          required: true
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Contributions
+      options:
+        - label: I can open a pull request to build this.
+          required: false

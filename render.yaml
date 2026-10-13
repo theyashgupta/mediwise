@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: mediwise-api
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: WEB_ORIGIN
+        sync: false
+      - key: RUN_WORKER
+        value: "true"
+      - key: CLAUDE_MONTHLY_CAP_CENTS
+        value: "2000"
+      - key: CLAUDE_HARD_STOP
+        value: "false"
+      - key: ADMIN_USER_ID
+        sync: false
+      - key: PAYMENTS_ENABLED
+        value: "false"
+      - key: CASHFREE_APP_ID
+        sync: false
+      - key: CASHFREE_SECRET_KEY
+        sync: false
+      - key: CASHFREE_ENV
+        value: "sandbox"
+      - key: PAYMENTS_WEBHOOK_URL
+        sync: false

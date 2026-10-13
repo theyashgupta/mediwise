@@ -1,0 +1,180 @@
+import type { TransformedToken } from "style-dictionary/types";
+import { type OklchColor, toCssColor, toNativeColor } from "./color.ts";
+
+type Dimension = { value: number; unit: "px" | "rem" | "em" | "ms" };
+type ShadowLayer = {
+  color: OklchColor;
+  offsetX: Dimension;
+  offsetY: Dimension;
+  blur: Dimension;
+  spread: Dimension;
+  inset?: boolean;
+};
+
+const themed = new Set(["color", "shadow"]);
+const genericFamilies = new Set([
+  "ui-sans-serif",
+  "ui-serif",
+  "ui-monospace",
+  "system-ui",
+  "sans-serif",
+  "serif",
+  "monospace",
+]);
+
+const cssDimension = ({ value, unit }: Dimension) => (value === 0 ? "0" : `${value}${unit}`);
+const pxDimension = ({ value, unit }: Dimension) => (unit === "rem" ? value * 16 : value);
+const layers = (value: ShadowLayer | ShadowLayer[]) => (Array.isArray(value) ? value : [value]);
+
+/**
+ * Returns the CSS variable name of a token, without the theme segment.
+ */
+function cssName(path: string[]) {
+  const [group, ...rest] = themed.has(path[0]!) ? [path[0]!, ...path.slice(2)] : path;
+  return group === "color" ? rest.join("-") : [group, ...rest].join("-");
+}
+
+/**
+ * Returns the name of the token a value points at, when the value is a plain reference.
+ */
+function referenceName(original: unknown) {
+  const match = typeof original === "string" ? original.match(/^\{(.+)\}$/) : null;
+  return match ? cssName(match[1]!.split(".")) : undefined;
+}
+
+/**
+ * Writes one value for both themes, with light-dark() only where the two differ.
+ */
+function themedCss(light: TransformedToken, dark: TransformedToken) {
+  const lightRef = referenceName(light.original.$value);
+  if (lightRef && lightRef === referenceName(dark.original.$value)) return `var(--${lightRef})`;
+  const pair = (a: OklchColor, b: OklchColor) => {
+    const [x, y] = [toCssColor(a), toCssColor(b)];
+    return x === y ? x : `light-dark(${x}, ${y})`;
+  };
+  if (light.$type === "color") return pair(light.$value, dark.$value);
+
+  const [lightLayers, darkLayers] = [layers(light.$value), layers(dark.$value)];
+  return lightLayers
+    .map((layer, i) => {
+      const other = darkLayers[i];
+      const geometry = (l: ShadowLayer) =>
+        [l.inset ? "inset" : "", ...[l.offsetX, l.offsetY, l.blur, l.spread].map(cssDimension)]
+          .filter(Boolean)
+          .join(" ");
+      if (
+        !other ||
+        geometry(other) !== geometry(layer) ||
+        darkLayers.length !== lightLayers.length
+      ) {
+        throw new Error(
+          `${light.path.join(".")}: light and dark shadows must share their geometry`,
+        );
+      }
+      return `${geometry(layer)} ${pair(layer.color, other.color)}`;
+    })
+    .join(", ");
+}
+
+/**
+ * Writes a mode-independent token as one or more Tailwind theme variables.
+ *
+ * @remarks
+ * Tailwind reads `--text-*--line-height` and `--text-*--letter-spacing` as parts of the `text-*` utility.
+ */
+function staticCss({ path, $type, $value }: TransformedToken): [string, string][] {
+  const [group, kind, step] = path;
+  if ($type === "fontFamily") {
+    const families = ($value as string[]).map((f) => (genericFamilies.has(f) ? f : `"${f}"`));
+    return [[`font-${step}`, families.join(", ")]];
+  }
+  if ($type === "cubicBezier") return [[`ease-${kind}`, `cubic-bezier(${$value.join(", ")})`]];
+  if (group === "spacing") return [["spacing", cssDimension($value)]];
+  if (group === "font" && kind === "size") return [[`text-${step}`, cssDimension($value)]];
+  if (group === "font") return [[`text-${step}--${kind}`, cssDimension($value)]];
+  return [[path.join("-"), cssDimension($value)]];
+}
+
+/**
+ * Formats every token as the CSS file apps/web imports.
+ *
+ * @remarks
+ * Theme values go on `:root, [data-theme]` with light-dark(), as globals.css did before, so every shadcn variable keeps its name.
+ * Scales that Tailwind turns into utilities (font, text, spacing, radius steps, ease) go in `@theme`.
+ */
+export function cssFormat(tokens: TransformedToken[]) {
+  const theme: string[] = [];
+  const root: string[] = [];
+  const dark = new Map(
+    tokens.filter((t) => t.path[1] === "dark").map((t) => [cssName(t.path), t] as const),
+  );
+  for (const token of tokens) {
+    const [group, mode] = token.path;
+    if (themed.has(group!)) {
+      if (mode !== "light") continue;
+      const name = cssName(token.path);
+      const pair = dark.get(name);
+      if (!pair) throw new Error(`${token.path.join(".")} has no dark value`);
+      root.push(`  --${name}: ${themedCss(token, pair)};`);
+    } else if (token.$type === "duration" || group === "blur") {
+      root.push(`  --${token.path.join("-")}: ${cssDimension(token.$value)};`);
+    } else if (group === "radius" && mode === "base") {
+      root.push(`  --radius: ${cssDimension(token.$value)};`);
+    } else {
+      for (const [name, value] of staticCss(token)) theme.push(`  --${name}: ${value};`);
+    }
+  }
+  return [
+    "/* Generated by @mediwise/design-tokens from tokens/*.json. Run `pnpm --filter @mediwise/design-tokens build`. */",
+    "",
+    "@theme {",
+    ...theme,
+    "}",
+    "",
+    "/* The build polyfills light-dark() with variables that resolve where a token is declared, so a nested [data-theme] redeclares every token. */",
+    ":root,",
+    "[data-theme] {",
+    ...root,
+    "}",
+    "",
+  ].join("\n");
+}
+
+const camel = (key: string) => key.replace(/-(\w)/g, (_, c: string) => c.toUpperCase());
+
+/**
+ * Converts one token value to the plain number or string React Native styles take.
+ */
+function nativeValue({ $type, $value }: TransformedToken): unknown {
+  if ($type === "color") return toNativeColor($value);
+  if ($type === "shadow") {
+    return layers($value).map((l) => ({
+      color: toNativeColor(l.color),
+      offsetX: pxDimension(l.offsetX),
+      offsetY: pxDimension(l.offsetY),
+      blur: pxDimension(l.blur),
+      spread: pxDimension(l.spread),
+      inset: l.inset ?? false,
+    }));
+  }
+  if ($type === "fontFamily") return ($value as string[])[0];
+  if ($type === "dimension" || $type === "duration") return pxDimension($value);
+  return $value;
+}
+
+/**
+ * Formats every token as a TypeScript module for the Expo app.
+ *
+ * @remarks
+ * Colours become hex or rgba(), sizes become px numbers and durations become ms numbers. Each theme is its own object, because React Native has no light-dark().
+ */
+export function nativeFormat(tokens: TransformedToken[]) {
+  const tree: Record<string, unknown> = {};
+  for (const token of tokens) {
+    let node = tree;
+    const keys = token.path.map(camel);
+    for (const key of keys.slice(0, -1)) node = (node[key] ??= {}) as Record<string, unknown>;
+    node[keys.at(-1)!] = nativeValue(token);
+  }
+  return `export const tokens = ${JSON.stringify(tree, null, 2)} as const;\n`;
+}

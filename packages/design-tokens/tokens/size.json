@@ -1,0 +1,66 @@
+{
+  "spacing": {
+    "$type": "dimension",
+    "base": {
+      "$value": {
+        "value": 0.25,
+        "unit": "rem"
+      },
+      "$description": "The 4 px grid step"
+    }
+  },
+  "radius": {
+    "$type": "dimension",
+    "base": {
+      "$value": {
+        "value": 0.5,
+        "unit": "rem"
+      }
+    },
+    "sm": {
+      "$value": {
+        "value": 0.25,
+        "unit": "rem"
+      }
+    },
+    "md": {
+      "$value": {
+        "value": 0.375,
+        "unit": "rem"
+      }
+    },
+    "lg": {
+      "$value": {
+        "value": 0.5,
+        "unit": "rem"
+      }
+    },
+    "xl": {
+      "$value": {
+        "value": 0.75,
+        "unit": "rem"
+      }
+    },
+    "2xl": {
+      "$value": {
+        "value": 1,
+        "unit": "rem"
+      }
+    }
+  },
+  "blur": {
+    "$type": "dimension",
+    "glass-bar": {
+      "$value": {
+        "value": 12,
+        "unit": "px"
+      }
+    },
+    "glass-surface": {
+      "$value": {
+        "value": 16,
+        "unit": "px"
+      }
+    }
+  }
+}

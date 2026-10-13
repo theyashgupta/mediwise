@@ -1,0 +1,886 @@
+{
+  "sample": "sample-2025.pdf",
+  "labName": "Sunrise Diagnostics",
+  "person": {
+    "dateOfBirth": null,
+    "sex": null,
+    "ancestry": "unknown"
+  },
+  "score": 87,
+  "mapped": 108,
+  "total": 109,
+  "markers": [
+    {
+      "rawName": "25 Hydroxy, Vitamin D",
+      "markerKey": "vitamin_d",
+      "value": 13,
+      "valueText": null,
+      "unit": "ng/mL",
+      "status": "risk"
+    },
+    {
+      "rawName": "A.G. ratio",
+      "markerKey": "albumin_globulin_ratio",
+      "value": 1.9,
+      "valueText": null,
+      "unit": "ratio",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Absolute Basophil Count",
+      "markerKey": "basophils_abs",
+      "value": 0.02,
+      "valueText": null,
+      "unit": "10^3/µL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Absolute Eosinophil Count",
+      "markerKey": "eosinophils_abs",
+      "value": 0.16,
+      "valueText": null,
+      "unit": "10^3/µL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Absolute Lymphocyte Count",
+      "markerKey": "lymphocytes_abs",
+      "value": 2.11,
+      "valueText": null,
+      "unit": "10^3/µL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Absolute Monocyte Count",
+      "markerKey": "monocytes_abs",
+      "value": 0.31,
+      "valueText": null,
+      "unit": "10^3/µL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Absolute Neutrophil Count",
+      "markerKey": "neutrophils_abs",
+      "value": 3.04,
+      "valueText": null,
+      "unit": "10^3/µL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Albumin",
+      "markerKey": "albumin",
+      "value": 4,
+      "valueText": null,
+      "unit": "g/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Albumin, Urine",
+      "markerKey": "urine_albumin",
+      "value": 273,
+      "valueText": null,
+      "unit": "mg/L",
+      "status": "risk"
+    },
+    {
+      "rawName": "Albumin/Creatinine Ratio",
+      "markerKey": "urine_acr",
+      "value": 24.8,
+      "valueText": null,
+      "unit": "mg/g Creatinine",
+      "status": null
+    },
+    {
+      "rawName": "Alkaline Phosphatase",
+      "markerKey": "alp",
+      "value": 63,
+      "valueText": null,
+      "unit": "U/L",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Anti Hbs Titre",
+      "markerKey": "anti_hbs",
+      "value": null,
+      "valueText": "<2.0",
+      "unit": "mIU/mL",
+      "status": "watch"
+    },
+    {
+      "rawName": "Apo B/ Apo A1 Ratio",
+      "markerKey": "apob_apoa1_ratio",
+      "value": 0.66,
+      "valueText": null,
+      "unit": "ratio",
+      "status": null
+    },
+    {
+      "rawName": "Apolipoprotein (A)",
+      "markerKey": "apolipoprotein_a1",
+      "value": 144,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": null
+    },
+    {
+      "rawName": "Apolipoprotein (B)",
+      "markerKey": "apolipoprotein_b",
+      "value": 93,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "AST/ALT Ratio",
+      "markerKey": "ast_alt_ratio",
+      "value": 0.89,
+      "valueText": null,
+      "unit": "ratio",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Average Glucose Value For the Last 3 Months",
+      "markerKey": "estimated_average_glucose",
+      "value": 96.93,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Average Glucose Value For the Last 3 Months IFCC",
+      "markerKey": "estimated_average_glucose",
+      "value": 5.94,
+      "valueText": null,
+      "unit": "mmol/L",
+      "status": null
+    },
+    {
+      "rawName": "Bacteria",
+      "markerKey": "urine_bacteria",
+      "value": null,
+      "valueText": "ABSENT",
+      "unit": null,
+      "status": null
+    },
+    {
+      "rawName": "Basophils",
+      "markerKey": "basophils_pct",
+      "value": 0.4,
+      "valueText": null,
+      "unit": "%",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Bicarbonate",
+      "markerKey": "bicarbonate",
+      "value": 29,
+      "valueText": null,
+      "unit": "mmol/L",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Bilirubin",
+      "markerKey": "urine_bilirubin",
+      "value": null,
+      "valueText": "ABSENT",
+      "unit": null,
+      "status": null
+    },
+    {
+      "rawName": "Bilirubin (Direct)",
+      "markerKey": "bilirubin_direct",
+      "value": 0.29,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Bilirubin (Indirect)",
+      "markerKey": "bilirubin_indirect",
+      "value": 0.7,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Bilirubin (Total)",
+      "markerKey": "bilirubin_total",
+      "value": 0.967,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Blood Cast",
+      "markerKey": "urine_casts",
+      "value": null,
+      "valueText": "ABSENT",
+      "unit": null,
+      "status": null
+    },
+    {
+      "rawName": "Blood Urea Nitrogen",
+      "markerKey": "bun",
+      "value": 8,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Blood Urea Nitrogen",
+      "markerKey": "bun",
+      "value": 7.11,
+      "valueText": null,
+      "unit": "mg/dl",
+      "status": null
+    },
+    {
+      "rawName": "Bun/Creatinine Ratio",
+      "markerKey": "bun_creatinine_ratio",
+      "value": 8,
+      "valueText": null,
+      "unit": "ratio",
+      "status": "watch"
+    },
+    {
+      "rawName": "C-Reactive Protein, High Sensitive",
+      "markerKey": "hs_crp",
+      "value": 1.28,
+      "valueText": null,
+      "unit": "mg/L",
+      "status": "watch"
+    },
+    {
+      "rawName": "Calcium (Total)",
+      "markerKey": "calcium",
+      "value": 8.8,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Cast",
+      "markerKey": "urine_casts",
+      "value": null,
+      "valueText": "ABSENT",
+      "unit": null,
+      "status": null
+    },
+    {
+      "rawName": "Chloride",
+      "markerKey": "chloride",
+      "value": 98,
+      "valueText": null,
+      "unit": "mmol/L",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Cholesterol",
+      "markerKey": "total_cholesterol",
+      "value": 186.3,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Colour",
+      "markerKey": "urine_colour",
+      "value": null,
+      "valueText": "PALE YELLOW",
+      "unit": null,
+      "status": null
+    },
+    {
+      "rawName": "Cortisol (Random)",
+      "markerKey": "cortisol",
+      "value": 12.6,
+      "valueText": null,
+      "unit": "µg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Creatine Kinase (CPK)",
+      "markerKey": "ck_total",
+      "value": 79,
+      "valueText": null,
+      "unit": "U/L",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Creatinine",
+      "markerKey": "creatinine",
+      "value": 0.77,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Creatinine, Urine",
+      "markerKey": "urine_creatinine",
+      "value": 89.2,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "CRP",
+      "markerKey": "crp",
+      "value": 1.2,
+      "valueText": null,
+      "unit": "mg/L",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Crystals",
+      "markerKey": "urine_crystals",
+      "value": null,
+      "valueText": "ABSENT",
+      "unit": null,
+      "status": null
+    },
+    {
+      "rawName": "eGFR by CKD EPI 2021",
+      "markerKey": "egfr",
+      "value": 120.3,
+      "valueText": null,
+      "unit": "mL/min/1.73m²",
+      "status": "optimal"
+    },
+    {
+      "rawName": "eGFR by MDRD",
+      "markerKey": "egfr",
+      "value": 120.3,
+      "valueText": null,
+      "unit": "mL/min/1.73m²",
+      "status": null
+    },
+    {
+      "rawName": "Eosinophils",
+      "markerKey": "eosinophils_pct",
+      "value": 2.3,
+      "valueText": null,
+      "unit": "%",
+      "status": "optimal"
+    },
+    {
+      "rawName": "ESR (Modified Westergren)",
+      "markerKey": "esr",
+      "value": 3,
+      "valueText": null,
+      "unit": "mm/hr",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Ferritin",
+      "markerKey": "ferritin",
+      "value": 79.77,
+      "valueText": null,
+      "unit": "ng/mL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Folate Serum",
+      "markerKey": "folate",
+      "value": 5.2,
+      "valueText": null,
+      "unit": "ng/mL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Free Thyroxine (FT4)",
+      "markerKey": "free_t4",
+      "value": 1.48,
+      "valueText": null,
+      "unit": "ng/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Free Triiodothyronine (FT3)",
+      "markerKey": "free_t3",
+      "value": 3.53,
+      "valueText": null,
+      "unit": "pg/mL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "GGTP (Gamma GT), Serum",
+      "markerKey": "ggt",
+      "value": 21,
+      "valueText": null,
+      "unit": "U/L",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Globulin",
+      "markerKey": "globulin",
+      "value": 3,
+      "valueText": null,
+      "unit": "g/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Glucose (Fasting)",
+      "markerKey": "glucose_fasting",
+      "value": 78.8,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Glucose.",
+      "markerKey": "urine_glucose",
+      "value": null,
+      "valueText": "ABSENT",
+      "unit": "mg/dl",
+      "status": null
+    },
+    {
+      "rawName": "Glycosylated Haemoglobin(Hb A1c)",
+      "markerKey": "hba1c",
+      "value": 4.6,
+      "valueText": null,
+      "unit": "%",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Glycosylated Haemoglobin(Hb A1c) IFCC",
+      "markerKey": "hba1c",
+      "value": 34.6,
+      "valueText": null,
+      "unit": "mmol/mol",
+      "status": null
+    },
+    {
+      "rawName": "Haemoglobin",
+      "markerKey": "hemoglobin",
+      "value": 16,
+      "valueText": null,
+      "unit": "g/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "HBsAg",
+      "markerKey": "hbsag",
+      "value": null,
+      "valueText": "Non Reactive",
+      "unit": null,
+      "status": "optimal"
+    },
+    {
+      "rawName": "HCV, IgG",
+      "markerKey": "hcv_antibody",
+      "value": null,
+      "valueText": "NON REACTIVE",
+      "unit": null,
+      "status": "optimal"
+    },
+    {
+      "rawName": "HDL Cholesterol",
+      "markerKey": "hdl_cholesterol",
+      "value": 46,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "risk"
+    },
+    {
+      "rawName": "HDL/LDL",
+      "markerKey": null,
+      "value": 0.35,
+      "valueText": null,
+      "unit": "Ratio",
+      "status": null
+    },
+    {
+      "rawName": "Homocysteine, Quantitative",
+      "markerKey": "homocysteine",
+      "value": 24.9,
+      "valueText": null,
+      "unit": "µmol/L",
+      "status": "risk"
+    },
+    {
+      "rawName": "Intact, Parathyroid Hormone (PTH)",
+      "markerKey": "pth",
+      "value": 44.05,
+      "valueText": null,
+      "unit": "pg/mL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Iron",
+      "markerKey": "iron",
+      "value": 152.3,
+      "valueText": null,
+      "unit": "µg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Ketones",
+      "markerKey": "urine_ketones",
+      "value": null,
+      "valueText": "ABSENT",
+      "unit": null,
+      "status": null
+    },
+    {
+      "rawName": "LDH",
+      "markerKey": "ldh",
+      "value": 213,
+      "valueText": null,
+      "unit": "U/L",
+      "status": "optimal"
+    },
+    {
+      "rawName": "LDL Cholesterol",
+      "markerKey": "ldl_cholesterol",
+      "value": 150,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "watch"
+    },
+    {
+      "rawName": "Lymphocytes",
+      "markerKey": "lymphocytes_pct",
+      "value": 31.7,
+      "valueText": null,
+      "unit": "%",
+      "status": "optimal"
+    },
+    {
+      "rawName": "MCH",
+      "markerKey": "mch",
+      "value": 28.8,
+      "valueText": null,
+      "unit": "pg",
+      "status": "optimal"
+    },
+    {
+      "rawName": "MCHC",
+      "markerKey": "mchc",
+      "value": 32.1,
+      "valueText": null,
+      "unit": "g/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "MCV",
+      "markerKey": "mcv",
+      "value": 98,
+      "valueText": null,
+      "unit": "fL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Monocytes",
+      "markerKey": "monocytes_pct",
+      "value": 5.8,
+      "valueText": null,
+      "unit": "%",
+      "status": "optimal"
+    },
+    {
+      "rawName": "MPV",
+      "markerKey": "mpv",
+      "value": 13.6,
+      "valueText": null,
+      "unit": "fL",
+      "status": "risk"
+    },
+    {
+      "rawName": "Neutrophils",
+      "markerKey": "neutrophils_pct",
+      "value": 53.7,
+      "valueText": null,
+      "unit": "%",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Nitrite",
+      "markerKey": "urine_nitrite",
+      "value": null,
+      "valueText": "NEGATIVE",
+      "unit": null,
+      "status": null
+    },
+    {
+      "rawName": "Non-HDL Cholesterol",
+      "markerKey": "non_hdl_cholesterol",
+      "value": 142.7,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "watch"
+    },
+    {
+      "rawName": "Packed Cell, Volume",
+      "markerKey": "hematocrit",
+      "value": 51.5,
+      "valueText": null,
+      "unit": "%",
+      "status": "risk"
+    },
+    {
+      "rawName": "Peripheral Smear DLC",
+      "markerKey": "smear_dlc",
+      "value": null,
+      "valueText": "No abnormal cell seen.",
+      "unit": null,
+      "status": null
+    },
+    {
+      "rawName": "Peripheral Smear Hemoparasite",
+      "markerKey": "smear_hemoparasite",
+      "value": null,
+      "valueText": "No hemoparasite seen on thin smear examined.",
+      "unit": null,
+      "status": null
+    },
+    {
+      "rawName": "Peripheral Smear Platelets",
+      "markerKey": "smear_platelets",
+      "value": null,
+      "valueText": "Adequate on smear.",
+      "unit": null,
+      "status": null
+    },
+    {
+      "rawName": "Peripheral Smear RBC",
+      "markerKey": "smear_rbc",
+      "value": null,
+      "valueText": "Normocytic / Normochromic",
+      "unit": null,
+      "status": null
+    },
+    {
+      "rawName": "Peripheral Smear WBC",
+      "markerKey": "smear_wbc",
+      "value": null,
+      "valueText": "TLC-Normal",
+      "unit": null,
+      "status": null
+    },
+    {
+      "rawName": "PH",
+      "markerKey": "urine_ph",
+      "value": 5,
+      "valueText": null,
+      "unit": "pH",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Phosphorus(inorg)",
+      "markerKey": "phosphorus",
+      "value": 3.87,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Platelet Count",
+      "markerKey": "platelet_count",
+      "value": 205,
+      "valueText": null,
+      "unit": "x 1000/µL",
+      "status": null
+    },
+    {
+      "rawName": "Potassium",
+      "markerKey": "potassium",
+      "value": 5.8,
+      "valueText": null,
+      "unit": "mmol/L",
+      "status": "risk"
+    },
+    {
+      "rawName": "Protein",
+      "markerKey": "urine_protein",
+      "value": null,
+      "valueText": "ABSENT",
+      "unit": null,
+      "status": null
+    },
+    {
+      "rawName": "RBC Count",
+      "markerKey": "rbc_count",
+      "value": 6.25,
+      "valueText": null,
+      "unit": "mill/µL",
+      "status": null
+    },
+    {
+      "rawName": "RDW",
+      "markerKey": "rdw_cv",
+      "value": 13,
+      "valueText": null,
+      "unit": "%",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Red Blood Cells (RBC)",
+      "markerKey": "urine_rbc",
+      "value": null,
+      "valueText": "ABSENT",
+      "unit": null,
+      "status": null
+    },
+    {
+      "rawName": "Rheumatoid Factor",
+      "markerKey": "rheumatoid_factor",
+      "value": null,
+      "valueText": "< 10.0",
+      "unit": "IU/mL",
+      "status": null
+    },
+    {
+      "rawName": "SGOT- Aspartate Transaminase (AST)",
+      "markerKey": "ast",
+      "value": 26.5,
+      "valueText": null,
+      "unit": "U/L",
+      "status": "optimal"
+    },
+    {
+      "rawName": "SGPT- Alanine Transaminase (ALT)",
+      "markerKey": "alt",
+      "value": 20.6,
+      "valueText": null,
+      "unit": "U/L",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Sodium",
+      "markerKey": "sodium",
+      "value": 134,
+      "valueText": null,
+      "unit": "mmol/L",
+      "status": "watch"
+    },
+    {
+      "rawName": "Specific Gravity",
+      "markerKey": "urine_specific_gravity",
+      "value": 1.02,
+      "valueText": null,
+      "unit": "ratio",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Squamous Epithelial Cells",
+      "markerKey": "urine_epithelial_cells",
+      "value": null,
+      "valueText": "1-2",
+      "unit": null,
+      "status": null
+    },
+    {
+      "rawName": "Thyroid Stimulating Hormone",
+      "markerKey": "tsh",
+      "value": 5.3,
+      "valueText": null,
+      "unit": "µIU/mL",
+      "status": "watch"
+    },
+    {
+      "rawName": "Total Cholesterol/HDL Ratio",
+      "markerKey": "tc_hdl_ratio",
+      "value": 4.5,
+      "valueText": null,
+      "unit": "ratio",
+      "status": "risk"
+    },
+    {
+      "rawName": "Total Iron Binding Capacity",
+      "markerKey": "tibc",
+      "value": 404.6,
+      "valueText": null,
+      "unit": "µg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Total Leucocyte Count (TLC)",
+      "markerKey": "wbc_count",
+      "value": 5.91,
+      "valueText": null,
+      "unit": "10^3/µL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Total Protein",
+      "markerKey": "total_protein",
+      "value": 7.21,
+      "valueText": null,
+      "unit": "g/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Transferrin Saturation",
+      "markerKey": "transferrin_saturation",
+      "value": 37.84,
+      "valueText": null,
+      "unit": "%",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Triglyceride",
+      "markerKey": "triglycerides",
+      "value": 76.8,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "UIBC",
+      "markerKey": "uibc",
+      "value": 239.8,
+      "valueText": null,
+      "unit": "µg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Urea",
+      "markerKey": "blood_urea",
+      "value": 17.9,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Uric Acid",
+      "markerKey": "uric_acid",
+      "value": 4.3,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Urobilinogen",
+      "markerKey": "urine_urobilinogen",
+      "value": null,
+      "valueText": "NORMAL",
+      "unit": null,
+      "status": null
+    },
+    {
+      "rawName": "Vitamin B12",
+      "markerKey": "vitamin_b12",
+      "value": 380.2,
+      "valueText": null,
+      "unit": "pg/mL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "VLDL Cholesterol",
+      "markerKey": "vldl_cholesterol",
+      "value": 15.2,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "White Blood Cells",
+      "markerKey": "urine_pus_cells",
+      "value": null,
+      "valueText": "1-2",
+      "unit": null,
+      "status": null
+    }
+  ]
+}

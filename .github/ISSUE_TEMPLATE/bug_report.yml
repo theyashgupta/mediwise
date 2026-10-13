@@ -1,0 +1,72 @@
+name: Bug report
+description: Something in MediWise behaves wrong or breaks.
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for the report. Do not attach a real lab report and do not paste real values.
+        Reproduce the bug with a sample report from `apps/api/fixtures/golden` when you can.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you see, and what did you expect?
+      placeholder: I uploaded sample-2024.pdf. The report stayed on "Reading" for ten minutes.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: The exact steps. A reliable way to reproduce the bug helps most.
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant output
+      description: >
+        API log lines, the browser console or the error on the page.
+        Remove every key, token and personal value first.
+      render: shell
+    validations:
+      required: false
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where
+      options:
+        - Local dev (pnpm dev)
+        - Self-hosted
+        - The hosted app
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Commit
+      description: The commit SHA you run (`git rev-parse --short HEAD`), or the date you used the hosted app.
+      placeholder: a1b2c3d
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you file
+      options:
+        - label: I searched the existing issues and this is not a duplicate.
+          required: true
+        - label: This issue contains no real health data and no secret.
+          required: true
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Contributions
+      options:
+        - label: I can open a pull request to fix this.
+          required: false

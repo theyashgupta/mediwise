@@ -1,0 +1,18 @@
+{
+  "duration": {
+    "$type": "duration",
+    "fast": { "$value": { "value": 150, "unit": "ms" }, "$description": "Hover and press fills" },
+    "base": {
+      "$value": { "value": 200, "unit": "ms" },
+      "$description": "Panels that open or close"
+    },
+    "slow": {
+      "$value": { "value": 300, "unit": "ms" },
+      "$description": "Sheets and page-level changes"
+    }
+  },
+  "ease": {
+    "$type": "cubicBezier",
+    "standard": { "$value": [0.2, 0, 0, 1] }
+  }
+}

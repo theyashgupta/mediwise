@@ -1,0 +1,1 @@
+ALTER TABLE "report_markers" ADD COLUMN "derived" boolean DEFAULT false NOT NULL;

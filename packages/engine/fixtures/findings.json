@@ -1,0 +1,1785 @@
+{
+  "previous": {
+    "date": "2024-03-09",
+    "labName": "LAKEVIEW Lab (Test performed at Riverside Hospital)",
+    "markers": [
+      {
+        "markerKey": "tibc",
+        "value": 357.5,
+        "valueText": null,
+        "unit": "µg/dL",
+        "status": "optimal",
+        "calibratedLow": 250,
+        "calibratedHigh": 450
+      },
+      {
+        "markerKey": "lymphocytes_pct",
+        "value": 33.8,
+        "valueText": null,
+        "unit": "%",
+        "status": "optimal",
+        "calibratedLow": 20,
+        "calibratedHigh": 40
+      },
+      {
+        "markerKey": "monocytes_abs",
+        "value": 0.29,
+        "valueText": null,
+        "unit": "10^3/µL",
+        "status": "optimal",
+        "calibratedLow": 0.2,
+        "calibratedHigh": 1
+      },
+      {
+        "markerKey": "cortisol",
+        "value": 14.0,
+        "valueText": null,
+        "unit": "µg/dL",
+        "status": "optimal",
+        "calibratedLow": 6.2,
+        "calibratedHigh": 19.4
+      },
+      {
+        "markerKey": "ferritin",
+        "value": 81.2,
+        "valueText": null,
+        "unit": "ng/mL",
+        "status": "optimal",
+        "calibratedLow": 17,
+        "calibratedHigh": 430
+      },
+      {
+        "markerKey": "homocysteine",
+        "value": 22.5,
+        "valueText": null,
+        "unit": "µmol/L",
+        "status": "risk",
+        "calibratedLow": null,
+        "calibratedHigh": 12
+      },
+      {
+        "markerKey": "eosinophils_abs",
+        "value": 0.15,
+        "valueText": null,
+        "unit": "10^3/µL",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 0.5
+      },
+      {
+        "markerKey": "rbc_count",
+        "value": 5.29,
+        "valueText": null,
+        "unit": "mill/µL",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "total_protein",
+        "value": 7.95,
+        "valueText": null,
+        "unit": "g/dL",
+        "status": "optimal",
+        "calibratedLow": 6.4,
+        "calibratedHigh": 8.3
+      },
+      {
+        "markerKey": "uric_acid",
+        "value": 4.2,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "optimal",
+        "calibratedLow": 3.4,
+        "calibratedHigh": 7
+      },
+      {
+        "markerKey": "urine_bacteria",
+        "value": null,
+        "valueText": "ABSENT",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "apob_apoa1_ratio",
+        "value": 0.62,
+        "valueText": null,
+        "unit": "ratio",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "bun",
+        "value": 8.52,
+        "valueText": null,
+        "unit": "mg/dl",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "albumin",
+        "value": 5,
+        "valueText": null,
+        "unit": "g/dL",
+        "status": "optimal",
+        "calibratedLow": 3.5,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "uibc",
+        "value": 211.3,
+        "valueText": null,
+        "unit": "µg/dL",
+        "status": "optimal",
+        "calibratedLow": 110,
+        "calibratedHigh": 370
+      },
+      {
+        "markerKey": "urine_epithelial_cells",
+        "value": null,
+        "valueText": "1-2",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "ck_total",
+        "value": 82,
+        "valueText": null,
+        "unit": "U/L",
+        "status": "optimal",
+        "calibratedLow": 0,
+        "calibratedHigh": 190
+      },
+      {
+        "markerKey": "hba1c",
+        "value": 5.6,
+        "valueText": null,
+        "unit": "%",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 5.6
+      },
+      {
+        "markerKey": "smear_rbc",
+        "value": null,
+        "valueText": "Normocytic / Normochromic",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "bun_creatinine_ratio",
+        "value": 8.7,
+        "valueText": null,
+        "unit": "ratio",
+        "status": "watch",
+        "calibratedLow": 10,
+        "calibratedHigh": 20
+      },
+      {
+        "markerKey": "lymphocytes_abs",
+        "value": 1.99,
+        "valueText": null,
+        "unit": "10^3/µL",
+        "status": "optimal",
+        "calibratedLow": 1,
+        "calibratedHigh": 3
+      },
+      {
+        "markerKey": "alt",
+        "value": 23.0,
+        "valueText": null,
+        "unit": "U/L",
+        "status": "optimal",
+        "calibratedLow": 0,
+        "calibratedHigh": 40
+      },
+      {
+        "markerKey": "vitamin_b12",
+        "value": 402.3,
+        "valueText": null,
+        "unit": "pg/mL",
+        "status": "optimal",
+        "calibratedLow": 300,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "urine_protein",
+        "value": null,
+        "valueText": "ABSENT",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "crp",
+        "value": 1.08,
+        "valueText": null,
+        "unit": "mg/L",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 5
+      },
+      {
+        "markerKey": "estimated_average_glucose",
+        "value": 99.73,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 114
+      },
+      {
+        "markerKey": "hdl_cholesterol",
+        "value": 42.2,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "risk",
+        "calibratedLow": 60,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "urine_specific_gravity",
+        "value": 1.02,
+        "valueText": null,
+        "unit": "ratio",
+        "status": "optimal",
+        "calibratedLow": 1.005,
+        "calibratedHigh": 1.03
+      },
+      {
+        "markerKey": "esr",
+        "value": 3,
+        "valueText": null,
+        "unit": "mm/hr",
+        "status": "optimal",
+        "calibratedLow": 0,
+        "calibratedHigh": 20
+      },
+      {
+        "markerKey": "urine_albumin",
+        "value": 231,
+        "valueText": null,
+        "unit": "mg/L",
+        "status": "risk",
+        "calibratedLow": null,
+        "calibratedHigh": 19
+      },
+      {
+        "markerKey": "mchc",
+        "value": 32.7,
+        "valueText": null,
+        "unit": "g/dL",
+        "status": "optimal",
+        "calibratedLow": 31.5,
+        "calibratedHigh": 34.5
+      },
+      {
+        "markerKey": "hs_crp",
+        "value": 1.21,
+        "valueText": null,
+        "unit": "mg/L",
+        "status": "watch",
+        "calibratedLow": null,
+        "calibratedHigh": 1
+      },
+      {
+        "markerKey": "smear_wbc",
+        "value": null,
+        "valueText": "TLC-Normal",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "urea_creatinine_ratio",
+        "value": 20.9,
+        "valueText": null,
+        "unit": "ratio",
+        "status": "watch",
+        "calibratedLow": 21,
+        "calibratedHigh": 43
+      },
+      {
+        "markerKey": "rheumatoid_factor",
+        "value": null,
+        "valueText": "< 10.0",
+        "unit": "IU/mL",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "ldh",
+        "value": 196,
+        "valueText": null,
+        "unit": "U/L",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 243
+      },
+      {
+        "markerKey": "urine_ketones",
+        "value": null,
+        "valueText": "ABSENT",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "urine_pus_cells",
+        "value": null,
+        "valueText": "1-2",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "neutrophils_pct",
+        "value": 56.7,
+        "valueText": null,
+        "unit": "%",
+        "status": "optimal",
+        "calibratedLow": 40,
+        "calibratedHigh": 75
+      },
+      {
+        "markerKey": "calcium",
+        "value": 9.05,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "optimal",
+        "calibratedLow": 8.6,
+        "calibratedHigh": 10.2
+      },
+      {
+        "markerKey": "smear_dlc",
+        "value": null,
+        "valueText": "No abnormal cell seen.",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "hematocrit",
+        "value": 51.4,
+        "valueText": null,
+        "unit": "%",
+        "status": "risk",
+        "calibratedLow": 40,
+        "calibratedHigh": 50
+      },
+      {
+        "markerKey": "free_t3",
+        "value": 3.63,
+        "valueText": null,
+        "unit": "pg/mL",
+        "status": "optimal",
+        "calibratedLow": 2.3,
+        "calibratedHigh": 4.2
+      },
+      {
+        "markerKey": "wbc_count",
+        "value": 6.27,
+        "valueText": null,
+        "unit": "10^3/µL",
+        "status": "optimal",
+        "calibratedLow": 4,
+        "calibratedHigh": 10
+      },
+      {
+        "markerKey": "sodium",
+        "value": 125,
+        "valueText": null,
+        "unit": "mmol/L",
+        "status": "watch",
+        "calibratedLow": 136,
+        "calibratedHigh": 145
+      },
+      {
+        "markerKey": "urine_colour",
+        "value": null,
+        "valueText": "PALE YELLOW",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "glucose_fasting",
+        "value": 83.8,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "optimal",
+        "calibratedLow": 70,
+        "calibratedHigh": 99
+      },
+      {
+        "markerKey": "mch",
+        "value": 30.1,
+        "valueText": null,
+        "unit": "pg",
+        "status": "optimal",
+        "calibratedLow": 27,
+        "calibratedHigh": 32
+      },
+      {
+        "markerKey": "hba1c",
+        "value": 36.42,
+        "valueText": null,
+        "unit": "mmol/mol",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "free_t4",
+        "value": 1.45,
+        "valueText": null,
+        "unit": "ng/dL",
+        "status": "optimal",
+        "calibratedLow": 0.9,
+        "calibratedHigh": 1.7
+      },
+      {
+        "markerKey": "blood_urea",
+        "value": 16.8,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "optimal",
+        "calibratedLow": 15,
+        "calibratedHigh": 40
+      },
+      {
+        "markerKey": "basophils_pct",
+        "value": 0.4,
+        "valueText": null,
+        "unit": "%",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 1
+      },
+      {
+        "markerKey": "rdw_cv",
+        "value": 14,
+        "valueText": null,
+        "unit": "%",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 14
+      },
+      {
+        "markerKey": "hemoglobin",
+        "value": 17,
+        "valueText": null,
+        "unit": "g/dL",
+        "status": "optimal",
+        "calibratedLow": 13,
+        "calibratedHigh": 17
+      },
+      {
+        "markerKey": "urine_casts",
+        "value": null,
+        "valueText": "ABSENT",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "urine_urobilinogen",
+        "value": null,
+        "valueText": "NORMAL",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "urine_blood",
+        "value": null,
+        "valueText": "ABSENT",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "tsh",
+        "value": 5.55,
+        "valueText": null,
+        "unit": "µIU/mL",
+        "status": "watch",
+        "calibratedLow": 0.45,
+        "calibratedHigh": 4.12
+      },
+      {
+        "markerKey": "transferrin_saturation",
+        "value": 43.24,
+        "valueText": null,
+        "unit": "%",
+        "status": "optimal",
+        "calibratedLow": 20,
+        "calibratedHigh": 45
+      },
+      {
+        "markerKey": "smear_platelets",
+        "value": null,
+        "valueText": "Adequate on smear.",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "vldl_cholesterol",
+        "value": 14.4,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 30
+      },
+      {
+        "markerKey": "ast_alt_ratio",
+        "value": 0.99,
+        "valueText": null,
+        "unit": "ratio",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 1.5
+      },
+      {
+        "markerKey": "albumin_globulin_ratio",
+        "value": 1.5,
+        "valueText": null,
+        "unit": "ratio",
+        "status": "optimal",
+        "calibratedLow": 1.1,
+        "calibratedHigh": 2.5
+      },
+      {
+        "markerKey": "phosphorus",
+        "value": 3.56,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "optimal",
+        "calibratedLow": 2.5,
+        "calibratedHigh": 4.5
+      },
+      {
+        "markerKey": "basophils_abs",
+        "value": 0.02,
+        "valueText": null,
+        "unit": "10^3/µL",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 0.1
+      },
+      {
+        "markerKey": "ldl_cholesterol",
+        "value": 124,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "watch",
+        "calibratedLow": null,
+        "calibratedHigh": 99
+      },
+      {
+        "markerKey": "ggt",
+        "value": 21,
+        "valueText": null,
+        "unit": "U/L",
+        "status": "optimal",
+        "calibratedLow": 1,
+        "calibratedHigh": 60
+      },
+      {
+        "markerKey": "bilirubin_total",
+        "value": 0.876,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 1.2
+      },
+      {
+        "markerKey": "urine_crystals",
+        "value": null,
+        "valueText": "ABSENT",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "egfr",
+        "value": 126.03,
+        "valueText": null,
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "pth",
+        "value": 43.28,
+        "valueText": null,
+        "unit": "pg/mL",
+        "status": "optimal",
+        "calibratedLow": 15,
+        "calibratedHigh": 65
+      },
+      {
+        "markerKey": "potassium",
+        "value": 5.4,
+        "valueText": null,
+        "unit": "mmol/L",
+        "status": "risk",
+        "calibratedLow": 3.5,
+        "calibratedHigh": 5
+      },
+      {
+        "markerKey": "globulin",
+        "value": 3.2,
+        "valueText": null,
+        "unit": "g/dL",
+        "status": "optimal",
+        "calibratedLow": 2,
+        "calibratedHigh": 3.5
+      },
+      {
+        "markerKey": "alp",
+        "value": 63,
+        "valueText": null,
+        "unit": "U/L",
+        "status": "optimal",
+        "calibratedLow": 40,
+        "calibratedHigh": 130
+      },
+      {
+        "markerKey": "estimated_average_glucose",
+        "value": 5.52,
+        "valueText": null,
+        "unit": "mmol/L",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "urine_bilirubin",
+        "value": null,
+        "valueText": "ABSENT",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "bilirubin_direct",
+        "value": 0.257,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 0.3
+      },
+      {
+        "markerKey": "tg_hdl_ratio",
+        "value": 2.0,
+        "valueText": null,
+        "unit": "ratio",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 2
+      },
+      {
+        "markerKey": "neutrophils_abs",
+        "value": 3.73,
+        "valueText": null,
+        "unit": "10^3/µL",
+        "status": "optimal",
+        "calibratedLow": 2,
+        "calibratedHigh": 7
+      },
+      {
+        "markerKey": "mpv",
+        "value": 14.1,
+        "valueText": null,
+        "unit": "fL",
+        "status": "risk",
+        "calibratedLow": 7.5,
+        "calibratedHigh": 11.5
+      },
+      {
+        "markerKey": "urine_rbc",
+        "value": null,
+        "valueText": "ABSENT",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "urine_ph",
+        "value": 6,
+        "valueText": null,
+        "unit": "pH",
+        "status": "optimal",
+        "calibratedLow": 5,
+        "calibratedHigh": 7.5
+      },
+      {
+        "markerKey": "hcv_antibody",
+        "value": null,
+        "valueText": "NON REACTIVE",
+        "unit": null,
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "urine_glucose",
+        "value": null,
+        "valueText": "ABSENT",
+        "unit": "mg/dl",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "non_hdl_cholesterol",
+        "value": 137.4,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "watch",
+        "calibratedLow": null,
+        "calibratedHigh": 129
+      },
+      {
+        "markerKey": "chloride",
+        "value": 105,
+        "valueText": null,
+        "unit": "mmol/L",
+        "status": "optimal",
+        "calibratedLow": 98,
+        "calibratedHigh": 107
+      },
+      {
+        "markerKey": "iron",
+        "value": 153.7,
+        "valueText": null,
+        "unit": "µg/dL",
+        "status": "optimal",
+        "calibratedLow": 49,
+        "calibratedHigh": 181
+      },
+      {
+        "markerKey": "urine_creatinine",
+        "value": 106.1,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "optimal",
+        "calibratedLow": 20,
+        "calibratedHigh": 300
+      },
+      {
+        "markerKey": "eosinophils_pct",
+        "value": 2.6,
+        "valueText": null,
+        "unit": "%",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 6
+      },
+      {
+        "markerKey": "total_cholesterol",
+        "value": 175.4,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 199
+      },
+      {
+        "markerKey": "apolipoprotein_b",
+        "value": 93,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 99
+      },
+      {
+        "markerKey": "ast",
+        "value": 21.0,
+        "valueText": null,
+        "unit": "U/L",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 35
+      },
+      {
+        "markerKey": "bilirubin_indirect",
+        "value": 0.66,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 1
+      },
+      {
+        "markerKey": "monocytes_pct",
+        "value": 5.1,
+        "valueText": null,
+        "unit": "%",
+        "status": "optimal",
+        "calibratedLow": 2,
+        "calibratedHigh": 10
+      },
+      {
+        "markerKey": "platelet_count",
+        "value": 189,
+        "valueText": null,
+        "unit": "x 1000/µL",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "apolipoprotein_a1",
+        "value": 136,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "optimal",
+        "calibratedLow": 101,
+        "calibratedHigh": 215
+      },
+      {
+        "markerKey": "ldl_hdl_ratio",
+        "value": 3.0,
+        "valueText": null,
+        "unit": "ratio",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "tc_hdl_ratio",
+        "value": 4.6,
+        "valueText": null,
+        "unit": "ratio",
+        "status": "risk",
+        "calibratedLow": 3.3,
+        "calibratedHigh": 4.4
+      },
+      {
+        "markerKey": "triglycerides",
+        "value": 80.0,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 149
+      },
+      {
+        "markerKey": "creatinine",
+        "value": 0.83,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "optimal",
+        "calibratedLow": 0.7,
+        "calibratedHigh": 1.2
+      },
+      {
+        "markerKey": "folate",
+        "value": 5.3,
+        "valueText": null,
+        "unit": "ng/mL",
+        "status": "optimal",
+        "calibratedLow": 4,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "urine_nitrite",
+        "value": null,
+        "valueText": "NEGATIVE",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "urine_acr",
+        "value": 25.0,
+        "valueText": null,
+        "unit": "mg/g Creatinine",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "hbsag",
+        "value": null,
+        "valueText": "Non Reactive",
+        "unit": null,
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "anti_hbs",
+        "value": null,
+        "valueText": "<2.0",
+        "unit": "mIU/mL",
+        "status": "watch",
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "smear_hemoparasite",
+        "value": null,
+        "valueText": "No hemoparasite seen on thin smear examined.",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "egfr",
+        "value": 110.57,
+        "valueText": null,
+        "unit": "mL/min/1.73m²",
+        "status": "optimal",
+        "calibratedLow": 90,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "mcv",
+        "value": 96.7,
+        "valueText": null,
+        "unit": "fL",
+        "status": "optimal",
+        "calibratedLow": 83,
+        "calibratedHigh": 101
+      },
+      {
+        "markerKey": "bicarbonate",
+        "value": 23,
+        "valueText": null,
+        "unit": "mmol/L",
+        "status": "optimal",
+        "calibratedLow": 22,
+        "calibratedHigh": 29
+      },
+      {
+        "markerKey": "bun",
+        "value": 8,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "optimal",
+        "calibratedLow": 7,
+        "calibratedHigh": 20
+      },
+      {
+        "markerKey": "vitamin_d",
+        "value": 11.42,
+        "valueText": null,
+        "unit": "ng/mL",
+        "status": "risk",
+        "calibratedLow": 30,
+        "calibratedHigh": 100
+      }
+    ],
+    "studies": []
+  },
+  "current": {
+    "date": "2025-03-29",
+    "labName": "GF Greenfield Health & Diagnostic Centre",
+    "markers": [
+      {
+        "markerKey": "rbc_count",
+        "value": 5.11,
+        "valueText": null,
+        "unit": "mill/cmm",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "urine_nitrite",
+        "value": null,
+        "valueText": "Absent",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "urine_bilirubin",
+        "value": null,
+        "valueText": "Absent",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "vldl_cholesterol",
+        "value": 10.9,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 30
+      },
+      {
+        "markerKey": "total_cholesterol",
+        "value": 153.1,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "total_cholesterol",
+        "value": 153.1,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 199
+      },
+      {
+        "markerKey": "lymphocytes_pct",
+        "value": 36,
+        "valueText": null,
+        "unit": "%",
+        "status": "optimal",
+        "calibratedLow": 20,
+        "calibratedHigh": 40
+      },
+      {
+        "markerKey": "hdl_cholesterol",
+        "value": 44.3,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "watch",
+        "calibratedLow": 60,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "mpv",
+        "value": 12.6,
+        "valueText": null,
+        "unit": "fL",
+        "status": "watch",
+        "calibratedLow": 7.5,
+        "calibratedHigh": 11.5
+      },
+      {
+        "markerKey": "rdw_cv",
+        "value": 12.2,
+        "valueText": null,
+        "unit": "%",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 14
+      },
+      {
+        "markerKey": "monocytes_pct",
+        "value": 6,
+        "valueText": null,
+        "unit": "%",
+        "status": "optimal",
+        "calibratedLow": 2,
+        "calibratedHigh": 10
+      },
+      {
+        "markerKey": "urine_urobilinogen",
+        "value": null,
+        "valueText": "Normal",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "tsh",
+        "value": 10.23,
+        "valueText": null,
+        "unit": "uIU/mL",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "alt",
+        "value": 36.9,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "bmi",
+        "value": 27.2,
+        "valueText": null,
+        "unit": "kg/m²",
+        "status": "watch",
+        "calibratedLow": 18.5,
+        "calibratedHigh": 24.9
+      },
+      {
+        "markerKey": "wbc_count",
+        "value": 6.74,
+        "valueText": null,
+        "unit": "10^3/µL",
+        "status": "optimal",
+        "calibratedLow": 4,
+        "calibratedHigh": 10
+      },
+      {
+        "markerKey": "systolic_bp",
+        "value": 100,
+        "valueText": null,
+        "unit": "mmHg",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 119
+      },
+      {
+        "markerKey": "basophils_pct",
+        "value": 0,
+        "valueText": null,
+        "unit": "%",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 1
+      },
+      {
+        "markerKey": "urine_casts",
+        "value": null,
+        "valueText": "Absent",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "urine_crystals",
+        "value": null,
+        "valueText": "Absent",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "glucose_fasting",
+        "value": 72,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "optimal",
+        "calibratedLow": 70,
+        "calibratedHigh": 99
+      },
+      {
+        "markerKey": "urine_colour",
+        "value": null,
+        "valueText": "Pale Yellow",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "pulse",
+        "value": 81,
+        "valueText": null,
+        "unit": "bpm",
+        "status": "optimal",
+        "calibratedLow": 60,
+        "calibratedHigh": 100
+      },
+      {
+        "markerKey": "urine_glucose",
+        "value": null,
+        "valueText": "Absent",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "smear_rbc",
+        "value": null,
+        "valueText": "Red cells are normocytic and normochromic",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "uibc",
+        "value": 289,
+        "valueText": null,
+        "unit": "µg/dL",
+        "status": "optimal",
+        "calibratedLow": 110,
+        "calibratedHigh": 370
+      },
+      {
+        "markerKey": "diastolic_bp",
+        "value": 63,
+        "valueText": null,
+        "unit": "mmHg",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 79
+      },
+      {
+        "markerKey": "plateletcrit",
+        "value": 0.18,
+        "valueText": null,
+        "unit": "%",
+        "status": "optimal",
+        "calibratedLow": 0.17,
+        "calibratedHigh": 0.35
+      },
+      {
+        "markerKey": "tg_hdl_ratio",
+        "value": 1.4,
+        "valueText": null,
+        "unit": "ratio",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 2
+      },
+      {
+        "markerKey": "hs_crp",
+        "value": 0.75,
+        "valueText": null,
+        "unit": "mg/Lt",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "platelet_count",
+        "value": 152,
+        "valueText": null,
+        "unit": "10^3/µL",
+        "status": "optimal",
+        "calibratedLow": 150,
+        "calibratedHigh": 410
+      },
+      {
+        "markerKey": "weight",
+        "value": 78,
+        "valueText": null,
+        "unit": "kg",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "urine_pus_cells",
+        "value": null,
+        "valueText": "1-2 /hpf.",
+        "unit": "/ HPF",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "mcv",
+        "value": 94.5,
+        "valueText": null,
+        "unit": "fL",
+        "status": "optimal",
+        "calibratedLow": 83,
+        "calibratedHigh": 101
+      },
+      {
+        "markerKey": "urine_specific_gravity",
+        "value": 1.02,
+        "valueText": null,
+        "unit": "ratio",
+        "status": "optimal",
+        "calibratedLow": 1.005,
+        "calibratedHigh": 1.03
+      },
+      {
+        "markerKey": "calcium",
+        "value": 8.8,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "optimal",
+        "calibratedLow": 8.6,
+        "calibratedHigh": 10.2
+      },
+      {
+        "markerKey": "hemoglobin",
+        "value": 15.9,
+        "valueText": null,
+        "unit": "g/dL",
+        "status": "optimal",
+        "calibratedLow": 13,
+        "calibratedHigh": 16.5
+      },
+      {
+        "markerKey": "vitamin_b12",
+        "value": 258,
+        "valueText": null,
+        "unit": "pg/mL",
+        "status": "watch",
+        "calibratedLow": 300,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "neutrophils_pct",
+        "value": 55,
+        "valueText": null,
+        "unit": "%",
+        "status": "optimal",
+        "calibratedLow": 40,
+        "calibratedHigh": 75
+      },
+      {
+        "markerKey": "smear_wbc",
+        "value": null,
+        "valueText": "Within Normal Limit.",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "urine_rbc",
+        "value": null,
+        "valueText": "Absent",
+        "unit": "/ HPF",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "estimated_average_glucose",
+        "value": 77.59,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 114
+      },
+      {
+        "markerKey": "vitamin_d",
+        "value": 24.0,
+        "valueText": null,
+        "unit": "ng/mL",
+        "status": "watch",
+        "calibratedLow": 30,
+        "calibratedHigh": 100
+      },
+      {
+        "markerKey": "pdw",
+        "value": 22.7,
+        "valueText": null,
+        "unit": "%",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "triglycerides",
+        "value": 60.7,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 149
+      },
+      {
+        "markerKey": "mchc",
+        "value": 33.0,
+        "valueText": null,
+        "unit": "%",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "ldl_hdl_ratio",
+        "value": 2.3,
+        "valueText": null,
+        "unit": "ratio",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 3
+      },
+      {
+        "markerKey": "smear_platelets",
+        "value": null,
+        "valueText": "Adequate",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "iron",
+        "value": 73,
+        "valueText": null,
+        "unit": "µg/dL",
+        "status": "optimal",
+        "calibratedLow": 65,
+        "calibratedHigh": 175
+      },
+      {
+        "markerKey": "non_hdl_cholesterol",
+        "value": 113,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 129
+      },
+      {
+        "markerKey": "hbsag",
+        "value": null,
+        "valueText": "Negative",
+        "unit": null,
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "mch",
+        "value": 29.7,
+        "valueText": null,
+        "unit": "pg",
+        "status": "optimal",
+        "calibratedLow": 27,
+        "calibratedHigh": 32
+      },
+      {
+        "markerKey": "eosinophils_pct",
+        "value": 2,
+        "valueText": null,
+        "unit": "%",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 6
+      },
+      {
+        "markerKey": "hba1c",
+        "value": 4.7,
+        "valueText": null,
+        "unit": "%",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 5.6
+      },
+      {
+        "markerKey": "urine_protein",
+        "value": null,
+        "valueText": "Nil",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "transferrin_saturation",
+        "value": 20,
+        "valueText": null,
+        "unit": "%",
+        "status": "optimal",
+        "calibratedLow": 20,
+        "calibratedHigh": 45
+      },
+      {
+        "markerKey": "total_t3",
+        "value": 1.85,
+        "valueText": null,
+        "unit": "ng/ml",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "tibc",
+        "value": 353,
+        "valueText": null,
+        "unit": "µg/dL",
+        "status": "optimal",
+        "calibratedLow": 250,
+        "calibratedHigh": 450
+      },
+      {
+        "markerKey": "height",
+        "value": 162,
+        "valueText": null,
+        "unit": "cm",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "ldl_cholesterol",
+        "value": 100.4,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "watch",
+        "calibratedLow": null,
+        "calibratedHigh": 99
+      },
+      {
+        "markerKey": "tc_hdl_ratio",
+        "value": 3.8,
+        "valueText": null,
+        "unit": "ratio",
+        "status": "optimal",
+        "calibratedLow": null,
+        "calibratedHigh": 4.5
+      },
+      {
+        "markerKey": "hematocrit",
+        "value": 48.6,
+        "valueText": null,
+        "unit": "%",
+        "status": "optimal",
+        "calibratedLow": 40,
+        "calibratedHigh": 50
+      },
+      {
+        "markerKey": "ast",
+        "value": 21.5,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "tsh",
+        "value": 10.23,
+        "valueText": null,
+        "unit": "mIU/ml",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "creatinine",
+        "value": 0.77,
+        "valueText": null,
+        "unit": "mg/dL",
+        "status": "optimal",
+        "calibratedLow": 0.7,
+        "calibratedHigh": 1.3
+      },
+      {
+        "markerKey": "urine_ketones",
+        "value": null,
+        "valueText": "Absent",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "egfr",
+        "value": 129,
+        "valueText": null,
+        "unit": "mL/min/1.73m²",
+        "status": "optimal",
+        "calibratedLow": 90,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "urine_ph",
+        "value": null,
+        "valueText": "Acidic (6.0)",
+        "unit": null,
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "urine_epithelial_cells",
+        "value": null,
+        "valueText": "1-2 /hpf.",
+        "unit": "/ HPF",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      },
+      {
+        "markerKey": "total_t4",
+        "value": 87.3,
+        "valueText": null,
+        "unit": "ng/ml",
+        "status": null,
+        "calibratedLow": null,
+        "calibratedHigh": null
+      }
+    ],
+    "studies": [
+      {
+        "id": "0e1d07e4-9ec8-4911-bc9b-4c6cedd86675",
+        "kind": "ultrasound",
+        "bodyRegion": "Abdomen and pelvis",
+        "impression": "Grade I fatty liver.",
+        "measurements": [
+          {
+            "key": "cbd_diameter",
+            "value": 3,
+            "unit": "mm",
+            "status": null
+          },
+          {
+            "key": "left_kidney_length",
+            "value": 104,
+            "unit": "mm",
+            "status": null
+          },
+          {
+            "key": "liver_length",
+            "value": 13,
+            "unit": "cm",
+            "status": "optimal"
+          },
+          {
+            "key": "portal_vein_diameter",
+            "value": 8.2,
+            "unit": "mm",
+            "status": null
+          },
+          {
+            "key": "right_kidney_length",
+            "value": 90,
+            "unit": "mm",
+            "status": null
+          },
+          {
+            "key": "spleen_length",
+            "value": 9,
+            "unit": "cm",
+            "status": null
+          }
+        ]
+      },
+      {
+        "id": "18db4043-0c08-4d41-892e-00ec63608681",
+        "kind": "ecg",
+        "bodyRegion": "Resting ECG",
+        "impression": "Sinus rhythm\nNormal electrical axis\nNonspecific ST abnormality (elevation)\nUnconfirmed report\nOtherwise normal ECG",
+        "measurements": [
+          {
+            "key": "heart_rate",
+            "value": 70,
+            "unit": "bpm",
+            "status": "optimal"
+          },
+          {
+            "key": "p_axis",
+            "value": 55,
+            "unit": "°",
+            "status": null
+          },
+          {
+            "key": "p_duration",
+            "value": 104,
+            "unit": "ms",
+            "status": null
+          },
+          {
+            "key": "pr_interval",
+            "value": 130,
+            "unit": "ms",
+            "status": null
+          },
+          {
+            "key": "qrs_axis",
+            "value": 52,
+            "unit": "°",
+            "status": null
+          },
+          {
+            "key": "qrs_duration",
+            "value": 104,
+            "unit": "ms",
+            "status": null
+          },
+          {
+            "key": "qt_interval",
+            "value": 402,
+            "unit": "ms",
+            "status": null
+          },
+          {
+            "key": "qtc_interval",
+            "value": 433,
+            "unit": "ms",
+            "status": "optimal"
+          },
+          {
+            "key": "rr_interval",
+            "value": 862,
+            "unit": "ms",
+            "status": null
+          },
+          {
+            "key": "sokolow_lyon",
+            "value": 3.28,
+            "unit": "mV",
+            "status": null
+          },
+          {
+            "key": "t_axis",
+            "value": 3,
+            "unit": "°",
+            "status": null
+          }
+        ]
+      },
+      {
+        "id": "798c1df7-b2e6-40cf-8cb7-60261d18af7d",
+        "kind": "examination",
+        "bodyRegion": null,
+        "impression": "FIT\nDoctors Comments: Fit",
+        "measurements": []
+      },
+      {
+        "id": "ce6d1b43-1ac1-434c-8d41-e67ef7ba515b",
+        "kind": "ecg",
+        "bodyRegion": null,
+        "impression": "Sinus Bradycardia\nNo Significant Changes\nECG found in Normal Limit\nNormal ECG",
+        "measurements": []
+      },
+      {
+        "id": "c7b3ee78-db17-441f-a092-f780309fbf73",
+        "kind": "xray",
+        "bodyRegion": "X-RAY CHEST PA",
+        "impression": "No Abnormality Detected",
+        "measurements": []
+      }
+    ]
+  }
+}

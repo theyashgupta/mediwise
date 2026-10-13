@@ -1,0 +1,89 @@
+import { formatValue } from "@/modules/markers";
+import type { Change, Comparison, CompareRow, Direction, TrendItem, TrendSort } from "../types";
+
+export const directionStyles: Record<Direction, { label: string; text: string; badge: string }> = {
+  improving: { label: "Improving", text: "text-optimal", badge: "bg-optimal-soft text-optimal" },
+  worsening: { label: "Worsening", text: "text-risk", badge: "bg-risk-soft text-risk" },
+  stable: {
+    label: "Stable",
+    text: "text-muted-foreground",
+    badge: "bg-muted text-muted-foreground",
+  },
+};
+
+export const verdictStyles: Record<CompareRow["verdictChange"], { label: string; badge: string }> =
+  {
+    improved: { label: "Improved", badge: "bg-optimal-soft text-optimal" },
+    worsened: { label: "Worsened", badge: "bg-risk-soft text-risk" },
+    same: { label: "Same", badge: "bg-muted text-muted-foreground" },
+    new: { label: "New", badge: "bg-muted text-foreground" },
+    gone: { label: "Not retested", badge: "bg-muted text-muted-foreground" },
+  };
+
+/** Returns the unit to print, or nothing for a ratio. */
+export function displayUnit(unit: string | null) {
+  return unit && unit !== "ratio" ? unit : undefined;
+}
+
+/**
+ * Formats a change with an explicit sign, the unit and the percent when it is known.
+ *
+ * @remarks
+ * The change keeps at least 2 decimals, so 41.1 to 47.3 reads +6.2 even when the marker shows whole numbers.
+ */
+export function formatChange(change: Change, precision: number, unit: string | null) {
+  const digits = Math.max(precision, 2);
+  if (!change || Number(change.absolute.toFixed(digits)) === 0) return "No change";
+  const sign = change.absolute > 0 ? "+" : "−";
+  const shown = displayUnit(unit);
+  const absolute = `${sign}${formatValue(Math.abs(change.absolute), digits)}${shown ? ` ${shown}` : ""}`;
+  return change.percent === null
+    ? absolute
+    : `${absolute} (${sign}${formatValue(Math.abs(change.percent), 1)}%)`;
+}
+
+/**
+ * Sorts trend rows by name, or by the size of the last change.
+ *
+ * @remarks
+ * The change is compared in percent, so markers in different units rank fairly. A change without a percent sorts last.
+ */
+export function sortTrends(items: TrendItem[], sort: TrendSort) {
+  const byName = (a: TrendItem, b: TrendItem) => a.name.localeCompare(b.name);
+  if (sort === "name") return items.toSorted(byName);
+  const size = (item: TrendItem) => Math.abs(item.change?.percent ?? -1);
+  return items.toSorted((a, b) => size(b) - size(a) || byName(a, b));
+}
+
+/**
+ * Places values on a sparkline inside a width by height box.
+ *
+ * @remarks
+ * A flat series sits in the middle of the box, so it does not draw on the edge.
+ */
+export function sparklinePoints(values: number[], width: number, height: number) {
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const pad = 2;
+  const step = values.length > 1 ? (width - pad * 2) / (values.length - 1) : 0;
+  const y = (value: number) =>
+    max === min ? height / 2 : pad + ((max - value) / (max - min)) * (height - pad * 2);
+  return values.map((value, i) => ({ x: pad + i * step, y: y(value) }));
+}
+
+/** Writes the one-line count of how markers changed between two reports. */
+export function summaryLine(summary: Comparison["summary"]) {
+  const parts = [
+    `${summary.improved} improved`,
+    `${summary.worsened} worsened`,
+    `${summary.same} same`,
+    `${summary.new} new`,
+  ];
+  if (summary.gone > 0) parts.push(`${summary.gone} not retested`);
+  return parts.join(", ");
+}
+
+export function validateCompareSearch(search: Record<string, unknown>): { a?: string; b?: string } {
+  const id = (value: unknown) => (typeof value === "string" && value ? value : undefined);
+  return { a: id(search.a), b: id(search.b) };
+}
