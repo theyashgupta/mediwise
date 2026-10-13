@@ -21,7 +21,15 @@ if [ -n "${WEB_URL:-}" ]; then
   pass "CORS allows $WEB_URL"
   curl -fsS "$WEB_URL/reports/upload" | grep -q '<div id="root"' || fail "SPA rewrite on $WEB_URL"
   pass "web serves index.html on a deep link"
+  curl -fsS -o /dev/null -D - "$WEB_URL/share/smoke" | grep -qi '^x-robots-tag: noindex, nofollow' ||
+    fail "X-Robots-Tag on $WEB_URL/share/*"
+  pass "web sends noindex on /share/*"
 fi
+
+# A share link needs no sign-in, so an unknown token answers 404, not 401.
+status=$(curl -sS -o /dev/null -w '%{http_code}' "$API_URL/share/smoke-test-unknown-token")
+[ "$status" = 404 ] || fail "GET /share/:token answers $status, expected 404"
+pass "GET /share/:token without sign-in"
 
 token=$(curl -fsS "$SUPABASE_URL/auth/v1/token?grant_type=password" \
   -H "apikey: $SUPABASE_ANON_KEY" -H "Content-Type: application/json" \

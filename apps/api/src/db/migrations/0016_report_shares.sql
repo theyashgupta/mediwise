@@ -1,0 +1,23 @@
+CREATE TABLE "report_share_opens" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"share_id" uuid NOT NULL,
+	"opened_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "report_shares" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"report_id" uuid NOT NULL,
+	"owner_user_id" text NOT NULL,
+	"token_hash" text NOT NULL,
+	"expires_at" timestamp with time zone NOT NULL,
+	"ended_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "report_shares_token_hash_unique" UNIQUE("token_hash")
+);
+--> statement-breakpoint
+ALTER TABLE "report_share_opens" ADD CONSTRAINT "report_share_opens_share_id_report_shares_id_fk" FOREIGN KEY ("share_id") REFERENCES "public"."report_shares"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "report_shares" ADD CONSTRAINT "report_shares_report_id_reports_id_fk" FOREIGN KEY ("report_id") REFERENCES "public"."reports"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "report_share_opens_share_id_idx" ON "report_share_opens" USING btree ("share_id");--> statement-breakpoint
+CREATE INDEX "report_shares_report_id_idx" ON "report_shares" USING btree ("report_id");--> statement-breakpoint
+ALTER TABLE "report_shares" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "report_share_opens" ENABLE ROW LEVEL SECURITY;

@@ -4,7 +4,9 @@ import {
   changeMark,
   previousReport,
   previousValues,
+  profileDetails,
   rangeText,
+  sharedPersonDetails,
   unitText,
   valueText,
 } from "./export";
@@ -93,4 +95,32 @@ test("previous values keep only markers the previous report measured", () => {
     },
   ]);
   expect([...values]).toEqual([["ldl", 140]]);
+});
+
+test("a shared export lists only the first name and the age", () => {
+  expect(sharedPersonDetails({ firstName: "Asha", age: 49 })).toEqual([
+    ["First name", "Asha"],
+    ["Age", "49 years"],
+  ]);
+  expect(sharedPersonDetails({ firstName: "Asha", age: null })[1]).toEqual(["Age", null]);
+});
+
+test("the signed-in export lists the full name, the date of birth and the sex", () => {
+  expect(
+    profileDetails({
+      id: "profile-1",
+      name: "Asha Rao",
+      relation: "parent",
+      dateOfBirth: "1977-02-28",
+      dateOfBirthApproximate: true,
+      sex: "female",
+      ancestry: "south_asian",
+      isSelf: false,
+      reportCount: 1,
+    }),
+  ).toEqual([
+    ["Name", "Asha Rao"],
+    ["Date of birth (approximate)", "28 Feb 1977"],
+    ["Sex", "Female"],
+  ]);
 });
