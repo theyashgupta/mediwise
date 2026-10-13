@@ -33,7 +33,7 @@ export const dashboard = {
   latest: {
     coverage: (percent: number) => `Measures ${percent}% of core markers`,
     fallbackTitle: "Your latest report",
-    since: (date: string) => `since your visit of ${date}`,
+    since: (date: string) => `since your report of ${date}`,
     noChange: "No change",
     byStatus: "Markers by status",
     open: "Open report",
@@ -44,7 +44,7 @@ export const dashboard = {
     none: "All scored markers are in their optimal range.",
   },
   recent: {
-    title: "Recent visits",
+    title: "Recent reports",
     all: "All reports",
     fallbackTitle: "Report",
     files: (n: number) => `${n} files`,
@@ -70,6 +70,7 @@ export const dashboard = {
     atRisk: (n: number) =>
       plural("en", n, { one: `${n} marker at risk`, other: `${n} markers at risk` }),
     stale: "No report in the last 12 months.",
+    staleFrequent: "No report in the last 3 months.",
     upload: "Upload a report",
   },
 };

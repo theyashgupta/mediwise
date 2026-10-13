@@ -92,11 +92,11 @@ describe("settleFinding", () => {
 
 describe("buildFindings with a later report", () => {
   test("the settled alert leaves the top findings, the headline and the questions", () => {
-    const open = buildFindings(earlier, undefined, []);
+    const open = buildFindings(earlier, [], []);
     expect(open.findings[0]).toMatchObject({ kind: "study_alert", rank: 0 });
     expect(open.headline?.startsWith(alertHeadlineStart)).toBe(true);
 
-    const { findings, headline, doctorQuestions } = buildFindings(earlier, undefined, [], [later]);
+    const { findings, headline, doctorQuestions } = buildFindings(earlier, [], [], [later]);
     const settled = findings.find(({ kind }) => kind === "study_alert");
     expect(findings.at(-1)).toBe(settled);
     expect(settled).toMatchObject({
@@ -114,7 +114,7 @@ describe("buildFindings with a later report", () => {
 
   test("a confirmed alert stays first with the later line in its facts", () => {
     const repeat = laterWith({}, "A 4.0 x 3.0 cm mass in the right adnexa persists.");
-    const { findings, headline } = buildFindings(earlier, undefined, [], [repeat]);
+    const { findings, headline } = buildFindings(earlier, [], [], [repeat]);
     expect(findings[0]).toMatchObject({ kind: "study_alert", settlement: { state: "confirmed" } });
     expect(findings[0]?.facts.at(-1)).toBe(
       "The report of 24 Mar 2025 repeats it. It reads: A 4.0 x 3.0 cm mass in the right adnexa persists.",

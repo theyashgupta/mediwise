@@ -39,7 +39,7 @@ function ScoreChange({
   const change = scoreChange(delta, latestDate);
   const Arrow = delta.score > 0 ? ArrowUpRight : delta.score < 0 ? ArrowDownRight : ArrowRight;
   return (
-    <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+    <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1" data-testid="latest-score-change">
       <span
         className={cn(
           "inline-flex items-center gap-1 self-center rounded-md px-2 py-0.5 font-mono text-sm font-medium",

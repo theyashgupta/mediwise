@@ -8,21 +8,34 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useState } from "react";
 import { type ChartConfig, ChartContainer, ChartTooltip } from "@/components/ui/chart";
+import { Button } from "@/components/ui/button";
 import { getIntlTag, useT } from "@/common/hooks/use-locale";
 import { cn } from "@/lib/utils";
 import { chartDomain } from "../utils/chart-domain";
+import {
+  type ChartRange,
+  dayTime,
+  defaultChartRange,
+  isRecent,
+  labelledIndexes,
+  timeDomain,
+} from "../utils/chart-window";
+import { formatPlainDate } from "../utils/date";
 import { type Status, statusStyles } from "../utils/status";
 import { type LabInfo, ValueTooltip } from "./value-tooltip";
 
 type ValuePoint = {
   key: string;
+  day: string;
   date: string;
   value: number;
   status: Status;
   current?: boolean;
   linked?: boolean;
   lab?: LabInfo;
+  sameDay?: { value: number; labName: string | null }[];
 };
 
 type ValueChartProps = {
@@ -31,9 +44,14 @@ type ValueChartProps = {
   bandLabel: string;
   unit?: string;
   precision: number;
+  today: Date;
 };
 
-type DotProps = { cx?: number; cy?: number; payload?: ValuePoint };
+type PlottedPoint = ValuePoint & { time: number; label: string };
+
+const ranges: ChartRange[] = ["recent", "all"];
+
+type DotProps = { cx?: number; cy?: number; payload?: PlottedPoint };
 
 function StatusDot({ cx, cy, payload }: DotProps) {
   if (cx === undefined || cy === undefined || !payload) return null;
@@ -71,34 +89,72 @@ function StatusDot({ cx, cy, payload }: DotProps) {
   );
 }
 
-export function ValueChart({ points, band, bandLabel, unit, precision }: ValueChartProps) {
+export function ValueChart({ points, band, bandLabel, unit, precision, today }: ValueChartProps) {
   const t = useT();
+  const [range, setRange] = useState(() =>
+    defaultChartRange(
+      points.map((point) => point.day),
+      today,
+    ),
+  );
   const config = {
     value: { label: t.common.chart.value, color: "var(--chart-1)" },
   } satisfies ChartConfig;
   const format = (n: number) =>
     n.toLocaleString(getIntlTag(), { maximumFractionDigits: precision });
+  const recent = points.filter((point) => isRecent(point.day, today));
+  const canZoom = recent.length >= 3 && recent.length < points.length;
+  const shown = canZoom && range === "recent" ? recent : points;
+  const times = shown.map((point) => dayTime(point.day));
+  const labelled = labelledIndexes(times);
+  const data: PlottedPoint[] = shown.map((point, index) => ({
+    ...point,
+    time: times[index]!,
+    label: labelled.has(index) ? format(point.value) : "",
+  }));
+  const manyYears = new Set(shown.map((point) => point.day.slice(0, 4))).size > 1;
+  const tick = (time: number) =>
+    formatPlainDate(new Date(time).toISOString(), {
+      day: "numeric",
+      month: "short",
+      ...(manyYears && { year: "2-digit" }),
+    });
   const [low, high] = chartDomain(
-    points.map((point) => point.value),
+    shown.map((point) => point.value),
     band,
   );
-  const label = points
+  const label = shown
     .map(
       (point) =>
         `${point.date}: ${format(point.value)}${unit ? ` ${unit}` : ""}${point.lab?.change ? ` (${t.common.chart.labChangedShort})` : ""}${point.linked ? ` (${t.common.chart.linkedShort})` : ""}`,
     )
     .join(", ");
   const hasBand = band && (band.low !== null || band.high !== null);
-  const hasLabs = points.some((point) => point.lab);
-  const labChanges = points.filter((point) => point.lab?.change);
-  const hasLinked = points.some((point) => point.linked);
+  const labChanges = data.filter((point) => point.lab?.change);
+  const hasLinked = shown.some((point) => point.linked);
 
   return (
     <div className="space-y-3">
-      <div role="img" aria-label={label}>
+      {canZoom && (
+        <div role="group" aria-label={t.common.chart.range} className="flex flex-wrap gap-2">
+          {ranges.map((value) => (
+            <Button
+              key={value}
+              size="sm"
+              variant={range === value ? "secondary" : "ghost"}
+              aria-pressed={range === value}
+              data-testid={`chart-range-${value}`}
+              onClick={() => setRange(value)}
+            >
+              {t.common.chart.ranges[value]}
+            </Button>
+          ))}
+        </div>
+      )}
+      <div role="img" aria-label={label} data-testid="value-chart">
         <ChartContainer config={config} className="aspect-auto h-56 w-full">
           <LineChart
-            data={points}
+            data={data}
             margin={{ top: 28, right: 20, bottom: 0, left: 4 }}
             accessibilityLayer={false}
           >
@@ -113,11 +169,17 @@ export function ValueChart({ points, band, bandLabel, unit, precision }: ValueCh
               />
             )}
             <XAxis
-              dataKey="date"
+              dataKey="time"
+              type="number"
+              scale="time"
+              domain={timeDomain(times)}
+              ticks={times}
+              interval="preserveStartEnd"
+              minTickGap={16}
+              tickFormatter={tick}
               tickLine={false}
               axisLine={false}
               tickMargin={10}
-              padding={{ left: 24, right: 24 }}
             />
             <YAxis
               domain={[low, high]}
@@ -131,28 +193,30 @@ export function ValueChart({ points, band, bandLabel, unit, precision }: ValueCh
             {labChanges.map((point) => (
               <ReferenceLine
                 key={point.key}
-                x={point.date}
+                x={point.time}
                 stroke="var(--muted-foreground)"
                 strokeDasharray="4 4"
               />
             ))}
-            {hasLabs && (
-              <ChartTooltip
-                cursor={false}
-                content={({ active, payload }) => {
-                  const point = payload?.[0]?.payload as ValuePoint | undefined;
-                  if (!active || !point?.lab) return null;
-                  return (
-                    <ValueTooltip
-                      date={point.date}
-                      value={format(point.value)}
-                      lab={point.lab}
-                      unit={unit}
-                    />
-                  );
-                }}
-              />
-            )}
+            <ChartTooltip
+              cursor={false}
+              content={({ active, payload }) => {
+                const point = payload?.[0]?.payload as PlottedPoint | undefined;
+                if (!active || !point) return null;
+                return (
+                  <ValueTooltip
+                    date={point.date}
+                    value={format(point.value)}
+                    lab={point.lab}
+                    sameDay={point.sameDay?.map((other) => ({
+                      ...other,
+                      value: format(other.value),
+                    }))}
+                    unit={unit}
+                  />
+                );
+              }}
+            />
             <Line
               dataKey="value"
               type="linear"
@@ -163,10 +227,9 @@ export function ValueChart({ points, band, bandLabel, unit, precision }: ValueCh
               isAnimationActive={false}
             >
               <LabelList
-                dataKey="value"
+                dataKey="label"
                 position="top"
                 offset={12}
-                formatter={(value) => (typeof value === "number" ? format(value) : value)}
                 className="fill-foreground font-mono text-xs font-medium"
               />
             </Line>

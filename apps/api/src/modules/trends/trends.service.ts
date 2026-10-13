@@ -133,7 +133,8 @@ export function visitDate(report: Pick<StoredReport, "collectedAt" | "createdAt"
  * Builds one marker's numeric series across visits, oldest first.
  *
  * @remarks
- * Reports of one collection date are one visit, and the newest report's value wins that date.
+ * Reports of one collection date are one visit, and the newest report's value wins that date. The other values of
+ * that date ride along in `sameDay`, so the chart draws one point per day and the tooltip still shows each value.
  * Only points in the unit of the latest point are kept, so a series never mixes units.
  * A point is linked when it and the point next to it come from linked reports or lie 30 days or fewer apart.
  */
@@ -143,20 +144,26 @@ function toSeries(
   picked: Map<string, Map<string, StoredRow>>,
   pairs: Set<string>,
 ) {
-  const byDate = new Map<string, { report: StoredReport; row: StoredRow; value: number }>();
+  type Found = { report: StoredReport; row: StoredRow; value: number };
+  const byDate = new Map<string, Found[]>();
   for (const report of ordered) {
     const row = picked.get(report.id)?.get(entry.key);
-    if (row && row.value !== null) byDate.set(visitDate(report), { report, row, value: row.value });
+    if (!row || row.value === null) continue;
+    const date = visitDate(report);
+    byDate.set(date, [...(byDate.get(date) ?? []), { report, row, value: row.value }]);
   }
-  const found = [...byDate.values()];
-  const unit = found.at(-1)?.row.unit ?? null;
-  const kept = found.filter(({ row }) => row.unit === unit);
-  const last = kept.at(-1);
-  const previous = kept.at(-2);
+  const unit = [...byDate.values()].at(-1)?.at(-1)?.row.unit ?? null;
+  const days = [...byDate.values()].flatMap((found) => {
+    const inUnit = found.filter(({ row }) => row.unit === unit);
+    const kept = inUnit.at(-1);
+    return kept ? [{ ...kept, sameDay: inUnit.slice(0, -1) }] : [];
+  });
+  const last = days.at(-1);
+  const previous = days.at(-2);
   const change = last && previous ? computeChange(previous.value, last.value) : null;
-  const labChange = labChanges(kept.map(({ report }) => report.labName));
-  const joined = kept.map(({ report }, index) => {
-    const next = kept[index + 1]?.report;
+  const labChange = labChanges(days.map(({ report }) => report.labName));
+  const joined = days.map(({ report }, index) => {
+    const next = days[index + 1]?.report;
     return (
       next !== undefined &&
       (pairs.has(`${report.id}:${next.id}`) ||
@@ -171,7 +178,7 @@ function toSeries(
     category: entry.category,
     unit,
     precision: entry.precision,
-    points: kept.map(({ report, row, value }, index) => ({
+    points: days.map(({ report, row, value, sameDay }, index) => ({
       reportId: report.id,
       labName: report.labName,
       labChange: labChange[index] ?? false,
@@ -181,10 +188,16 @@ function toSeries(
       createdAt: report.createdAt,
       value,
       status: statusOf(row),
+      sameDay: sameDay.map((other) => ({
+        reportId: other.report.id,
+        labName: other.report.labName,
+        value: other.value,
+        status: statusOf(other.row),
+      })),
       linked: joined[index] === true || joined[index - 1] === true,
       episode: report.episodeName ?? null,
     })),
-    labCount: new Set(kept.map(({ report }) => labKey(report.labName)).filter(Boolean)).size,
+    labCount: new Set(days.map(({ report }) => labKey(report.labName)).filter(Boolean)).size,
     latestStatus: last ? statusOf(last.row) : "unknown",
     change,
     direction:
@@ -247,10 +260,12 @@ function toHeader(report: StoredReport) {
 }
 
 /**
- * Compares two done reports of one profile, marker by marker.
+ * Compares two done reports of one profile, marker by marker, older report first.
  *
  * @remarks
- * Without `b` the latest report is used, and without `a` the report before `b`. Both must be in the profile's done reports, so a report of another profile or owner answers 404.
+ * Any two reports compare, at any distance. Without `b` the latest report is used, and without `a` the newest report
+ * of an earlier date than `b`. A pair picked newest first is swapped, so a change always reads forward in time.
+ * Both must be in the profile's done reports, so a report of another profile or owner answers 404.
  */
 export async function compareReports(userId: string, query: CompareQuery) {
   const profileId = query.b
@@ -262,10 +277,15 @@ export async function compareReports(userId: string, query: CompareQuery) {
     repo.listDoneReports(userId, profileId),
     repo.listMarkerRows(userId, profileId),
   ]);
-  const bIndex = query.b ? ordered.findIndex((r) => r.id === query.b) : ordered.length - 1;
-  const b = ordered[bIndex];
-  const a = query.a ? ordered.find((r) => r.id === query.a) : ordered[bIndex - 1];
-  if ((query.b && !b) || (query.a && !a)) throw notFound;
+  const chosenB = query.b ? ordered.find((r) => r.id === query.b) : ordered.at(-1);
+  const chosenA = query.a
+    ? ordered.find((r) => r.id === query.a)
+    : chosenB && ordered.findLast((r) => visitDate(r) < visitDate(chosenB));
+  if ((query.b && !chosenB) || (query.a && !chosenA)) throw notFound;
+  const [a, b] =
+    chosenA && chosenB && ordered.indexOf(chosenA) > ordered.indexOf(chosenB)
+      ? [chosenB, chosenA]
+      : [chosenA, chosenB];
 
   const picked = pickRows(rows);
   const rowsA = a ? picked.get(a.id) : undefined;

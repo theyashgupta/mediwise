@@ -83,7 +83,9 @@ function Content() {
       ) : (
         <>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="font-medium">{summaryLine(data.summary)}</p>
+            <p className="font-medium" data-testid="compare-summary">
+              {summaryLine(data.summary)}
+            </p>
             <Button
               size="sm"
               variant={changedOnly ? "secondary" : "ghost"}

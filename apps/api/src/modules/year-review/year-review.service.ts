@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import type Anthropic from "@anthropic-ai/sdk";
+import { coverageCap } from "@mediwise/engine";
 import { z } from "zod";
 import { AppError } from "../../common/errors.js";
 import { env } from "../../config/env.js";
@@ -33,7 +34,8 @@ function reading(point: Point) {
  *
  * @remarks
  * The window ends at the latest report and starts 13 months before it, so a yearly test that comes a few weeks late still
- * counts. Reports of one collection date are one visit, the same rule as the trend pages.
+ * counts. Reports of one collection date are one visit, the same rule as the trend pages. The score compares the first
+ * and last of the broadest panels only, so a glucose-only report never reads as a score drop.
  */
 export function buildYearReview(reports: Loaded["reports"], series: Loaded["series"]) {
   const last = reports.at(-1);
@@ -45,8 +47,12 @@ export function buildYearReview(reports: Loaded["reports"], series: Loaded["seri
   if (from === to) return null;
 
   const ids = new Set(inWindow.map((report) => report.id));
-  const scoreOn = (date: string) =>
-    inWindow.findLast((report) => visitDate(report) === date)?.score ?? null;
+  const scored = inWindow.filter((report) => report.score !== null);
+  const cap = (report: (typeof inWindow)[number]) => coverageCap(report.coverage ?? 100, 100);
+  const broadest = Math.max(...scored.map(cap));
+  const broad = scored.filter((report) => cap(report) === broadest);
+  const [firstBroad, lastBroad] = [broad[0], broad.at(-1)];
+  const twoDates = firstBroad && lastBroad && visitDate(firstBroad) !== visitDate(lastBroad);
   const labs = new Set(inWindow.flatMap((report) => report.labName?.trim().toLowerCase() ?? []));
 
   const moved = [];
@@ -76,7 +82,10 @@ export function buildYearReview(reports: Loaded["reports"], series: Loaded["seri
     to,
     reportCount: inWindow.length,
     labCount: labs.size,
-    score: { from: scoreOn(from), to: scoreOn(to) },
+    score: {
+      from: twoDates ? firstBroad.score : null,
+      to: twoDates ? lastBroad.score : null,
+    },
     moved,
     stillAtRisk,
     measuredOnce,

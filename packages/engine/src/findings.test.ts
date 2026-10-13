@@ -27,7 +27,7 @@ function statusOf(visitRows: Visit, key: string) {
 }
 
 describe("buildFindings on the 2024 and 2025 visits", () => {
-  const { findings } = buildFindings(current, previous, []);
+  const { findings } = buildFindings(current, [previous], []);
 
   test("every core marker that moved status has a change finding", () => {
     const moved = coreMarkerKeys.filter((key) => {
@@ -72,7 +72,7 @@ describe("buildFindings on the 2024 and 2025 visits", () => {
   });
 
   test("the same visits give the same findings", () => {
-    expect(buildFindings(current, previous, [])).toEqual(buildFindings(current, previous, []));
+    expect(buildFindings(current, [previous], [])).toEqual(buildFindings(current, [previous], []));
   });
 
   test("findings are ranked by severity, then worsening before improving", () => {
@@ -94,7 +94,7 @@ describe("buildFindings rules", () => {
   test("a value in a unit the catalog cannot convert gives no change finding", () => {
     const { findings } = buildFindings(
       visit("2025-02-01", [marker("alt", 80, "mg/dL", null)]),
-      visit("2024-01-13", [marker("alt", 23, "U/L", "optimal")]),
+      [visit("2024-01-13", [marker("alt", 23, "U/L", "optimal")])],
       [],
     );
     expect(findings.filter(({ kind }) => kind === "change")).toEqual([]);
@@ -107,7 +107,7 @@ describe("buildFindings rules", () => {
         [marker("vitamin_d", 40, "ng/mL", "optimal", [30, 100])],
         "LAKEVIEW Lab (Test performed at X)",
       ),
-      visit("2024-01-13", [marker("vitamin_d", 11, "ng/mL", "risk", [30, 100])], "Lakeview Lab"),
+      [visit("2024-01-13", [marker("vitamin_d", 11, "ng/mL", "risk", [30, 100])], "Lakeview Lab")],
       [],
     );
     expect(findings).toHaveLength(1);
@@ -122,7 +122,7 @@ describe("buildFindings rules", () => {
   test("a value that stays optimal while it moves gives no change finding", () => {
     const { findings } = buildFindings(
       visit("2025-02-01", [marker("hba1c", 5.0, "%", "optimal")]),
-      visit("2024-01-13", [marker("hba1c", 5.3, "%", "optimal")]),
+      [visit("2024-01-13", [marker("hba1c", 5.3, "%", "optimal")])],
       [],
     );
     expect(findings).toEqual([]);
@@ -133,7 +133,7 @@ describe("buildFindings rules", () => {
       ...visit("2025-02-01", [marker("alt", 30, "U/L", "optimal")]),
       studies: [{ ...ultrasound, impression: "No fatty liver.\nNo renal calculus." }],
     };
-    expect(buildFindings(current, undefined, []).findings).toEqual([]);
+    expect(buildFindings(current, [], []).findings).toEqual([]);
   });
 
   test("a kidney stone on the scan links with the kidney markers of the visit", () => {
@@ -141,7 +141,7 @@ describe("buildFindings rules", () => {
       ...visit("2025-02-01", [marker("creatinine", 1.0, "mg/dL", "optimal")]),
       studies: [{ ...ultrasound, impression: "Right renal calculus of 5 mm." }],
     };
-    expect(buildFindings(current, undefined, []).findings).toMatchObject([
+    expect(buildFindings(current, [], []).findings).toMatchObject([
       { kind: "study_alert" },
       { kind: "link", title: "Kidney stone on the scan", citedKeys: ["creatinine"] },
     ]);
@@ -155,7 +155,7 @@ describe("buildFindings rules", () => {
         marker("hemoglobin", 15, "g/dL", "optimal"),
         marker("tsh", 2, "µIU/mL", "optimal"),
       ]),
-      undefined,
+      [],
       [],
     );
     expect(findings.map(({ kind, title }) => [kind, title])).toEqual([
@@ -174,11 +174,48 @@ describe("buildFindings rules", () => {
         ...risky,
         marker("hdl_cholesterol", 55, "mg/dL", "optimal", [50, null]),
       ]),
-      visit("2024-01-13", [marker("hdl_cholesterol", 41, "mg/dL", "risk", [50, null])]),
+      [visit("2024-01-13", [marker("hdl_cholesterol", 41, "mg/dL", "risk", [50, null])])],
       [],
     );
     expect(findings).toHaveLength(13);
     expect(findings.at(-1)).toMatchObject({ kind: "change", citedKeys: ["hdl_cholesterol"] });
+  });
+
+  test("two reports of one month name the day of each value", () => {
+    const { findings } = buildFindings(
+      visit("2026-10-13", [marker("glucose_fasting", 112, "mg/dL", "watch", [70, 99])]),
+      [visit("2026-10-06", [marker("glucose_fasting", 94, "mg/dL", "optimal", [70, 99])])],
+      [],
+    );
+    expect(findings[0]?.title).toBe(
+      "Fasting glucose worsening: 94 mg/dL on 6 Oct 2026, 112 mg/dL on 13 Oct 2026",
+    );
+  });
+
+  test("a marker missing from the last report compares with its own last value", () => {
+    const { findings } = buildFindings(
+      visit("2026-10-13", [marker("hba1c", 6.1, "%", "watch")]),
+      [
+        visit("2026-10-06", [marker("glucose_fasting", 94, "mg/dL", "optimal", [70, 99])]),
+        visit("2026-08-04", [marker("hba1c", 5.4, "%", "optimal")]),
+      ],
+      [],
+    );
+    expect(findings.map(({ kind, title }) => [kind, title])).toEqual([
+      ["change", "HbA1c worsening: 5.4 % in Aug 2026, 6.1 % in Oct 2026"],
+    ]);
+  });
+
+  test("the newest earlier value of a marker wins over an older one", () => {
+    const { findings } = buildFindings(
+      visit("2026-10-13", [marker("vitamin_d", 40, "ng/mL", "optimal", [30, 100])]),
+      [
+        visit("2026-09-29", [marker("vitamin_d", 35, "ng/mL", "optimal", [30, 100])]),
+        visit("2026-08-04", [marker("vitamin_d", 12, "ng/mL", "risk", [30, 100])]),
+      ],
+      [],
+    );
+    expect(findings.filter(({ kind }) => kind === "change")).toEqual([]);
   });
 
   test("doctor questions put findings first, drop repeats and stop at 6", () => {
@@ -186,7 +223,7 @@ describe("buildFindings rules", () => {
       { askDoctor: ["Question A?", "Question B?", "Question C?"] },
       { askDoctor: ["Question A?", "Question D?", "Question E?", "Question F?"] },
     ] as PatternMatch[];
-    const { doctorQuestions } = buildFindings(current, previous, patterns);
+    const { doctorQuestions } = buildFindings(current, [previous], patterns);
     expect(doctorQuestions).toEqual([
       "My scan shows a fatty liver. Which tests should I repeat, and when?",
       "My Thyroid stimulating hormone went from 5.55 µIU/mL to 10.23 µIU/mL. What could explain this change?",
@@ -214,7 +251,7 @@ describe("study alerts", () => {
     const line = "Heterogenous, solid, round to oval mass lesion in left adnexa.";
     const { findings, doctorQuestions, headline } = buildFindings(
       withStudy({ impression: massImpression }),
-      undefined,
+      [],
       [],
     );
     expect(findings[0]).toMatchObject({
@@ -243,7 +280,7 @@ describe("study alerts", () => {
     ["a small cyst", "Simple cyst of 18 mm in the right ovary."],
     ["a nonspecific ST line", "Nonspecific ST abnormality (elevation)"],
   ])("%s gives no study alert and no headline", (_, impression) => {
-    const { findings, headline } = buildFindings(withStudy({ impression }), undefined, []);
+    const { findings, headline } = buildFindings(withStudy({ impression }), [], []);
     expect(findings.some(({ kind }) => kind === "study_alert")).toBe(false);
     expect(headline).toBeUndefined();
   });
@@ -257,7 +294,7 @@ describe("study alerts", () => {
     ],
     ["a pathology result", "Atypical squamous cells of undetermined significance (ASC-US)"],
   ])("%s gives a study alert", (_, impression) => {
-    const { findings } = buildFindings(withStudy({ impression }), undefined, []);
+    const { findings } = buildFindings(withStudy({ impression }), [], []);
     expect(findings[0]?.kind).toBe("study_alert");
   });
 
@@ -268,7 +305,7 @@ describe("study alerts", () => {
         result: "Positive for malignancy",
         impression: "See comment",
       }),
-      undefined,
+      [],
       [],
     );
     expect(findings[0]).toMatchObject({
@@ -280,7 +317,7 @@ describe("study alerts", () => {
   test("an examination form verdict never gives a study alert", () => {
     const { findings } = buildFindings(
       withStudy({ kind: "examination", impression: "Fit. Old healed lesion on left leg." }),
-      undefined,
+      [],
       [],
     );
     expect(findings).toEqual([]);

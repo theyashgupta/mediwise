@@ -404,6 +404,7 @@ function buildReportDetail(
  *
  * @remarks
  * The row comes from the same build as the report page, so value, status and marker order match it.
+ * History keeps one point per date, and this report wins its own date, so the page always marks its point.
  */
 export async function getMarkerDetail(userId: string, id: string, markerKey: string) {
   const report = await getReport(userId, id);
@@ -441,6 +442,7 @@ export async function getMarkerDetail(userId: string, id: string, markerKey: str
     const date = collectedAt ?? createdAt.toISOString().slice(0, 10);
     const kept = history.get(date);
     if (kept?.reportId === reportId && kept.status !== "unknown") continue;
+    if (kept?.reportId === id && reportId !== id) continue;
     history.set(date, {
       reportId,
       collectedAt,

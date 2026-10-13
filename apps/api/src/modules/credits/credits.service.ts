@@ -32,17 +32,21 @@ export async function refundReport(reportId: string) {
   await repo.refundReportCredit(reportId);
 }
 
-/** Adds credits to the account with this email and returns its user id. */
-export async function grantCredits(email: string, credits: number, note: string) {
+/** Finds the user id of the account with this email, through the Supabase admin API. */
+export async function findUserIdByEmail(email: string) {
   const wanted = email.trim().toLowerCase();
   for (let page = 1; ; page++) {
     const { data, error } = await supabase.auth.admin.listUsers({ page, perPage: usersPerPage });
     if (error) throw error;
     const user = data.users.find((candidate) => candidate.email?.toLowerCase() === wanted);
-    if (user) {
-      await repo.insertGrant(user.id, credits, note);
-      return user.id;
-    }
+    if (user) return user.id;
     if (data.users.length < usersPerPage) throw new Error(`No account has the email ${email}`);
   }
+}
+
+/** Adds credits to the account with this email and returns its user id. */
+export async function grantCredits(email: string, credits: number, note: string) {
+  const userId = await findUserIdByEmail(email);
+  await repo.insertGrant(userId, credits, note);
+  return userId;
 }

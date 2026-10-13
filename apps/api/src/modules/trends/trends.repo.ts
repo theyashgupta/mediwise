@@ -33,6 +33,7 @@ export async function listDoneReports(ownerUserId: string, profileId: string) {
       createdAt: reports.createdAt,
       score: reports.score,
       tier: reports.tier,
+      coverage: reports.coverage,
       episodeName: episodes.name,
     })
     .from(reports)

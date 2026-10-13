@@ -3,6 +3,7 @@ import { and, asc, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import { findings, reportMarkers, reports, studies, studyMeasurements } from "../../db/schema.js";
 
+const earlierVisitLimit = 12;
 const visitDate = sql<string>`coalesce(${reports.collectedAt}, ${reports.createdAt}::date)::text`;
 
 /** Loads a stored report as a visit, with its profile and the patterns the engine matched. */
@@ -77,13 +78,14 @@ export async function findVisit(reportId: string) {
 }
 
 /**
- * Loads the profile's last done visit before a date, or undefined for a first visit.
+ * Loads the profile's done visits before a date, newest first, for the change findings.
  *
  * @remarks
- * Reports of one date are one visit, so a report of the same date is never the previous visit. The newest upload of a date wins.
+ * Reports of one date are one visit, so a report of the same date is never an earlier visit. The newest upload of a date
+ * comes first. The limit keeps a weekly history to a bounded number of reads.
  */
-export async function findPreviousVisit(profileId: string, reportId: string, date: string) {
-  const [previous] = await db
+export async function findEarlierVisits(profileId: string, reportId: string, date: string) {
+  const rows = await db
     .select({ id: reports.id })
     .from(reports)
     .where(
@@ -95,8 +97,9 @@ export async function findPreviousVisit(profileId: string, reportId: string, dat
       ),
     )
     .orderBy(desc(visitDate), desc(reports.createdAt))
-    .limit(1);
-  return previous ? (await findVisit(previous.id))?.visit : undefined;
+    .limit(earlierVisitLimit);
+  const visits = await Promise.all(rows.map(({ id }) => findVisit(id)));
+  return visits.flatMap((found) => (found ? [found.visit] : []));
 }
 
 export async function listFindings(reportId: string) {

@@ -7,8 +7,7 @@ const encoder = new TextEncoder();
 
 type RetestEvent = {
   profile: { id: string; name: string };
-  marker: { markerKey: string; name: string; dueOn: string };
-  reportDate: string;
+  marker: { markerKey: string; name: string; dueOn: string; measuredOn: string };
 };
 
 /** Escapes a TEXT value per RFC 5545 section 3.3.11. */
@@ -48,10 +47,11 @@ function basicDate(date: string) {
  *
  * @remarks
  * The UID is fixed per profile, marker and date, so a second download updates the same event in the calendar.
+ * The text names the report that measured the marker, which is not always the latest report.
  */
-export function buildRetestCalendarFile({ profile, marker, reportDate }: RetestEvent, now: Date) {
+export function buildRetestCalendarFile({ profile, marker }: RetestEvent, now: Date) {
   const dayAfter = new Date(Date.parse(marker.dueOn) + dayMs).toISOString().slice(0, 10);
-  const reportDay = formatPlainDate(reportDate, {
+  const reportDay = formatPlainDate(marker.measuredOn, {
     day: "numeric",
     month: "short",
     year: "numeric",

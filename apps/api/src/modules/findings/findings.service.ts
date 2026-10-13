@@ -200,7 +200,7 @@ function findingFacts(drafts: FindingDraft[], studyRefs: Map<string, string>) {
  * Title, cited keys and rank come from the engine, so the same visits give the same set of findings.
  * A rejected body gets one more call with the reasons. A body that fails twice drops its finding, unless the engine
  * gave a fallback body, as it does for a study alert.
- * A body may cite and name any marker of the visits given, this one and the previous one.
+ * A body may cite and name any marker of the visits given.
  */
 export async function writeFindings(
   drafts: FindingDraft[],

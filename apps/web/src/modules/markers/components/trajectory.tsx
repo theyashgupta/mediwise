@@ -6,6 +6,7 @@ import type { Bounds } from "../types";
 
 type TrajectoryPoint = {
   key: string;
+  day: string;
   date: string;
   value: number;
   status: Status;
@@ -17,9 +18,10 @@ type TrajectoryProps = {
   band: Bounds | null;
   unit?: string;
   precision: number;
+  today: Date;
 };
 
-export function Trajectory({ points, band, unit, precision }: TrajectoryProps) {
+export function Trajectory({ points, band, unit, precision, today }: TrajectoryProps) {
   const t = useT();
   if (points.length < 2) {
     return (
@@ -49,6 +51,7 @@ export function Trajectory({ points, band, unit, precision }: TrajectoryProps) {
         bandLabel={t.markers.trajectory.band}
         unit={unit}
         precision={precision}
+        today={today}
       />
     </div>
   );
