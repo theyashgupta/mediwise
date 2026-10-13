@@ -1,3 +1,4 @@
+import { getT } from "@/common/hooks/use-locale";
 export type Range = { low?: number; high?: number };
 
 export type Band = { from: number; to: number };
@@ -43,11 +44,12 @@ export function rangeScale(value: number, lab?: Range, calibrated?: Range, watch
  * Formats a range in words, so open-ended lab ranges read naturally.
  */
 export function formatRange({ low, high }: Range, unit?: string) {
+  const { range } = getT().common;
   const text =
     low !== undefined && high !== undefined
-      ? `${low} to ${high}`
+      ? range.between(low, high)
       : high !== undefined
-        ? `below ${high}`
-        : `above ${low}`;
+        ? range.below(high)
+        : range.above(low ?? 0);
   return unit ? `${text} ${unit}` : text;
 }

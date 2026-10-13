@@ -1,3 +1,4 @@
+import { useT } from "@/common/hooks/use-locale";
 import { cn } from "@/lib/utils";
 
 type ScoreRingProps = {
@@ -11,10 +12,11 @@ const circumference = 2 * Math.PI * radius;
 
 export function ScoreRing({ score, tier, className }: ScoreRingProps) {
   const value = Math.round(Math.min(100, Math.max(0, score)));
+  const t = useT();
   return (
     <div
       role="img"
-      aria-label={`Score ${value} out of 100, ${tier}`}
+      aria-label={t.common.score.label(value, tier)}
       className={cn("@container relative size-40", className)}
     >
       <svg viewBox="0 0 120 120" className="size-full -rotate-90" aria-hidden>

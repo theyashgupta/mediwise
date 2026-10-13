@@ -1,4 +1,5 @@
 import { CircleAlert, RotateCw } from "lucide-react";
+import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 
 type ErrorStateProps = {
@@ -7,6 +8,7 @@ type ErrorStateProps = {
 };
 
 export function ErrorState({ message, onRetry }: ErrorStateProps) {
+  const t = useT();
   return (
     <section
       role="alert"
@@ -18,7 +20,7 @@ export function ErrorState({ message, onRetry }: ErrorStateProps) {
       </p>
       <Button variant="outline" onClick={onRetry}>
         <RotateCw aria-hidden />
-        Try again
+        {t.common.retry}
       </Button>
     </section>
   );
