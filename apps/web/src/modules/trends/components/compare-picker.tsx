@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { formatReportDate } from "@/modules/reports";
+import { reportLabels } from "../config/trends";
 import type { ReportHeader } from "../types";
 
 type ComparePickerProps = {
@@ -17,13 +17,9 @@ type ComparePickerProps = {
   onChange: (next: { a: string | undefined; b: string | undefined }) => void;
 };
 
-function reportLabel(report: ReportHeader) {
-  const date = formatReportDate(report.collectedAt, report.createdAt);
-  return report.labName ? `${date}, ${report.labName}` : date;
-}
-
 export function ComparePicker({ reports, a, b, onChange }: ComparePickerProps) {
   const t = useT();
+  const labels = reportLabels(reports);
   const pickers = [
     {
       id: "report-a",
@@ -57,7 +53,7 @@ export function ComparePicker({ reports, a, b, onChange }: ComparePickerProps) {
                   disabled={report.id === picker.other}
                   data-testid={`${picker.id}-option`}
                 >
-                  {reportLabel(report)}
+                  {labels.get(report.id)}
                 </SelectItem>
               ))}
             </SelectContent>

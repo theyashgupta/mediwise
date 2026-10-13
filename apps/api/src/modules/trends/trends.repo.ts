@@ -8,6 +8,7 @@ import {
   studies,
   studyMeasurements,
 } from "../../db/schema.js";
+import { reportFileNames } from "../reports/index.js";
 
 const reportDate = sql`coalesce(${reports.collectedAt}, ${reports.createdAt}::date)`;
 
@@ -35,6 +36,7 @@ export async function listDoneReports(ownerUserId: string, profileId: string) {
       tier: reports.tier,
       coverage: reports.coverage,
       episodeName: episodes.name,
+      fileName: sql<string | null>`(${reportFileNames})[1]`,
     })
     .from(reports)
     .innerJoin(profiles, eq(profiles.id, reports.profileId))
