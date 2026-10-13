@@ -69,3 +69,43 @@ export async function getDashboard(userId: string, profileId: string) {
     processingCount,
   };
 }
+
+type FamilyRow = Awaited<ReturnType<typeof repo.listFamilyDoneReports>>[number];
+
+function isNewer(row: FamilyRow, than: FamilyRow) {
+  if (!row.date || !row.uploadedAt) return false;
+  if (!than.date || !than.uploadedAt) return true;
+  return row.date === than.date ? row.uploadedAt > than.uploadedAt : row.date > than.date;
+}
+
+/**
+ * Builds one row per profile of the user with its latest done report and the markers at risk in it.
+ *
+ * @remarks
+ * Returns dates only. The web decides when a report is old, because "today" is the reader's day.
+ */
+export async function getFamily(userId: string) {
+  const latestByProfile = new Map<string, FamilyRow>();
+  for (const row of await repo.listFamilyDoneReports(userId)) {
+    const seen = latestByProfile.get(row.profileId);
+    if (!seen || isNewer(row, seen)) latestByProfile.set(row.profileId, row);
+  }
+  const latest = [...latestByProfile.values()];
+  const risk = await repo.countRiskMarkers(latest.flatMap((row) => row.reportId ?? []));
+  const riskByReport = new Map(risk.map((row) => [row.reportId, row.total]));
+  return latest.map((row) => ({
+    id: row.profileId,
+    name: row.name,
+    relation: row.relation,
+    latest:
+      row.reportId && row.date
+        ? {
+            id: row.reportId,
+            date: row.date,
+            score: row.score,
+            tier: row.tier,
+            riskCount: riskByReport.get(row.reportId) ?? 0,
+          }
+        : null,
+  }));
+}
