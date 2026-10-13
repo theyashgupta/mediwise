@@ -122,6 +122,17 @@ The fixtures give the size of one value line: the 178 values of `packages/engine
 
 The hard cap keeps every request under 100,000 tokens. Above that, Haiku 5.5 charges five times the price ([Anthropic pricing, long context](https://platform.claude.com/docs/en/about-claude/pricing)). The estimates are from character counts, not from the token counter. The first build ticket measures them with `messages.countTokens` on the fixtures.
 
+**Measured on 2026-10-13 (MEDI-75)** with `messages.countTokens` on `claude-haiku-5-5`, through `pnpm eval:assistant`:
+
+| Profile | Reports | References | Characters | Counted tokens |
+| - | - | - | - | - |
+| Dense history fixture (178 values in 10 weeks) | 12 | 318 | 77,784 | 33,916 |
+| 2024 golden panel with a settled repeat scan and a workup of 5 reports | 8 | 263 | 78,006 | 32,084 |
+| System prompt and answer tool | | | | 3,086 |
+
+- The text has about 2.3 characters per token, not 3.5. The estimates above are about 1.5 times too low, mostly because the catalog text and the engine follow-ups go into the block. The server now estimates with 2.2 characters per token, so the 60,000 cap stays on the safe side.
+- A profile with one full panel is about 32,000 tokens, not 12,000. The cache still makes this cheap: see the eval cost below.
+
 When a profile is over the cap, the server cuts in this order and tells the model what it cut ("Older reports not included: 14."):
 
 1. Values with status optimal from reports older than 24 months, when the marker has a newer value.
@@ -227,6 +238,8 @@ The eval runs these 30 questions on two fixture profiles: the dense history fixt
 | 30 | Is this lab reliable? | Refuse `off_topic`. | Prompt |
 
 Pass bar for launch: 30 of 30 on 3 runs each, on Haiku 5.5, with the validator on. A question that passes only after the retry counts as a pass, and the eval prints the first-try rate.
+
+**Result on 2026-10-13 (MEDI-75):** `pnpm eval:assistant 3` on `claude-haiku-5-5` passed 30 of 30 questions on every run. 78 of 81 Claude answers passed the validator on the first try. One full run (27 Claude answers, 3 gate answers) cost 4.6 cents, a mean of 0.057 cents per Claude answer. The prompt tuning and every eval run of the ticket cost 32.4 cents in total.
 
 ### What the app logs
 
