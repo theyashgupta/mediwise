@@ -21,6 +21,8 @@ jobs:
       - run: pnpm check
       # Prints the coverage summary of every package and fails when one drops below its threshold.
       - run: pnpm coverage
+      # Builds web and landing, and fails when a chunk grows over 10% against scripts/bundle-size.json.
+      - run: pnpm size
 
   e2e:
     needs: check
@@ -61,3 +63,4 @@ jobs:
             apps/e2e/playwright-report
             apps/e2e/test-results
           retention-days: 14
+

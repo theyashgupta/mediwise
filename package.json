@@ -19,6 +19,7 @@
     "coverage": "turbo run coverage --concurrency 2",
     "test:db": "pnpm --filter @mediwise/api test:db",
     "e2e": "pnpm --filter @mediwise/e2e e2e",
+    "size": "turbo run build --filter @mediwise/landing --filter @mediwise/web^... && pnpm --filter @mediwise/web exec vite build --manifest && node scripts/bundle-size.mjs",
     "format": "prettier --write .",
     "eval:mapping": "pnpm --filter @mediwise/api eval:mapping",
     "eval:extraction": "pnpm --filter @mediwise/api eval:extraction",
