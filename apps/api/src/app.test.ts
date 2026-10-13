@@ -68,3 +68,19 @@ test("the 11th report created in one hour returns a 429 problem", async () => {
   expect(Number(res.headers.get("Retry-After"))).toBeGreaterThan(3500);
   expect((await app.request("/reports/x/retry", { method: "POST" })).status).not.toBe(429);
 });
+
+test.each(["https://app.mediwise.theyashgupta.me", "https://mediwise.pages.dev"])(
+  "CORS allows the listed origin %s",
+  async (origin) => {
+    const res = await app.request("/health", { headers: { Origin: origin } });
+    expect(res.headers.get("Access-Control-Allow-Origin")).toBe(origin);
+  },
+);
+
+test("CORS gives no allow header to an origin outside the list", async () => {
+  const res = await app.request("/health", {
+    method: "OPTIONS",
+    headers: { Origin: "https://evil.example.com", "Access-Control-Request-Method": "GET" },
+  });
+  expect(res.headers.get("Access-Control-Allow-Origin")).toBeNull();
+});
