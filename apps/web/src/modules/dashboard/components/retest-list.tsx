@@ -24,7 +24,11 @@ export function RetestList({ retests, today, onAddToCalendar }: RetestListProps)
             year: "numeric",
           });
           return (
-            <li key={retest.markerKey} className="flex items-center gap-3 py-3 pr-3 pl-4">
+            <li
+              key={retest.markerKey}
+              className="flex items-center gap-3 py-3 pr-3 pl-4"
+              data-testid={`retest-row-${retest.markerKey}`}
+            >
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-medium">{retest.name}</span>
                 <span className="block text-sm text-muted-foreground">

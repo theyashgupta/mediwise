@@ -3,8 +3,7 @@ import { buildRetestCalendarFile, isPastDue } from "./calendar-file";
 
 const event = {
   profile: { id: "p-1", name: "Arjun Mehta" },
-  marker: { markerKey: "hba1c", name: "HbA1c", dueOn: "2026-01-31" },
-  reportDate: "2025-02-01",
+  marker: { markerKey: "hba1c", name: "HbA1c", dueOn: "2026-01-31", measuredOn: "2025-02-01" },
 };
 const now = new Date("2026-10-13T08:30:05.123Z");
 
@@ -28,7 +27,7 @@ test("the file is one all-day event on the due date with CRLF lines", () => {
   );
 });
 
-test("the description suggests the date and folds at 75 octets", () => {
+test("the description names the report that measured the marker and folds at 75 octets", () => {
   const lines = buildRetestCalendarFile(event, now).split("\r\n");
   expect(lines.every((line) => new TextEncoder().encode(line).length <= 75)).toBe(true);
   const unfolded = lines.join("\r\n").replace(/\r\n /g, "");

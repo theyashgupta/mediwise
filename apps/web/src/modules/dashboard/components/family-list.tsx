@@ -4,7 +4,7 @@ import { useT } from "@/common/hooks/use-locale";
 import { formatPlainDate } from "@/common/utils/date";
 import { statusStyles } from "@/common/utils/status";
 import { cn } from "@/lib/utils";
-import { isOlderThanAYear } from "../config/report-age";
+import { isStale, staleAfterDays } from "../config/report-age";
 import type { FamilyMember } from "../types";
 
 type FamilyListProps = {
@@ -45,8 +45,10 @@ function MemberSummary({ member, today }: { member: FamilyMember; today: Date })
             {text.atRisk(latest.riskCount)}
           </span>
         )}
-        {isOlderThanAYear(latest.date, today) && (
-          <span className="block text-sm text-muted-foreground">{text.stale}</span>
+        {isStale(latest.date, member.typicalGapDays, today) && (
+          <span className="block text-sm text-muted-foreground" data-testid="family-stale">
+            {staleAfterDays(member.typicalGapDays) === 90 ? text.staleFrequent : text.stale}
+          </span>
         )}
       </span>
       {latest.score !== null && (
@@ -75,7 +77,7 @@ export function FamilyList({ members, activeId, today, onSelect }: FamilyListPro
       ) : (
         <ul className="divide-y overflow-hidden rounded-xl border bg-card">
           {members.map((member) => (
-            <li key={member.id} className="flex items-center">
+            <li key={member.id} className="flex items-center" data-testid="family-row">
               <button
                 type="button"
                 aria-current={member.id === activeId || undefined}

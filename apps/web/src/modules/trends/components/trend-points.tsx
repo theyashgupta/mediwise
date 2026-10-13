@@ -14,6 +14,9 @@ type TrendPointsProps = {
 
 export function TrendPoints({ markerKey, category, points, unit, precision }: TrendPointsProps) {
   const t = useT();
+  const rows = points
+    .toReversed()
+    .flatMap((point) => [point, ...point.sameDay.map((other) => ({ ...other, date: point.date }))]);
   return (
     <div className="overflow-x-auto rounded-lg border bg-card">
       <table className="w-full text-left">
@@ -34,8 +37,8 @@ export function TrendPoints({ markerKey, category, points, unit, precision }: Tr
           </tr>
         </thead>
         <tbody className="divide-y">
-          {points.toReversed().map((point) => (
-            <tr key={point.reportId}>
+          {rows.map((point) => (
+            <tr key={point.reportId} data-testid={`trend-point-${point.reportId}`}>
               <td className="p-4">
                 <Link
                   {...(category === "studies"

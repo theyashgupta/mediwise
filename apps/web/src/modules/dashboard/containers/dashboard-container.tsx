@@ -18,6 +18,7 @@ import { ProfilePrompt } from "../components/profile-prompt";
 import { RecentReports } from "../components/recent-reports";
 import { RetestList } from "../components/retest-list";
 import { buildRetestCalendarFile } from "../config/calendar-file";
+import { isMeasuredRecently } from "../config/report-age";
 import { useDashboard } from "../hooks/use-dashboard";
 import { useDismissedForSession } from "../hooks/use-dismissed-for-session";
 import { useFamily } from "../hooks/use-family";
@@ -49,12 +50,12 @@ export function DashboardContainer() {
   );
   const incomplete = profile && (!profile.dateOfBirth || !profile.sex);
 
+  const retests = data?.retests.filter(
+    (retest) => !isMeasuredRecently(retest.measuredOn, new Date()),
+  );
   const addToCalendar = (marker: RetestDate) => {
-    if (!profile || !data?.latest) return;
-    const file = buildRetestCalendarFile(
-      { profile, marker, reportDate: data.latest.date },
-      new Date(),
-    );
+    if (!profile) return;
+    const file = buildRetestCalendarFile({ profile, marker }, new Date());
     downloadFile(
       new Blob([file], { type: "text/calendar;charset=utf-8" }),
       `retest-${marker.markerKey}-${marker.dueOn}.ics`,
@@ -98,8 +99,8 @@ export function DashboardContainer() {
         )}
         {data?.latest && <LatestReportCard report={data.latest} />}
         {data?.latest && <YearReviewCardContainer profileId={profile?.id} />}
-        {data && data.retests.length > 0 && (
-          <RetestList retests={data.retests} today={new Date()} onAddToCalendar={addToCalendar} />
+        {retests && retests.length > 0 && (
+          <RetestList retests={retests} today={new Date()} onAddToCalendar={addToCalendar} />
         )}
         {isEmpty && (
           <EmptyState

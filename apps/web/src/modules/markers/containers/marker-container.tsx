@@ -83,6 +83,7 @@ export function MarkerContainer() {
           <Trajectory
             points={history.map((point) => ({
               key: point.reportId,
+              day: point.collectedAt ?? point.createdAt,
               date: formatReportDate(point.collectedAt, point.createdAt),
               value: point.value,
               status: point.status,
@@ -91,6 +92,7 @@ export function MarkerContainer() {
             band={marker.calibratedRange}
             unit={unit}
             precision={marker.precision}
+            today={new Date()}
           />
         </Section>
         <Section id="meaning" title={t.markers.page.meaning}>
