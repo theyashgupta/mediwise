@@ -127,6 +127,13 @@
       "when": 1791885802916,
       "tag": "0017_year_review_intro",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1791886507469,
+      "tag": "0018_consent_and_deletion_log",
+      "breakpoints": true
     }
   ]
 }

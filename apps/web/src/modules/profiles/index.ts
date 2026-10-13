@@ -1,4 +1,5 @@
 export { ancestryLabels, relationLabels, sexLabels } from "./config/labels";
+export { ConsentPromptContainer } from "./containers/consent-prompt-container";
 export { ProfileSwitcherContainer } from "./containers/profile-switcher-container";
 export { ProfilesContainer } from "./containers/profiles-container";
 export { SelfProfileContainer } from "./containers/self-profile-container";

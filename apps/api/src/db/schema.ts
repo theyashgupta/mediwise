@@ -56,6 +56,8 @@ export const profiles = pgTable(
     sex: text({ enum: sexes }),
     ancestry: text({ enum: ancestries }).notNull(),
     isSelf: boolean("is_self").notNull().default(false),
+    permissionConfirmedAt: timestamp("permission_confirmed_at", { withTimezone: true }),
+    guardianConfirmedAt: timestamp("guardian_confirmed_at", { withTimezone: true }),
     yearReviewIntro: jsonb("year_review_intro").$type<{
       hash: string;
       sentences: string[] | null;
@@ -335,3 +337,19 @@ export const reportShareOpens = pgTable(
   },
   (t) => [index("report_share_opens_share_id_idx").on(t.shareId)],
 );
+
+export type DeletionCounts = { profiles: number; reports: number; files: number };
+
+/**
+ * One row per account deletion, kept after the user's data is gone.
+ *
+ * @remarks
+ * Holds only the SHA-256 of the user id, so the row names no person. Nothing deletes these rows, which keeps each for at least one year.
+ */
+export const deletionLog = pgTable("deletion_log", {
+  id: uuid().primaryKey().defaultRandom(),
+  userIdHash: text("user_id_hash").notNull(),
+  scope: text({ enum: ["account"] }).notNull(),
+  counts: jsonb().$type<DeletionCounts>().notNull(),
+  deletedAt: timestamp("deleted_at", { withTimezone: true }).notNull().defaultNow(),
+});

@@ -1,12 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ancestries,
+  isMinor,
   type ProfileInput,
   profileInputSchema,
   relations,
   sexes,
 } from "@mediwise/shared";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import type { z } from "zod";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,7 +28,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ancestryLabels, approximateBirthNote, relationLabels, sexLabels } from "../config/labels";
+import {
+  ancestryLabels,
+  approximateBirthNote,
+  guardianLabel,
+  permissionLabel,
+  relationLabels,
+  sexLabels,
+} from "../config/labels";
 
 type ProfileFormValues = z.input<typeof profileInputSchema>;
 
@@ -45,6 +53,35 @@ type ProfileFormProps = {
 type Option = { value: string; label: string };
 
 const memberRelations = relations.filter((relation) => relation !== "self");
+
+const isoDate = /^\d{4}-\d{2}-\d{2}$/;
+
+function CheckboxField({
+  checked,
+  onChange,
+  label,
+}: {
+  checked?: boolean;
+  onChange: (checked: boolean) => void;
+  label: string;
+}) {
+  return (
+    <FormItem className="flex items-start gap-3">
+      <FormControl>
+        <input
+          type="checkbox"
+          className="mt-0.5 size-4 shrink-0 accent-primary"
+          checked={checked ?? false}
+          onChange={(event) => onChange(event.target.checked)}
+        />
+      </FormControl>
+      <div className="grid gap-1">
+        <FormLabel className="font-normal leading-snug">{label}</FormLabel>
+        <FormMessage />
+      </div>
+    </FormItem>
+  );
+}
 
 function SelectField({
   value,
@@ -94,6 +131,8 @@ export function ProfileForm({
       relation: isSelf ? "self" : defaultValues?.relation,
     },
   });
+  const dateOfBirth = useWatch({ control: form.control, name: "dateOfBirth" });
+  const showGuardian = !isSelf && isoDate.test(dateOfBirth) && isMinor(dateOfBirth);
 
   return (
     <Form {...form}>
@@ -188,6 +227,32 @@ export function ProfileForm({
             </FormItem>
           )}
         />
+        {!isSelf && (
+          <FormField
+            control={form.control}
+            name="permissionConfirmed"
+            render={({ field }) => (
+              <CheckboxField
+                checked={field.value}
+                onChange={field.onChange}
+                label={permissionLabel}
+              />
+            )}
+          />
+        )}
+        {showGuardian && (
+          <FormField
+            control={form.control}
+            name="guardianConfirmed"
+            render={({ field }) => (
+              <CheckboxField
+                checked={field.value}
+                onChange={field.onChange}
+                label={guardianLabel}
+              />
+            )}
+          />
+        )}
         {error && (
           <p role="alert" className="text-sm text-destructive">
             {error}

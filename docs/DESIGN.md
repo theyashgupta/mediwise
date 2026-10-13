@@ -202,9 +202,12 @@ Screenshots: the demo account (made-up profile "Arjun Mehta", the two sample rep
 | Compare | [after](design/pages/after-compare-light.jpg) | [after](design/pages/after-compare-dark.jpg) | [after](design/pages/after-compare-light-phone.jpg) |
 | Year in review (MEDI-60), 9 Mar 2024 to 29 Mar 2025, no marker moved status; [print](design/pages/after-year-review-print.jpg) | [after](design/pages/after-year-review-light.jpg) | [after](design/pages/after-year-review-dark.jpg) | [light](design/pages/after-year-review-light-phone.jpg), [dark](design/pages/after-year-review-dark-phone.jpg) |
 | Home, Year in review card (MEDI-60) | [after](design/pages/after-year-review-home-light.jpg) | [after](design/pages/after-year-review-home-dark.jpg) | [after](design/pages/after-year-review-home-light-phone.jpg) |
+| Home, Confirm your family profiles (MEDI-61). Two made-up family profiles with the consent dates cleared for the capture | [after](design/pages/after-consent-home-prompt-light.jpg) | | [after](design/pages/after-consent-home-prompt-light-phone.jpg) |
 | Reports | [after](design/pages/after-reports-light.jpg) | [after](design/pages/after-reports-dark.jpg) | [after](design/pages/after-reports-light-phone.jpg) |
 | Upload; with a photo warning (MEDI-55): [light](design/pages/after-upload-warning-light.jpg), [phone](design/pages/after-upload-warning-light-phone.jpg) | [after](design/pages/after-upload-light.jpg) | [after](design/pages/after-upload-dark.jpg) | [after](design/pages/after-upload-light-phone.jpg) |
 | Profiles | [after](design/pages/after-profiles-light.jpg) | [after](design/pages/after-profiles-dark.jpg) | [after](design/pages/after-profiles-light-phone.jpg) |
+| Add a family member, a child saved without the two ticks (MEDI-61), viewport only | [after](design/pages/after-consent-child-form-refused-light.jpg) | | |
+| Privacy policy with family, children and deletion records (MEDI-61) | [after](design/pages/after-consent-privacy-light.jpg) | | |
 | Settings | [after](design/pages/after-settings-light.jpg) | [after](design/pages/after-settings-dark.jpg) | [after](design/pages/after-settings-light-phone.jpg) |
 | Credits | [after](design/pages/after-credits-light.jpg) | [after](design/pages/after-credits-dark.jpg) | [after](design/pages/after-credits-light-phone.jpg) |
 | Doctor export with previous values (29 Mar 2025, previous 9 Mar 2024, MEDI-53) | [after](design/pages/after-export-light.jpg) | [after](design/pages/after-export-dark.jpg) | [after](design/pages/after-export-light-phone.jpg) |

@@ -4,7 +4,7 @@ export const contact = {
   address: "[postal address in India]",
 };
 
-export const policyUpdated = "12 October 2026";
+export const policyUpdated = "13 October 2026";
 
 export type PolicyPage = "terms" | "privacy" | "refunds" | "contact";
 
@@ -75,6 +75,18 @@ export const policies: Record<PolicyPage, Policy> = {
         ],
       },
       {
+        heading: "Family members",
+        body: [
+          "When you add a family member, you confirm that you have their permission to add their reports. MediWise stores the date of that confirmation with the profile. You can remove a family profile on the Profiles page at any time. This also deletes the reports of that profile.",
+        ],
+      },
+      {
+        heading: "Children",
+        body: [
+          "A profile with an age under 18 needs one more confirmation. You confirm that you are the parent or guardian of the child. MediWise calculates the age from the date of birth. MediWise stores the date of that confirmation with the profile.",
+        ],
+      },
+      {
         heading: "Why we keep it",
         body: [
           "We use your data to read your reports, to show your trends and to count your report credits.",
@@ -96,6 +108,12 @@ export const policies: Record<PolicyPage, Policy> = {
           "To get a copy of your data, go to Settings and download your data.",
           "To delete your data, go to Settings and delete your account. This deletes your profiles, reports and files.",
           "We keep payment records after you delete your account, because tax law requires them.",
+        ],
+      },
+      {
+        heading: "Deletion records",
+        body: [
+          "When you delete your account, MediWise keeps one deletion record. The record has the time and the number of profiles, reports and files that we deleted. It has a one-way code made from your account ID, not your name or email address. It has no report values. We keep each record for at least one year. Your data download does not include these records.",
         ],
       },
     ],

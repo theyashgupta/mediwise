@@ -1,5 +1,12 @@
-import { expect, test } from "vitest";
-import { healthResponseSchema, profileInputSchema, reportFilesSchema } from "./index";
+import { afterEach, expect, test, vi } from "vitest";
+import {
+  guardianMessage,
+  healthResponseSchema,
+  isMinor,
+  permissionMessage,
+  profileInputSchema,
+  reportFilesSchema,
+} from "./index";
 
 test("healthResponseSchema accepts ok with an ISO time and rejects anything else", () => {
   expect(
@@ -17,10 +24,44 @@ const validProfile = {
   dateOfBirth: "1960-02-29",
   sex: "female",
   ancestry: "south_asian",
+  permissionConfirmed: true,
 };
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 test("profileInputSchema accepts a complete profile and trims the name", () => {
   expect(profileInputSchema.parse({ ...validProfile, name: "  Asha " }).name).toBe("Asha");
+});
+
+test("a family profile without the permission tick is refused, the self profile needs no tick", () => {
+  const issues = (input: object) =>
+    profileInputSchema.safeParse(input).error?.issues.map((issue) => issue.message) ?? [];
+  expect(issues({ ...validProfile, permissionConfirmed: undefined })).toEqual([permissionMessage]);
+  expect(issues({ ...validProfile, permissionConfirmed: false })).toEqual([permissionMessage]);
+  expect(issues({ ...validProfile, relation: "self", permissionConfirmed: undefined })).toEqual([]);
+});
+
+test("isMinor is true until the day of the 18th birthday", () => {
+  const today = new Date("2026-10-13T06:00:00Z");
+  expect(isMinor("2008-10-14", today)).toBe(true);
+  expect(isMinor("2008-10-13", today)).toBe(false);
+  expect(isMinor("2020-01-01", today)).toBe(true);
+  expect(isMinor("1960-02-29", today)).toBe(false);
+  expect(isMinor("2008-02-29", new Date("2026-02-28T06:00:00Z"))).toBe(true);
+  expect(isMinor("2008-02-29", new Date("2026-03-01T06:00:00Z"))).toBe(false);
+});
+
+test("a family profile under 18 needs the guardian tick, one aged 18 does not", () => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-10-13T06:00:00Z"));
+  const child = { ...validProfile, relation: "child", dateOfBirth: "2008-10-14" };
+  expect(profileInputSchema.safeParse(child).error?.issues).toEqual([
+    expect.objectContaining({ path: ["guardianConfirmed"], message: guardianMessage }),
+  ]);
+  expect(profileInputSchema.safeParse({ ...child, guardianConfirmed: true }).success).toBe(true);
+  expect(profileInputSchema.safeParse({ ...child, dateOfBirth: "2008-10-13" }).success).toBe(true);
 });
 
 test("profileInputSchema rejects an unknown relation, a non ISO date and a future date", () => {
@@ -43,11 +84,7 @@ test("reportFilesSchema accepts up to 20 PDFs and photos in any mix", () => {
   expect(messages([pdf])).toEqual([]);
   expect(messages([...Array(10).fill(pdf), ...Array(10).fill(photo)])).toEqual([]);
   expect(
-    messages([
-      pdf,
-      { ...photo, mime: "image/heic" },
-      { ...photo, mime: "image/webp" },
-    ]),
+    messages([pdf, { ...photo, mime: "image/heic" }, { ...photo, mime: "image/webp" }]),
   ).toEqual([]);
 });
 

@@ -1,8 +1,8 @@
-import type { ProfileInput, ProfileUpdate } from "@mediwise/shared";
 import { Hono } from "hono";
-import { beforeEach, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { handleError } from "../../common/problem.js";
 import type { AuthEnv } from "../../middleware/auth.js";
+import type { ProfileValues } from "./profiles.repo.js";
 import { profilesRoutes } from "./profiles.routes.js";
 
 const store = vi.hoisted(() => {
@@ -16,6 +16,8 @@ const store = vi.hoisted(() => {
     sex: string | null;
     ancestry: string;
     isSelf: boolean;
+    permissionConfirmedAt: Date | null;
+    guardianConfirmedAt: Date | null;
   };
   const rows: Row[] = [];
   const owned = (owner: string) => rows.filter((row) => row.ownerUserId === owner);
@@ -29,8 +31,12 @@ const store = vi.hoisted(() => {
           .map((row) => ({ ...row, reportCount: 0 })),
       findProfileById: async (owner: string, id: string) => find(owner, id),
       countProfilesByOwner: async (owner: string) => owned(owner).length,
-      insertProfile: async (owner: string, input: ProfileInput) => {
+      insertProfile: async (owner: string, input: ProfileValues) => {
         const row = {
+          dateOfBirth: null,
+          sex: null,
+          permissionConfirmedAt: null,
+          guardianConfirmedAt: null,
           ...input,
           dateOfBirthApproximate: false,
           id: crypto.randomUUID(),
@@ -52,13 +58,11 @@ const store = vi.hoisted(() => {
           sex: null,
           ancestry: "unknown",
           isSelf: true,
+          permissionConfirmedAt: null,
+          guardianConfirmedAt: null,
         });
       },
-      updateProfile: async (
-        owner: string,
-        id: string,
-        input: ProfileUpdate & { dateOfBirthApproximate?: boolean },
-      ) => {
+      updateProfile: async (owner: string, id: string, input: Partial<ProfileValues>) => {
         const row = find(owner, id);
         return row && Object.assign(row, input);
       },
@@ -87,6 +91,7 @@ const member = {
   dateOfBirth: "1960-02-29",
   sex: "female",
   ancestry: "south_asian",
+  permissionConfirmed: true,
 };
 
 function call(method: string, path: string, user = "alice", body?: object) {
@@ -104,6 +109,87 @@ async function createMember(user = "alice") {
 
 beforeEach(() => {
   store.rows.length = 0;
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
+
+const today = new Date("2026-10-13T06:00:00Z");
+const child = { ...member, name: "Meera", relation: "child", dateOfBirth: "2015-05-01" };
+
+function rowOf(id: string) {
+  return store.rows.find((row) => row.id === id)!;
+}
+
+test("a new family member without the permission tick is refused and not saved", async () => {
+  for (const permissionConfirmed of [undefined, false]) {
+    const res = await call("POST", "/profiles", "alice", { ...member, permissionConfirmed });
+    expect(res.status).toBe(400);
+    expect(JSON.stringify(await res.json())).toContain("permission");
+  }
+  expect(store.rows).toEqual([]);
+});
+
+test("a saved family member stores the date of the permission tick", async () => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(today);
+  const { id } = await createMember();
+  expect(rowOf(id)).toMatchObject({ permissionConfirmedAt: today, guardianConfirmedAt: null });
+});
+
+test("a child under 18 needs the guardian tick and stores its date", async () => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(today);
+  expect((await call("POST", "/profiles", "alice", child)).status).toBe(400);
+  const res = await call("POST", "/profiles", "alice", { ...child, guardianConfirmed: true });
+  expect(res.status).toBe(201);
+  const { id } = (await res.json()) as { id: string };
+  expect(rowOf(id).guardianConfirmedAt).toEqual(today);
+});
+
+test("a guardian tick on an adult stores no guardian date", async () => {
+  const res = await call("POST", "/profiles", "alice", { ...member, guardianConfirmed: true });
+  const { id } = (await res.json()) as { id: string };
+  expect(rowOf(id).guardianConfirmedAt).toBeNull();
+});
+
+test("confirming an existing profile dates the tick once and keeps the first date", async () => {
+  const { id } = await createMember();
+  rowOf(id).permissionConfirmedAt = null;
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(today);
+  await call("PATCH", `/profiles/${id}`, "alice", { permissionConfirmed: true });
+  expect(rowOf(id).permissionConfirmedAt).toEqual(today);
+  vi.setSystemTime(new Date("2026-12-01T06:00:00Z"));
+  await call("PATCH", `/profiles/${id}`, "alice", { permissionConfirmed: true, name: "Asha R" });
+  expect(rowOf(id).permissionConfirmedAt).toEqual(today);
+});
+
+test("a new date of birth under 18 needs the guardian tick unless one is on record", async () => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(today);
+  const { id } = await createMember();
+  const path = `/profiles/${id}`;
+  expect((await call("PATCH", path, "alice", { dateOfBirth: "2015-05-01" })).status).toBe(400);
+  expect(rowOf(id).dateOfBirth).toBe("1960-02-29");
+  const res = await call("PATCH", path, "alice", {
+    dateOfBirth: "2015-05-01",
+    guardianConfirmed: true,
+  });
+  expect(res.status).toBe(200);
+  expect(rowOf(id).guardianConfirmedAt).toEqual(today);
+  expect((await call("PATCH", path, "alice", { dateOfBirth: "2015-06-01" })).status).toBe(200);
+});
+
+test("the self profile stores no consent dates", async () => {
+  const [self] = (await (await call("GET", "/profiles")).json()) as { id: string }[];
+  await call("PATCH", `/profiles/${self!.id}`, "alice", {
+    dateOfBirth: "2015-05-01",
+    permissionConfirmed: true,
+    guardianConfirmed: true,
+  });
+  expect(rowOf(self!.id)).toMatchObject({ permissionConfirmedAt: null, guardianConfirmedAt: null });
 });
 
 test("GET /profiles creates the self profile on the first call", async () => {

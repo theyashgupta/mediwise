@@ -31,3 +31,18 @@ export function useProfileMutations() {
     remove: useMutation({ mutationFn: (id: string) => deleteProfile(id), onSuccess }),
   };
 }
+
+/**
+ * Records the permission and guardian ticks of several family profiles in one go.
+ *
+ * @remarks
+ * The Home prompt confirms every pending profile at once, so one pending state covers all the updates.
+ */
+export function useConfirmConsent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (updates: { id: string; input: ProfileUpdate }[]) =>
+      Promise.all(updates.map(({ id, input }) => updateProfile(id, input))),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["profiles"] }),
+  });
+}

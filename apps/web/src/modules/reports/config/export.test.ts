@@ -116,6 +116,8 @@ test("the signed-in export lists the full name, the date of birth and the sex", 
       sex: "female",
       ancestry: "south_asian",
       isSelf: false,
+      permissionConfirmedAt: null,
+      guardianConfirmedAt: null,
       reportCount: 1,
     }),
   ).toEqual([
