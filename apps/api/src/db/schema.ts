@@ -428,8 +428,7 @@ export const reportShareOpens = pgTable(
  * One question to the assistant about one profile, with the answer as shown.
  *
  * @remarks
- * `answer` keeps report ids, not the references Claude saw, so a deleted report still leaves its sentence. Refusal copy
- * is not stored: the API derives it from `refusal_kind`. `charged` stays false until the quota ticket charges questions.
+ * `answer` keeps report ids, not the references Claude saw, so a deleted report still leaves its sentence.
  */
 export const assistantQuestions = pgTable(
   "assistant_questions",

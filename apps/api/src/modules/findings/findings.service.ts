@@ -20,6 +20,8 @@ const catalogNames = [...markers, ...derived, ...studyMarkers].flatMap((entry) =
     .map((name) => ({ key: entry.key, name: name.toLowerCase() })),
 );
 
+const longestFirst = catalogNames.toSorted((a, b) => b.name.length - a.name.length);
+
 /** Tells whether a lower-case text names a marker as a whole word. */
 function namedIn(text: string, name: string) {
   const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -33,14 +35,13 @@ function namedIn(text: string, name: string) {
  * Present names are cut out of the text before the search, so "fasting glucose" never counts as a bare "glucose".
  */
 export function absentMarkerNames(text: string, allowed: Set<string>) {
-  const names = catalogNames.toSorted((a, b) => b.name.length - a.name.length);
   let rest = text.toLowerCase();
-  for (const { name } of names.filter(({ key }) => allowed.has(key))) {
+  for (const { name } of longestFirst.filter(({ key }) => allowed.has(key))) {
     rest = rest.replaceAll(name, " ");
   }
   return [
     ...new Set(
-      names
+      longestFirst
         .filter(({ key, name }) => !allowed.has(key) && namedIn(rest, name))
         .map(({ name }) => name),
     ),
