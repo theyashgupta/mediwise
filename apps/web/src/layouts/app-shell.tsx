@@ -86,22 +86,28 @@ export function AppShell() {
         Skip to content
       </a>
 
-      <AppSidebar collapsed={collapsed} onToggle={toggleSidebar} />
+      <div className="contents print:hidden">
+        <AppSidebar collapsed={collapsed} onToggle={toggleSidebar} />
+      </div>
 
       <div className="flex min-h-svh min-w-0 flex-col">
-        <AppHeader />
+        <div className="contents print:hidden">
+          <AppHeader />
+        </div>
         <main
           id="content"
           tabIndex={-1}
-          className="mx-auto w-full max-w-content flex-1 px-4 pt-6 pb-24 outline-none md:px-8 md:pt-10 md:pb-12"
+          className="mx-auto w-full max-w-content flex-1 px-4 pt-6 pb-24 outline-none md:px-8 md:pt-10 md:pb-12 print:p-0"
         >
-          <AppBreadcrumb innerOnly className="mb-4 md:hidden" />
+          <AppBreadcrumb innerOnly className="mb-4 md:hidden print:hidden" />
           <Outlet />
           <SiteFooter className="mt-16" />
         </main>
       </div>
 
-      <MobileTabBar />
+      <div className="contents print:hidden">
+        <MobileTabBar />
+      </div>
       <ShortcutsDialog open={showShortcuts} onOpenChange={setShowShortcuts} />
     </div>
   );

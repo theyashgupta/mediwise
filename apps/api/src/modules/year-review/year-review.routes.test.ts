@@ -162,7 +162,11 @@ describe("window", () => {
       "vitamin_b12",
       "ferritin",
     ]);
-    expect(body.measuredOnce[0]).toMatchObject({ value: 400, status: "optimal", date: "2025-03-29" });
+    expect(body.measuredOnce[0]).toMatchObject({
+      value: 400,
+      status: "optimal",
+      date: "2025-03-29",
+    });
   });
 });
 
@@ -233,7 +237,9 @@ describe("intro", () => {
 
   test("an intro rejected twice falls back to the engine text", async () => {
     store.create.mockResolvedValue(
-      intro([{ text: "Your score rose; LDL cholesterol improved.", citedKeys: ["ldl_cholesterol"] }]),
+      intro([
+        { text: "Your score rose; LDL cholesterol improved.", citedKeys: ["ldl_cholesterol"] },
+      ]),
     );
     const { body } = await getReview();
     expect(store.create).toHaveBeenCalledTimes(2);

@@ -56,7 +56,10 @@ export const profiles = pgTable(
     sex: text({ enum: sexes }),
     ancestry: text({ enum: ancestries }).notNull(),
     isSelf: boolean("is_self").notNull().default(false),
-    yearReviewIntro: jsonb("year_review_intro").$type<{ hash: string; sentences: string[] | null }>(),
+    yearReviewIntro: jsonb("year_review_intro").$type<{
+      hash: string;
+      sentences: string[] | null;
+    }>(),
     createdAt: createdAt(),
   },
   (t) => [

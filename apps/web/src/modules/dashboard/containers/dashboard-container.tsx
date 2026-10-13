@@ -7,6 +7,7 @@ import { downloadFile } from "@/common/utils/download";
 import { Button } from "@/components/ui/button";
 import { useActiveProfile } from "@/modules/profiles";
 import { ReportFailed, useRetryReport } from "@/modules/reports";
+import { YearReviewCardContainer } from "@/modules/year-review";
 import { AttentionList } from "../components/attention-list";
 import { DashboardGreeting } from "../components/dashboard-greeting";
 import { FamilyList } from "../components/family-list";
@@ -95,6 +96,7 @@ export function DashboardContainer() {
           />
         )}
         {data?.latest && <LatestReportCard report={data.latest} />}
+        {data?.latest && <YearReviewCardContainer profileId={profile?.id} />}
         {data && data.retests.length > 0 && (
           <RetestList retests={data.retests} today={new Date()} onAddToCalendar={addToCalendar} />
         )}

@@ -117,7 +117,10 @@ const introExample = {
   sentences: [
     { text: "Your score went from 78 to 84 across two reports.", citedKeys: [] },
     { text: "Vitamin D moved from risk to watch status.", citedKeys: ["vitamin_d"] },
-    { text: "LDL cholesterol kept its risk status in both reports.", citedKeys: ["ldl_cholesterol"] },
+    {
+      text: "LDL cholesterol kept its risk status in both reports.",
+      citedKeys: ["ldl_cholesterol"],
+    },
   ],
 };
 
@@ -145,7 +148,9 @@ function introShape(key: z.ZodType<string>) {
       .array(
         z.object({
           text: z.string().trim().min(1).describe("One sentence of 20 words or fewer"),
-          citedKeys: z.array(key).describe("Keys from the review key list that this sentence names"),
+          citedKeys: z
+            .array(key)
+            .describe("Keys from the review key list that this sentence names"),
         }),
       )
       .min(1)
@@ -158,7 +163,8 @@ function introTool(keys: string[]): Anthropic.Tool {
   const key = keys.length > 0 ? z.enum(keys as [string, ...string[]]) : z.string();
   return {
     name: "write_intro",
-    description: "Records the plain-English intro of one year in review, one cited sentence at a time.",
+    description:
+      "Records the plain-English intro of one year in review, one cited sentence at a time.",
     input_schema: z.toJSONSchema(introShape(key)) as Anthropic.Tool.InputSchema,
   };
 }
@@ -204,7 +210,10 @@ async function writeIntro(facts: string, keys: string[], usage: StepUsage) {
     if (!parsed.success) {
       const message =
         input === undefined ? "No write_intro call was made." : z.prettifyError(parsed.error);
-      return { sentences: null, problems: [{ rule: "invalid_call", message }] as NarrativeProblem[] };
+      return {
+        sentences: null,
+        problems: [{ rule: "invalid_call", message }] as NarrativeProblem[],
+      };
     }
     const sentences = parsed.data.sentences;
     const problems = validateNarrative(
@@ -215,7 +224,8 @@ async function writeIntro(facts: string, keys: string[], usage: StepUsage) {
   };
 
   const first = await draft(ask);
-  if (first.sentences && first.problems.length === 0) return first.sentences.map(({ text }) => text);
+  if (first.sentences && first.problems.length === 0)
+    return first.sentences.map(({ text }) => text);
   const reasons = first.problems.map(({ message, index }) =>
     index === undefined ? message : `"${first.sentences?.[index]?.text}" ${message}`,
   );
