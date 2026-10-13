@@ -106,7 +106,19 @@ export const report: Messages["report"] = {
     title: review("पहले इन पर काम करें"),
     description: review("इन मार्कर पर पहले काम करें, इसी क्रम में।"),
   },
-  narrative: { title: "आपकी रिपोर्ट क्या कहती है" },
+  narrative: {
+    title: "आपकी रिपोर्ट क्या कहती है",
+    headings: {
+      "The headline": "मुख्य बात",
+      "What stands out": "क्या अलग दिखता है",
+      "What looks good": "क्या अच्छा है",
+      "What to do next": "आगे क्या करें",
+    },
+  },
+  translation: {
+    writing: "हम यह रिपोर्ट हिंदी में लिख रहे हैं। तब तक कुछ हिस्से अंग्रेज़ी में दिखेंगे।",
+    failed: "हम यह पूरी रिपोर्ट हिंदी में नहीं लिख सके। कुछ हिस्से अंग्रेज़ी में दिखते हैं।",
+  },
   followUps: {
     empty: "इस रिपोर्ट में कोई अगला कदम नहीं है।",
     next: "अगला कदम: ",

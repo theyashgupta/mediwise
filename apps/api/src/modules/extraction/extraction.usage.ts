@@ -16,6 +16,7 @@ export type ReportUsage = {
   findings: StepUsage;
   studies: StepUsage;
   studyScans: StepUsage;
+  translate?: StepUsage;
 };
 
 /** Starts an empty token count for one pipeline step on one model. */

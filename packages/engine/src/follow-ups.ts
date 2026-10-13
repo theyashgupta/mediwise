@@ -7,7 +7,7 @@ const alwaysSuggested = new Set(["lipoprotein_a", "insulin_fasting", "hs_crp", "
 
 type FollowUpCopy = Pick<FollowUp, "title" | "why" | "next">;
 
-const templates: Record<FollowUpKind, (marker: Marker) => FollowUpCopy> = {
+export const followUpTemplates: Record<FollowUpKind, (marker: Marker) => FollowUpCopy> = {
   supplement: (marker) => ({
     title: `Ask your doctor about a supplement for low ${marker.name}`,
     why: `Your ${marker.name} is below your calibrated range. ${marker.whyItMatters}`,
@@ -62,7 +62,7 @@ export function buildFollowUps(assessed: Assessed[], unmeasured: Marker[]): Foll
   return items.map(({ kind, marker, copy }, index) => ({
     kind,
     markerKey: marker.key,
-    ...(copy ?? templates[kind](marker)),
+    ...(copy ?? followUpTemplates[kind](marker)),
     rank: index + 1,
   }));
 }

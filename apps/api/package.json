@@ -26,7 +26,8 @@
     "eval:mapping": "tsx --conditions=development src/eval/eval-mapping.ts",
     "eval:extraction": "tsx --conditions=development --env-file-if-exists=.env src/eval/eval-extraction.ts",
     "eval:narrative": "tsx --conditions=development --env-file-if-exists=.env src/eval/eval-narrative.ts",
-    "eval:findings": "tsx --conditions=development --env-file-if-exists=.env src/eval/eval-findings.ts"
+    "eval:findings": "tsx --conditions=development --env-file-if-exists=.env src/eval/eval-findings.ts",
+    "review:hindi": "UPDATE_REVIEW=1 vitest run src/eval/hindi-review.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.133.0",

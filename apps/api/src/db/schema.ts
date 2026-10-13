@@ -96,6 +96,9 @@ export const reports = pgTable(
     doctorQuestions: jsonb("doctor_questions").$type<string[]>(),
     narrative: jsonb().$type<Narrative>(),
     narrativeStatus: text("narrative_status", { enum: ["done", "failed"] }),
+    translations: jsonb().$type<{
+      hi?: { status: "done" | "failed"; text: Record<string, string> };
+    }>(),
     note: text(),
     episodeId: uuid("episode_id").references(() => episodes.id, { onDelete: "set null" }),
     error: text(),

@@ -1,6 +1,7 @@
 import type { Session } from "@supabase/supabase-js";
 import { useSyncExternalStore } from "react";
 import { defaultLocale, intlTag, isLocale, type Locale, messages } from "@/config/messages";
+import { queryClient } from "@/config/query-client";
 import { supabase } from "@/lib/supabase";
 
 const storageKey = "locale";
@@ -31,9 +32,11 @@ export function getLocale() {
  * Applies a locale on this device: storage, the `lang` attribute and every `useT` caller.
  *
  * @remarks
- * `index.html` sets `lang` from the same storage key before first paint.
+ * `index.html` sets `lang` from the same storage key before first paint. The API writes report text in the
+ * locale, so a change refetches every query.
  */
 function applyLocale(locale: Locale) {
+  if (current !== undefined && current !== locale) void queryClient.invalidateQueries();
   current = locale;
   try {
     localStorage.setItem(storageKey, locale);

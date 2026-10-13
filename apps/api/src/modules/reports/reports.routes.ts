@@ -1,5 +1,6 @@
 import { createReportSchema, reportNoteSchema } from "@mediwise/shared";
 import { Hono } from "hono";
+import { requestLocale } from "../../common/locale.js";
 import { validate } from "../../common/validate.js";
 import type { AuthEnv } from "../../middleware/auth.js";
 import {
@@ -16,6 +17,7 @@ import {
   markReportUploaded,
   retryReport,
   setReportNote,
+  translateReport,
 } from "./reports.service.js";
 
 export const reportsRoutes = new Hono<AuthEnv>()
@@ -33,7 +35,10 @@ export const reportsRoutes = new Hono<AuthEnv>()
     c.json(await retryReport(c.var.userId, c.req.valid("param").id)),
   )
   .get("/:id", validate("param", reportParamsSchema), async (c) =>
-    c.json(await getReportDetail(c.var.userId, c.req.valid("param").id)),
+    c.json(await getReportDetail(c.var.userId, c.req.valid("param").id, requestLocale(c))),
+  )
+  .post("/:id/translation", validate("param", reportParamsSchema), async (c) =>
+    c.json(await translateReport(c.var.userId, c.req.valid("param").id)),
   )
   .put(
     "/:id/note",
@@ -44,7 +49,7 @@ export const reportsRoutes = new Hono<AuthEnv>()
   )
   .get("/:id/markers/:markerKey", validate("param", markerParamsSchema), async (c) => {
     const { id, markerKey } = c.req.valid("param");
-    return c.json(await getMarkerDetail(c.var.userId, id, markerKey));
+    return c.json(await getMarkerDetail(c.var.userId, id, markerKey, requestLocale(c)));
   })
   .delete("/:id", validate("param", reportParamsSchema), async (c) => {
     await deleteReport(c.var.userId, c.req.valid("param").id);

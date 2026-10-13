@@ -97,7 +97,19 @@ export const report = {
     title: "Move first",
     description: "The markers to work on first, in order.",
   },
-  narrative: { title: "What your report says" },
+  narrative: {
+    title: "What your report says",
+    headings: {
+      "The headline": "The headline",
+      "What stands out": "What stands out",
+      "What looks good": "What looks good",
+      "What to do next": "What to do next",
+    },
+  },
+  translation: {
+    writing: "We are writing this report in your language. Some text shows in English until then.",
+    failed: "We could not write all of this report in your language. Some text shows in English.",
+  },
   followUps: {
     empty: "This report has no follow-ups.",
     next: "Next: ",

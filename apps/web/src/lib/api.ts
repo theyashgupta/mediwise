@@ -1,11 +1,21 @@
 import type { AppType } from "@mediwise/api";
 import { hc } from "hono/client";
+import { getLocale } from "@/common/hooks/use-locale";
 import { env } from "@/config/env";
 import { supabase } from "@/lib/supabase";
 
+/**
+ * Builds the headers of every API call: the session token and the language the user picked.
+ *
+ * @remarks
+ * The API writes catalog and report text in the `Accept-Language` locale, so the header carries the app choice, not the browser list.
+ */
 async function authHeaders(): Promise<Record<string, string>> {
   const { data } = await supabase.auth.getSession();
-  return data.session ? { Authorization: `Bearer ${data.session.access_token}` } : {};
+  const language = { "Accept-Language": getLocale() };
+  return data.session
+    ? { ...language, Authorization: `Bearer ${data.session.access_token}` }
+    : language;
 }
 
 /**

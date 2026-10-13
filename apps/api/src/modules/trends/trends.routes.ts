@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { requestLocale } from "../../common/locale.js";
 import { validate } from "../../common/validate.js";
 import type { AuthEnv } from "../../middleware/auth.js";
 import {
@@ -11,7 +12,7 @@ import { compareReports, getTrend, listEarlierValues, listTrends } from "./trend
 
 export const trendsRoutes = new Hono<AuthEnv>()
   .get("/", validate("query", trendsQuerySchema), async (c) =>
-    c.json(await listTrends(c.var.userId, c.req.valid("query").profileId)),
+    c.json(await listTrends(c.var.userId, c.req.valid("query").profileId, requestLocale(c))),
   )
   .get(
     "/:markerKey",
@@ -29,7 +30,7 @@ export const trendsRoutes = new Hono<AuthEnv>()
 
 export const compareRoutes = new Hono<AuthEnv>()
   .get("/", validate("query", compareQuerySchema), async (c) =>
-    c.json(await compareReports(c.var.userId, c.req.valid("query"))),
+    c.json(await compareReports(c.var.userId, c.req.valid("query"), requestLocale(c))),
   )
   .get("/earlier", validate("query", earlierQuerySchema), async (c) =>
     c.json(await listEarlierValues(c.var.userId, c.req.valid("query").reportId)),

@@ -27,6 +27,7 @@ import {
   studyMeasurements,
 } from "../../db/schema.js";
 import { findCreditUsage, lockUserCredits } from "../credits/index.js";
+import type { StepUsage } from "../extraction/index.js";
 
 const ownedBy = (ownerUserId: string) =>
   inArray(
@@ -177,6 +178,7 @@ export async function findReportInsights(reportId: string) {
       patterns: reports.patterns,
       doctorQuestions: reports.doctorQuestions,
       narrative: reports.narrative,
+      translations: reports.translations,
     })
     .from(reports)
     .where(eq(reports.id, reportId));
@@ -363,7 +365,7 @@ export async function saveReportResult(
     if (findingRows.length > 0) await tx.insert(findings).values(findingRows);
     await tx
       .update(reports)
-      .set({ ...report, status: "done", error: null })
+      .set({ ...report, status: "done", error: null, translations: null })
       .where(eq(reports.id, id));
   });
 }
@@ -493,6 +495,34 @@ export async function deleteDraftsCreatedBefore(ownerUserId: string, before: Dat
     ownerUserId,
     and(eq(reports.status, "draft"), lt(reports.createdAt, before)),
   );
+}
+
+/**
+ * Stores a report's translations and adds the translate step's tokens to its latest read job.
+ *
+ * @remarks
+ * The read job carries every Claude cost of a report, so the report cost and the monthly cap see this step too.
+ */
+export async function saveTranslation(
+  reportId: string,
+  translations: NonNullable<typeof reports.$inferSelect.translations>,
+  usage: StepUsage,
+) {
+  await db.transaction(async (tx) => {
+    await tx.update(reports).set({ translations }).where(eq(reports.id, reportId));
+    const [job] = await tx
+      .select({ id: jobs.id, usage: jobs.usage })
+      .from(jobs)
+      .where(sql`${jobs.payload}->>'reportId' = ${reportId}`)
+      .orderBy(desc(jobs.updatedAt))
+      .limit(1);
+    if (job?.usage) {
+      await tx
+        .update(jobs)
+        .set({ usage: { ...job.usage, translate: usage } })
+        .where(eq(jobs.id, job.id));
+    }
+  });
 }
 
 /** Loads the token counts of a report's latest read job, or undefined when it has none. */

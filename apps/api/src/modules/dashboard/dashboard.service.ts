@@ -2,8 +2,10 @@ import {
   derived,
   deviation,
   markers,
+  markerText,
   retestDueDate,
   sameScoreScale,
+  type TextLocale,
   typicalGapDays,
 } from "@mediwise/engine";
 import { getOwnedProfile } from "../profiles/index.js";
@@ -63,7 +65,7 @@ function listRetests(rows: LatestByMarker[]) {
  * The score change compares with the newest report of an earlier date on the same score scale, so a glucose-only
  * report never reads as a drop from a full panel.
  */
-export async function getDashboard(userId: string, profileId: string) {
+export async function getDashboard(userId: string, profileId: string, locale: TextLocale = "en") {
   await getOwnedProfile(userId, profileId);
   const [recent, [latest, ...older], processingCount, newestByMarker] = await Promise.all([
     repo.listRecentReports(userId, profileId, recentLimit),
@@ -92,7 +94,7 @@ export async function getDashboard(userId: string, profileId: string) {
       reportId: latest.id,
       markerKey: row.markerKey,
       name: entry?.name ?? row.rawName,
-      description: entry?.description ?? null,
+      description: entry ? markerText(entry, locale).description : null,
       value: row.value,
       unit: row.unit,
       status: row.status,
