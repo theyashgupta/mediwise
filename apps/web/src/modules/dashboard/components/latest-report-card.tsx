@@ -67,11 +67,7 @@ export function LatestReportCard({ report }: LatestReportCardProps) {
       className="grid gap-6 rounded-xl border bg-card p-6 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center sm:gap-10 sm:p-8"
     >
       {report.score !== null && report.tier && (
-        <ScoreRing
-          score={report.score}
-          tier={t.report.summary.tiers[report.tier]}
-          className="size-36 sm:size-40"
-        />
+        <ScoreRing score={report.score} tier={t.report.summary.tiers[report.tier]} size="lg" />
       )}
       <div className="min-w-0 space-y-5">
         <div className="space-y-2">
