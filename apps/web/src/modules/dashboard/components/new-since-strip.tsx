@@ -28,30 +28,32 @@ export function NewSinceStrip({ since, reports }: NewSinceStripProps) {
             <Link
               to="/reports/$reportId"
               params={{ reportId: report.id }}
-              className="flex items-center gap-3 px-3 py-2.5 outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset sm:gap-4"
+              className="flex items-center gap-x-3 px-3 py-2.5 outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset sm:gap-4"
             >
-              <span className="w-14 shrink-0 text-sm text-muted-foreground">
-                {formatPlainDate(report.date, { day: "numeric", month: "short" })}
-              </span>
-              <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-4 gap-y-1.5">
-                {report.markers.map((marker) => (
-                  <span
-                    key={`${marker.markerKey}-${marker.name}`}
-                    className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1"
-                  >
-                    <span className="truncate text-sm font-medium">{marker.name}</span>
-                    {marker.value !== null && (
-                      <MarkerValue
-                        value={marker.value}
-                        valueText={null}
-                        unit={marker.unit}
-                        precision={2}
-                        className="text-sm"
-                      />
-                    )}
-                    {marker.status && <StatusBadge status={marker.status} />}
-                  </span>
-                ))}
+              <span className="flex min-w-0 flex-1 flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
+                <span className="shrink-0 text-sm text-muted-foreground sm:w-14">
+                  {formatPlainDate(report.date, { day: "numeric", month: "short" })}
+                </span>
+                <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-4 gap-y-1.5">
+                  {report.markers.map((marker) => (
+                    <span
+                      key={`${marker.markerKey}-${marker.name}`}
+                      className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1"
+                    >
+                      <span className="truncate text-sm font-medium">{marker.name}</span>
+                      {marker.value !== null && (
+                        <MarkerValue
+                          value={marker.value}
+                          valueText={null}
+                          unit={marker.unit}
+                          precision={2}
+                          className="text-sm"
+                        />
+                      )}
+                      {marker.status && <StatusBadge status={marker.status} />}
+                    </span>
+                  ))}
+                </span>
               </span>
               <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
             </Link>

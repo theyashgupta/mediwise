@@ -227,6 +227,21 @@ test("a narrow report after a full panel leaves the full panel on top and lists 
   ]);
 });
 
+test("new since lists the three newest narrow reports", async () => {
+  store.reports.push(
+    done("full", "2026-09-01", 80),
+    ...["2026-09-08", "2026-09-15", "2026-09-22", "2026-09-29"].map((date) =>
+      glucoseOnly(date, date),
+    ),
+  );
+  const data = await body();
+  expect(data.newSince.map((report) => report.id)).toEqual([
+    "2026-09-29",
+    "2026-09-22",
+    "2026-09-15",
+  ]);
+});
+
 test("with no report of ten mapped markers the newest report leads", async () => {
   store.reports.push(glucoseOnly("week-1", "2026-09-22"), glucoseOnly("week-2", "2026-09-29"));
   const data = await body();

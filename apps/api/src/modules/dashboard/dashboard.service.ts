@@ -15,6 +15,7 @@ const recentLimit = 5;
 const moveFirstLimit = 3;
 const latestLimit = 60;
 const leadMinMarkers = 10;
+const newSinceLimit = 3;
 const catalogByKey = new Map([...markers, ...derived].map((entry) => [entry.key, entry]));
 
 type AssessedMarker = Awaited<ReturnType<typeof repo.listAssessedMarkers>>[number];
@@ -111,7 +112,7 @@ export async function getDashboard(userId: string, profileId: string, locale: Te
 
   const [rows, newSince] = await Promise.all([
     repo.listAssessedMarkers(latest.id),
-    listReportMarkers(done.slice(0, leadIndex).slice(0, recentLimit)),
+    listReportMarkers(done.slice(0, Math.min(leadIndex, newSinceLimit))),
   ]);
   const counts = { optimal: 0, watch: 0, risk: 0 };
   rows.forEach((row) => row.status && counts[row.status]++);
