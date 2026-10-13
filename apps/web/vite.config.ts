@@ -31,7 +31,18 @@ function siteFilesPlugin(appOrigin: string): Plugin {
   };
 }
 
+/**
+ * Forces the test mode in Vitest when the shell exports `NODE_ENV=production`.
+ *
+ * @remarks
+ * A production NODE_ENV makes Vite skip the `development` export of workspace packages and loads React without `act`.
+ */
+function forceTestNodeEnv(mode: string) {
+  if (mode === "test") process.env.NODE_ENV = "test";
+}
+
 export default defineConfig(({ mode }) => {
+  forceTestNodeEnv(mode);
   const appOrigin = new URL(
     loadEnv(mode, import.meta.dirname, "VITE_").VITE_APP_ORIGIN || "http://localhost:5173",
   ).origin;
@@ -47,6 +58,7 @@ export default defineConfig(({ mode }) => {
       alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
     },
     test: {
+      testTimeout: 15_000,
       env: { VITE_SUPABASE_URL: "http://localhost:54321", VITE_SUPABASE_ANON_KEY: "test" },
     },
   };
