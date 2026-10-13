@@ -118,6 +118,7 @@ export type ContextRef = {
   fact: string;
   dates: string[];
   names?: string[];
+  keys?: string[];
   text?: string;
   quotes?: string[];
   settlement?: Settlement;
@@ -293,7 +294,7 @@ function render(snapshot: Snapshot, cuts: string[]): AssistantContext {
       .toSorted((a, b) => a.startedOn.localeCompare(b.startedOn) || a.id.localeCompare(b.id))
       .map((episode, index) => [episode.id, `E${index + 1}`]),
   );
-  lines.push("", "Reports, oldest first:");
+  lines.push("", `Reports, oldest first (${ordered.length} in total):`);
   for (const report of ordered) {
     const ref = number.get(report.id)!;
     const score =
@@ -305,7 +306,7 @@ function render(snapshot: Snapshot, cuts: string[]): AssistantContext {
     lines.push(fact);
     add(ref, {
       cite: { kind: "report", reportId: report.id, target: null },
-      fact,
+      fact: `${fact} One of ${ordered.length} reports.`,
       dates: [report.date],
     });
   }
@@ -454,7 +455,7 @@ function render(snapshot: Snapshot, cuts: string[]): AssistantContext {
     ];
     const confirmed = settlements.get(finding.id);
     const later = confirmed
-      ? ` A later report of ${day(confirmed.date)} confirms it: "${confirmed.later}".`
+      ? ` A later report of ${day(confirmed.date)} repeats it: "${confirmed.later}".`
       : "";
     const fact = `${id} (${number.get(finding.reportId)}, ${day(report.date)}, ${finding.severity}): ${finding.title}. ${finding.body}${later} Cites: ${cites.join(", ") || "none"}.`;
     lines.push(fact);
@@ -491,6 +492,8 @@ function render(snapshot: Snapshot, cuts: string[]): AssistantContext {
       cite: { kind: "study", reportId: study.reportId, target: study.id },
       fact: block.join(" "),
       dates: [...new Set([date, report.date])],
+      names: [study.kind, study.bodyRegion ?? "", study.labName ?? report.labName ?? ""],
+      keys: study.measurements.map(({ key }) => key),
       quotes: [
         ...quoted(study.impression),
         ...quoted(study.result),
