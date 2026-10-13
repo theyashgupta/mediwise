@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { expect, type Locator, type Page, test } from "@playwright/test";
-import { apiEnv } from "../local-env";
+import { apiEnv, apiPort } from "../local-env";
 
 const email = `e2e-dense-${Date.now()}@example.com`;
 const password = "e2e-Password-1";
@@ -105,3 +105,83 @@ test("compare takes the first and the last report, and one report never sits on 
   await page.getByTestId("report-b-option").first().click();
   await expect(page.getByTestId("compare-summary")).toBeVisible();
 });
+
+/** Counts the pages of a PDF that Chromium wrote, from its page objects. */
+function pdfPages(pdf: Buffer) {
+  return pdf.toString("latin1").match(/\/Type\s*\/Page\b(?!s)/g)?.length ?? 0;
+}
+
+/**
+ * Returns the full panel with the most markers and an earlier full panel, so the export has the widest rows.
+ *
+ * @remarks
+ * The reports list response gives the ids. The seeded reports have no title, so the page text cannot pick the report.
+ */
+async function latestFullPanelId() {
+  const listed = page.waitForResponse(
+    (response) =>
+      response.request().method() === "GET" &&
+      new URL(response.url()).port === String(apiPort) &&
+      new URL(response.url()).pathname === "/reports",
+  );
+  await page.goto("/reports");
+  const { items } = (await (await listed).json()) as {
+    items: { id: string; markerCount: number; collectedAt: string }[];
+  };
+  const panels = items
+    .filter((item) => item.markerCount >= 80)
+    .sort((a, b) => b.collectedAt.localeCompare(a.collectedAt));
+  expect(panels.length, "two full panels in the dense history").toBe(2);
+  return panels[0]!.id;
+}
+
+for (const locale of ["en", "hi"] as const) {
+  test(`the doctor export in ${locale} keeps every marker row whole and the footer on each A4 and Letter page`, async () => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    if (locale === "hi") {
+      await page.goto("/settings");
+      await page.getByTestId("language-select").click();
+      await page.getByTestId("language-option-hi").click();
+      await expect(page.locator("html")).toHaveAttribute("lang", "hi");
+    }
+    const reportId = await latestFullPanelId();
+    await page.goto(`/reports/${reportId}/export`);
+    await expect(page.getByTestId("export-download-pdf")).toBeVisible();
+
+    const boxes = page.getByTestId("export-pages").locator("[data-page]");
+    await expect(boxes.first()).toBeAttached();
+    const layout = await page.evaluate(() => {
+      const empty = document.querySelector<HTMLElement>("[data-flow] ~ [data-page]")!;
+      const pages = [...document.querySelectorAll<HTMLElement>('[data-testid="export-pages"] > *')];
+      return {
+        rows: document.querySelectorAll("[data-flow] tr[data-atom]").length,
+        placed: pages.flatMap((box) =>
+          [...box.querySelectorAll<HTMLElement>("[data-atom]")].map((atom) => atom.dataset.atom),
+        ),
+        atoms: document.querySelectorAll("[data-flow] [data-atom]").length,
+        pagedRows: pages.reduce(
+          (sum, box) => sum + box.querySelectorAll("tr[data-atom]").length,
+          0,
+        ),
+        tallest: Math.max(...pages.map((box) => box.offsetHeight)),
+        limit: empty.offsetHeight,
+        footers: pages.map((box) => box.querySelector("footer")?.textContent ?? ""),
+      };
+    });
+    expect(layout.rows, "the dense full panel has its marker rows").toBeGreaterThan(80);
+    expect(layout.pagedRows).toBe(layout.rows);
+    expect(new Set(layout.placed).size).toBe(layout.atoms);
+    expect(layout.placed).toHaveLength(layout.atoms);
+    expect(layout.tallest, "no page box grows past one page").toBeLessThanOrEqual(layout.limit);
+    expect(layout.footers.length).toBeGreaterThan(1);
+    for (const footer of layout.footers) expect(footer).toContain("Moon Labs");
+
+    for (const format of ["A4", "Letter"] as const) {
+      const pdf = await page.pdf({
+        format,
+        margin: { top: "12mm", right: "12mm", bottom: "12mm", left: "12mm" },
+      });
+      expect(pdfPages(pdf), `${format}: one PDF page per page box`).toBe(layout.footers.length);
+    }
+  });
+}
