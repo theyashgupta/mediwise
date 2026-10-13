@@ -1,6 +1,15 @@
 import { getT } from "@/common/hooks/use-locale";
 import { formatValue } from "@/modules/markers";
-import type { Change, Comparison, CompareRow, Direction, TrendItem, TrendSort } from "../types";
+import { formatReportDate } from "@/modules/reports";
+import type {
+  Change,
+  Comparison,
+  CompareRow,
+  Direction,
+  ReportHeader,
+  TrendItem,
+  TrendSort,
+} from "../types";
 
 export const directionStyles: Record<Direction, { text: string; badge: string }> = {
   improving: { text: "text-optimal", badge: "bg-optimal-soft text-optimal" },
@@ -83,4 +92,30 @@ export function summaryLine(summary: Comparison["summary"]) {
 export function validateCompareSearch(search: Record<string, unknown>): { a?: string; b?: string } {
   const id = (value: unknown) => (typeof value === "string" && value ? value : undefined);
   return { a: id(search.a), b: id(search.b) };
+}
+
+/**
+ * Labels each report by its date and lab, keyed by report id.
+ *
+ * @remarks
+ * Two reports of one date from one lab add the name of their first file, so the picker never shows one text twice.
+ */
+export function reportLabels(reports: ReportHeader[]) {
+  const base = new Map(
+    reports.map((report) => {
+      const date = formatReportDate(report.collectedAt, report.createdAt);
+      return [report.id, report.labName ? `${date}, ${report.labName}` : date];
+    }),
+  );
+  const counts = new Map<string, number>();
+  for (const label of base.values()) counts.set(label, (counts.get(label) ?? 0) + 1);
+  return new Map(
+    reports.map((report) => {
+      const label = base.get(report.id)!;
+      return [
+        report.id,
+        counts.get(label)! > 1 && report.fileName ? `${label}, ${report.fileName}` : label,
+      ];
+    }),
+  );
 }

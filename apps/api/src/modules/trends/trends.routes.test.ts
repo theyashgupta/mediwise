@@ -21,6 +21,7 @@ const store = vi.hoisted(() => {
     collectedAt: string;
     labName?: string | null;
     episodeName?: string | null;
+    fileName?: string | null;
   };
   type Row = {
     reportId: string;
@@ -40,6 +41,7 @@ const store = vi.hoisted(() => {
   const header = (report: Report) => ({
     labName: "Lab",
     episodeName: null,
+    fileName: `${report.id}.pdf`,
     ...report,
     createdAt: new Date(`${report.collectedAt}T00:00:00Z`),
     score: 70,
@@ -356,6 +358,7 @@ test("another user's profile returns 404 for trends", async () => {
 test("compare gives a verdict per marker and counts them", async () => {
   const { status, body } = await json(`/compare?a=${ids.first}&b=${ids.second}`);
   expect(status).toBe(200);
+  expect(body.a).toMatchObject({ id: ids.first, fileName: `${ids.first}.pdf` });
   expect(body.summary).toEqual({ improved: 1, worsened: 1, same: 1, new: 1, gone: 1 });
   const rows = (body.groups as unknown as { rows: { markerKey: string }[] }[]).flatMap(
     (group) => group.rows,
