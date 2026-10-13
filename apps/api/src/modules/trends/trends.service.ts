@@ -91,11 +91,34 @@ function statusOf(row: StoredRow): Status {
 function valueInUnit(entry: Marker, row: StoredRow, unit: string | null) {
   if (row.value === null) return row.valueText;
   if (row.unit === unit) return row.value;
-  return unit === entry.unit ? (toCanonical(entry, row.value, row.unit ?? undefined) ?? null) : null;
+  return unit === entry.unit
+    ? (toCanonical(entry, row.value, row.unit ?? undefined) ?? null)
+    : null;
 }
 
 function toRange(low: number | null, high: number | null) {
   return low === null && high === null ? null : { low, high };
+}
+
+/** Normalises a printed lab name, so case and spacing alone never read as another lab. */
+function labKey(name: string | null) {
+  return name?.trim().toLowerCase().replace(/\s+/g, " ") || null;
+}
+
+/**
+ * Marks each point whose lab differs from the last named lab before it.
+ *
+ * @remarks
+ * A report without a lab name could come from either lab, so it never marks a change and never resets the comparison.
+ */
+function labChanges(labNames: (string | null)[]) {
+  let last: string | null = null;
+  return labNames.map((name) => {
+    const key = labKey(name);
+    const changed = last !== null && key !== null && key !== last;
+    last = key ?? last;
+    return changed;
+  });
 }
 
 /** The day a report belongs to: its collection date, or its upload day when the lab printed none. */
@@ -126,6 +149,7 @@ function toSeries(
   const last = kept.at(-1);
   const previous = kept.at(-2);
   const change = last && previous ? computeChange(previous.value, last.value) : null;
+  const labChange = labChanges(kept.map(({ report }) => report.labName));
   const optimal = { low: last?.row.calibratedLow ?? null, high: last?.row.calibratedHigh ?? null };
   return {
     markerKey: entry.key,
@@ -134,14 +158,18 @@ function toSeries(
     category: entry.category,
     unit,
     precision: entry.precision,
-    points: kept.map(({ report, row, value }) => ({
+    points: kept.map(({ report, row, value }, index) => ({
       reportId: report.id,
       labName: report.labName,
+      labChange: labChange[index] ?? false,
+      labRange: toRange(row.labRangeLow, row.labRangeHigh),
+      calibratedRange: toRange(row.calibratedLow, row.calibratedHigh),
       collectedAt: report.collectedAt,
       createdAt: report.createdAt,
       value,
       status: statusOf(row),
     })),
+    labCount: new Set(kept.map(({ report }) => labKey(report.labName)).filter(Boolean)).size,
     latestStatus: last ? statusOf(last.row) : "unknown",
     change,
     direction:
