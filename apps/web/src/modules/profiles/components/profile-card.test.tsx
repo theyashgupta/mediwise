@@ -12,6 +12,8 @@ const profile: Profile = {
   sex: "female",
   ancestry: "south_asian",
   isSelf: false,
+  permissionConfirmedAt: "2026-10-13T06:00:00.000Z",
+  guardianConfirmedAt: null,
   reportCount: 1,
   valueCount: 42,
 };

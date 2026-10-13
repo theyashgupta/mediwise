@@ -5,8 +5,9 @@ import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
 import { downloadFile } from "@/common/utils/download";
 import { Button } from "@/components/ui/button";
-import { useActiveProfile } from "@/modules/profiles";
+import { ConsentPromptContainer, useActiveProfile } from "@/modules/profiles";
 import { ReportFailed, useRetryReport } from "@/modules/reports";
+import { YearReviewCardContainer } from "@/modules/year-review";
 import { AttentionList } from "../components/attention-list";
 import { DashboardGreeting } from "../components/dashboard-greeting";
 import { FamilyList } from "../components/family-list";
@@ -61,6 +62,7 @@ export function DashboardContainer() {
     <>
       <DashboardGreeting firstName={profile?.name.split(" ")[0]} now={new Date()} />
       <div className="space-y-10">
+        <ConsentPromptContainer />
         {profile && incomplete && (
           <ProfilePrompt
             title={`Complete ${profile.name}’s profile`}
@@ -95,6 +97,7 @@ export function DashboardContainer() {
           />
         )}
         {data?.latest && <LatestReportCard report={data.latest} />}
+        {data?.latest && <YearReviewCardContainer profileId={profile?.id} />}
         {data && data.retests.length > 0 && (
           <RetestList retests={data.retests} today={new Date()} onAddToCalendar={addToCalendar} />
         )}

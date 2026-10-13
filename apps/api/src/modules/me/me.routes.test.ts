@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { createHash } from "node:crypto";
 import { beforeEach, expect, test, vi } from "vitest";
 import { handleError } from "../../common/problem.js";
 import type { AuthEnv } from "../../middleware/auth.js";
@@ -10,6 +11,7 @@ const store = vi.hoisted(() => {
     paths: new Map<string, string[]>(),
     removeCalls: [] as string[][],
     deletedUsers: [] as string[],
+    deletionLog: [] as { userIdHash: string; files: number }[],
   };
   return {
     state,
@@ -25,7 +27,8 @@ const store = vi.hoisted(() => {
         return name;
       },
       listStoragePathsByOwner: async (owner: string) => state.paths.get(owner) ?? [],
-      deleteAllByOwner: async (owner: string) => {
+      deleteAllByOwner: async (owner: string, log: { userIdHash: string; files: number }) => {
+        state.deletionLog.push(log);
         state.names.delete(owner);
         state.paths.delete(owner);
       },
@@ -72,7 +75,11 @@ app.onError(handleError);
 function call(method: string, path: string, body?: object, user = "alice", name?: string) {
   return app.request(path, {
     method,
-    headers: { "x-user": user, "Content-Type": "application/json", ...(name && { "x-name": name }) },
+    headers: {
+      "x-user": user,
+      "Content-Type": "application/json",
+      ...(name && { "x-name": name }),
+    },
     body: body && JSON.stringify(body),
   });
 }
@@ -82,6 +89,7 @@ beforeEach(() => {
   store.state.paths.clear();
   store.state.removeCalls.length = 0;
   store.state.deletedUsers.length = 0;
+  store.state.deletionLog.length = 0;
 });
 
 test("GET /me returns the email, the self profile name, defaulting to the email name, and the credit balance", async () => {
@@ -126,6 +134,7 @@ test("DELETE /me without the typed confirm returns 400 and deletes nothing", asy
   }
   expect(store.state.removeCalls).toEqual([]);
   expect(store.state.names.has("alice")).toBe(true);
+  expect(store.state.deletionLog).toEqual([]);
 });
 
 test("DELETE /me removes every stored file in batches of 1000, then the rows, then the sign-in", async () => {
@@ -142,6 +151,16 @@ test("DELETE /me removes every stored file in batches of 1000, then the rows, th
   expect(store.state.deletedUsers).toEqual(["alice"]);
 });
 
+test("DELETE /me logs the deletion with a hash of the user id and the file count, never the id", async () => {
+  await call("GET", "/me");
+  store.state.paths.set("alice", ["alice/r1/0.pdf", "alice/r1/1.jpg"]);
+  expect((await call("DELETE", "/me", { confirm: "DELETE" })).status).toBe(204);
+  expect(store.state.deletionLog).toEqual([
+    { userIdHash: createHash("sha256").update("alice").digest("hex"), files: 2 },
+  ]);
+  expect(JSON.stringify(store.state.deletionLog)).not.toContain("alice");
+});
+
 test("DELETE /me keeps the rows when removing the files fails", async () => {
   await call("GET", "/me");
   store.state.paths.set("alice", ["alice/r1/0.pdf"]);
@@ -149,6 +168,7 @@ test("DELETE /me keeps the rows when removing the files fails", async () => {
   expect((await call("DELETE", "/me", { confirm: "DELETE" })).status).toBe(500);
   expect(store.state.names.has("alice")).toBe(true);
   expect(store.state.deletedUsers).toEqual([]);
+  expect(store.state.deletionLog).toEqual([]);
   remove.mockRestore();
 });
 
@@ -169,10 +189,12 @@ test("GET /me/export answers a JSON attachment with the user's data", async () =
   expect(res.headers.get("Content-Disposition")).toBe(
     'attachment; filename="mediwise-export.json"',
   );
-  expect(await res.json()).toMatchObject({
+  const body = (await res.json()) as object;
+  expect(body).toMatchObject({
     exportedAt: expect.any(String),
     profiles: [{ name: "Alice" }],
     reports: [],
     markers: [],
   });
+  expect(Object.keys(body).sort()).toEqual(["exportedAt", "markers", "profiles", "reports"]);
 });

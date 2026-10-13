@@ -1,4 +1,5 @@
 import type { UpdateMeInput } from "@mediwise/shared";
+import { createHash } from "node:crypto";
 import { AppError } from "../../common/errors.js";
 import { remove } from "../../lib/storage.js";
 import { supabase } from "../../lib/supabase.js";
@@ -20,7 +21,7 @@ export async function updateMe(userId: string, email: string, input: UpdateMeInp
 }
 
 /**
- * Deletes every profile, report, stored file and job of the user.
+ * Deletes every profile, report, stored file and job of the user, and logs the deletion.
  *
  * @remarks
  * Files go first, in the batches of 1000 that Supabase Storage allows, so a failed call leaves the rows to retry from.
@@ -31,10 +32,13 @@ export async function deleteMe(userId: string) {
   for (let i = 0; i < paths.length; i += removeBatchSize) {
     await remove(paths.slice(i, i + removeBatchSize));
   }
-  await repo.deleteAllByOwner(userId);
+  await repo.deleteAllByOwner(userId, { userIdHash: hashUserId(userId), files: paths.length });
   const { error } = await supabase.auth.admin.deleteUser(userId);
   if (error) throw new AppError(502, "We deleted your data but not your sign-in. Try again.");
 }
+
+/** SHA-256 of the user id, the only trace of the user that the deletion log keeps. */
+const hashUserId = (userId: string) => createHash("sha256").update(userId).digest("hex");
 
 export async function exportMe(userId: string) {
   return { exportedAt: new Date().toISOString(), ...(await repo.exportByOwner(userId)) };

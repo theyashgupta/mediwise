@@ -1,5 +1,11 @@
 import { derived, markers, studyMarkers } from "@mediwise/engine";
-import { maxProfilesPerUser, type ProfileInput, type ProfileUpdate } from "@mediwise/shared";
+import {
+  guardianMessage,
+  isMinor,
+  maxProfilesPerUser,
+  type ProfileInput,
+  type ProfileUpdate,
+} from "@mediwise/shared";
 import { AppError } from "../../common/errors.js";
 import { isVital } from "../studies/index.js";
 import * as repo from "./profiles.repo.js";
@@ -36,7 +42,13 @@ export async function createProfile(userId: string, input: ProfileInput) {
   if ((await repo.countProfilesByOwner(userId)) >= maxProfilesPerUser) {
     throw new AppError(409, `You can have up to ${maxProfilesPerUser} profiles`);
   }
-  return repo.insertProfile(userId, input);
+  const { permissionConfirmed, guardianConfirmed, ...fields } = input;
+  const now = new Date();
+  return repo.insertProfile(userId, {
+    ...fields,
+    permissionConfirmedAt: permissionConfirmed ? now : null,
+    guardianConfirmedAt: guardianConfirmed && isMinor(fields.dateOfBirth) ? now : null,
+  });
 }
 
 /**
@@ -50,14 +62,46 @@ export async function updateProfile(userId: string, id: string, input: ProfileUp
   if (input.relation && (input.relation === "self") !== profile.isSelf) {
     throw new AppError(409, "The self relation cannot change");
   }
-  if (Object.keys(input).length === 0) return profile;
-  const updated = await repo.updateProfile(
-    userId,
-    id,
-    input.dateOfBirth ? { ...input, dateOfBirthApproximate: false } : input,
-  );
+  const { permissionConfirmed, guardianConfirmed, ...fields } = input;
+  const changes: Partial<repo.ProfileValues> = { ...fields };
+  if (fields.dateOfBirth) changes.dateOfBirthApproximate = false;
+  if (!profile.isSelf) {
+    const consent = { dateOfBirth: fields.dateOfBirth, permissionConfirmed, guardianConfirmed };
+    Object.assign(changes, consentChanges(profile, consent));
+  }
+  if (Object.keys(changes).length === 0) return profile;
+  const updated = await repo.updateProfile(userId, id, changes);
   if (!updated) throw new AppError(404, "We could not find this profile");
   return updated;
+}
+
+/**
+ * Dates the permission and guardian ticks of a family member the first time each is given.
+ *
+ * @remarks
+ * Only a new date of birth under 18 demands the guardian tick, so a permission-only update for an older child profile still saves.
+ */
+function consentChanges(
+  profile: {
+    dateOfBirth: string | null;
+    permissionConfirmedAt: Date | null;
+    guardianConfirmedAt: Date | null;
+  },
+  input: Pick<ProfileUpdate, "dateOfBirth" | "permissionConfirmed" | "guardianConfirmed">,
+) {
+  const dateOfBirth = input.dateOfBirth ?? profile.dateOfBirth;
+  const minor = dateOfBirth !== null && isMinor(dateOfBirth);
+  if (input.dateOfBirth && minor && !profile.guardianConfirmedAt && !input.guardianConfirmed) {
+    throw new AppError(400, guardianMessage);
+  }
+  const now = new Date();
+  return {
+    ...(input.permissionConfirmed &&
+      !profile.permissionConfirmedAt && { permissionConfirmedAt: now }),
+    ...(minor &&
+      input.guardianConfirmed &&
+      !profile.guardianConfirmedAt && { guardianConfirmedAt: now }),
+  };
 }
 
 export async function deleteProfile(userId: string, id: string) {

@@ -45,6 +45,8 @@ export function ProfileSheet({
                 dateOfBirth: profile.dateOfBirth ?? "",
                 sex: profile.sex ?? undefined,
                 ancestry: profile.ancestry,
+                permissionConfirmed: profile.permissionConfirmedAt !== null,
+                guardianConfirmed: profile.guardianConfirmedAt !== null,
               }
             }
             isSelf={profile?.isSelf ?? false}

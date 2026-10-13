@@ -1,4 +1,5 @@
-import { Pencil, Trash2 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { CalendarRange, Pencil, Trash2 } from "lucide-react";
 import { ageOn } from "@/common/utils/age";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -52,6 +53,17 @@ export function ProfileCard({
           )}
         </div>
         <div className="flex shrink-0 gap-1">
+          {profile.reportCount >= 2 && (
+            <Button variant="ghost" size="icon" asChild>
+              <Link
+                to="/year-review"
+                search={{ profileId: profile.id }}
+                aria-label={`Year in review for ${profile.name}`}
+              >
+                <CalendarRange aria-hidden />
+              </Link>
+            </Button>
+          )}
           <Button variant="ghost" size="icon" onClick={onEdit} aria-label={`Edit ${profile.name}`}>
             <Pencil aria-hidden />
           </Button>

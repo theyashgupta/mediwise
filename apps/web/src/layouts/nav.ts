@@ -30,6 +30,7 @@ export const pages: Record<AppRouteId, Page> = {
   "/_app/trends/$markerKey": { title: "Trend", parent: "/_app/trends/" },
   "/_app/compare": { title: "Compare reports", parent: "/_app/trends/" },
   "/_app/profiles": { title: "Profiles" },
+  "/_app/year-review": { title: "Year in review", parent: "/_app/profiles" },
   "/_app/settings": { title: "Settings" },
   "/_app/credits": { title: "Report credits", parent: "/_app/settings" },
   "/_app/dev/kitchen-sink": { title: "Kitchen sink" },

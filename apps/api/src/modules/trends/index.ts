@@ -1,2 +1,2 @@
 export { compareRoutes, trendsRoutes } from "./trends.routes.js";
-export { compareReports } from "./trends.service.js";
+export { compareReports, listSeries, verdictChange, visitDate } from "./trends.service.js";

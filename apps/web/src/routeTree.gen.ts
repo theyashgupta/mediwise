@@ -21,6 +21,7 @@ import { Route as AppCreditsRouteImport } from './routes/_app/credits'
 import { Route as AppDesignRouteImport } from './routes/_app/design'
 import { Route as AppProfilesRouteImport } from './routes/_app/profiles'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
+import { Route as AppYearReviewRouteImport } from './routes/_app/year-review'
 import { Route as AuthForgotPasswordRouteImport } from './routes/_auth/forgot-password'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AuthResetPasswordRouteImport } from './routes/_auth/reset-password'
@@ -92,6 +93,11 @@ const AppProfilesRoute = AppProfilesRouteImport.update({
 const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppYearReviewRoute = AppYearReviewRouteImport.update({
+  id: '/year-review',
+  path: '/year-review',
   getParentRoute: () => AppRoute,
 } as any)
 const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
@@ -177,6 +183,7 @@ export interface FileRoutesByFullPath {
   '/design': typeof AppDesignRoute
   '/profiles': typeof AppProfilesRoute
   '/settings': typeof AppSettingsRoute
+  '/year-review': typeof AppYearReviewRoute
   '/forgot-password': typeof AuthForgotPasswordRoute
   '/login': typeof AuthLoginRoute
   '/reset-password': typeof AuthResetPasswordRoute
@@ -203,6 +210,7 @@ export interface FileRoutesByTo {
   '/design': typeof AppDesignRoute
   '/profiles': typeof AppProfilesRoute
   '/settings': typeof AppSettingsRoute
+  '/year-review': typeof AppYearReviewRoute
   '/forgot-password': typeof AuthForgotPasswordRoute
   '/login': typeof AuthLoginRoute
   '/reset-password': typeof AuthResetPasswordRoute
@@ -231,6 +239,7 @@ export interface FileRoutesById {
   '/_app/design': typeof AppDesignRoute
   '/_app/profiles': typeof AppProfilesRoute
   '/_app/settings': typeof AppSettingsRoute
+  '/_app/year-review': typeof AppYearReviewRoute
   '/_auth/forgot-password': typeof AuthForgotPasswordRoute
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/reset-password': typeof AuthResetPasswordRoute
@@ -260,6 +269,7 @@ export interface FileRouteTypes {
     | '/design'
     | '/profiles'
     | '/settings'
+    | '/year-review'
     | '/forgot-password'
     | '/login'
     | '/reset-password'
@@ -286,6 +296,7 @@ export interface FileRouteTypes {
     | '/design'
     | '/profiles'
     | '/settings'
+    | '/year-review'
     | '/forgot-password'
     | '/login'
     | '/reset-password'
@@ -313,6 +324,7 @@ export interface FileRouteTypes {
     | '/_app/design'
     | '/_app/profiles'
     | '/_app/settings'
+    | '/_app/year-review'
     | '/_auth/forgot-password'
     | '/_auth/login'
     | '/_auth/reset-password'
@@ -428,6 +440,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/year-review': {
+      id: '/_app/year-review'
+      path: '/year-review'
+      fullPath: '/year-review'
+      preLoaderRoute: typeof AppYearReviewRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_auth/forgot-password': {
       id: '/_auth/forgot-password'
       path: '/forgot-password'
@@ -535,6 +554,7 @@ interface AppRouteChildren {
   AppDesignRoute: typeof AppDesignRoute
   AppProfilesRoute: typeof AppProfilesRoute
   AppSettingsRoute: typeof AppSettingsRoute
+  AppYearReviewRoute: typeof AppYearReviewRoute
   AppIndexRoute: typeof AppIndexRoute
   AppDevKitchenSinkRoute: typeof AppDevKitchenSinkRoute
   AppReportsReportIdRoute: typeof AppReportsReportIdRoute
@@ -551,6 +571,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDesignRoute: AppDesignRoute,
   AppProfilesRoute: AppProfilesRoute,
   AppSettingsRoute: AppSettingsRoute,
+  AppYearReviewRoute: AppYearReviewRoute,
   AppIndexRoute: AppIndexRoute,
   AppDevKitchenSinkRoute: AppDevKitchenSinkRoute,
   AppReportsReportIdRoute: AppReportsReportIdRoute,

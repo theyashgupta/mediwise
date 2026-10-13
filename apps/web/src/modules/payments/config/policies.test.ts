@@ -17,3 +17,11 @@ test("the refund policy gives 7 days to refund a credit that was never used", ()
   expect(refunds).toContain("did not use");
   expect(refunds).toContain("within 7 days");
 });
+
+test("the privacy policy explains family consent, child profiles and deletion records", () => {
+  const headings = policies.privacy.sections.map((section) => section.heading);
+  expect(headings).toEqual(
+    expect.arrayContaining(["Family members", "Children", "Deletion records"]),
+  );
+  expect(JSON.stringify(policies).toLowerCase()).not.toContain("compliant");
+});

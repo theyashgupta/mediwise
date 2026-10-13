@@ -1,4 +1,3 @@
-import type { ProfileInput, ProfileUpdate } from "@mediwise/shared";
 import { and, asc, count, desc, eq, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import { profiles, reportMarkers, reports, studies, studyMeasurements } from "../../db/schema.js";
@@ -12,6 +11,8 @@ const profileColumns = {
   sex: profiles.sex,
   ancestry: profiles.ancestry,
   isSelf: profiles.isSelf,
+  permissionConfirmedAt: profiles.permissionConfirmedAt,
+  guardianConfirmedAt: profiles.guardianConfirmedAt,
 };
 
 /**
@@ -28,6 +29,9 @@ const valueCount = sql<number>`(
   + (select count(*) from study_measurements sm join studies s on s.id = sm.study_id
     join reports r on r.id = s.report_id where r.profile_id = ${profiles.id} and r.status = 'done')
 )`.mapWith(Number);
+
+type ProfileRow = typeof profiles.$inferInsert;
+export type ProfileValues = Omit<ProfileRow, "id" | "ownerUserId" | "isSelf" | "createdAt">;
 
 export async function listProfilesByOwner(ownerUserId: string) {
   return db
@@ -55,7 +59,7 @@ export async function countProfilesByOwner(ownerUserId: string) {
   return row?.total ?? 0;
 }
 
-export async function insertProfile(ownerUserId: string, input: ProfileInput) {
+export async function insertProfile(ownerUserId: string, input: ProfileValues) {
   const [row] = await db
     .insert(profiles)
     .values({ ...input, ownerUserId })
@@ -79,7 +83,7 @@ export async function insertSelfProfileIfMissing(ownerUserId: string, name: stri
 export async function updateProfile(
   ownerUserId: string,
   id: string,
-  input: ProfileUpdate & { dateOfBirthApproximate?: boolean },
+  input: Partial<ProfileValues>,
 ) {
   const [row] = await db
     .update(profiles)
