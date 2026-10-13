@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type Anthropic from "@anthropic-ai/sdk";
+import type { AssistantCite } from "@mediwise/shared";
 import { and, eq, inArray } from "drizzle-orm";
 import { beforeAll, beforeEach, expect, test, vi } from "vitest";
 import { db } from "../../db/client.js";
@@ -454,4 +455,158 @@ test("a question refused 7 times in a minute for no quota stays a 402, never a 4
     });
   }
   expect(edge.create).not.toHaveBeenCalled();
+});
+
+async function storeCited(owner: string, profile: string, cites: AssistantCite[]) {
+  await db.insert(schema.assistantQuestions).values({
+    userId: owner,
+    profileId: profile,
+    question: "Which report?",
+    answer: { sentences: [{ text: "Cited.", cites }] },
+  });
+}
+
+test("an answer and the chat give each cite the name, lab and date its chip shows", async () => {
+  edge.create.mockResolvedValue(answer(good));
+  const item = await askQuestion(userId, profileId, { question: "What was my HbA1c?" });
+  const chip = {
+    kind: "value",
+    reportId,
+    target: "hba1c",
+    label: "HbA1c",
+    labName: "Sunrise Diagnostics",
+    date: "2026-08-04",
+    deleted: false,
+  };
+  expect(item.sentences[0]!.cites).toEqual([chip]);
+  expect((await listQuestions(userId, profileId))[0]!.sentences[0]!.cites).toEqual([chip]);
+});
+
+test("study, finding and episode chips show the printed study, the finding title and the episode name", async () => {
+  const [study] = await db
+    .select({ id: schema.studies.id })
+    .from(schema.studies)
+    .where(eq(schema.studies.reportId, reportId));
+  const [finding] = await db
+    .insert(schema.findings)
+    .values({
+      reportId,
+      kind: "risk",
+      severity: "watch",
+      title: "HbA1c is in the watch range",
+      body: "Body.",
+      citedKeys: ["hba1c"],
+      citedStudyIds: [],
+      rank: 1,
+    })
+    .returning();
+  const [report] = await db
+    .select({ episodeId: schema.reports.episodeId })
+    .from(schema.reports)
+    .where(eq(schema.reports.id, reportId));
+  await storeCited(userId, profileId, [
+    { kind: "study", reportId, target: study!.id },
+    { kind: "finding", reportId, target: finding!.id },
+    { kind: "episode", reportId: null, target: report!.episodeId },
+  ]);
+
+  const [cited] = await listQuestions(userId, profileId);
+  expect(cited!.sentences[0]!.cites).toMatchObject([
+    { label: "ultrasound, Abdomen", labName: "Sunrise Diagnostics", deleted: false },
+    { label: "HbA1c is in the watch range", labName: "Sunrise Diagnostics", date: "2026-08-04" },
+    { label: `${marker}-episode-name`, date: "2026-08-01", deleted: false },
+  ]);
+});
+
+test("a cite of a deleted report keeps its sentence and comes back deleted with no labels", async () => {
+  const report = await insertReport(profileId, 6.1, {});
+  await storeCited(userId, profileId, [{ kind: "value", reportId: report, target: "hba1c" }]);
+  await db.delete(schema.reports).where(eq(schema.reports.id, report));
+
+  const [cited] = await listQuestions(userId, profileId);
+  expect(cited!.sentences[0]).toEqual({
+    text: "Cited.",
+    cites: [
+      {
+        kind: "value",
+        reportId: report,
+        target: "hba1c",
+        label: null,
+        labName: null,
+        date: null,
+        deleted: true,
+      },
+    ],
+  });
+});
+
+test("a cite of another account's report comes back deleted and shows nothing of that report", async () => {
+  await storeCited(userId, profileId, [
+    { kind: "report", reportId: otherReportId, target: null },
+    { kind: "value", reportId: otherReportId, target: "hba1c" },
+  ]);
+
+  const [cited] = await listQuestions(userId, profileId);
+  for (const cite of cited!.sentences[0]!.cites) {
+    expect(cite).toMatchObject({ label: null, labName: null, date: null, deleted: true });
+  }
+});
+
+test("a cited study, finding or episode of another account comes back without its labels", async () => {
+  const [otherStudy] = await db
+    .select({ id: schema.studies.id })
+    .from(schema.studies)
+    .where(eq(schema.studies.reportId, otherReportId));
+  const [otherEpisode] = await db
+    .insert(schema.episodes)
+    .values({ profileId: otherProfileId, name: `${marker}-other-episode`, startedOn: "2026-08-01" })
+    .returning();
+  await storeCited(userId, profileId, [
+    { kind: "study", reportId, target: otherStudy!.id },
+    { kind: "episode", reportId: null, target: otherEpisode!.id },
+  ]);
+
+  const [cited] = await listQuestions(userId, profileId);
+  const [study, episode] = cited!.sentences[0]!.cites;
+  expect(study).toMatchObject({ label: null, deleted: false });
+  expect(episode).toMatchObject({ label: null, deleted: true });
+  expect(JSON.stringify(cited)).not.toContain(`${marker}-other-episode`);
+});
+
+test("a cited finding or follow-up of another account comes back with its report title, never its own title", async () => {
+  const [otherFinding] = await db
+    .insert(schema.findings)
+    .values({
+      reportId: otherReportId,
+      kind: "risk",
+      severity: "risk",
+      title: `${marker}-other-finding`,
+      body: "Body.",
+      citedKeys: [],
+      citedStudyIds: [],
+      rank: 1,
+    })
+    .returning();
+  const [otherFollowUp] = await db
+    .insert(schema.followUps)
+    .values({
+      reportId: otherReportId,
+      kind: "retest",
+      title: `${marker}-other-follow-up`,
+      why: "Why.",
+      nextAction: "Next.",
+      rank: 1,
+    })
+    .returning();
+  await storeCited(userId, profileId, [
+    { kind: "finding", reportId, target: otherFinding!.id },
+    { kind: "follow_up", reportId, target: otherFollowUp!.id },
+  ]);
+
+  const [cited] = await listQuestions(userId, profileId);
+  expect(cited!.sentences[0]!.cites).toMatchObject([
+    { labName: "Sunrise Diagnostics", deleted: false },
+    { labName: "Sunrise Diagnostics", deleted: false },
+  ]);
+  expect(JSON.stringify(cited)).not.toContain(`${marker}-other-`);
 });

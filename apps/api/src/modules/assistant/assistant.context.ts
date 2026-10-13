@@ -182,7 +182,7 @@ function range(low: number | null, high: number | null) {
   return undefined;
 }
 
-function nameOf(key: string, fallback: string) {
+export function nameOf(key: string, fallback: string) {
   return catalog.get(key)?.name ?? fallback;
 }
 

@@ -305,3 +305,78 @@ export async function flagQuestion(ownerUserId: string, id: string) {
     .returning(questionColumns);
   return row;
 }
+
+const none = Promise.resolve([]);
+
+/** Loads what the chips of cited rows show, for rows of the owner's reports and episodes only. */
+export async function findCiteRows(
+  ownerUserId: string,
+  ids: {
+    reports: string[];
+    studies: string[];
+    findings: string[];
+    followUps: string[];
+    episodes: string[];
+  },
+) {
+  const [reportRows, studyRows, findingRows, followUpRows, episodeRows] = await Promise.all([
+    ids.reports.length === 0
+      ? none
+      : db
+          .select({
+            id: reports.id,
+            title: reports.title,
+            labName: reports.labName,
+            date: visitDate,
+          })
+          .from(reports)
+          .innerJoin(profiles, eq(profiles.id, reports.profileId))
+          .where(and(inArray(reports.id, ids.reports), eq(profiles.ownerUserId, ownerUserId))),
+    ids.studies.length === 0
+      ? none
+      : db
+          .select({
+            id: studies.id,
+            reportId: studies.reportId,
+            kind: studies.kind,
+            bodyRegion: studies.bodyRegion,
+            performedAt: studies.performedAt,
+            labName: reportFiles.labName,
+          })
+          .from(studies)
+          .innerJoin(reportFiles, eq(reportFiles.id, studies.reportFileId))
+          .innerJoin(reports, eq(reports.id, studies.reportId))
+          .innerJoin(profiles, eq(profiles.id, reports.profileId))
+          .where(and(inArray(studies.id, ids.studies), eq(profiles.ownerUserId, ownerUserId))),
+    ids.findings.length === 0
+      ? none
+      : db
+          .select({ id: findings.id, reportId: findings.reportId, title: findings.title })
+          .from(findings)
+          .innerJoin(reports, eq(reports.id, findings.reportId))
+          .innerJoin(profiles, eq(profiles.id, reports.profileId))
+          .where(and(inArray(findings.id, ids.findings), eq(profiles.ownerUserId, ownerUserId))),
+    ids.followUps.length === 0
+      ? none
+      : db
+          .select({ id: followUps.id, reportId: followUps.reportId, title: followUps.title })
+          .from(followUps)
+          .innerJoin(reports, eq(reports.id, followUps.reportId))
+          .innerJoin(profiles, eq(profiles.id, reports.profileId))
+          .where(and(inArray(followUps.id, ids.followUps), eq(profiles.ownerUserId, ownerUserId))),
+    ids.episodes.length === 0
+      ? none
+      : db
+          .select({ id: episodes.id, name: episodes.name, startedOn: episodes.startedOn })
+          .from(episodes)
+          .innerJoin(profiles, eq(profiles.id, episodes.profileId))
+          .where(and(inArray(episodes.id, ids.episodes), eq(profiles.ownerUserId, ownerUserId))),
+  ]);
+  return {
+    reports: reportRows,
+    studies: studyRows,
+    findings: findingRows,
+    followUps: followUpRows,
+    episodes: episodeRows,
+  };
+}
