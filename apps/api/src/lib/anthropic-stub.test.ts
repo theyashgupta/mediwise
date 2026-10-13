@@ -55,3 +55,24 @@ test("the stubbed read of a study fixture classifies its page and returns its st
     },
   ]);
 });
+
+test("the stub answers the assistant tool with one sentence that cites the oldest report", async () => {
+  const { claudeStub } = await import("./anthropic-stub.js");
+  const response = await claudeStub.messages.create({
+    model: "claude-haiku-5-5",
+    max_tokens: 100,
+    tools: [{ name: "answer_question", input_schema: { type: "object" } }],
+    messages: [{ role: "user", content: "New question: What was my HbA1c?" }],
+  });
+
+  expect(response.content).toEqual([
+    expect.objectContaining({
+      type: "tool_use",
+      name: "answer_question",
+      input: {
+        kind: "answer",
+        sentences: [{ text: "Your first report is in MediWise.", cites: ["R1"] }],
+      },
+    }),
+  ]);
+});
