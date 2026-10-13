@@ -10,12 +10,13 @@ import { Button } from "@/components/ui/button";
 import { ProfileCard } from "../components/profile-card";
 import { ProfileSheet } from "../components/profile-sheet";
 import { RemoveProfileDialog } from "../components/remove-profile-dialog";
-import { useProfileMutations, useProfiles } from "../hooks/use-profiles";
+import { useProfileCsv, useProfileMutations, useProfiles } from "../hooks/use-profiles";
 import type { Profile } from "../types";
 
 export function ProfilesContainer() {
   const profiles = useProfiles();
   const { create, update, remove } = useProfileMutations();
+  const csv = useProfileCsv();
   const [editing, setEditing] = useState<Profile | "new">();
   const [removing, setRemoving] = useState<Profile>();
   const saving = editing === "new" ? create : update;
@@ -77,6 +78,9 @@ export function ProfilesContainer() {
                     remove.reset();
                     setRemoving(profile);
                   }}
+                  downloading={csv.isPending && csv.variables?.id === profile.id}
+                  downloadError={csv.variables?.id === profile.id ? csv.error?.message : undefined}
+                  onDownload={() => csv.mutate(profile)}
                 />
               </li>
             ))}

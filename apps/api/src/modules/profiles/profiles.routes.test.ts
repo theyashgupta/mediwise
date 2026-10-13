@@ -20,11 +20,18 @@ const store = vi.hoisted(() => {
     guardianConfirmedAt: Date | null;
   };
   const rows: Row[] = [];
+  const exportRows: { markerRows: object[]; studyRows: object[]; measurementRows: object[] } = {
+    markerRows: [],
+    studyRows: [],
+    measurementRows: [],
+  };
   const owned = (owner: string) => rows.filter((row) => row.ownerUserId === owner);
   const find = (owner: string, id: string) => owned(owner).find((row) => row.id === id);
   return {
     rows,
+    exportRows,
     repo: {
+      listExportRows: async () => exportRows,
       listProfilesByOwner: async (owner: string) =>
         owned(owner)
           .sort((a, b) => Number(b.isSelf) - Number(a.isSelf))
@@ -109,6 +116,9 @@ async function createMember(user = "alice") {
 
 beforeEach(() => {
   store.rows.length = 0;
+  store.exportRows.markerRows = [];
+  store.exportRows.studyRows = [];
+  store.exportRows.measurementRows = [];
 });
 
 afterEach(() => {
@@ -263,4 +273,81 @@ test("saving a date of birth clears the approximate flag, other changes keep it"
 test("an invalid body returns a 400 problem", async () => {
   const res = await call("POST", "/profiles", "alice", { ...member, dateOfBirth: "29/02/1960" });
   expect(res.status).toBe(400);
+});
+
+const csvHeader =
+  "Type,Report date,Lab,Marker key,Marker name,Value,Unit,Status,Printed range,Calibrated range,Visit ID,Report ID";
+const report = {
+  reportId: "r1",
+  reportDate: "2025-02-14",
+  collectedAt: "2025-02-14",
+  labName: 'Made-up Labs, "North" branch',
+};
+
+test("an empty profile downloads a CSV with the BOM and the header row only", async () => {
+  const { id } = await createMember();
+  const res = await call("GET", `/profiles/${id}/export.csv`);
+  expect(res.status).toBe(200);
+  expect(res.headers.get("content-type")).toBe("text/csv; charset=utf-8");
+  const bytes = new Uint8Array(await res.arrayBuffer());
+  expect([...bytes.slice(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
+  expect(new TextDecoder("utf-8", { ignoreBOM: true }).decode(bytes)).toBe(
+    `\uFEFF${csvHeader}\r\n`,
+  );
+});
+
+test("the CSV quotes a lab name with a comma and quotes, and types vitals and studies", async () => {
+  const { id } = await createMember();
+  store.exportRows.markerRows = [
+    {
+      ...report,
+      markerKey: "ldl_cholesterol",
+      rawName: "LDL Cholesterol",
+      value: 131,
+      valueText: null,
+      unit: "mg/dL",
+      status: "watch",
+      labRangeLow: null,
+      labRangeHigh: 130,
+      calibratedLow: 50,
+      calibratedHigh: 100,
+    },
+    {
+      ...report,
+      markerKey: "systolic_bp",
+      rawName: "Systolic",
+      value: 128,
+      valueText: null,
+      unit: "mmHg",
+      status: "optimal",
+      labRangeLow: null,
+      labRangeHigh: null,
+      calibratedLow: null,
+      calibratedHigh: null,
+    },
+  ];
+  store.exportRows.studyRows = [
+    {
+      ...report,
+      kind: "xray",
+      bodyRegion: "Chest",
+      impressionText: "=No active lesion",
+      resultText: null,
+      findingsText: null,
+    },
+  ];
+  const text = await (await call("GET", `/profiles/${id}/export.csv`)).text();
+  const lab = '"Made-up Labs, ""North"" branch"';
+  expect(text.split("\r\n")).toEqual([
+    csvHeader,
+    `marker,2025-02-14,${lab},ldl_cholesterol,LDL cholesterol,131,mg/dL,watch,< 130,50 to 100,visit-2025-02-14,r1`,
+    `vital,2025-02-14,${lab},systolic_bp,Systolic blood pressure,128,mmHg,optimal,,,visit-2025-02-14,r1`,
+    `study,2025-02-14,${lab},xray,Chest,'=No active lesion,,,,,visit-2025-02-14,r1`,
+    "",
+  ]);
+});
+
+test("another user's profile export returns 404", async () => {
+  const { id } = await createMember("alice");
+  expect((await call("GET", `/profiles/${id}/export.csv`, "bob")).status).toBe(404);
 });

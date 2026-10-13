@@ -31,3 +31,7 @@ export const approximateBirthNote =
 
 export const permissionLabel = "I have this person’s permission to add their reports";
 export const guardianLabel = "I am this child’s parent or guardian";
+
+export function rowCountLabel(count: number) {
+  return `${count} ${count === 1 ? "row" : "rows"}`;
+}
