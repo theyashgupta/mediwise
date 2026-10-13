@@ -34,6 +34,8 @@ const envSchema = z
     ANTHROPIC_EXTRACT_MODEL: z.string().min(1).default("claude-haiku-5-5"),
     ANTHROPIC_NARRATIVE_MODEL: z.string().min(1).default("claude-haiku-5-5"),
     ANTHROPIC_FINDINGS_MODEL: z.string().min(1).default("claude-haiku-5-5"),
+    ANTHROPIC_ASSISTANT_MODEL: z.string().min(1).default("claude-haiku-5-5"),
+    ASSISTANT_ENABLED: z.stringbool().default(false),
     RUN_WORKER: z.stringbool().default(false),
     CLAUDE_STUB: z.stringbool().default(false),
     CLAUDE_MONTHLY_CAP_CENTS: z.coerce.number().int().nonnegative().default(2000),
