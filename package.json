@@ -23,7 +23,8 @@
     "eval:mapping": "pnpm --filter @mediwise/api eval:mapping",
     "eval:extraction": "pnpm --filter @mediwise/api eval:extraction",
     "eval:narrative": "pnpm --filter @mediwise/api eval:narrative",
-    "eval:findings": "pnpm --filter @mediwise/api eval:findings"
+    "eval:findings": "pnpm --filter @mediwise/api eval:findings",
+    "eval:assistant": "pnpm --filter @mediwise/api eval:assistant"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.3",

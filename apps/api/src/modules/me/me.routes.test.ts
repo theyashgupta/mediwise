@@ -36,6 +36,7 @@ const store = vi.hoisted(() => {
         profiles: [{ name: state.names.get(owner) }],
         reports: [],
         markers: [],
+        questions: [],
       }),
     },
     storage: {
@@ -196,5 +197,11 @@ test("GET /me/export answers a JSON attachment with the user's data", async () =
     reports: [],
     markers: [],
   });
-  expect(Object.keys(body).sort()).toEqual(["exportedAt", "markers", "profiles", "reports"]);
+  expect(Object.keys(body).sort()).toEqual([
+    "exportedAt",
+    "markers",
+    "profiles",
+    "questions",
+    "reports",
+  ]);
 });

@@ -9,6 +9,7 @@ import { env } from "./config/env.js";
 import { auth } from "./middleware/auth.js";
 import { requestLogger } from "./middleware/logger.js";
 import { reportCreateLimit } from "./middleware/rate-limit.js";
+import { profileQuestionsRoutes, questionsRoutes } from "./modules/assistant/index.js";
 import { dashboardRoutes } from "./modules/dashboard/index.js";
 import {
   episodesRoutes,
@@ -54,6 +55,8 @@ export const app = new Hono()
   .route("/profiles", profilesRoutes)
   .route("/profiles", yearReviewRoutes)
   .route("/profiles", profileEpisodesRoutes)
+  .route("/profiles", profileQuestionsRoutes)
+  .route("/questions", questionsRoutes)
   .route("/episodes", episodesRoutes)
   .route("/reports", reportsRoutes)
   .route("/reports", sharesRoutes)

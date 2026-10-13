@@ -15,7 +15,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
-    "coverage": "vitest run --coverage --coverage.include=src/**/*.{ts,tsx} --coverage.reporter=text-summary --coverage.thresholds.statements=72 --coverage.thresholds.branches=70 --coverage.thresholds.functions=73 --coverage.thresholds.lines=73",
+    "coverage": "vitest run --coverage --coverage.include=src/**/*.{ts,tsx} --coverage.reporter=text-summary --coverage.thresholds.statements=75 --coverage.thresholds.branches=72 --coverage.thresholds.functions=75 --coverage.thresholds.lines=76",
     "test:db": "NODE_ENV=test vitest run --config vitest.db.config.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
@@ -30,6 +30,7 @@
     "eval:extraction": "tsx --conditions=development --env-file-if-exists=.env src/eval/eval-extraction.ts",
     "eval:narrative": "tsx --conditions=development --env-file-if-exists=.env src/eval/eval-narrative.ts",
     "eval:findings": "tsx --conditions=development --env-file-if-exists=.env src/eval/eval-findings.ts",
+    "eval:assistant": "tsx --conditions=development --env-file-if-exists=.env src/eval/eval-assistant.ts",
     "review:hindi": "UPDATE_REVIEW=1 vitest run src/eval/hindi-review.test.ts"
   },
   "dependencies": {

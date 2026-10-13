@@ -21,7 +21,9 @@ const catalogByKey = new Map([...markers, ...derived].map((entry) => [entry.key,
 type AssessedMarker = Awaited<ReturnType<typeof repo.listAssessedMarkers>>[number];
 type LatestByMarker = Awaited<ReturnType<typeof repo.listLatestAssessedByMarker>>[number];
 
-function distance({ value, calibratedLow, calibratedHigh }: AssessedMarker) {
+type Ranked = Pick<AssessedMarker, "status" | "value" | "calibratedLow" | "calibratedHigh">;
+
+function distance({ value, calibratedLow, calibratedHigh }: Ranked) {
   return value === null
     ? 0
     : Math.abs(deviation(value, { optimalLow: calibratedLow, optimalHigh: calibratedHigh }));
@@ -33,7 +35,7 @@ function distance({ value, calibratedLow, calibratedHigh }: AssessedMarker) {
  * @remarks
  * Same order as the engine's move-first list: risk before watch, then furthest from optimal first.
  */
-function rankMoveFirst(rows: AssessedMarker[], limit: number) {
+export function rankStoredMoveFirst<T extends Ranked>(rows: T[], limit: number) {
   const flagged = (status: "risk" | "watch") =>
     rows.filter((row) => row.status === status).sort((a, b) => distance(b) - distance(a));
   return [...flagged("risk"), ...flagged("watch")].slice(0, limit);
@@ -123,7 +125,7 @@ export async function getDashboard(userId: string, profileId: string, locale: Te
     previous && previous.score !== null && latest.score !== null
       ? { score: latest.score - previous.score, since: previous.date }
       : null;
-  const moveFirst = rankMoveFirst(rows, moveFirstLimit).map((row) => {
+  const moveFirst = rankStoredMoveFirst(rows, moveFirstLimit).map((row) => {
     const entry = row.markerKey ? catalogByKey.get(row.markerKey) : undefined;
     return {
       reportId: latest.id,
