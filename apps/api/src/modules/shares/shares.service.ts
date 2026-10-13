@@ -107,6 +107,7 @@ export async function getSharedExport(token: string) {
       moveFirst: report.moveFirst,
       patterns: report.patterns,
       findings: report.findings,
+      settled: report.settled,
       doctorQuestions: report.doctorQuestions,
       categories: report.categories,
       derived: report.derived,

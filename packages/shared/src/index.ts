@@ -155,6 +155,10 @@ export const findingKinds = [
 ] as const;
 export const findingSeverities = ["risk", "watch", "optimal"] as const;
 
+export const reportLinkKinds = ["repeat", "second_opinion"] as const;
+export type ReportLinkKind = (typeof reportLinkKinds)[number];
+export const reportLinkStates = ["proposed", "confirmed", "dismissed"] as const;
+
 export const reportStatuses = [
   "draft",
   "queued",

@@ -32,6 +32,8 @@ const store = vi.hoisted(() => {
   const historyRows: object[] = [];
   const studyRows: object[] = [];
   const findingRows: object[] = [];
+  const visits = new Map<string, object>();
+  const links: object[] = [];
   const insights: { current?: object } = {};
   const credits = new Map<string, { balance: number; readsToday: number }>();
   const view = ({ id, profileId, status, createdAt, note }: Report) => ({
@@ -63,9 +65,18 @@ const store = vi.hoisted(() => {
     historyRows,
     studyRows,
     findingRows,
+    visits,
+    links,
     insights,
     credits,
-    findingsRepo: { listFindings: async () => findingRows },
+    findingsRepo: {
+      listFindings: async () => findingRows,
+      findVisit: async (id: string) => {
+        const visit = visits.get(id);
+        return visit && { profileId: aliceProfile, patterns: [], visit };
+      },
+    },
+    linksRepo: { listLinks: async () => links, listReportsAfter: async () => [] },
     profilesRepo: {
       findProfileById: async (owner: string, id: string) =>
         owner === "alice" && id === aliceProfile ? { id, isSelf: true } : undefined,
@@ -144,6 +155,7 @@ vi.mock("./reports.repo.js", () => store.repo);
 vi.mock("../profiles/profiles.repo.js", () => store.profilesRepo);
 vi.mock("../../lib/storage.js", () => store.storage);
 vi.mock("../findings/findings.repo.js", () => store.findingsRepo);
+vi.mock("../links/links.repo.js", () => store.linksRepo);
 
 const app = new Hono<AuthEnv>()
   .use(async (c, next) => {
@@ -185,6 +197,8 @@ beforeEach(() => {
   store.files.length = 0;
   store.jobs.length = 0;
   store.findingRows.length = 0;
+  store.visits.clear();
+  store.links.length = 0;
   store.markerRows.length = 0;
   store.followUpRows.length = 0;
   store.historyRows.length = 0;
@@ -412,10 +426,102 @@ test("a done report returns its stored patterns, findings, doctor questions and 
 
   expect(detail).toMatchObject({
     patterns: [{ key: "gout_risk", matched: [{ markerKey: "uric_acid" }] }],
-    findings: [finding],
+    findings: [{ ...finding, sequence: null }],
     doctorQuestions: ["My uric acid is high. What is my risk of gout?"],
     narrative,
   });
+});
+
+test("an alert that a linked later ultrasound settles leaves the findings, the questions and the headline", async () => {
+  const { body } = await create([pdf]);
+  const report = store.reports.find((r) => r.id === body.id);
+  if (report) report.status = "done";
+  const line = "A 4.2 x 3.1 cm complex mass in the right adnexa.";
+  const ultrasound = { kind: "ultrasound", bodyRegion: "Pelvis", result: null, measurements: [] };
+  store.visits.set(body.id, {
+    date: "2025-02-10",
+    labName: null,
+    markers: [],
+    studies: [{ ...ultrasound, id: "study-a", impression: line }],
+  });
+  store.visits.set("report-b", {
+    date: "2025-03-24",
+    labName: null,
+    markers: [],
+    studies: [{ ...ultrasound, id: "study-b", impression: "No adnexal mass is seen." }],
+  });
+  store.links.push({
+    id: "link-1",
+    earlierReportId: body.id,
+    laterReportId: "report-b",
+    kind: "repeat",
+    createdBy: "detector",
+    state: "proposed",
+    other: { id: "report-b", labName: "Riverside Diagnostics", date: "2025-03-24" },
+  });
+  const alert = {
+    kind: "study_alert",
+    severity: "risk",
+    title: `Your ultrasound report says: "${line}"`,
+    body: "Your ultrasound report prints this line.",
+    citedKeys: [],
+    citedStudyIds: ["study-a"],
+  };
+  store.findingRows.push(alert);
+  store.insights.current = {
+    patterns: [],
+    doctorQuestions: [`My ultrasound report says: "${line}" What does this line mean for me?`],
+    narrative: {
+      sections: [
+        {
+          heading: "The headline",
+          sentences: [
+            { text: "Ask your doctor about a line in your ultrasound report.", markerKeys: [] },
+            { text: "Most markers are optimal.", markerKeys: [] },
+          ],
+        },
+      ],
+    },
+  };
+
+  type Detail = {
+    findings: object[];
+    settled: object[];
+    doctorQuestions: string[];
+    narrative: { sections: { sentences: object[] }[] };
+    links: object[];
+  };
+  const detail = (await (await call("GET", `/reports/${body.id}`)).json()) as Detail;
+
+  expect(detail.findings).toEqual([]);
+  expect(detail.settled).toEqual([
+    {
+      kind: "study_alert",
+      title: alert.title,
+      state: "settled",
+      earlier: { reportId: body.id, date: "2025-02-10", text: line },
+      later: { reportId: "report-b", date: "2025-03-24", text: "No adnexal mass is seen." },
+    },
+  ]);
+  expect(detail.doctorQuestions).toEqual([]);
+  expect(detail.narrative.sections[0]?.sentences).toEqual([
+    { text: "Most markers are optimal.", markerKeys: [] },
+  ]);
+  expect(detail.links).toEqual([
+    {
+      id: "link-1",
+      kind: "repeat",
+      state: "proposed",
+      createdBy: "detector",
+      role: "earlier",
+      other: { id: "report-b", labName: "Riverside Diagnostics", date: "2025-03-24" },
+    },
+  ]);
+
+  store.links.length = 0;
+  const open = (await (await call("GET", `/reports/${body.id}`)).json()) as Detail;
+  expect(open.findings).toEqual([{ ...alert, sequence: null }]);
+  expect(open.settled).toEqual([]);
 });
 
 test("a done report without stored insights returns empty patterns and no narrative", async () => {
