@@ -124,7 +124,7 @@ export function AppShell() {
           <AppBreadcrumb innerOnly className="mb-4 md:hidden print:hidden" />
           <UpdateLine />
           {!online && <OfflineState />}
-          <div hidden={!online}>
+          <div hidden={!online} className="min-h-svh">
             <Outlet />
           </div>
           <SiteFooter className="mt-16" />
