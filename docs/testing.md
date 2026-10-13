@@ -6,7 +6,7 @@ MediWise has three test layers. CI runs all three on every push and every pull r
 | --- | --- | --- |
 | Unit | `pnpm check` | Typecheck, lint and Vitest in every package, with rendered page tests for the web. The rules are in [.claude/rules/testing.md](../.claude/rules/testing.md). |
 | Coverage | `pnpm coverage` | The unit tests again with V8 coverage. It prints a summary per package and fails below the package threshold. |
-| Database | `pnpm test:db` | The SQL in `apps/api` against a real Postgres: credits ledger, purchases, the Claude spend cap, and the history queries (earlier values, same-day order, trends, compare, retests). |
+| Database | `pnpm test:db` | The SQL in `apps/api` against a real Postgres: credits ledger, purchases, question packs and questions left, the Claude spend cap with assistant questions, and the history queries (earlier values, same-day order, trends, compare, retests). |
 | End-to-end | `pnpm e2e` | The main flow in a real browser, against a local Supabase and the real API and web. |
 
 ## Rendered page tests
