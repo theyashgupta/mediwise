@@ -44,7 +44,13 @@ export const jobStatus = pgEnum("job_status", [
   "done",
   "failed",
 ]);
-export const creditReason = pgEnum("credit_reason", ["grant", "upload", "refund", "purchase"]);
+export const creditReason = pgEnum("credit_reason", [
+  "grant",
+  "upload",
+  "refund",
+  "purchase",
+  "questions",
+]);
 export const paymentOrderStatus = pgEnum("payment_order_status", ["created", "paid", "refunded"]);
 
 const createdAt = () => timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
@@ -435,9 +441,7 @@ export const assistantQuestions = pgTable(
   {
     id: uuid().primaryKey().defaultRandom(),
     userId: text("user_id").notNull(),
-    profileId: uuid("profile_id")
-      .notNull()
-      .references(() => profiles.id, { onDelete: "cascade" }),
+    profileId: uuid("profile_id").references(() => profiles.id, { onDelete: "set null" }),
     focusReportId: uuid("focus_report_id").references(() => reports.id, { onDelete: "set null" }),
     question: text().notNull(),
     answer: jsonb().$type<AssistantAnswer>().notNull(),
@@ -451,6 +455,7 @@ export const assistantQuestions = pgTable(
     costCents: doublePrecision("cost_cents").notNull().default(0),
     charged: boolean().notNull().default(false),
     flaggedAt: timestamp("flagged_at", { withTimezone: true }),
+    clearedAt: timestamp("cleared_at", { withTimezone: true }),
     createdAt: createdAt(),
   },
   (t) => [
@@ -459,6 +464,14 @@ export const assistantQuestions = pgTable(
     check("assistant_questions_question_length", sql`char_length(${t.question}) <= 500`),
   ],
 );
+
+export const clearedQuestion = {
+  question: "",
+  answer: { sentences: [] },
+  refusalKind: null,
+  focusReportId: null,
+  clearedAt: sql`now()`,
+};
 
 export type DeletionCounts = {
   profiles: number;
