@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { createHash } from "node:crypto";
 import { beforeEach, expect, test, vi } from "vitest";
 import { handleError } from "../../common/problem.js";
+import { env } from "../../config/env.js";
 import type { AuthEnv } from "../../middleware/auth.js";
 import { meRoutes } from "./me.routes.js";
 
@@ -12,6 +13,9 @@ const store = vi.hoisted(() => {
     removeCalls: [] as string[][],
     deletedUsers: [] as string[],
     deletionLog: [] as { userIdHash: string; files: number }[],
+    credits: 3,
+    freeCredits: 3,
+    packs: 0,
   };
   return {
     state,
@@ -58,7 +62,29 @@ const store = vi.hoisted(() => {
 });
 
 vi.mock("./me.repo.js", () => store.repo);
-vi.mock("../credits/credits.repo.js", () => ({ findBalance: async () => 3 }));
+vi.mock("../credits/credits.repo.js", () => ({
+  findBalance: async () => store.state.credits,
+  findQuestionCounts: async () => ({ reads: 1, packs: store.state.packs, charged: 2 }),
+  findCreditUsage: async () => ({
+    balance: store.state.credits,
+    readsToday: 0,
+    waiting: store.state.credits - store.state.freeCredits,
+  }),
+  debitQuestionPack: async (
+    _userId: string,
+    _note: string,
+    canDebit: (usage: { balance: number; waiting: number }) => boolean,
+  ) => {
+    const usage = {
+      balance: store.state.credits,
+      waiting: store.state.credits - store.state.freeCredits,
+    };
+    if (!canDebit(usage)) return undefined;
+    store.state.freeCredits -= 1;
+    store.state.packs += 1;
+    return --store.state.credits;
+  },
+}));
 vi.mock("../profiles/profiles.repo.js", () => store.profilesRepo);
 vi.mock("../../lib/storage.js", () => store.storage);
 vi.mock("../../lib/supabase.js", () => ({ supabase: store.supabase }));
@@ -91,15 +117,47 @@ beforeEach(() => {
   store.state.removeCalls.length = 0;
   store.state.deletedUsers.length = 0;
   store.state.deletionLog.length = 0;
+  Object.assign(store.state, { credits: 3, freeCredits: 3, packs: 0 });
+  env.ASSISTANT_ENABLED = true;
+  env.PAYMENTS_ENABLED = false;
 });
 
-test("GET /me returns the email, the self profile name, defaulting to the email name, and the credit balance", async () => {
+test("GET /me returns the email, the self profile name, defaulting to the email name, the credit balance and the questions left", async () => {
   expect(await (await call("GET", "/me")).json()).toEqual({
     userId: "alice",
     email: "alice@example.com",
     name: "alice",
     credits: 3,
+    questionsLeft: 3,
   });
+});
+
+test("POST /me/question-packs spends 1 credit for 20 questions", async () => {
+  const res = await call("POST", "/me/question-packs");
+  expect(res.status).toBe(201);
+  expect(await res.json()).toEqual({ credits: 2, questionsLeft: 23 });
+});
+
+test("POST /me/question-packs with no free credit answers 402 with the no-free-credit copy while payments are off", async () => {
+  store.state.freeCredits = 0;
+  const res = await call("POST", "/me/question-packs");
+  expect(res.status).toBe(402);
+  expect(await res.json()).toMatchObject({ title: "You have no free credits." });
+  expect(store.state.packs).toBe(0);
+});
+
+test("POST /me/question-packs with no free credit answers 402 with the buy copy while payments are on", async () => {
+  store.state.freeCredits = 0;
+  env.PAYMENTS_ENABLED = true;
+  expect(await (await call("POST", "/me/question-packs")).json()).toMatchObject({
+    title: "You have no free credits. Buy credits to get more questions.",
+  });
+});
+
+test("POST /me/question-packs answers 404 and spends nothing while the assistant is off", async () => {
+  env.ASSISTANT_ENABLED = false;
+  expect((await call("POST", "/me/question-packs")).status).toBe(404);
+  expect(store.state.packs).toBe(0);
 });
 
 test("a first Google sign-in creates the self profile with the Google name", async () => {

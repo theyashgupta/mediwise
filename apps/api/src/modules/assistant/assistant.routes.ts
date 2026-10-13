@@ -13,7 +13,7 @@ import { askQuestion, clearQuestions, flagQuestion, listQuestions } from "./assi
  * @remarks
  * Set per route, never with `.use`, because these routes mount on `/profiles` next to the profile routes.
  */
-const enabled = createMiddleware<AuthEnv>(async (c, next) => {
+export const assistantEnabled = createMiddleware<AuthEnv>(async (c, next) => {
   if (!env.ASSISTANT_ENABLED) return problem(c, 404, "Not Found");
   await next();
 });
@@ -21,23 +21,28 @@ const enabled = createMiddleware<AuthEnv>(async (c, next) => {
 export const profileQuestionsRoutes = new Hono<AuthEnv>()
   .post(
     "/:id/questions",
-    enabled,
+    assistantEnabled,
     validate("param", assistantParamsSchema),
     validate("json", askQuestionSchema),
     async (c) =>
       c.json(await askQuestion(c.var.userId, c.req.valid("param").id, c.req.valid("json")), 201),
   )
-  .get("/:id/questions", enabled, validate("param", assistantParamsSchema), async (c) =>
+  .get("/:id/questions", assistantEnabled, validate("param", assistantParamsSchema), async (c) =>
     c.json(await listQuestions(c.var.userId, c.req.valid("param").id)),
   )
-  .delete("/:id/questions", enabled, validate("param", assistantParamsSchema), async (c) => {
-    await clearQuestions(c.var.userId, c.req.valid("param").id);
-    return c.body(null, 204);
-  });
+  .delete(
+    "/:id/questions",
+    assistantEnabled,
+    validate("param", assistantParamsSchema),
+    async (c) => {
+      await clearQuestions(c.var.userId, c.req.valid("param").id);
+      return c.body(null, 204);
+    },
+  );
 
 export const questionsRoutes = new Hono<AuthEnv>().post(
   "/:id/flag",
-  enabled,
+  assistantEnabled,
   validate("param", assistantParamsSchema),
   async (c) => c.json(await flagQuestion(c.var.userId, c.req.valid("param").id)),
 );

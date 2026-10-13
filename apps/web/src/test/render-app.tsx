@@ -40,6 +40,7 @@ export const me: InferResponseType<typeof api.me.$get, 200> = {
   email,
   name: selfProfile.name,
   credits: 2,
+  questionsLeft: 0,
 };
 
 /**
