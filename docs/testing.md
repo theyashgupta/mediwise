@@ -87,6 +87,8 @@ The suite is in `apps/e2e`. It uses Playwright with Chromium only. One spec file
 
 A spec file, `apps/e2e/tests/dense-history.spec.ts`, signs up another user and seeds a profile with 12 reports in 10 weeks with `db:seed-history` (no upload, no Claude call). It checks that the Home score change compares two full panels, the New since strip with the narrow reports, the stale line, the glucose trend at 390 and 1440 px with no overlapping chart labels, the compare page with the first and last report, and the doctor export of the newest full panel in English and in Hindi. In the export, each marker row is whole in one page box, each box has the footer with the labs, and the A4 and Letter PDFs have one page for each box (MEDI-90). The audit behind it is in [research/continuous-history.md](research/continuous-history.md).
 
+`db:seed-history` dates the newest report on the local day of the machine, the same clock the spec uses to count back, so the spec passes at any hour in any time zone (MEDI-96).
+
 A spec file, `apps/e2e/tests/follow-up.spec.ts`, signs up another user with three credits and a female member profile. In order, it:
 
 1. Uploads `apps/api/fixtures/studies/usg-pelvis-2025-03-18.pdf`, a pelvis ultrasound with a 4.2 cm adnexal mass, and checks the study alert finding.
@@ -143,6 +145,7 @@ supabase stop --workdir apps/e2e
 
 - `supabase start` uses `apps/e2e/supabase/config.toml`. That file turns off the services the suite does not use and creates the private `reports` bucket. It is not in the root `supabase` folder, so `supabase config push` never reads it.
 - `pnpm e2e` applies the Drizzle migrations to the local database. Then it starts the API on port 3101 and the web on port 5174, with the same commands as `pnpm dev`. It also builds the web and serves the build with `vite preview` on port 5175 for the offline spec. The API and the web get the local Supabase URL and keys, not the values in `apps/*/.env`. The API gets `ADMIN_USER_ID` set to the fixed id of the demo account, so only that account opens `/admin`.
+- The dev web server always gets `NODE_ENV=development`. A shell with `NODE_ENV=production` would otherwise turn off the dev-only `/dev/kitchen-sink` page that `score-ring.spec.ts` opens.
 - The suite does not use a running `pnpm dev`. That process uses `apps/api/.env`, which has the real Claude key and the dev Supabase project.
 - On a machine with 8 GB of RAM, do not run `pnpm e2e` together with `pnpm check` or `pnpm dev`. Stop Supabase when you are done.
 - Each run makes a new user. The local database keeps the old users until `supabase stop`.
