@@ -33,7 +33,7 @@ jobs:
     needs: check
     runs-on: ubuntu-latest
     env:
-      PRODUCTION_URL: https://mediwise-landing.pages.dev
+      PRODUCTION_URL: https://mediwise.theyashgupta.me
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
@@ -44,6 +44,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Build
         run: pnpm turbo run build --filter @mediwise/landing
+        env:
+          NEXT_PUBLIC_SITE_URL: https://mediwise.theyashgupta.me
+          NEXT_PUBLIC_APP_URL: https://app.mediwise.theyashgupta.me
       # wrangler-action would run `pnpm add` at the workspace root, which pnpm refuses. It uses this global install instead.
       - run: npm install --global wrangler@4
       - name: Deploy

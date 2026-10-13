@@ -4,8 +4,8 @@ Production costs zero until users arrive. It runs in three places:
 
 | Part | Where | Source |
 |---|---|---|
-| Web (`apps/web`) | Cloudflare Pages project `mediwise`, `https://mediwise.pages.dev`, static Vite build that GitHub Actions uploads with `wrangler pages deploy` | `apps/web/public/_redirects`, `.github/workflows/deploy-web.yml` |
-| Landing page (`apps/landing`) | Cloudflare Pages project `mediwise-landing`, `https://mediwise-landing.pages.dev`, static Next.js export that GitHub Actions uploads with `wrangler pages deploy` | `apps/landing/next.config.ts`, `.github/workflows/deploy-landing.yml` |
+| Web (`apps/web`) | Cloudflare Pages project `mediwise`, `https://app.mediwise.theyashgupta.me` (alias `https://mediwise.pages.dev`), static Vite build that GitHub Actions uploads with `wrangler pages deploy` | `apps/web/public/_redirects`, `.github/workflows/deploy-web.yml` |
+| Landing page (`apps/landing`) | Cloudflare Pages project `mediwise-landing`, `https://mediwise.theyashgupta.me` (alias `https://mediwise-landing.pages.dev`), static Next.js export that GitHub Actions uploads with `wrangler pages deploy` | `apps/landing/next.config.ts`, `.github/workflows/deploy-landing.yml` |
 | API and job worker (`apps/api`) | Render free web service `mediwise-api` (`srv-db6atpg473hc73dqkuo0`), `https://mediwise-api-ij2v.onrender.com`, Docker, region Singapore | `apps/api/Dockerfile`, `render.yaml` |
 | Postgres, Auth, Storage | Supabase project `mediwise-prod` (ref `adnvhcharmqykmlyrepq`, `ap-south-1` Mumbai) | `apps/api/src/db/migrations` |
 
@@ -46,7 +46,8 @@ Never commit a secret. Put API values in the Render dashboard only. The web valu
 | `SUPABASE_URL` | yes | `https://adnvhcharmqykmlyrepq.supabase.co` |
 | `SUPABASE_SERVICE_ROLE_KEY` | yes | Service role key of `mediwise-prod`. Server only. |
 | `ANTHROPIC_API_KEY` | yes | Anthropic key for production. Without it, every report fails. |
-| `WEB_ORIGIN` | yes | `https://mediwise.pages.dev`. No trailing slash. CORS allows this origin only. |
+| `CORS_ORIGINS` | yes | `https://app.mediwise.theyashgupta.me,https://mediwise.pages.dev`, set by `render.yaml`. Origins that CORS allows, separated by commas. The first one is the main app origin, and Cashfree sends the buyer back there. |
+| `WEB_ORIGIN` | no | Old name for one CORS origin. The API reads it only when `CORS_ORIGINS` is empty. Remove it after one release. |
 | `RUN_WORKER` | yes | `true`, set by `render.yaml`. The report worker runs only when this is `true`. |
 | `SUPABASE_JWT_SECRET` | no | Set only if the project signs access tokens with HS256. ES256 and RS256 tokens verify against the public JWKS. |
 | `ANTHROPIC_MODEL` | no | Default `claude-sonnet-5-5`. Maps the names that no alias matches. |
@@ -81,7 +82,7 @@ The orchestrator sets these. Use the exact names. A workflow never prints a secr
 | `VITE_PAYMENTS_ENABLED` | variable | no | Default `false`. `true` shows the credit packs and the Buy button. Set it with `PAYMENTS_ENABLED=true` on the API, never alone. |
 | `VITE_CASHFREE_MODE` | variable | no | `sandbox` (default) or `production`. Must match `CASHFREE_ENV`. |
 
-The landing page reads no variable. Its workflow uses the two Cloudflare secrets only.
+The workflows also set the public origins in plain text, because they are not secret: `VITE_APP_ORIGIN` and `VITE_LANDING_URL` for the web, `NEXT_PUBLIC_SITE_URL` and `NEXT_PUBLIC_APP_URL` for the landing page. See Custom domains.
 
 ## First deploy (runbook)
 
@@ -97,7 +98,7 @@ Do the steps in this order. The API URL must exist before the web build, and the
 1. Sign in at dashboard.render.com with GitHub. No payment card is needed for the free plan.
 2. Click New, Blueprint. Connect the `theyashgupta/mediwise` repository. Give Render access to this repository only.
 3. Render reads `render.yaml` and shows one service: `mediwise-api`, Docker, Free, Singapore.
-4. Enter the `sync: false` values: `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`. For `WEB_ORIGIN`, enter `http://localhost:5173` for now. Step 4 sets the real value.
+4. Enter the `sync: false` values: `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`. `render.yaml` sets `CORS_ORIGINS`.
 5. Click Apply. Wait for the first deploy to show Live.
 6. Copy the service URL (`https://mediwise-api-ij2v.onrender.com`). This is `VITE_API_URL`.
 7. Check: `curl https://mediwise-api-ij2v.onrender.com/health` returns `{"status":"ok",...}`.
@@ -113,10 +114,10 @@ GitHub Actions builds the web and deploys it with `wrangler pages deploy`. Cloud
 
 ### 4. Connect the parts
 
-1. Render, `mediwise-api`, Environment: set `WEB_ORIGIN` to `https://mediwise.pages.dev`. Save. Render redeploys the API.
+1. Render, `mediwise-api`, Environment: make sure that `CORS_ORIGINS` has the web origins (see Custom domains).
 2. Supabase dashboard, `mediwise-prod`, Authentication, URL Configuration:
-   - Site URL: `https://mediwise.pages.dev`
-   - Redirect URLs: add `https://mediwise.pages.dev/**`. This covers `/` (sign up), `/auth/callback` (Google) and `/reset-password` (password reset).
+   - Site URL: `https://app.mediwise.theyashgupta.me`
+   - Redirect URLs: add `https://app.mediwise.theyashgupta.me/**` and `https://mediwise.pages.dev/**`. This covers `/` (sign up), `/auth/callback` (Google) and `/reset-password` (password reset).
    - Keep `http://localhost:5173/**` only on `mediwise-dev`, not on production.
 3. Google sign-in: follow "Google sign-in" below. The web needs no new variable and no new deploy.
 
@@ -138,10 +139,10 @@ Flow: the web calls `signInWithOAuth` with `redirectTo` = `<web origin>/auth/cal
 2. Open APIs and Services, OAuth consent screen. Set user type to External.
 3. Enter the app name `MediWise`, a support email and a developer contact email.
 4. Add the scopes `openid`, `.../auth/userinfo.email` and `.../auth/userinfo.profile`. These scopes need no Google review.
-5. Add `mediwise.pages.dev` as an authorised domain.
+5. Add `theyashgupta.me` and `mediwise.pages.dev` as authorised domains.
 6. Click Publish app. While the app is in Testing, only the listed test users can sign in.
 7. Open Credentials. Click Create credentials, OAuth client ID. Select Web application. Name it `mediwise-web`.
-8. Authorised JavaScript origins: add `http://localhost:5173` and `https://mediwise.pages.dev`.
+8. Authorised JavaScript origins: add `http://localhost:5173`, `https://app.mediwise.theyashgupta.me` and `https://mediwise.pages.dev`.
 9. Authorised redirect URIs: add these two URIs.
    - `https://wjdbyuzwefmsmnbvgrdt.supabase.co/auth/v1/callback` (dev, `mediwise-dev`)
    - `https://adnvhcharmqykmlyrepq.supabase.co/auth/v1/callback` (prod, `mediwise-prod`)
@@ -166,7 +167,7 @@ skip_nonce_check = false
 1. Preview dev: `~/.claude/scripts/with-env.sh supabase config diff --workdir <scratch> --project-ref wjdbyuzwefmsmnbvgrdt`. Make sure that only `auth.external.google` shows as `update` or `local_only`.
 2. Push dev: `~/.claude/scripts/with-env.sh supabase config push --workdir <scratch> --project-ref wjdbyuzwefmsmnbvgrdt`. Answer yes only for the auth change.
 3. Do steps 1 and 2 again with `--project-ref adnvhcharmqykmlyrepq` for prod.
-4. Make sure each project has the web URL in Authentication, URL Configuration, Redirect URLs: `http://localhost:5173/**` on dev, `https://mediwise.pages.dev/**` on prod.
+4. Make sure each project has the web URL in Authentication, URL Configuration, Redirect URLs: `http://localhost:5173/**` on dev, `https://app.mediwise.theyashgupta.me/**` and `https://mediwise.pages.dev/**` on prod.
 
 ### 3. Verify
 
@@ -180,7 +181,7 @@ skip_nonce_check = false
 
 ```sh
 API_URL=https://mediwise-api-ij2v.onrender.com \
-WEB_URL=https://mediwise.pages.dev \
+WEB_URL=https://app.mediwise.theyashgupta.me \
 SUPABASE_URL=https://adnvhcharmqykmlyrepq.supabase.co \
 SUPABASE_ANON_KEY=<anon key> \
 SMOKE_EMAIL=<smoke user email> \
@@ -196,7 +197,7 @@ Do not type a secret into a shared terminal log. Load the values from a git-igno
 - GitHub Actions deploys the web and the landing page when the push changes their files (next sections).
 - Render waits for `/health` to answer 200 before it moves traffic to the new deploy. A failed health check keeps the old deploy live.
 - On `SIGTERM` the API lets the job in hand finish, then exits.
-- A wrangler deploy with `--branch` set to any name other than `main` is a preview. CORS blocks preview URLs, because `WEB_ORIGIN` names the production origin only.
+- A wrangler deploy with `--branch` set to any name other than `main` is a preview. CORS blocks preview URLs, because `CORS_ORIGINS` names the production origins only.
 
 ## Deploy the web
 
@@ -208,18 +209,18 @@ Do not type a secret into a shared terminal log. Load the values from a git-igno
 - It builds with `pnpm turbo run build --filter @mediwise/web` and the values from the table in Environment variables. Then `cloudflare/wrangler-action` uploads `apps/web/dist` to the project `mediwise`, branch `main`.
 - A newer push cancels a deploy that is still running.
 - The job summary shows the production URL and the URL of this deploy.
-- The last step loads `https://mediwise.pages.dev` and fails when the page has no `MediWise` title.
+- The last step loads `https://app.mediwise.theyashgupta.me` and fails when the page has no `MediWise` title.
 
 ### Manual fallback
 
 Use this when GitHub Actions is down. Run from the repository root of the main checkout, on an up-to-date `main`:
 
 ```sh
-(cd apps/web && set -a && . ./.env.prod && set +a && VITE_API_URL=https://mediwise-api-ij2v.onrender.com pnpm build)
+(cd apps/web && set -a && . ./.env.prod && set +a && VITE_API_URL=https://mediwise-api-ij2v.onrender.com VITE_APP_ORIGIN=https://app.mediwise.theyashgupta.me VITE_LANDING_URL=https://mediwise.theyashgupta.me pnpm build)
 npx wrangler pages deploy apps/web/dist --project-name mediwise --branch main
 ```
 
-The first line builds with the production variables. It sets `VITE_API_URL` on the command line, because an empty value in `.env.prod` makes the web call `http://localhost:3001`. The second line uploads `apps/web/dist` as the production deploy of `https://mediwise.pages.dev`. Wrangler prints a URL for the new deploy.
+The first line builds with the production variables. It sets `VITE_API_URL` on the command line, because an empty value in `.env.prod` makes the web call `http://localhost:3001`. It also sets the two public origins, because without them the OG tags and the manifest name `http://localhost:5173`. The second line uploads `apps/web/dist` as the production deploy of `https://app.mediwise.theyashgupta.me`. Wrangler prints a URL for the new deploy.
 
 ## Deploy the landing page
 
@@ -227,24 +228,74 @@ The first line builds with the production variables. It sets `VITE_API_URL` on t
 
 - It starts on a push to `main` that changes `apps/landing`, `packages`, `pnpm-lock.yaml`, `apps/api/src/modules/payments/payments.config.ts` or the brand files in `apps/web/public` (favicons, `apple-touch-icon.png`, `og-image.png`).
 - It uploads `apps/landing/out` to the project `mediwise-landing`, branch `main`.
-- The last step loads `https://mediwise-landing.pages.dev` and fails when the page has no `MediWise` title.
+- The last step loads `https://mediwise.theyashgupta.me` and fails when the page has no `MediWise` title.
 
 ### Manual fallback
 
-The landing page is a static Next.js export. It has no environment variables. Run from the repository root of the main checkout, on an up-to-date `main`:
+The landing page is a static Next.js export. Run from the repository root of the main checkout, on an up-to-date `main`:
 
 ```sh
-pnpm turbo run build --filter @mediwise/landing
+NEXT_PUBLIC_SITE_URL=https://mediwise.theyashgupta.me NEXT_PUBLIC_APP_URL=https://app.mediwise.theyashgupta.me \
+  pnpm turbo run build --filter @mediwise/landing
 npx wrangler pages deploy apps/landing/out --project-name mediwise-landing --branch main
 ```
 
 - The first line builds `packages/engine` and `packages/shared` first, then writes the page to `apps/landing/out`. The build needs network access, because `next/font` downloads Inter, Instrument Serif and JetBrains Mono from Google Fonts.
 - The build copies the favicons and `og-image.png` from `apps/web/public`. After the logo changes, run `node scripts/generate-brand-assets.mjs`, then build and deploy the landing page again.
 - The prices come from `apps/api/src/modules/payments/payments.config.ts` and the counts come from the engine catalog when the page builds. After a change to either file, build and deploy the landing page again.
-- The links to the app (Sign in, Read my report, the policy pages) point to `https://mediwise.pages.dev`. The address is in `apps/landing/src/lib/site.ts`.
+- The links to the app (Sign in, Read my report, the policy pages) point to `NEXT_PUBLIC_APP_URL`. Without the two variables, every link and the canonical URL name `localhost`.
 - The project `mediwise-landing` exists. Do not create it again. A deploy with `--branch` set to any name other than `main` is a preview.
 
 To check a build before you deploy it, serve `apps/landing/out` with a static server that compresses, such as `npx serve apps/landing/out`. Python's `http.server` does not compress, so Lighthouse scores it too low.
+
+## Custom domains
+
+The landing page is at `https://mediwise.theyashgupta.me`. The app is at `https://app.mediwise.theyashgupta.me`. The pages.dev addresses stay live as aliases. A sign-in on an alias returns to that alias, because the web sends `window.location.origin` as the redirect.
+
+### Steps (orchestrator)
+
+The orchestrator did steps 1 to 4 on 2026-10-13. Do them again only for a new domain.
+
+1. DNS at GoDaddy, domain `theyashgupta.me`. Add two CNAME records:
+   - `mediwise` to `mediwise-landing.pages.dev`
+   - `app.mediwise` to `mediwise.pages.dev`
+2. Cloudflare Pages. Add one custom domain to each project:
+   - Project `mediwise-landing`: `mediwise.theyashgupta.me`
+   - Project `mediwise`: `app.mediwise.theyashgupta.me`
+   Wait until each domain shows Active.
+3. Supabase, Authentication, URL Configuration, on both projects:
+   - `mediwise-prod`: Site URL `https://app.mediwise.theyashgupta.me`. Redirect URLs `https://app.mediwise.theyashgupta.me/**` and `https://mediwise.pages.dev/**`.
+   - `mediwise-dev`: keep Site URL `http://localhost:5173` and Redirect URL `http://localhost:5173/**`.
+4. Google Cloud, Credentials, `mediwise-web`, Authorised JavaScript origins: add `https://app.mediwise.theyashgupta.me`. Keep `https://mediwise.pages.dev` and `http://localhost:5173`. The redirect URIs do not change, because Google returns to Supabase.
+5. Render, `mediwise-api`, Environment: set `CORS_ORIGINS` to `https://app.mediwise.theyashgupta.me,https://mediwise.pages.dev`. Do this after the merge of MEDI-50. Until then the API reads `WEB_ORIGIN`.
+6. Run the smoke test with `WEB_URL=https://app.mediwise.theyashgupta.me`. Every line must say `PASS`.
+
+### Values for each deploy
+
+| App | Variable | Value |
+|---|---|---|
+| API (Render) | `CORS_ORIGINS` | `https://app.mediwise.theyashgupta.me,https://mediwise.pages.dev` |
+| Web (`deploy-web.yml`) | `VITE_APP_ORIGIN` | `https://app.mediwise.theyashgupta.me` |
+| Web (`deploy-web.yml`) | `VITE_LANDING_URL` | `https://mediwise.theyashgupta.me` |
+| Landing (`deploy-landing.yml`) | `NEXT_PUBLIC_SITE_URL` | `https://mediwise.theyashgupta.me` |
+| Landing (`deploy-landing.yml`) | `NEXT_PUBLIC_APP_URL` | `https://app.mediwise.theyashgupta.me` |
+
+- `VITE_APP_ORIGIN` goes into the OG and Twitter tags, `site.webmanifest` (`start_url`, `scope`), `robots.txt` and `sitemap.xml` of the app. Default `http://localhost:5173`.
+- `VITE_LANDING_URL` is the "About MediWise" link in the app footer, also on the sign-in page. Default `http://localhost:3000`.
+- `NEXT_PUBLIC_SITE_URL` goes into the canonical link, the OG tags, `sitemap.xml` and `robots.txt` of the landing page. Default `http://localhost:3000`.
+- `NEXT_PUBLIC_APP_URL` is the target of every sign-in, sign-up and policy link on the landing page. Default `http://localhost:5173`.
+
+### Check
+
+1. Open `https://mediwise.theyashgupta.me/robots.txt` and `/sitemap.xml`. Each URL starts with `https://mediwise.theyashgupta.me`.
+2. Open `https://app.mediwise.theyashgupta.me/site.webmanifest`. `start_url` and `scope` are `https://app.mediwise.theyashgupta.me/`.
+3. Check CORS:
+
+   ```sh
+   curl -sI -H "Origin: https://app.mediwise.theyashgupta.me" https://mediwise-api-ij2v.onrender.com/health | grep -i access-control-allow-origin
+   ```
+
+   The answer names the origin. An origin outside the list gets no `Access-Control-Allow-Origin` header.
 
 ## Database migrations
 
@@ -288,7 +339,7 @@ Run these from `apps/api` with the target environment loaded.
 - Security headers on every response (`hono/secure-headers`).
 - Request body limit of 100 KB. Files go to Supabase Storage through signed URLs, so the API receives JSON only.
 - `POST /reports`: 10 per hour per user. The 11th answers 429 with `Retry-After`.
-- CORS allows `WEB_ORIGIN` only.
+- CORS allows the origins in `CORS_ORIGINS` only.
 
 ## Report credits
 
@@ -330,7 +381,7 @@ Do the steps in this order. Do not set a flag to `true` before step 5 is complet
 5. Database. Make sure that `0013` and `0014` are on `mediwise-prod` (see Before you merge MEDI-33).
 6. API flag. On the Render service, set `PAYMENTS_ENABLED=true`. Restart the service.
 7. Web flag. In GitHub, Settings, Secrets and variables, Actions, Variables, set `VITE_PAYMENTS_ENABLED` to `true` and `VITE_CASHFREE_MODE` to `production`. Run the deploy again: Actions, `deploy-web`, Run workflow.
-8. Check. Sign in on `https://mediwise.pages.dev/credits`. Buy the 1-credit pack with a real payment. Make sure that the balance increases by 1. Refund the payment in the Cashfree dashboard. Make sure that the balance decreases by 1. Call `GET /admin/spend` and make sure that `purchases` is 1.
+8. Check. Sign in on `https://app.mediwise.theyashgupta.me/credits`. Buy the 1-credit pack with a real payment. Make sure that the balance increases by 1. Refund the payment in the Cashfree dashboard. Make sure that the balance decreases by 1. Call `GET /admin/spend` and make sure that `purchases` is 1.
 
 To turn off payments, set both flags to `false`. A payment that arrives while the API flag is `false` gets a 404. Cashfree retries it 3 times in about 45 minutes and then stops. Give those credits with `credits:grant`.
 

@@ -1,0 +1,31 @@
+import { afterEach, expect, test, vi } from "vitest";
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.resetModules();
+});
+
+test("every link to the app uses NEXT_PUBLIC_APP_URL without a trailing slash", async () => {
+  vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://app.mediwise.theyashgupta.me/");
+  const { appLinks } = await import("./site");
+  expect(appLinks.signIn).toBe("https://app.mediwise.theyashgupta.me/login");
+  expect(appLinks.signUp).toBe("https://app.mediwise.theyashgupta.me/signup");
+});
+
+test("the sitemap and robots.txt name NEXT_PUBLIC_SITE_URL", async () => {
+  vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://mediwise.theyashgupta.me");
+  const { default: sitemap } = await import("../app/sitemap");
+  const { default: robots } = await import("../app/robots");
+  expect(sitemap()).toEqual([{ url: "https://mediwise.theyashgupta.me/" }]);
+  expect(robots().sitemap).toBe("https://mediwise.theyashgupta.me/sitemap.xml");
+});
+
+test("without the variables the links stay on the local dev servers", async () => {
+  vi.stubEnv("NEXT_PUBLIC_SITE_URL", "");
+  vi.stubEnv("NEXT_PUBLIC_APP_URL", "");
+  const { appUrl, siteUrl } = await import("./site");
+  expect({ appUrl, siteUrl }).toEqual({
+    appUrl: "http://localhost:5173",
+    siteUrl: "http://localhost:3000",
+  });
+});
