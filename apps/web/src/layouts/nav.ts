@@ -32,6 +32,7 @@ export const pages: Record<AppRouteId, Page> = {
   "/_app/compare": { name: "compare", parent: "/_app/trends/" },
   "/_app/profiles": { name: "profiles" },
   "/_app/year-review": { name: "yearReview", parent: "/_app/profiles" },
+  "/_app/episodes/$episodeId": { name: "episode", parent: "/_app/profiles" },
   "/_app/settings": { name: "settings" },
   "/_app/credits": { name: "credits", parent: "/_app/settings" },
   "/_app/dev/kitchen-sink": { name: "kitchenSink" },

@@ -91,6 +91,7 @@ export function TrendContainer() {
               value: point.value,
               status: point.status,
               linked: point.linked,
+              episode: point.episode,
               lab: {
                 name: point.labName,
                 range: point.labRange,

@@ -20,6 +20,7 @@ export const common = {
     labChanged: "Lab changed at this result",
     labChangedShort: "lab changed",
     linked: "Repeat or linked report",
+    episode: "Episode",
     linkedShort: "repeat",
     lab: "Lab",
     notPrinted: "Not printed",
