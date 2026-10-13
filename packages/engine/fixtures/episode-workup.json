@@ -1,0 +1,218 @@
+{
+  "yearly": {
+    "id": "e1000000-0000-4000-8000-000000000000",
+    "date": "2024-09-10"
+  },
+  "visits": [
+    {
+      "reportId": "e1000000-0000-4000-8000-000000000001",
+      "date": "2025-02-03",
+      "labName": "Made-up Diagnostics",
+      "markers": [
+        {
+          "markerKey": "testosterone_total",
+          "value": 78,
+          "valueText": null,
+          "unit": "ng/dL",
+          "status": "watch",
+          "calibratedLow": 15,
+          "calibratedHigh": 70
+        },
+        {
+          "markerKey": "lh",
+          "value": 14.2,
+          "valueText": null,
+          "unit": "mIU/mL",
+          "status": "watch",
+          "calibratedLow": 2,
+          "calibratedHigh": 10
+        },
+        {
+          "markerKey": "fsh",
+          "value": 5.1,
+          "valueText": null,
+          "unit": "mIU/mL",
+          "status": "optimal",
+          "calibratedLow": 3,
+          "calibratedHigh": 10
+        },
+        {
+          "markerKey": "tsh",
+          "value": 4.6,
+          "valueText": null,
+          "unit": "µIU/mL",
+          "status": "risk",
+          "calibratedLow": 0.5,
+          "calibratedHigh": 2.5
+        },
+        {
+          "markerKey": "insulin_fasting",
+          "value": 16,
+          "valueText": null,
+          "unit": "µIU/mL",
+          "status": "watch",
+          "calibratedLow": 2,
+          "calibratedHigh": 10
+        },
+        {
+          "markerKey": "prolactin",
+          "value": 18,
+          "valueText": null,
+          "unit": "ng/mL",
+          "status": "optimal",
+          "calibratedLow": 4,
+          "calibratedHigh": 23
+        }
+      ],
+      "studies": []
+    },
+    {
+      "reportId": "e1000000-0000-4000-8000-000000000002",
+      "date": "2025-02-10",
+      "labName": "Made-up Imaging",
+      "markers": [],
+      "studies": [
+        {
+          "id": "e2000000-0000-4000-8000-000000000001",
+          "kind": "ultrasound",
+          "bodyRegion": "Pelvis",
+          "impression": "Uterus is normal in size.\nA 34 mm simple cyst in the left ovary.",
+          "result": null,
+          "measurements": []
+        }
+      ]
+    },
+    {
+      "reportId": "e1000000-0000-4000-8000-000000000003",
+      "date": "2025-02-24",
+      "labName": "Made-up Diagnostics",
+      "markers": [
+        {
+          "markerKey": "tsh",
+          "value": 3.9,
+          "valueText": null,
+          "unit": "µIU/mL",
+          "status": "watch",
+          "calibratedLow": 0.5,
+          "calibratedHigh": 2.5
+        },
+        {
+          "markerKey": "free_t4",
+          "value": 1.1,
+          "valueText": null,
+          "unit": "ng/dL",
+          "status": "optimal",
+          "calibratedLow": 0.9,
+          "calibratedHigh": 1.7
+        },
+        {
+          "markerKey": "anti_tpo",
+          "value": 85,
+          "valueText": null,
+          "unit": "IU/mL",
+          "status": "risk",
+          "calibratedLow": null,
+          "calibratedHigh": 34
+        }
+      ],
+      "studies": [
+        {
+          "id": "e2000000-0000-4000-8000-000000000002",
+          "kind": "ultrasound",
+          "bodyRegion": "Neck",
+          "impression": "A 6 mm nodule in the right lobe of the thyroid.",
+          "result": null,
+          "measurements": []
+        }
+      ]
+    },
+    {
+      "reportId": "e1000000-0000-4000-8000-000000000004",
+      "date": "2025-03-03",
+      "labName": "Made-up Diagnostics",
+      "markers": [
+        {
+          "markerKey": "testosterone_total",
+          "value": 64,
+          "valueText": null,
+          "unit": "ng/dL",
+          "status": "watch",
+          "calibratedLow": 15,
+          "calibratedHigh": 70
+        },
+        {
+          "markerKey": "insulin_fasting",
+          "value": 13,
+          "valueText": null,
+          "unit": "µIU/mL",
+          "status": "watch",
+          "calibratedLow": 2,
+          "calibratedHigh": 10
+        },
+        {
+          "markerKey": "glucose_fasting",
+          "value": 92,
+          "valueText": null,
+          "unit": "mg/dL",
+          "status": "optimal",
+          "calibratedLow": 70,
+          "calibratedHigh": 99
+        },
+        {
+          "markerKey": "hba1c",
+          "value": 5.6,
+          "valueText": null,
+          "unit": "%",
+          "status": "watch",
+          "calibratedLow": 4,
+          "calibratedHigh": 5.6
+        }
+      ],
+      "studies": []
+    },
+    {
+      "reportId": "e1000000-0000-4000-8000-000000000005",
+      "date": "2025-03-17",
+      "labName": "Made-up Imaging",
+      "markers": [
+        {
+          "markerKey": "tsh",
+          "value": 2.4,
+          "valueText": null,
+          "unit": "µIU/mL",
+          "status": "optimal",
+          "calibratedLow": 0.5,
+          "calibratedHigh": 2.5
+        },
+        {
+          "markerKey": "testosterone_total",
+          "value": 52,
+          "valueText": null,
+          "unit": "ng/dL",
+          "status": "optimal",
+          "calibratedLow": 15,
+          "calibratedHigh": 70
+        },
+        {
+          "markerKey": "lh",
+          "value": 9.8,
+          "valueText": null,
+          "unit": "mIU/mL",
+          "status": "optimal",
+          "calibratedLow": 2,
+          "calibratedHigh": 10
+        }
+      ],
+      "studies": [
+        {
+          "id": "e2000000-0000-4000-8000-000000000003",
+          "kind": "ultrasound",
+          "bodyRegion": "pelvis",
+          "impression": "Both ovaries are normal in size. No cyst is seen.",
+          "result": null,
+          "measurements": []
+        }
+      ]
+    }
+  ]
+}
