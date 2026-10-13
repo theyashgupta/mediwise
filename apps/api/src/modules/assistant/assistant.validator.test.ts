@@ -384,4 +384,19 @@ describe("validateAnswer", () => {
       "unknown_ref",
     );
   });
+
+  test("treatment_word: a cited marker name such as fasting insulin or Cystatin C is not a treatment word", () => {
+    refs.set("R7:insulin_fasting", {
+      cite: { kind: "value", reportId: "r7", target: "insulin_fasting" },
+      fact: "insulin_fasting: Fasting insulin. R7:insulin_fasting 16.8 µIU/mL watch, 15 Sep 2026",
+      dates: ["2026-09-15"],
+      numbers: [16.8],
+      names: ["Fasting insulin"],
+    });
+    expect(
+      rules("Your fasting insulin was 16.8 µIU/mL on 15 Sep 2026.", ["R7:insulin_fasting"]),
+    ).toEqual([]);
+    expect(rules("Ask your doctor about insulin shots.", ["R6:hba1c"])).toContain("treatment_word");
+    expect(rules("Ask your doctor about rosuvastatin.", ["R6:hba1c"])).toContain("treatment_word");
+  });
 });

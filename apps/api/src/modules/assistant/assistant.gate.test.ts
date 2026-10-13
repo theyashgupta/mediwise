@@ -24,6 +24,7 @@ describe("gateQuestion", () => {
     "I overdosed on my pills",
     "There is pain in my chest",
     "I have trouble breathing",
+    "I can\u200Bnot breathe",
   ])("%s is an emergency", (question) => {
     expect(gateQuestion(question)).toBe("emergency");
   });

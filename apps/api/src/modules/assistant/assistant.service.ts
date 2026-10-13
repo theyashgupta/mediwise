@@ -115,7 +115,9 @@ async function store(row: Parameters<typeof repo.insertQuestion>[0]) {
     return await repo.insertQuestion(row);
   } catch (error) {
     const code = (error as { cause?: { code?: string } }).cause?.code ?? "unknown";
+    if (code === "23503" && row.focusReportId) return store({ ...row, focusReportId: null });
     log.error(`assistant insert failed code=${code}`);
+    if (code === "23503") throw new AppError(404, "We could not find this profile");
     throw new AppError(500, "We could not save this question. Try again.");
   }
 }
@@ -136,22 +138,23 @@ function logQuestion(
  * Answers one question about one profile and stores it in the chat.
  *
  * @remarks
- * The gate runs before the spend cap, so an emergency always gets its copy.
+ * The gate runs before the focus report check and the spend cap, so an emergency always gets its copy.
  */
 export async function askQuestion(userId: string, profileId: string, body: AskQuestionInput) {
   const started = Date.now();
   await getOwnedProfile(userId, profileId);
-  if (body.reportId && !(await repo.isProfileReport(profileId, body.reportId))) {
-    throw new AppError(404, "We could not find this report");
-  }
+  const focusFound = body.reportId ? await repo.isProfileReport(profileId, body.reportId) : false;
   const base = {
     userId,
     profileId,
-    focusReportId: body.reportId ?? null,
+    focusReportId: focusFound ? (body.reportId ?? null) : null,
     question: body.question,
   };
 
   const gated = gateQuestion(body.question);
+  if (!gated && body.reportId && !focusFound) {
+    throw new AppError(404, "We could not find this report");
+  }
   if (gated) {
     const row = await store({ ...base, answer: { sentences: [] }, refusalKind: gated });
     logQuestion(row.id, `gate:${gated}`, [], null, started);

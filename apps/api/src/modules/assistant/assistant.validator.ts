@@ -86,7 +86,7 @@ const quotePattern = /["“]([^"“”]+)["”]/g;
 const diagnosisWords =
   /\byou (?:may |might |could |probably |likely |possibly )?have\b|\bdiagnos(?!tics?\b)|\bdisease|\bdisorder|\bsyndrome|\bcancer|\btumou?r|\bmalignan|\bdiabetic|\bdiabetes|\bprediabetes|\bhypothyroid|\bhyperthyroid|\banaemi|\banemi|\bdeficien|\bfailure\b|\binfection|\bhypertension\b|\bpcos\b|\bpolycystic\b|\bcirrhosis\b/i;
 const treatmentWords =
-  /\bdos(e|es|age)\b|\bmg of\b|\btablets?\b|\bcapsules?\b|\bpills?\b|\btake\b|\btaking\b|\bprescri\w*|\bmedicines?\b|\bmedications?\b|\bdrugs?\b|\binsulin\b|\b\w*statins?\b|\bmetformin\b|\blevothyroxine\b|\baspirin\b|\bantibiotics?\b|\bsupplements?\b|\binjections?\b/gi;
+  /\bdos(e|es|age)\b|\bmg of\b|\btablets?\b|\bcapsules?\b|\bpills?\b|\btake\b|\btaking\b|\bprescri\w*|\bmedicines?\b|\bmedications?\b|\bdrugs?\b|\binsulin\b|\b(?:atorva|rosuva|simva|prava|pitava|fluva|lova)?statins?\b|\bmetformin\b|\blevothyroxine\b|\baspirin\b|\bantibiotics?\b|\bsupplements?\b|\binjections?\b/gi;
 const statusWords =
   /\b(normal|abnormal|fine|healthy|safe|dangerous|good|bad|serious|urgent|urgently|alarming|worrying)\b/i;
 const certaintyWords =
@@ -290,7 +290,7 @@ function checkSentence(
       .filter(({ cite }) => cite.kind === kind)
       .flatMap(({ names }) => names ?? [])
       .reduce((result, name) => result.replace(new RegExp(escape(name), "gi"), " "), from);
-  bare = strip(bare, "pattern");
+  bare = strip(strip(bare, "value"), "pattern");
   if (diagnosisWords.test(bare)) {
     add("diagnosis_word", `"${text}" uses a diagnosis word. Name a pattern only when you cite it.`);
   }

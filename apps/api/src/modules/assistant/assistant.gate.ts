@@ -9,7 +9,10 @@ const dose = /\bdos(e|es|age|ing)\b|\bhow (much|many)\b[^?.!]*\btake\b|\b\d+\s*m
  * An emergency wins over a dose because its copy carries the helpline numbers.
  */
 export function gateQuestion(question: string): "emergency" | "treatment" | undefined {
-  const text = question.replace(/[’‘]/g, "'").replace(/\s+/g, " ");
+  const text = question
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    .replace(/[’‘]/g, "'")
+    .replace(/\s+/g, " ");
   if (emergency.test(text)) return "emergency";
   if (dose.test(text)) return "treatment";
   return undefined;

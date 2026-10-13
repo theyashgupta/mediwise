@@ -454,6 +454,7 @@ function render(
       add(ref, {
         cite: { kind: "value", reportId: report.id, target: key },
         fact: `${header} ${line.trim()}${extra.length > 0 ? `, ${extra.join(", ")}` : ""}`,
+        names: [nameOf(key, marker.rawName)],
         dates: [report.date, ...(due ? [due] : [])],
         numbers: [
           ...present(

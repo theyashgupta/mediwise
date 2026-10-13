@@ -456,4 +456,32 @@ describe("assistant routes", () => {
   test("a question with a NUL character answers 400", async () => {
     expect((await ask({ question: "What was my\u0000 HbA1c?" })).status).toBe(400);
   });
+
+  test("an emergency question with a report id of another profile still gets the emergency copy", async () => {
+    const response = await ask({ question: "I have chest pain", reportId: ids.otherReport });
+    expect(response.status).toBe(201);
+    expect(await response.json()).toMatchObject({ refusalKind: "emergency", focusReportId: null });
+  });
+
+  test("a question of only zero-width characters answers 400", async () => {
+    expect((await ask({ question: "\u200B\u200B" })).status).toBe(400);
+  });
+
+  test("a focus report deleted during the call stores the question with no focus", async () => {
+    const insert = store.repo.insertQuestion;
+    let calls = 0;
+    store.repo.insertQuestion = async (row) => {
+      calls++;
+      if (row.focusReportId) {
+        throw Object.assign(new Error("fk"), { cause: { code: "23503" } });
+      }
+      return insert(row);
+    };
+    store.create.mockResolvedValueOnce(toolUse(good));
+    const response = await ask({ question: "What was my HbA1c?", reportId: ids.report });
+    store.repo.insertQuestion = insert;
+    expect(response.status).toBe(201);
+    expect(await response.json()).toMatchObject({ focusReportId: null });
+    expect(calls).toBe(2);
+  });
 });
