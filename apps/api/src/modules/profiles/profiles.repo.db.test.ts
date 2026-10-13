@@ -78,14 +78,12 @@ test("a question stored while the profile delete waits is wiped too", async () =
     .returning({ id: profiles.id });
   let deleting: Promise<void> | undefined;
   await db.transaction(async (tx) => {
-    await tx
-      .insert(assistantQuestions)
-      .values({
-        userId,
-        profileId: profile!.id,
-        question: "In flight?",
-        answer: { sentences: [] },
-      });
+    await tx.insert(assistantQuestions).values({
+      userId,
+      profileId: profile!.id,
+      question: "In flight?",
+      answer: { sentences: [] },
+    });
     deleting = deleteProfile(userId, profile!.id);
     await new Promise((resolve) => setTimeout(resolve, 200));
   });
