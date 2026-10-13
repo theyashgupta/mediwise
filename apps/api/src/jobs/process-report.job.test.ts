@@ -103,7 +103,7 @@ const edge = vi.hoisted(() => ({
   credits: { balance: 1, held: 0 },
   dateOfBirth: "1986-05-20" as string | null,
   filledBirths: [] as unknown[][],
-  previous: undefined as Visit | undefined,
+  earlier: [] as Visit[],
   note: null as string | null,
 }));
 
@@ -162,7 +162,7 @@ vi.mock("../modules/reports/reports.repo.js", () => ({
 }));
 
 vi.mock("../modules/findings/findings.repo.js", () => ({
-  findPreviousVisit: async () => edge.previous,
+  findEarlierVisits: async () => edge.earlier,
 }));
 
 /** Writes a report in the compact shape the record_extraction tool returns. */
@@ -259,7 +259,7 @@ beforeEach(() => {
   edge.credits = { balance: 1, held: 0 };
   edge.dateOfBirth = "1986-05-20";
   edge.filledBirths.length = 0;
-  edge.previous = undefined;
+  edge.earlier = [];
   edge.note = null;
   addFile(0, labPdf);
 });
@@ -424,23 +424,25 @@ test("a narrative call that throws leaves the report done without a narrative", 
   expect(report).toMatchObject({ narrative: null, narrativeStatus: "failed" });
 });
 
-test("a marker that moved status since the previous visit is stored as a change finding", async () => {
-  edge.previous = {
-    date: "2023-02-01",
-    labName: "Lakeview Lab",
-    markers: [
-      {
-        markerKey: "hemoglobin",
-        value: 10.2,
-        valueText: null,
-        unit: "g/dL",
-        status: "risk",
-        calibratedLow: 12,
-        calibratedHigh: 15.5,
-      },
-    ],
-    studies: [],
-  };
+test("a marker that moved status since its last earlier value is stored as a change finding", async () => {
+  edge.earlier = [
+    {
+      date: "2023-02-01",
+      labName: "Lakeview Lab",
+      markers: [
+        {
+          markerKey: "hemoglobin",
+          value: 10.2,
+          valueText: null,
+          unit: "g/dL",
+          status: "risk",
+          calibratedLow: 12,
+          calibratedHigh: 15.5,
+        },
+      ],
+      studies: [],
+    },
+  ];
   edge.create
     .mockResolvedValueOnce(classified("lab_panel"))
     .mockResolvedValueOnce(toolUse("record_extraction", compact(extraction)))
@@ -475,23 +477,25 @@ test("a marker that moved status since the previous visit is stored as a change 
 test("the visit note never reaches any Claude prompt, narrative and findings included", async () => {
   const note = "Zorbel note: tired for two weeks, started walking daily";
   edge.note = note;
-  edge.previous = {
-    date: "2023-02-01",
-    labName: "Lakeview Lab",
-    note,
-    markers: [
-      {
-        markerKey: "hemoglobin",
-        value: 10.2,
-        valueText: null,
-        unit: "g/dL",
-        status: "risk",
-        calibratedLow: 12,
-        calibratedHigh: 15.5,
-      },
-    ],
-    studies: [],
-  } as Visit;
+  edge.earlier = [
+    {
+      date: "2023-02-01",
+      labName: "Lakeview Lab",
+      note,
+      markers: [
+        {
+          markerKey: "hemoglobin",
+          value: 10.2,
+          valueText: null,
+          unit: "g/dL",
+          status: "risk",
+          calibratedLow: 12,
+          calibratedHigh: 15.5,
+        },
+      ],
+      studies: [],
+    } as Visit,
+  ];
   edge.create
     .mockResolvedValueOnce(classified("lab_panel"))
     .mockResolvedValueOnce(toolUse("record_extraction", compact(extraction)))

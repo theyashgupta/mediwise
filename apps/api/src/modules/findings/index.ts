@@ -1,4 +1,4 @@
-export { findPreviousVisit, findVisit, listFindings } from "./findings.repo.js";
+export { findEarlierVisits, findVisit, listFindings } from "./findings.repo.js";
 export {
   fallbackFindings,
   type Finding,

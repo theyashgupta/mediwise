@@ -7,7 +7,13 @@ import { yearReviewRoutes } from "./year-review.routes.js";
 const profileId = vi.hoisted(() => "5f0c6a8e-6c1a-4a39-9c43-2c1f7c3e2a10");
 
 const store = vi.hoisted(() => {
-  type Report = { id: string; collectedAt: string; score: number; labName: string | null };
+  type Report = {
+    id: string;
+    collectedAt: string;
+    score: number;
+    labName: string | null;
+    coverage?: number;
+  };
   type Row = {
     reportId: string;
     markerKey: string;
@@ -207,6 +213,19 @@ describe("band movement", () => {
     );
     expect(keys).not.toContain("tsh");
   });
+});
+
+test("the score compares the broadest panels and leaves out a glucose-only report", async () => {
+  store.reports.push({
+    id: "r5",
+    collectedAt: "2025-04-05",
+    score: 50,
+    labName: "Moon Labs",
+    coverage: 6,
+  });
+  const { body } = await getReview();
+  expect(body.score).toEqual({ from: 80, to: 86 });
+  expect(body.reportCount).toBe(4);
 });
 
 describe("not found", () => {

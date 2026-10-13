@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { beforeEach, expect, test, vi } from "vitest";
 import { handleError } from "../../common/problem.js";
+import { denseHistoryReports } from "../../db/dense-history.js";
 import type { AuthEnv } from "../../middleware/auth.js";
 import { compareRoutes, trendsRoutes } from "./trends.routes.js";
 
@@ -216,7 +217,7 @@ test("a marker trend returns every point and the latest calibrated range", async
   });
 });
 
-test("two reports with one collection date give one point, the newest value with its lab name", async () => {
+test("two reports with one collection date give one point, the newest value, with the other value in sameDay", async () => {
   store.reports.push({
     id: ids.third,
     profileId: ids.profile,
@@ -232,8 +233,13 @@ test("two reports with one collection date give one point, the newest value with
   });
   const { body } = await json(`/trends/ldl_cholesterol?profileId=${ids.profile}`);
   expect(body.points).toMatchObject([
-    { reportId: ids.first, value: 160, labName: "Lab" },
-    { reportId: ids.third, value: 110, labName: "Second lab" },
+    { reportId: ids.first, value: 160, labName: "Lab", sameDay: [] },
+    {
+      reportId: ids.third,
+      value: 110,
+      labName: "Second lab",
+      sameDay: [{ reportId: ids.second, value: 120, labName: "Lab", status: "watch" }],
+    },
   ]);
   expect(body.change).toEqual({ absolute: -50, percent: -31.3 });
 });
@@ -335,6 +341,37 @@ test("compare without ids uses the latest two reports, and with b alone the repo
   expect(first.body).toMatchObject({ a: null, b: { id: ids.first }, groups: [] });
 });
 
+test("compare takes any two reports, not only two in a row", async () => {
+  store.reports.push({ id: ids.third, profileId: ids.profile, collectedAt: "2026-01-10" });
+  store.rows.push({
+    reportId: ids.third,
+    markerKey: "ldl_cholesterol",
+    value: 100,
+    unit: "mg/dL",
+    status: "optimal",
+  });
+  const { body } = await json(`/compare?a=${ids.first}&b=${ids.third}`);
+  expect(body).toMatchObject({ a: { id: ids.first }, b: { id: ids.third } });
+  const rows = (body.groups as unknown as { rows: { markerKey: string }[] }[]).flatMap(
+    (group) => group.rows,
+  );
+  expect(rows).toContainEqual(
+    expect.objectContaining({ markerKey: "ldl_cholesterol", valueA: 160, valueB: 100 }),
+  );
+});
+
+test("compare puts the older report first when the pair comes newest first", async () => {
+  const { body } = await json(`/compare?a=${ids.second}&b=${ids.first}`);
+  expect(body).toMatchObject({ a: { id: ids.first }, b: { id: ids.second } });
+  expect(body.summary).toMatchObject({ improved: 1, worsened: 1 });
+});
+
+test("compare with b alone skips a report of the same date as b", async () => {
+  store.reports.push({ id: ids.third, profileId: ids.profile, collectedAt: "2025-07-10" });
+  const { body } = await json(`/compare?b=${ids.third}`);
+  expect(body).toMatchObject({ a: { id: ids.first }, b: { id: ids.third } });
+});
+
 test("compare gives a value from another unit only when the engine converts it", async () => {
   store.rows.splice(0, store.rows.length);
   store.rows.push(
@@ -385,4 +422,27 @@ test("study measurements and vitals trend in their own categories", async () => 
   ]);
   const { status } = await json(`/trends/qtc_interval?profileId=${ids.profile}`);
   expect(status).toBe(200);
+});
+
+test("the 12-report fixture gives one glucose point per day, with the same-day value kept for the tooltip", async () => {
+  store.reports.splice(0, store.reports.length);
+  store.rows.splice(0, store.rows.length);
+  denseHistoryReports("2026-10-13").forEach((report, index) => {
+    const id = `0b4c2a51-6666-4e0f-9a51-6f2b8c1d0e${String(index).padStart(2, "0")}`;
+    store.reports.push({
+      id,
+      profileId: ids.profile,
+      collectedAt: report.collectedAt,
+      labName: report.labName,
+    });
+    store.rows.push(...report.markers.map((marker) => ({ ...marker, reportId: id })));
+  });
+  const { body } = await json(`/trends/glucose_fasting?profileId=${ids.profile}`);
+  const points = body.points as { collectedAt: string; value: number; sameDay: unknown[] }[];
+  expect(points).toHaveLength(11);
+  expect(points.find(({ collectedAt }) => collectedAt === "2026-09-15")).toMatchObject({
+    value: 98,
+    sameDay: [{ value: 95, labName: "Moon Labs" }],
+  });
+  expect(body.change).toEqual({ absolute: -3, percent: -3.2 });
 });

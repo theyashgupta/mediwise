@@ -26,6 +26,7 @@ export async function listDoneReports(ownerUserId: string, profileId: string) {
       createdAt: reports.createdAt,
       score: reports.score,
       tier: reports.tier,
+      coverage: reports.coverage,
     })
     .from(reports)
     .innerJoin(profiles, eq(profiles.id, reports.profileId))

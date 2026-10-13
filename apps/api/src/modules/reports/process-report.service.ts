@@ -31,7 +31,7 @@ import {
 import { refundReport } from "../credits/index.js";
 import {
   fallbackFindings,
-  findPreviousVisit,
+  findEarlierVisits,
   type FindingsUsage,
   writeFindings,
 } from "../findings/index.js";
@@ -195,11 +195,10 @@ async function describeFindings(
   reportId: string,
   drafts: FindingDraft[],
   current: Visit,
-  previous: Visit | undefined,
   usage: FindingsUsage,
 ) {
   try {
-    return await writeFindings(drafts, [current, previous], usage);
+    return await writeFindings(drafts, [current], usage);
   } catch (error) {
     const name = error instanceof Error ? error.name : "unknown";
     log.error(`process_report report=${reportId} step=findings error=${name}`);
@@ -545,14 +544,14 @@ export async function processReport(reportId: string, usage: ReportUsage, reclas
     })),
   };
   const scored = read?.hasLab ? read : undefined;
-  const previous = await findPreviousVisit(report.profileId, reportId, current.date);
+  const earlier = await findEarlierVisits(report.profileId, reportId, current.date);
   const {
     findings: drafts,
     doctorQuestions,
     headline,
-  } = buildFindings(current, previous, scored?.output.patterns ?? []);
-  const findings = await describeFindings(reportId, drafts, current, previous, usage.findings);
-  step("findings", ` drafts=${drafts.length} kept=${findings.length} previous=${previous ? 1 : 0}`);
+  } = buildFindings(current, earlier, scored?.output.patterns ?? []);
+  const findings = await describeFindings(reportId, drafts, current, usage.findings);
+  step("findings", ` drafts=${drafts.length} kept=${findings.length} earlier=${earlier.length}`);
 
   await repo.saveReportResult(
     reportId,
