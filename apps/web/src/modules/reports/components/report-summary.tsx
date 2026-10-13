@@ -54,7 +54,7 @@ export function ReportSummary({ header, verdict }: ReportSummaryProps) {
         )}
       </div>
       {header.score !== null && tier && (
-        <ScoreRing score={header.score} tier={tier} className="size-28 sm:order-first sm:size-36" />
+        <ScoreRing score={header.score} tier={tier} size="md" className="sm:order-first" />
       )}
     </section>
   );
