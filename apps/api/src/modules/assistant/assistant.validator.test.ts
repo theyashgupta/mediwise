@@ -9,6 +9,7 @@ const refs = new Map<string, ContextRef>([
     {
       cite: { kind: "value", reportId: "r6", target: "hba1c" },
       fact: "hba1c: HbA1c, unit %, optimal 4 to 5.6. R6:hba1c 5.9 % watch, lab range 4 to 5.6, 4 Aug 2026, Sunrise Diagnostics, retest due 4 Nov 2026",
+      numbers: [5.9, 4, 5.6],
       dates: ["2026-08-04", "2026-11-04"],
     },
   ],
@@ -17,6 +18,7 @@ const refs = new Map<string, ContextRef>([
     {
       cite: { kind: "value", reportId: "r2", target: "hba1c" },
       fact: "hba1c: HbA1c, unit %. R2:hba1c 5.6 % optimal, 3 Feb 2025, Lakeview Imaging",
+      numbers: [5.6],
       dates: ["2025-02-03"],
     },
   ],
@@ -25,6 +27,7 @@ const refs = new Map<string, ContextRef>([
     {
       cite: { kind: "report", reportId: "r6", target: null },
       fact: "R6: 4 Aug 2026, Sunrise Diagnostics. Score 81 (gold), coverage 100%. One of 6 reports.",
+      numbers: [81, 100, 6],
       dates: ["2026-08-04"],
     },
   ],
@@ -33,6 +36,7 @@ const refs = new Map<string, ContextRef>([
     {
       cite: { kind: "pattern", reportId: "r6", target: "prediabetes" },
       fact: "P:prediabetes Prediabetes range. Your blood sugar may run higher than optimal.",
+      numbers: [],
       dates: ["2026-08-04"],
       names: ["Prediabetes range"],
       text: "Your blood sugar may run higher than optimal. Ask your doctor about a retest.",
@@ -43,6 +47,7 @@ const refs = new Map<string, ContextRef>([
     {
       cite: { kind: "follow_up", reportId: "r6", target: "u1" },
       fact: "U:1 Ask your doctor about a supplement for low Vitamin D. Ask your doctor whether a supplement suits you and what dose to take.",
+      numbers: [],
       dates: ["2026-08-04"],
       names: ["Ask your doctor about a supplement for low Vitamin D"],
       text: "Ask your doctor whether a supplement suits you and what dose to take.",
@@ -53,6 +58,7 @@ const refs = new Map<string, ContextRef>([
     {
       cite: { kind: "catalog", reportId: null, target: "hba1c" },
       fact: "C:hba1c HbA1c. What it is: it reflects average sugar because red cells live about three months.",
+      numbers: [],
       dates: [],
       text: "What it is: it reflects average sugar because red cells live about three months.",
     },
@@ -62,6 +68,7 @@ const refs = new Map<string, ContextRef>([
     {
       cite: { kind: "study", reportId: "r1", target: "s1" },
       fact: 'R1:S1 ultrasound, Pelvis, 10 Feb 2025, Lakeview Imaging. Impression as printed: "A 4.2 x 3.1 cm complex mass in the right adnexa."',
+      numbers: [4.2, 3.1],
       dates: ["2025-02-10"],
       names: ["ultrasound", "Pelvis", "Lakeview Imaging"],
       quotes: ["A 4.2 x 3.1 cm complex mass in the right adnexa.", "Uterus is normal in size."],
@@ -85,9 +92,24 @@ const settled: Settlement[] = [
 refs.set("L2", {
   cite: { kind: "link", reportId: "r1", target: "r2" },
   fact: 'L2: the report of 24 Mar 2025 settles a result of R1 (10 Feb 2025). Later line as printed: "No adnexal mass is seen."',
+  numbers: [4.2, 3.1],
   dates: ["2025-02-10", "2025-03-24"],
   quotes: [settled[0]!.earlier, settled[0]!.later],
   settlement: settled[0],
+});
+refs.set("R3:S1", {
+  cite: { kind: "study", reportId: "r3", target: "s3" },
+  fact: 'R3:S1 ultrasound, Abdomen, 10 Feb 2025. Impression as printed: "No evidence of malignancy."',
+  dates: ["2025-02-10"],
+  numbers: [],
+  names: ["ultrasound", "Abdomen"],
+  quotes: ["No evidence of malignancy."],
+});
+refs.set("R6:vitamin_b12", {
+  cite: { kind: "value", reportId: "r6", target: "vitamin_b12" },
+  fact: "vitamin_b12: Vitamin B12, unit pg/mL. R6:vitamin_b12 2000 pg/mL watch, 4 Aug 2026, change between the last two values -0.3",
+  dates: ["2026-08-04"],
+  numbers: [2000, -0.3],
 });
 const context = { refs, settled };
 
@@ -290,5 +312,59 @@ describe("validateAnswer", () => {
     expect(rules("Your HbA1c was 6.1% on 4 Aug 2026.", ["R6:hba1c"], "refuse")).toContain(
       "number_not_in_fact",
     );
+  });
+
+  test("wrong_date: every date form is checked against the cited dates", () => {
+    expect(rules("Your HbA1c was 5.9% on 14 Sep.", ["R6:hba1c"])).toContain("wrong_date");
+    expect(rules("Your HbA1c was 5.9% in March.", ["R6:hba1c"])).toContain("wrong_date");
+    expect(rules("Your HbA1c was 5.9% on Aug 5, 2026.", ["R6:hba1c"])).toContain("wrong_date");
+    expect(rules("Your HbA1c was 5.9% on Aug 4, 2026.", ["R6:hba1c"])).toEqual([]);
+    expect(rules("Your HbA1c was 5.9% on the 4th of August.", ["R6:hba1c"])).toEqual([]);
+    expect(rules("Your HbA1c was 5.6% in 2024.", ["R2:hba1c"])).toContain("wrong_date");
+    expect(rules("Your HbA1c was 5.6% in 2025.", ["R2:hba1c"])).toEqual([]);
+  });
+
+  test("number_not_in_fact: only the numbers of the cited fields count, with their sign", () => {
+    expect(rules("Your HbA1c rose by 2 points on 4 Aug 2026.", ["R6:hba1c"])).toContain(
+      "number_not_in_fact",
+    );
+    expect(rules("Your Vitamin B12 was 2000 pg/mL on 4 Aug 2026.", ["R6:vitamin_b12"])).toEqual([]);
+    expect(rules("The change was -0.3 pg/mL.", ["R6:vitamin_b12"])).toEqual([]);
+    expect(rules("The change was +0.3 pg/mL.", ["R6:vitamin_b12"])).toContain("number_not_in_fact");
+  });
+
+  test("a quote counts only when it holds whole printed sentences", () => {
+    expect(rules('Your abdomen ultrasound reads "No evidence of malignancy."', ["R3:S1"])).toEqual(
+      [],
+    );
+    expect(rules('Your abdomen ultrasound reads "malignancy".', ["R3:S1"])).toEqual(
+      expect.arrayContaining(["diagnosis_word", "paraphrased_study"]),
+    );
+    expect(
+      rules('Your abdomen ultrasound reads "No evidence of malignancy. You have a tumour."', [
+        "R3:S1",
+      ]),
+    ).toEqual(expect.arrayContaining(["diagnosis_word", "paraphrased_study"]));
+  });
+
+  test("uncited: a sentence with no cite fails, apart from the fixed lines", () => {
+    expect(rules("You may have PCOS.", [])).toEqual(
+      expect.arrayContaining(["uncited", "diagnosis_word"]),
+    );
+    expect(rules("Eat less sugar and walk daily.", [])).toEqual(["uncited"]);
+    expect(rules("Ask your doctor to explain it.", [])).toEqual([]);
+  });
+
+  test("unknown_ref: a word that only looks like a reference passes", () => {
+    expect(rules("The L4 level of your ultrasound is from 10 Feb 2025.", ["R1:S1"])).not.toContain(
+      "unknown_ref",
+    );
+  });
+
+  test("treatment_word: only cited follow-up or catalog text lifts a treatment word", () => {
+    expect(rules("Ask your doctor about a statin for your ultrasound.", ["R1:S1"])).toContain(
+      "treatment_word",
+    );
+    expect(rules("Ask your doctor about atorvastatin.", ["R6:hba1c"])).toContain("treatment_word");
   });
 });
