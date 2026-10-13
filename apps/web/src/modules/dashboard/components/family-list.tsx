@@ -52,7 +52,9 @@ function MemberSummary({ member, today }: { member: FamilyMember; today: Date })
       {latest.score !== null && (
         <span className="shrink-0 text-right">
           <span className="block font-mono font-medium">{latest.score}</span>
-          <span className="block text-xs text-muted-foreground capitalize">{latest.tier}</span>
+          <span className="block text-xs text-muted-foreground capitalize">
+            {latest.tier && t.report.summary.tiers[latest.tier]}
+          </span>
         </span>
       )}
     </>

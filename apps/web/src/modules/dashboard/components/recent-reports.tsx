@@ -11,7 +11,8 @@ type RecentReportsProps = {
 };
 
 export function RecentReports({ reports }: RecentReportsProps) {
-  const text = useT().dashboard.recent;
+  const t = useT();
+  const text = t.dashboard.recent;
   return (
     <Section
       id="recent-reports"
@@ -52,7 +53,7 @@ export function RecentReports({ reports }: RecentReportsProps) {
                   <span className="shrink-0 text-right">
                     <span className="block font-mono font-medium">{report.score}</span>
                     <span className="block text-xs text-muted-foreground capitalize">
-                      {report.tier}
+                      {report.tier && t.report.summary.tiers[report.tier]}
                     </span>
                   </span>
                 ) : (

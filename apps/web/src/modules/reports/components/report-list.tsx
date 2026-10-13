@@ -37,7 +37,7 @@ export function ReportList({ reports }: ReportListProps) {
                       {report.score !== null && report.tier ? (
                         <ScoreRing
                           score={report.score}
-                          tier={report.tier}
+                          tier={t.report.summary.tiers[report.tier]}
                           className="size-12 shrink-0"
                         />
                       ) : (
