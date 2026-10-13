@@ -42,4 +42,9 @@ export const shell = {
     then: "then",
   },
   footer: { nav: "About and policies", about: "About MediWise" },
+  offline: {
+    title: "You are offline",
+    body: "Connect to the internet to see your reports. MediWise keeps no report on this device.",
+  },
+  update: { available: "Update available", action: "Update" },
 };

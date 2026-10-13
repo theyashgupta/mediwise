@@ -1,5 +1,6 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
+import { listenForInstall } from "@/common/hooks/use-install-prompt";
 import { useTheme } from "@/common/hooks/use-theme";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,6 +8,7 @@ import { queryClient } from "@/config/query-client";
 import { registerServiceWorker } from "./service-worker";
 
 registerServiceWorker();
+listenForInstall();
 
 function ThemedToaster() {
   const { theme } = useTheme();
