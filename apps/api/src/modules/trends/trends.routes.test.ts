@@ -15,7 +15,13 @@ const ids = vi.hoisted(() => ({
 }));
 
 const store = vi.hoisted(() => {
-  type Report = { id: string; profileId: string; collectedAt: string; labName?: string | null };
+  type Report = {
+    id: string;
+    profileId: string;
+    collectedAt: string;
+    labName?: string | null;
+    episodeName?: string | null;
+  };
   type Row = {
     reportId: string;
     markerKey: string | null;
@@ -33,6 +39,7 @@ const store = vi.hoisted(() => {
   const links: { earlierReportId: string; laterReportId: string }[] = [];
   const header = (report: Report) => ({
     labName: "Lab",
+    episodeName: null,
     ...report,
     createdAt: new Date(`${report.collectedAt}T00:00:00Z`),
     score: 70,
@@ -242,6 +249,16 @@ test("a repeat within 30 days and a pair of linked reports mark their points as 
   expect(await linked()).toEqual([false, true, true]);
   store.links.push({ earlierReportId: ids.first, laterReportId: ids.second });
   expect(await linked()).toEqual([true, true, true]);
+});
+
+test("a point of a report inside an episode carries the episode name, the others carry null", async () => {
+  store.reports.find((report) => report.id === ids.second)!.episodeName = "Thyroid workup";
+  const { body } = await json(`/trends/ldl_cholesterol?profileId=${ids.profile}`);
+
+  expect((body.points as { episode: string | null }[]).map((point) => point.episode)).toEqual([
+    null,
+    "Thyroid workup",
+  ]);
 });
 
 test("two reports with one collection date give one point, the newest value, with the other value in sameDay", async () => {

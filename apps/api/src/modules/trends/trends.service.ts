@@ -195,6 +195,7 @@ function toSeries(
         status: statusOf(other.row),
       })),
       linked: joined[index] === true || joined[index - 1] === true,
+      episode: report.episodeName ?? null,
     })),
     labCount: new Set(days.map(({ report }) => labKey(report.labName)).filter(Boolean)).size,
     latestStatus: last ? statusOf(last.row) : "unknown",

@@ -7,15 +7,18 @@ import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
 import { PageHeader } from "@/common/components/page-header";
 import { useT } from "@/common/hooks/use-locale";
+import { EpisodesSectionContainer } from "@/modules/episodes";
 import { Button } from "@/components/ui/button";
 import { ProfileCard } from "../components/profile-card";
 import { ProfileSheet } from "../components/profile-sheet";
 import { RemoveProfileDialog } from "../components/remove-profile-dialog";
+import { useActiveProfile } from "../hooks/use-active-profile";
 import { useProfileCsv, useProfileMutations, useProfiles } from "../hooks/use-profiles";
 import type { Profile } from "../types";
 
 export function ProfilesContainer() {
   const profiles = useProfiles();
+  const { profile: active } = useActiveProfile();
   const { create, update, remove } = useProfileMutations();
   const csv = useProfileCsv();
   const [editing, setEditing] = useState<Profile | "new">();
@@ -92,6 +95,7 @@ export function ProfilesContainer() {
           {atLimit && (
             <p className="text-sm text-muted-foreground">{text.limit(maxProfilesPerUser)}</p>
           )}
+          {active && <EpisodesSectionContainer profileId={active.id} profileName={active.name} />}
         </div>
       )}
       <ProfileSheet

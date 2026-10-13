@@ -29,6 +29,7 @@ import { Route as AuthSignupRouteImport } from './routes/_auth/signup'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as ShareTokenRouteImport } from './routes/share/$token'
 import { Route as AppDevKitchenSinkRouteImport } from './routes/_app/dev/kitchen-sink'
+import { Route as AppEpisodesEpisodeIdRouteImport } from './routes/_app/episodes/$episodeId'
 import { Route as AppReportsIndexRouteImport } from './routes/_app/reports/index'
 import { Route as AppReportsReportIdRouteImport } from './routes/_app/reports/$reportId'
 import { Route as AppReportsUploadRouteImport } from './routes/_app/reports/upload'
@@ -135,6 +136,11 @@ const AppDevKitchenSinkRoute = AppDevKitchenSinkRouteImport.update({
   path: '/dev/kitchen-sink',
   getParentRoute: () => AppRoute,
 } as any)
+const AppEpisodesEpisodeIdRoute = AppEpisodesEpisodeIdRouteImport.update({
+  id: '/episodes/$episodeId',
+  path: '/episodes/$episodeId',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppReportsIndexRoute = AppReportsIndexRouteImport.update({
   id: '/reports/',
   path: '/reports/',
@@ -191,6 +197,7 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof AuthCallbackRoute
   '/share/$token': typeof ShareTokenRoute
   '/dev/kitchen-sink': typeof AppDevKitchenSinkRoute
+  '/episodes/$episodeId': typeof AppEpisodesEpisodeIdRoute
   '/reports/$reportId': typeof AppReportsReportIdRoute
   '/reports/upload': typeof AppReportsUploadRoute
   '/trends/$markerKey': typeof AppTrendsMarkerKeyRoute
@@ -218,6 +225,7 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof AuthCallbackRoute
   '/share/$token': typeof ShareTokenRoute
   '/dev/kitchen-sink': typeof AppDevKitchenSinkRoute
+  '/episodes/$episodeId': typeof AppEpisodesEpisodeIdRoute
   '/reports/$reportId': typeof AppReportsReportIdRoute
   '/reports/upload': typeof AppReportsUploadRoute
   '/trends/$markerKey': typeof AppTrendsMarkerKeyRoute
@@ -248,6 +256,7 @@ export interface FileRoutesById {
   '/share/$token': typeof ShareTokenRoute
   '/_app/': typeof AppIndexRoute
   '/_app/dev/kitchen-sink': typeof AppDevKitchenSinkRoute
+  '/_app/episodes/$episodeId': typeof AppEpisodesEpisodeIdRoute
   '/_app/reports/$reportId': typeof AppReportsReportIdRoute
   '/_app/reports/upload': typeof AppReportsUploadRoute
   '/_app/trends/$markerKey': typeof AppTrendsMarkerKeyRoute
@@ -277,6 +286,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/share/$token'
     | '/dev/kitchen-sink'
+    | '/episodes/$episodeId'
     | '/reports/$reportId'
     | '/reports/upload'
     | '/trends/$markerKey'
@@ -304,6 +314,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/share/$token'
     | '/dev/kitchen-sink'
+    | '/episodes/$episodeId'
     | '/reports/$reportId'
     | '/reports/upload'
     | '/trends/$markerKey'
@@ -333,6 +344,7 @@ export interface FileRouteTypes {
     | '/share/$token'
     | '/_app/'
     | '/_app/dev/kitchen-sink'
+    | '/_app/episodes/$episodeId'
     | '/_app/reports/$reportId'
     | '/_app/reports/upload'
     | '/_app/trends/$markerKey'
@@ -496,6 +508,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDevKitchenSinkRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/episodes/$episodeId': {
+      id: '/_app/episodes/$episodeId'
+      path: '/episodes/$episodeId'
+      fullPath: '/episodes/$episodeId'
+      preLoaderRoute: typeof AppEpisodesEpisodeIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/reports/': {
       id: '/_app/reports/'
       path: '/reports'
@@ -557,6 +576,7 @@ interface AppRouteChildren {
   AppYearReviewRoute: typeof AppYearReviewRoute
   AppIndexRoute: typeof AppIndexRoute
   AppDevKitchenSinkRoute: typeof AppDevKitchenSinkRoute
+  AppEpisodesEpisodeIdRoute: typeof AppEpisodesEpisodeIdRoute
   AppReportsReportIdRoute: typeof AppReportsReportIdRoute
   AppReportsUploadRoute: typeof AppReportsUploadRoute
   AppTrendsMarkerKeyRoute: typeof AppTrendsMarkerKeyRoute
@@ -574,6 +594,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppYearReviewRoute: AppYearReviewRoute,
   AppIndexRoute: AppIndexRoute,
   AppDevKitchenSinkRoute: AppDevKitchenSinkRoute,
+  AppEpisodesEpisodeIdRoute: AppEpisodesEpisodeIdRoute,
   AppReportsReportIdRoute: AppReportsReportIdRoute,
   AppReportsUploadRoute: AppReportsUploadRoute,
   AppTrendsMarkerKeyRoute: AppTrendsMarkerKeyRoute,

@@ -208,6 +208,20 @@ export const reportNoteSchema = z.object({
 });
 export type ReportNoteInput = z.infer<typeof reportNoteSchema>;
 
+export const maxEpisodeNoteLength = 200;
+
+/**
+ * The fields a user writes for an episode.
+ *
+ * @remarks
+ * The note is the user's own reason for the episode. It is stored and shown, but never sent to Claude.
+ */
+export const episodeFieldsSchema = z.object({
+  name: z.string().trim().min(1, "Enter a name").max(80, "Enter a name of 80 characters or fewer"),
+  note: z.string().trim().max(maxEpisodeNoteLength, "Write 200 characters or fewer"),
+});
+export type EpisodeFields = z.infer<typeof episodeFieldsSchema>;
+
 /** Body of `PATCH /me`. The name is the self profile's name. */
 export const updateMeSchema = profileFieldsSchema.pick({ name: true });
 export type UpdateMeInput = z.infer<typeof updateMeSchema>;

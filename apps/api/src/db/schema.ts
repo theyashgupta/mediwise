@@ -65,6 +65,7 @@ export const profiles = pgTable(
       hash: string;
       sentences: string[] | null;
     }>(),
+    episodeProposalDismissedOn: date("episode_proposal_dismissed_on"),
     createdAt: createdAt(),
   },
   (t) => [
@@ -96,10 +97,42 @@ export const reports = pgTable(
     narrative: jsonb().$type<Narrative>(),
     narrativeStatus: text("narrative_status", { enum: ["done", "failed"] }),
     note: text(),
+    episodeId: uuid("episode_id").references(() => episodes.id, { onDelete: "set null" }),
     error: text(),
     createdAt: createdAt(),
   },
-  (t) => [index("reports_profile_id_idx").on(t.profileId)],
+  (t) => [
+    index("reports_profile_id_idx").on(t.profileId),
+    index("reports_episode_id_idx").on(t.episodeId),
+  ],
+);
+
+/**
+ * A diagnostic workup of one profile: reports that belong together, from the day it started to the day it ended or open.
+ *
+ * @remarks
+ * A report points at its episode, so it belongs to one episode at most. `summary` caches the Claude paragraph by the hash
+ * of its input, the same way `profiles.year_review_intro` does.
+ */
+export const episodes = pgTable(
+  "episodes",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    profileId: uuid("profile_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    name: text().notNull(),
+    startedOn: date("started_on").notNull(),
+    endedOn: date("ended_on"),
+    note: text(),
+    summary: jsonb().$type<{ hash: string; sentences: string[] | null }>(),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    index("episodes_profile_id_idx").on(t.profileId),
+    check("episodes_note_length", sql`char_length(${t.note}) <= 200`),
+    check("episodes_dates", sql`${t.endedOn} is null or ${t.endedOn} >= ${t.startedOn}`),
+  ],
 );
 
 /**

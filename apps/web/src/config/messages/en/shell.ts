@@ -16,6 +16,7 @@ export const shell = {
     trend: "Trend",
     compare: "Compare reports",
     profiles: "Profiles",
+    episode: "Episode",
     yearReview: "Year in review",
     settings: "Settings",
     credits: "Report credits",

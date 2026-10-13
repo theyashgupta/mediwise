@@ -28,6 +28,7 @@ export const common: Messages["common"] = {
     labChanged: "इस नतीजे पर लैब बदली",
     labChangedShort: "लैब बदली",
     linked: "दोबारा जाँच या जुड़ी रिपोर्ट",
+    episode: "एपिसोड",
     linkedShort: "दोबारा जाँच",
     lab: "लैब",
     notPrinted: "छपा नहीं है",

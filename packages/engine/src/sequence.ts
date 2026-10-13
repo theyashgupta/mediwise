@@ -27,7 +27,7 @@ function region(study: Pick<VisitStudy, "bodyRegion">) {
     .trim();
 }
 
-function sameStudy(a: VisitStudy, b: VisitStudy) {
+export function sameStudy(a: VisitStudy, b: VisitStudy) {
   return (
     a.kind === b.kind && a.kind !== "examination" && region(a) !== "" && region(a) === region(b)
   );

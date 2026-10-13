@@ -6,6 +6,7 @@ import { LoadingState } from "@/common/components/loading-state";
 import { useT } from "@/common/hooks/use-locale";
 import { downloadFile } from "@/common/utils/download";
 import { Button } from "@/components/ui/button";
+import { EpisodeCardContainer } from "@/modules/episodes";
 import { ConsentPromptContainer, useActiveProfile } from "@/modules/profiles";
 import { ReportFailed, useRetryReport } from "@/modules/reports";
 import { YearReviewCardContainer } from "@/modules/year-review";
@@ -98,6 +99,7 @@ export function DashboardContainer() {
           />
         )}
         {data?.latest && <LatestReportCard report={data.latest} />}
+        {data?.latest && <EpisodeCardContainer profileId={profile?.id} />}
         {data?.latest && <YearReviewCardContainer profileId={profile?.id} />}
         {retests && retests.length > 0 && (
           <RetestList retests={retests} today={new Date()} onAddToCalendar={addToCalendar} />

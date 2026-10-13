@@ -10,6 +10,7 @@ import { PageHeader } from "@/common/components/page-header";
 import { GlassButton } from "@/common/components/surface/glass";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ReportEpisodeContainer } from "@/modules/episodes";
 import { DeleteReportDialog } from "../components/delete-report-dialog";
 import { DoctorQuestions } from "../components/doctor-questions";
 import { FindingList } from "../components/finding-list";
@@ -183,6 +184,7 @@ export function ReportContainer() {
             onUpdate={(linkId, state) => links.update.mutate({ reportId, linkId, state })}
             onLink={(otherId, kind) => links.link.mutate({ reportId, otherId, kind })}
           />
+          <ReportEpisodeContainer reportId={reportId} profileId={report.data.profileId} />
           <ReportNote
             key={reportId}
             note={report.data.note}

@@ -36,6 +36,7 @@ type ValuePoint = {
   linked?: boolean;
   lab?: LabInfo;
   sameDay?: { value: number; labName: string | null }[];
+  episode?: string | null;
 };
 
 type ValueChartProps = {
@@ -213,6 +214,7 @@ export function ValueChart({ points, band, bandLabel, unit, precision, today }: 
                       value: format(other.value),
                     }))}
                     unit={unit}
+                    episode={point.episode}
                   />
                 );
               }}

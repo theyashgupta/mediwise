@@ -18,6 +18,7 @@ export const shell: Messages["shell"] = {
     trend: "ट्रेंड",
     compare: "रिपोर्ट की तुलना करें",
     profiles: "प्रोफ़ाइल",
+    episode: "एपिसोड",
     yearReview: "साल का सार",
     settings: "सेटिंग",
     credits: "रिपोर्ट क्रेडिट",
