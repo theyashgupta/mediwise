@@ -5,11 +5,12 @@ import {
   derived,
   type Marker,
   markers,
-  repeatMarkerDays,
+  repeatsMarker,
   studyMarkers,
   type TextLocale,
   toCanonical,
   trendDirection,
+  typicalGapDays,
 } from "@mediwise/engine";
 import { AppError } from "../../common/errors.js";
 import { listLinkedPairs } from "../links/index.js";
@@ -138,7 +139,7 @@ export function visitDate(report: Pick<StoredReport, "collectedAt" | "createdAt"
  * Reports of one collection date are one visit, and the newest report's value wins that date. The other values of
  * that date ride along in `sameDay`, so the chart draws one point per day and the tooltip still shows each value.
  * Only points in the unit of the latest point are kept, so a series never mixes units.
- * A point is linked when it and the point next to it come from linked reports or lie 30 days or fewer apart.
+ * A point is linked when it and the point next to it come from linked reports or the next one repeats it by `repeatsMarker`.
  */
 function toSeries(
   entry: Marker,
@@ -146,6 +147,7 @@ function toSeries(
   picked: Map<string, Map<string, StoredRow>>,
   pairs: Set<string>,
 ) {
+  const typicalGap = typicalGapDays(ordered.map(visitDate));
   type Found = { report: StoredReport; row: StoredRow; value: number };
   const byDate = new Map<string, Found[]>();
   for (const report of ordered) {
@@ -164,12 +166,12 @@ function toSeries(
   const previous = days.at(-2);
   const change = last && previous ? computeChange(previous.value, last.value) : null;
   const labChange = labChanges(days.map(({ report }) => report.labName));
-  const joined = days.map(({ report }, index) => {
+  const joined = days.map(({ report, row }, index) => {
     const next = days[index + 1]?.report;
     return (
       next !== undefined &&
       (pairs.has(`${report.id}:${next.id}`) ||
-        daysBetween(visitDate(report), visitDate(next)) <= repeatMarkerDays)
+        repeatsMarker(daysBetween(visitDate(report), visitDate(next)), row.status, typicalGap))
     );
   });
   const optimal = { low: last?.row.calibratedLow ?? null, high: last?.row.calibratedHigh ?? null };
@@ -256,6 +258,39 @@ export async function getTrend(userId: string, profileId: string, markerKey: str
   const series = toSeries(known.entry, ordered, pickRows(rows), new Set(pairs));
   if (series.points.length === 0) throw notFound;
   return series;
+}
+
+/**
+ * Finds each marker's newest value from a date before this report, in this report's unit.
+ *
+ * @remarks
+ * Each marker looks back on its own, so a glucose-only report in between never hides the full panel before it.
+ * A report of the same collection date is the same visit, so it never gives an earlier value.
+ */
+export async function listEarlierValues(userId: string, reportId: string) {
+  const notFound = new AppError(404, "We could not find this report");
+  const profileId = await repo.findReportProfileId(userId, reportId);
+  if (!profileId) throw notFound;
+  const [ordered, rows] = await Promise.all([
+    repo.listDoneReports(userId, profileId),
+    repo.listMarkerRows(userId, profileId),
+  ]);
+  const current = ordered.find((report) => report.id === reportId);
+  if (!current) throw notFound;
+  const picked = pickRows(rows);
+  const earlier = ordered.filter((report) => visitDate(report) < visitDate(current)).reverse();
+  return [...(picked.get(reportId) ?? [])].flatMap(([markerKey, row]) => {
+    const entry = catalog.get(markerKey)!.entry;
+    for (const report of earlier) {
+      const found = picked.get(report.id)?.get(markerKey);
+      const value = found ? valueInUnit(entry, found, row.unit) : null;
+      if (value !== null) {
+        const { id, labName, collectedAt, createdAt } = report;
+        return [{ markerKey, value, reportId: id, labName, collectedAt, createdAt }];
+      }
+    }
+    return [];
+  });
 }
 
 function toHeader(report: StoredReport) {

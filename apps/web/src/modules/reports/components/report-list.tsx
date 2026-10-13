@@ -38,7 +38,8 @@ export function ReportList({ reports }: ReportListProps) {
                         <ScoreRing
                           score={report.score}
                           tier={t.report.summary.tiers[report.tier]}
-                          className="size-12 shrink-0"
+                          size="sm"
+                          className="shrink-0"
                         />
                       ) : (
                         <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">

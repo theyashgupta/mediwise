@@ -6,6 +6,7 @@ import {
   retestDueDate,
   sameScoreScale,
   type TextLocale,
+  typicalGapDays,
 } from "@mediwise/engine";
 import { getOwnedProfile } from "../profiles/index.js";
 import * as repo from "./dashboard.repo.js";
@@ -13,8 +14,6 @@ import * as repo from "./dashboard.repo.js";
 const recentLimit = 5;
 const moveFirstLimit = 3;
 const latestLimit = 60;
-const cadenceDates = 5;
-const dayMs = 86_400_000;
 const catalogByKey = new Map([...markers, ...derived].map((entry) => [entry.key, entry]));
 
 type AssessedMarker = Awaited<ReturnType<typeof repo.listAssessedMarkers>>[number];
@@ -116,22 +115,6 @@ function isNewer(row: FamilyRow, than: FamilyRow) {
   if (!row.date || !row.uploadedAt) return false;
   if (!than.date || !than.uploadedAt) return true;
   return row.date === than.date ? row.uploadedAt > than.uploadedAt : row.date > than.date;
-}
-
-/**
- * Gives the median number of days between the newest report dates of a profile, or null with fewer than three dates.
- *
- * @remarks
- * The web uses it to tell a weekly history from a yearly one, so the stale line fits how often this person tests.
- */
-export function typicalGapDays(dates: string[]) {
-  const newest = [...new Set(dates)].sort().slice(-cadenceDates);
-  if (newest.length < 3) return null;
-  const gaps = newest
-    .slice(1)
-    .map((date, i) => (Date.parse(date) - Date.parse(newest[i]!)) / dayMs)
-    .sort((a, b) => a - b);
-  return gaps[Math.floor(gaps.length / 2)]!;
 }
 
 /**

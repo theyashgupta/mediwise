@@ -3,7 +3,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { AppError } from "../../common/errors.js";
 import { getOwnedProfile } from "../profiles/index.js";
 import { ageOn, getReport, getReportDetail } from "../reports/index.js";
-import { compareReports } from "../trends/index.js";
+import { listEarlierValues } from "../trends/index.js";
 import * as repo from "./shares.repo.js";
 
 const dayMs = 24 * 60 * 60 * 1000;
@@ -42,38 +42,6 @@ export async function endShare(userId: string, reportId: string, shareId: string
   }
 }
 
-type DatedReport = { collectedAt: string | null; createdAt: Date };
-
-const visitDate = (report: DatedReport) =>
-  report.collectedAt ?? report.createdAt.toISOString().slice(0, 10);
-
-/**
- * Finds the values of the profile's report before this one, in this report's units.
- *
- * @remarks
- * Same rule as the doctor export in the web: a report from the same collection date is the same visit, so it is skipped.
- */
-async function previousValues(ownerUserId: string, reportId: string) {
-  const { reports, b } = await compareReports(ownerUserId, { b: reportId });
-  const previous = b
-    ? reports.filter((report) => visitDate(report) < visitDate(b)).at(-1)
-    : undefined;
-  if (!previous) return null;
-  const { groups } = await compareReports(ownerUserId, { a: previous.id, b: reportId });
-  return {
-    labName: previous.labName,
-    collectedAt: previous.collectedAt,
-    createdAt: previous.createdAt,
-    values: Object.fromEntries(
-      groups.flatMap(({ rows }) =>
-        rows.flatMap((row) =>
-          row.statusA !== null && row.valueA !== null ? [[row.markerKey, row.valueA]] : [],
-        ),
-      ),
-    ) as Record<string, number | string>,
-  };
-}
-
 /**
  * Loads the export behind an open link and records the open.
  *
@@ -84,9 +52,9 @@ export async function getSharedExport(token: string, locale: TextLocale = "en") 
   const share = await repo.findOpenShare(hashToken(token));
   if (!share) throw new AppError(404, "This link has ended");
   const report = await getReportDetail(share.ownerUserId, share.reportId, locale);
-  const [profile, previous] = await Promise.all([
+  const [profile, earlier] = await Promise.all([
     getOwnedProfile(share.ownerUserId, report.profileId),
-    previousValues(share.ownerUserId, share.reportId),
+    listEarlierValues(share.ownerUserId, share.reportId),
   ]);
   await repo.insertShareOpen(share.id);
   const { header } = report;
@@ -116,6 +84,6 @@ export async function getSharedExport(token: string, locale: TextLocale = "en") 
       studies: report.studies.map((study) => ({ ...study, fileName: null, filmName: null })),
       files: { images: report.files.images.map((_name, index) => `Image ${index + 1}`) },
     },
-    previous,
+    earlier,
   };
 }

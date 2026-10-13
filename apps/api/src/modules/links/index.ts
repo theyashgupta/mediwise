@@ -1,8 +1,8 @@
 export { linksRoutes } from "./links.routes.js";
 export {
-  listLaterVisits,
   listLinkedPairs,
   listReportLinks,
+  loadLaterVisits,
   loadSequence,
   proposeLinks,
   settleStored,

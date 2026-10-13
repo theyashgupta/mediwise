@@ -71,6 +71,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { locales, messages } from "@/config/messages";
 
 const themes = ["light", "dark"] as const;
 
@@ -391,9 +392,22 @@ function Specimens() {
 
       <Specimen title="ScoreRing">
         <div className="flex flex-wrap gap-6">
-          <ScoreRing score={46} tier="Silver" className="size-28" />
-          <ScoreRing score={78} tier="Gold" className="size-28" />
-          <ScoreRing score={100} tier="Apex" className="size-28" />
+          <ScoreRing score={46} tier="Silver" size="md" />
+          <ScoreRing score={78} tier="Gold" size="md" />
+          <ScoreRing score={100} tier="Apex" size="md" />
+        </div>
+        <div className="mt-6 flex flex-wrap items-center gap-6" data-testid="score-ring-widest">
+          {locales.flatMap((locale) =>
+            (["sm", "md", "lg"] as const).map((size) => (
+              <div key={`${locale}-${size}`} lang={locale}>
+                <ScoreRing
+                  score={89}
+                  tier={messages[locale].report.summary.tiers.platinum}
+                  size={size}
+                />
+              </div>
+            )),
+          )}
         </div>
       </Specimen>
 

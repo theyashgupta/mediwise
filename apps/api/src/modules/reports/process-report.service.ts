@@ -35,7 +35,7 @@ import {
   type FindingsUsage,
   writeFindings,
 } from "../findings/index.js";
-import { listLaterVisits, proposeLinks } from "../links/index.js";
+import { loadLaterVisits, proposeLinks } from "../links/index.js";
 import { withHeadline, writeNarrative } from "../narrative/index.js";
 import { readStudies, type StudyDraft, type StudyPage, vitalValues } from "../studies/index.js";
 import * as repo from "./reports.repo.js";
@@ -547,12 +547,12 @@ export async function processReport(reportId: string, usage: ReportUsage, reclas
   const scored = read?.hasLab ? read : undefined;
   const earlier = await findEarlierVisits(report.profileId, reportId, current.date);
   await proposeLinks(report.profileId, { ...report, id: reportId, date: current.date }, current);
-  const later = await listLaterVisits(report.profileId, reportId, current.date);
+  const { later, typicalGap } = await loadLaterVisits(report.profileId, reportId, current.date);
   const {
     findings: drafts,
     doctorQuestions,
     headline,
-  } = buildFindings(current, earlier, scored?.output.patterns ?? [], later);
+  } = buildFindings(current, earlier, scored?.output.patterns ?? [], later, typicalGap);
   const findings = await describeFindings(reportId, drafts, current, usage.findings);
   step(
     "findings",

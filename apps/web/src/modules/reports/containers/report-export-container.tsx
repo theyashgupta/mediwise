@@ -6,9 +6,9 @@ import { EmptyState } from "@/common/components/empty-state";
 import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
 import { useProfiles } from "@/modules/profiles";
-import { useComparison } from "@/modules/trends";
+import { useEarlierValues } from "@/modules/trends";
 import { ReportExport } from "../components/report-export";
-import { dateOptions, previousReport, previousValues, profileDetails } from "../config/export";
+import { dateOptions, profileDetails } from "../config/export";
 import { useReportTranslation } from "../hooks/use-report-translation";
 import { useReport } from "../hooks/use-reports";
 import { ShareReportContainer } from "./share-report-container";
@@ -35,20 +35,10 @@ function Content() {
   const { reportId } = route.useParams();
   const report = useReport(reportId);
   const profiles = useProfiles();
-  const reports = useComparison({ b: reportId });
-  const previous = reports.data?.b
-    ? previousReport(reports.data.reports, reports.data.b)
-    : undefined;
-  const paired = useComparison({ a: previous?.id, b: previous ? reportId : undefined });
-  const comparing = reports.isPending || (previous !== undefined && paired.isPending);
-  const comparisonFailed = reports.isError || paired.isError;
+  const earlier = useEarlierValues(reportId, report.data?.status === "done");
   const { translating } = useReportTranslation(reportId, report.data?.translation);
   const ready =
-    report.data?.status === "done" &&
-    profiles.isSuccess &&
-    !comparing &&
-    !comparisonFailed &&
-    !translating;
+    report.data?.status === "done" && profiles.isSuccess && earlier.isSuccess && !translating;
   usePrintWhenReady(ready);
 
   if (report.isPending || profiles.isPending) return <LoadingState variant="page" />;
@@ -60,9 +50,10 @@ function Content() {
       <ErrorState message={t.reports.export.profileError} onRetry={() => profiles.refetch()} />
     );
   }
-  if (comparisonFailed) {
-    const failed = reports.isError ? reports : paired;
-    return <ErrorState message={t.reports.export.previousError} onRetry={() => failed.refetch()} />;
+  if (earlier.isError) {
+    return (
+      <ErrorState message={t.reports.export.previousError} onRetry={() => earlier.refetch()} />
+    );
   }
   if (report.data.status !== "done") {
     return (
@@ -74,16 +65,12 @@ function Content() {
     );
   }
 
-  if (comparing) return <LoadingState variant="page" />;
+  if (earlier.isPending) return <LoadingState variant="page" />;
 
   return (
     <ReportExport
       report={report.data}
-      previous={
-        previous && paired.data
-          ? { report: previous, values: previousValues(paired.data.groups) }
-          : undefined
-      }
+      earlier={earlier.data}
       person={profileDetails(profiles.data.find((profile) => profile.id === report.data.profileId))}
       generatedOn={new Date().toLocaleDateString(getIntlTag(), dateOptions)}
       onPrint={() => window.print()}

@@ -144,7 +144,7 @@ export async function getReportDetail(userId: string, id: string, locale: TextLo
     : [[], [], undefined];
   const read = buildReportDetail(report, rows, storedFollowUps, insights, locale);
   const settled = sequence
-    ? settleStored(id, sequence.current, sequence.later, {
+    ? settleStored(id, sequence, {
         findings: storedFindings,
         doctorQuestions: read.doctorQuestions,
         narrative: read.narrative,
