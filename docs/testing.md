@@ -99,7 +99,7 @@ A spec file, `apps/e2e/tests/follow-up.spec.ts`, signs up another user with thre
 
 A spec file, `apps/e2e/tests/checkout.spec.ts`, buys the 5 credit pack on the credits page with payments on. See [No Cashfree call](#no-cashfree-call).
 
-A spec file, `apps/e2e/tests/offline.spec.ts`, runs against a production build of the web, because the dev server keeps no app shell. It signs up a user and checks that Chrome reports no installability error. It checks that Cache Storage holds only the app shell and no API response. Then it reloads the page offline and checks that the service worker serves the shell with the offline state.
+A spec file, `apps/e2e/tests/offline.spec.ts`, runs against a production build of the web, because the dev server keeps no app shell. It signs up a user and checks that Chrome reports no installability error. It checks that Cache Storage holds only the app shell and no API response. Then it opens a new page offline, as a user opens the installed app, and checks that the service worker serves the shell with the offline state. A reload does not work for this check, because Chromium resets `navigator.onLine` to true on a reload under Playwright.
 
 ### No Claude call
 
