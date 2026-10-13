@@ -83,3 +83,10 @@ export {
 } from "./episode.js";
 export { patterns } from "./patterns/catalog.js";
 export { alertKeys } from "./patterns/study-alerts.js";
+export {
+  categoryLabel,
+  localizeAlertHeadline,
+  localizeFollowUp,
+  localizeVerdict,
+} from "./localize.js";
+export { hindiReviewMarkdown } from "./catalog/review.js";

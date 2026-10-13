@@ -105,3 +105,15 @@ export { normalizeName } from "./find-marker.js";
 export * from "./schema.js";
 export { sources } from "./sources.js";
 export { studyMarkers } from "./studies.js";
+export {
+  devanagariWordCount,
+  type FollowUpText,
+  hindiCopyProblems,
+  hindiSentences,
+  markerText,
+  type MarkerText,
+  patternText,
+  type PatternText,
+  textLocales,
+  type TextLocale,
+} from "./text.js";
