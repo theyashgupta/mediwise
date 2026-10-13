@@ -1,5 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
-import { apiEnv, apiPort, webEnv, webOrigin } from "./local-env";
+import { apiEnv, apiPort, shellOrigin, webEnv, webOrigin } from "./local-env";
 
 const ci = Boolean(process.env.CI);
 
@@ -34,6 +34,13 @@ export default defineConfig({
       env: webEnv,
       reuseExistingServer: false,
       timeout: 120_000,
+    },
+    {
+      command: `pnpm turbo run build --filter @mediwise/web && pnpm --filter @mediwise/web exec vite preview --port ${new URL(shellOrigin).port} --strictPort`,
+      url: shellOrigin,
+      env: { ...webEnv, VITE_APP_ORIGIN: shellOrigin },
+      reuseExistingServer: false,
+      timeout: 180_000,
     },
   ],
 });

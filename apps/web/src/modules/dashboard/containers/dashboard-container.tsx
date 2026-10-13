@@ -13,6 +13,8 @@ import { YearReviewCardContainer } from "@/modules/year-review";
 import { AttentionList } from "../components/attention-list";
 import { DashboardGreeting } from "../components/dashboard-greeting";
 import { FamilyList } from "../components/family-list";
+import { InstallBanner } from "../components/install-banner";
+import { InstallHintSheet } from "../components/install-hint-sheet";
 import { LatestReportCard } from "../components/latest-report-card";
 import { NewSinceStrip } from "../components/new-since-strip";
 import { ProcessingCard } from "../components/processing-card";
@@ -24,6 +26,7 @@ import { isMeasuredRecently } from "../config/report-age";
 import { useDashboard } from "../hooks/use-dashboard";
 import { useDismissedForSession } from "../hooks/use-dismissed-for-session";
 import { useFamily } from "../hooks/use-family";
+import { useInstallOffer } from "@/common/hooks/use-install-prompt";
 import type { RetestDate } from "../types";
 
 function UploadButton() {
@@ -44,6 +47,7 @@ export function DashboardContainer() {
   const dashboard = useDashboard(profile?.id);
   const family = useFamily();
   const retry = useRetryReport();
+  const install = useInstallOffer();
   const data = dashboard.data;
   const isEmpty = data?.recent.length === 0;
   const lastFailed = data?.recent[0]?.status === "failed" ? data.recent[0] : undefined;
@@ -69,6 +73,10 @@ export function DashboardContainer() {
       <DashboardGreeting firstName={profile?.name.split(" ")[0]} now={new Date()} />
       <div className="space-y-10">
         <ConsentPromptContainer />
+        {install.offer === "banner" && (
+          <InstallBanner onInstall={() => void install.install()} onDismiss={install.dismiss} />
+        )}
+        <InstallHintSheet open={install.offer === "ios-hint"} onClose={install.close} />
         {profile && incomplete && (
           <ProfilePrompt
             title={text.incomplete.title(profile.name)}
