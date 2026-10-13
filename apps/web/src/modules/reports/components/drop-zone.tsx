@@ -3,6 +3,12 @@ import { FileUp } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
+const photoTips = [
+  "Use daylight or a bright room.",
+  "Fit one full page in each photo.",
+  "Hold the phone flat above the page.",
+];
+
 type DropZoneProps = {
   disabled: boolean;
   onFiles: (files: File[]) => void;
@@ -37,6 +43,11 @@ export function DropZone({ disabled, onFiles }: DropZoneProps) {
           Up to <span className="font-mono">{maxFiles}</span> PDFs or photos,{" "}
           <span className="font-mono">{maxFileBytes / 1024 / 1024}</span> MB each and{" "}
           <span className="font-mono">{maxTotalBytes / 1024 / 1024}</span> MB in total
+        </span>
+        <span className="flex flex-wrap justify-center gap-x-4 gap-y-1 pt-2 text-xs text-muted-foreground">
+          {photoTips.map((tip) => (
+            <span key={tip}>{tip}</span>
+          ))}
         </span>
       </span>
       <input
