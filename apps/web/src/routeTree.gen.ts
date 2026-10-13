@@ -26,6 +26,7 @@ import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AuthResetPasswordRouteImport } from './routes/_auth/reset-password'
 import { Route as AuthSignupRouteImport } from './routes/_auth/signup'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
+import { Route as ShareTokenRouteImport } from './routes/share/$token'
 import { Route as AppDevKitchenSinkRouteImport } from './routes/_app/dev/kitchen-sink'
 import { Route as AppReportsIndexRouteImport } from './routes/_app/reports/index'
 import { Route as AppReportsReportIdRouteImport } from './routes/_app/reports/$reportId'
@@ -118,6 +119,11 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShareTokenRoute = ShareTokenRouteImport.update({
+  id: '/share/$token',
+  path: '/share/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppDevKitchenSinkRoute = AppDevKitchenSinkRouteImport.update({
   id: '/dev/kitchen-sink',
   path: '/dev/kitchen-sink',
@@ -176,6 +182,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof AuthResetPasswordRoute
   '/signup': typeof AuthSignupRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/share/$token': typeof ShareTokenRoute
   '/dev/kitchen-sink': typeof AppDevKitchenSinkRoute
   '/reports/$reportId': typeof AppReportsReportIdRoute
   '/reports/upload': typeof AppReportsUploadRoute
@@ -201,6 +208,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof AuthResetPasswordRoute
   '/signup': typeof AuthSignupRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/share/$token': typeof ShareTokenRoute
   '/dev/kitchen-sink': typeof AppDevKitchenSinkRoute
   '/reports/$reportId': typeof AppReportsReportIdRoute
   '/reports/upload': typeof AppReportsUploadRoute
@@ -228,6 +236,7 @@ export interface FileRoutesById {
   '/_auth/reset-password': typeof AuthResetPasswordRoute
   '/_auth/signup': typeof AuthSignupRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/share/$token': typeof ShareTokenRoute
   '/_app/': typeof AppIndexRoute
   '/_app/dev/kitchen-sink': typeof AppDevKitchenSinkRoute
   '/_app/reports/$reportId': typeof AppReportsReportIdRoute
@@ -256,6 +265,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/auth/callback'
+    | '/share/$token'
     | '/dev/kitchen-sink'
     | '/reports/$reportId'
     | '/reports/upload'
@@ -281,6 +291,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/auth/callback'
+    | '/share/$token'
     | '/dev/kitchen-sink'
     | '/reports/$reportId'
     | '/reports/upload'
@@ -307,6 +318,7 @@ export interface FileRouteTypes {
     | '/_auth/reset-password'
     | '/_auth/signup'
     | '/auth/callback'
+    | '/share/$token'
     | '/_app/'
     | '/_app/dev/kitchen-sink'
     | '/_app/reports/$reportId'
@@ -326,6 +338,7 @@ export interface RootRouteChildren {
   RefundsRoute: typeof RefundsRoute
   TermsRoute: typeof TermsRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
+  ShareTokenRoute: typeof ShareTokenRoute
   ReportsReportIdExportRoute: typeof ReportsReportIdExportRoute
 }
 
@@ -450,6 +463,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/share/$token': {
+      id: '/share/$token'
+      path: '/share/$token'
+      fullPath: '/share/$token'
+      preLoaderRoute: typeof ShareTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app/dev/kitchen-sink': {
       id: '/_app/dev/kitchen-sink'
       path: '/dev/kitchen-sink'
@@ -568,6 +588,7 @@ const rootRouteChildren: RootRouteChildren = {
   RefundsRoute: RefundsRoute,
   TermsRoute: TermsRoute,
   AuthCallbackRoute: AuthCallbackRoute,
+  ShareTokenRoute: ShareTokenRoute,
   ReportsReportIdExportRoute: ReportsReportIdExportRoute,
 }
 export const routeTree = rootRouteImport

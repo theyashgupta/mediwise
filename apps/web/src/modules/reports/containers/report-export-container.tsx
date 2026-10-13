@@ -7,8 +7,9 @@ import { LoadingState } from "@/common/components/loading-state";
 import { useProfiles } from "@/modules/profiles";
 import { useComparison } from "@/modules/trends";
 import { ReportExport } from "../components/report-export";
-import { previousReport, previousValues } from "../config/export";
+import { dateOptions, previousReport, previousValues, profileDetails } from "../config/export";
 import { useReport } from "../hooks/use-reports";
+import { ShareReportContainer } from "./share-report-container";
 
 const route = getRouteApi("/reports/$reportId/export");
 
@@ -80,13 +81,10 @@ function Content() {
           ? { report: previous, values: previousValues(paired.data.groups) }
           : undefined
       }
-      profile={profiles.data.find((profile) => profile.id === report.data.profileId)}
-      generatedOn={new Date().toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      })}
+      person={profileDetails(profiles.data.find((profile) => profile.id === report.data.profileId))}
+      generatedOn={new Date().toLocaleDateString("en-IN", dateOptions)}
       onPrint={() => window.print()}
+      actions={<ShareReportContainer reportId={reportId} />}
     />
   );
 }

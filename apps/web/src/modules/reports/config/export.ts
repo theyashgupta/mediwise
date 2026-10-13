@@ -1,6 +1,10 @@
+import { formatPlainDate } from "@/common/utils/date";
 import { formatRange } from "@/common/utils/range-scale";
+import { type Profile, sexLabels } from "@/modules/profiles";
 import type { Comparison } from "@/modules/trends";
-import type { MarkerRow } from "../types";
+import type { ExportDetail, MarkerRow } from "../types";
+
+export const dateOptions = { day: "numeric", month: "short", year: "numeric" } as const;
 
 /** Writes a stored range as text for the export table, or a dash when the lab printed none. */
 export function rangeText(range: MarkerRow["labRange"]) {
@@ -17,6 +21,34 @@ export function valueText(value: number | null, text: string | null, precision =
 /** Names the date of birth row, so a doctor sees when the date came from a printed age. */
 export function birthDateTerm(approximate: boolean | undefined) {
   return approximate ? "Date of birth (approximate)" : "Date of birth";
+}
+
+/** Lists the profile rows the signed-in export prints above the lab details. */
+export function profileDetails(profile: Profile | undefined): ExportDetail[] {
+  return [
+    ["Name", profile?.name],
+    [
+      birthDateTerm(profile?.dateOfBirthApproximate),
+      profile?.dateOfBirth ? formatPlainDate(profile.dateOfBirth, dateOptions) : null,
+    ],
+    ["Sex", profile?.sex ? sexLabels[profile.sex] : null],
+  ];
+}
+
+/**
+ * Lists the person rows of a shared export: first name and age only.
+ *
+ * @remarks
+ * A share link can be passed on, so the page never shows the full name or the date of birth.
+ */
+export function sharedPersonDetails(person: {
+  firstName: string;
+  age: number | null;
+}): ExportDetail[] {
+  return [
+    ["First name", person.firstName],
+    ["Age", person.age === null ? null : `${person.age} years`],
+  ];
 }
 
 /** Returns the unit to print, or a dash for a ratio or a missing unit. */

@@ -9,6 +9,7 @@ import { ProfileSwitcherContainer, useActiveProfile } from "@/modules/profiles";
 import { DropZone } from "../components/drop-zone";
 import { FilePreviewList } from "../components/file-preview-list";
 import { sharedFilesLine } from "../config/shared-files";
+import { usePhotoFlags } from "../hooks/use-photo-flags";
 import { useSelectedFiles } from "../hooks/use-selected-files";
 import { useSharedFiles } from "../hooks/use-shared-files";
 import { useUploadReport } from "../hooks/use-upload-report";
@@ -18,6 +19,7 @@ export function UploadReportContainer() {
   const { profile } = useActiveProfile();
   const me = useMe();
   const selected = useSelectedFiles();
+  const photoFlags = usePhotoFlags(selected.files);
   const sharedCount = useSharedFiles(selected.add);
   const { upload, progress } = useUploadReport();
   const uploading = upload.isPending;
@@ -64,6 +66,7 @@ export function UploadReportContainer() {
           <FilePreviewList
             files={selected.files}
             progress={progress}
+            photoFlags={photoFlags}
             uploading={uploading}
             onRemove={(index) => {
               upload.reset();

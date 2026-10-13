@@ -14,3 +14,16 @@ export type Study = ReportDetail["studies"][number];
 export type MarkerFilter = "all" | "attention";
 
 export type Finding = ReportDetail["findings"][number];
+
+export type ShareLink = InferResponseType<
+  (typeof api.reports)[":id"]["share"]["$get"],
+  200
+>[number];
+
+export type SharedReport = InferResponseType<(typeof api.share)[":token"]["$get"], 200>;
+
+export type ExportReport = Omit<SharedReport["report"], "studies"> & {
+  studies: Omit<Study, "fileName" | "filmName">[];
+};
+
+export type ExportDetail = [term: string, detail: string | null | undefined];

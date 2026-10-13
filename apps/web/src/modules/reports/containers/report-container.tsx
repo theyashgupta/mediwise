@@ -29,6 +29,8 @@ import { useDeleteReport } from "../hooks/use-delete-report";
 import { useReport } from "../hooks/use-reports";
 import { useRetryReport } from "../hooks/use-retry-report";
 import type { MarkerFilter } from "../types";
+import { SharedLinksContainer } from "./shared-links-container";
+import { ShareReportContainer } from "./share-report-container";
 
 const route = getRouteApi("/_app/reports/$reportId");
 
@@ -105,6 +107,7 @@ export function ReportContainer() {
                 </Link>
               </GlassButton>
             )}
+            {status === "done" && <ShareReportContainer reportId={reportId} glass />}
             {status !== "processing" && (
               <Button
                 variant="ghost"
@@ -189,6 +192,11 @@ export function ReportContainer() {
               </TabsContent>
             </Tabs>
           )}
+        </div>
+      )}
+      {status === "done" && (
+        <div className="mt-12">
+          <SharedLinksContainer reportId={reportId} />
         </div>
       )}
       <ReportFiles files={report.data.files} className="mt-12" />
