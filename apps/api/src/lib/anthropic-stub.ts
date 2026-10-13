@@ -66,7 +66,12 @@ function studyGoldenFor(text: string) {
   return studyGoldens.find(({ labId }) => text.includes(labId));
 }
 
-/** Answers each tool the report read offers. Prose tools get no call, so the read keeps the engine text. */
+/**
+ * Answers each tool the report read offers, and the assistant tool with one fixed sentence.
+ *
+ * @remarks
+ * Prose tools get no call, so the read keeps the engine text. The assistant sentence cites R1, the oldest report.
+ */
 function toolInput(tool: string, text: string): unknown {
   switch (tool) {
     case "classify_pages": {
@@ -96,6 +101,11 @@ function toolInput(tool: string, text: string): unknown {
         })),
       };
     }
+    case "answer_question":
+      return {
+        kind: "answer",
+        sentences: [{ text: "Your first report is in MediWise.", cites: ["R1"] }],
+      };
     default:
       return undefined;
   }

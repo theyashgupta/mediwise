@@ -1,6 +1,8 @@
 import type { PatternMatch } from "@mediwise/engine";
 import {
   ancestries,
+  type AssistantAnswer,
+  assistantRefusalKinds,
   type Narrative,
   pageClasses,
   relations,
@@ -13,7 +15,7 @@ import {
   studyKinds,
 } from "@mediwise/shared";
 import { sql } from "drizzle-orm";
-import type { ReportUsage } from "../modules/extraction/index.js";
+import type { ReportUsage, StepUsage } from "../modules/extraction/index.js";
 import {
   boolean,
   check,
@@ -422,7 +424,48 @@ export const reportShareOpens = pgTable(
   (t) => [index("report_share_opens_share_id_idx").on(t.shareId)],
 );
 
-export type DeletionCounts = { profiles: number; reports: number; files: number };
+/**
+ * One question to the assistant about one profile, with the answer as shown.
+ *
+ * @remarks
+ * `answer` keeps report ids, not the references Claude saw, so a deleted report still leaves its sentence.
+ */
+export const assistantQuestions = pgTable(
+  "assistant_questions",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    userId: text("user_id").notNull(),
+    profileId: uuid("profile_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    focusReportId: uuid("focus_report_id").references(() => reports.id, { onDelete: "set null" }),
+    question: text().notNull(),
+    answer: jsonb().$type<AssistantAnswer>().notNull(),
+    refusalKind: text("refusal_kind", { enum: assistantRefusalKinds }),
+    rules: text()
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    model: text(),
+    usage: jsonb().$type<StepUsage>(),
+    costCents: doublePrecision("cost_cents").notNull().default(0),
+    charged: boolean().notNull().default(false),
+    flaggedAt: timestamp("flagged_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    index("assistant_questions_profile_id_created_at_idx").on(t.profileId, t.createdAt),
+    index("assistant_questions_user_id_idx").on(t.userId),
+    check("assistant_questions_question_length", sql`char_length(${t.question}) <= 500`),
+  ],
+);
+
+export type DeletionCounts = {
+  profiles: number;
+  reports: number;
+  files: number;
+  questions?: number;
+};
 
 /**
  * One row per account deletion, kept after the user's data is gone.
