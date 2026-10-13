@@ -112,6 +112,8 @@ export const reports = {
     moveFirst: "Move first",
     patterns: "Patterns",
     findings: "Findings",
+    sequences: "Repeat studies",
+    sequencesNote: "Each block shows one result and the later report that repeats it.",
     questions: "Questions for the doctor",
     markers: "Markers",
     studies: "Studies",

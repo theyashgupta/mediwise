@@ -94,7 +94,7 @@ const store = vi.hoisted(() => {
       listFollowUps: async () => [],
       findReportInsights: async () => undefined,
     },
-    findingsRepo: { listFindings: async () => [] },
+    findingsRepo: { listFindings: async () => [], findVisit: async () => undefined },
     profilesRepo: {
       findProfileById: async (owner: string, id: string) =>
         owner === "alice" && id === ids.profile
@@ -124,6 +124,11 @@ vi.mock("../reports/reports.repo.js", () => store.reportsRepo);
 vi.mock("../findings/findings.repo.js", () => store.findingsRepo);
 vi.mock("../profiles/profiles.repo.js", () => store.profilesRepo);
 vi.mock("../trends/trends.repo.js", () => store.trendsRepo);
+vi.mock("../links/links.repo.js", () => ({
+  listProfileLinks: async () => [],
+  listLinks: async () => [],
+  listReportsAfter: async () => [],
+}));
 
 const app = new Hono<AuthEnv>()
   .use(async (c, next) => {

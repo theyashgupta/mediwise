@@ -49,6 +49,29 @@ const liver: FindingDraft = {
   facts: ["The ultrasound impression reads: Grade I fatty liver."],
 };
 
+const settlement = {
+  state: "settled" as const,
+  reportId: "later-report",
+  date: "2025-03-24",
+  earlier: "A 4.2 x 3.1 cm complex mass in the right adnexa.",
+  later: "No adnexal mass is seen.",
+  subject: "A 4.2 x 3.1 cm complex mass in the right adnexa.",
+  alertKeys: ["mass"],
+};
+const settledAlert: FindingDraft = {
+  kind: "study_alert",
+  severity: "risk",
+  title: `Your ultrasound report says: "${settlement.earlier}"`,
+  citedKeys: [],
+  citedStudyIds: [studyId],
+  rank: 2,
+  facts: [
+    "Write that the report of 24 Mar 2025 settles it. Do not write about it as a current result.",
+  ],
+  fallback: "Settled by the report of 24 Mar 2025.",
+  settlement,
+};
+
 type Body = { number: number; body: string; citedKeys: string[] };
 type Request = {
   system: { text: string; cache_control?: unknown }[];
@@ -111,6 +134,28 @@ describe("validateFindingBody", () => {
         fasting,
       ),
     ).toEqual([]);
+  });
+
+  test("a sentence that states a settled alert line as current is rejected", () => {
+    const rules = (body: string) =>
+      validateFindingBody({ body, citedKeys: ["study_1"] }, new Set(["study_1"]), [settlement]).map(
+        ({ rule }) => rule,
+      );
+    expect(rules("The ultrasound shows a mass in the right adnexa.")).toEqual([
+      "settled_as_current",
+    ]);
+    expect(rules("The report of 24 Mar 2025 settles the mass line.")).toEqual([]);
+    expect(rules("The later ultrasound shows no mass.")).toEqual([]);
+  });
+
+  test("a sentence that names a settled marker as current is rejected", () => {
+    const marker = { alertKeys: [], subject: "Thyroid stimulating hormone", markerKey: "tsh" };
+    const problems = validateFindingBody(
+      { body: "Thyroid stimulating hormone is high.", citedKeys: ["tsh"] },
+      allowed,
+      [marker],
+    );
+    expect(problems.map(({ rule }) => rule)).toEqual(["settled_as_current"]);
   });
 
   test("the example bodies in the prompt pass every rule", () => {
@@ -189,6 +234,33 @@ describe("writeFindings", () => {
 
     expect(await writeFindings([tsh, liver], [visit], usage)).toHaveLength(2);
     expect(usage.rejections).toEqual(["missing"]);
+  });
+
+  test("a settled finding reaches the prompt as settled, and a body that calls it current is retried", async () => {
+    const current = {
+      number: 3,
+      body: "The ultrasound shows a mass in the right adnexa.",
+      citedKeys: ["study_1"],
+    };
+    const fixed = {
+      number: 3,
+      body: "The report of 24 Mar 2025 settles this line.",
+      citedKeys: ["study_1"],
+    };
+    edge.create
+      .mockResolvedValueOnce(toolUse([tshBody, liverBody, current]))
+      .mockResolvedValueOnce(toolUse([fixed]));
+    const usage: FindingsUsage = stepUsage("claude-haiku-5-5");
+
+    const findings = await writeFindings([tsh, liver, settledAlert], [visit], usage);
+
+    const [facts] = request(0).messages[0]!.content;
+    expect(facts?.text).toContain("Kind: study_alert. Severity: risk. Settled.");
+    expect(request(0).system[0]?.text).toContain(
+      "A finding marked settled is not a current result.",
+    );
+    expect(usage.rejections).toEqual(["settled_as_current"]);
+    expect(findings.at(-1)?.body).toBe(fixed.body);
   });
 
   test("no drafts make no call", async () => {

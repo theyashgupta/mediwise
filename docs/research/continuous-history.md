@@ -38,6 +38,7 @@ Status: **Fixed** in this ticket, or **Ticket** with a draft in `docs/tickets/dr
 | 21 | Home latest report card | The latest report is the main panel. | After a glucose-only report, Home leads with a score capped at 50 and one marker. | Needs a product call on which report leads Home. | Not built | Ticket: [home-lead-report](../tickets/drafts/home-lead-report.md) |
 | 22 | Doctor export, previous values | The report before holds the same panel. | After a glucose-only report, the export shows a previous value for glucose only. | Each marker shows its own last earlier value with its date. | Not built | Ticket: [export-last-values](../tickets/drafts/export-last-values.md) |
 | 23 | Compare picker labels | Two reports of one date come from two labs. | Two reports of one date from one lab have the same label. | Add the upload time or the file name to the label. | Not built | Ticket: [compare-picker-labels](../tickets/drafts/compare-picker-labels.md) |
+| 24 | Repeat marker rule (MEDI-67, merged during this ticket) | A marker measured again within 30 days is a repeat or a second opinion. | Every weekly glucose point gets the dashed "repeat or linked" ring, and each weekly report can propose a link to the report before it. | Count a 30-day repeat as a link only when the earlier value had watch or risk status, or when the profile's typical gap is longer than 30 days. Needs the MEDI-67 owner. | Not built | Ticket: [repeat-rule-cadence](../tickets/drafts/repeat-rule-cadence.md) |
 
 ## Checked and correct
 

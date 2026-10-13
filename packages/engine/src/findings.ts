@@ -10,15 +10,18 @@ import { toCanonical } from "./normalise.js";
 import { riskQuestion, runLinks } from "./patterns/run-patterns.js";
 import { alertLine } from "./patterns/study-alerts.js";
 import { withUnit } from "./rank.js";
+import { openQuestions, settleFinding } from "./sequence.js";
 import { deviation, trendDirection } from "./status.js";
 import type {
   FindingDraft,
   FindingKind,
   FindingSeverity,
+  LaterVisit,
   MarkerResult,
   PatternMatch,
   Visit,
   VisitMarker,
+  Settlement,
 } from "./types.js";
 
 const maxFindings = 12;
@@ -65,6 +68,10 @@ function monthYear(date: string) {
   return `${months[Number(date.slice(5, 7)) - 1]} ${date.slice(0, 4)}`;
 }
 
+function dayMonthYear(date: string) {
+  return `${Number(date.slice(8, 10))} ${monthYear(date)}`;
+}
+
 /**
  * Writes the two dates of a change, with the day when both fall in one month.
  *
@@ -73,9 +80,10 @@ function monthYear(date: string) {
  */
 function changeDates(from: string, to: string) {
   if (from.slice(0, 7) !== to.slice(0, 7)) return [`in ${monthYear(from)}`, `in ${monthYear(to)}`];
-  const day = (date: string) => `on ${Number(date.slice(8, 10))} ${monthYear(date)}`;
-  return [day(from), day(to)];
+  return [`on ${dayMonthYear(from)}`, `on ${dayMonthYear(to)}`];
 }
+
+export const alertHeadlineStart = "Ask your doctor about a line in your ";
 
 function preference({ row, value }: Pick<Picked, "row" | "value">) {
   if (row.status) return 0;
@@ -262,10 +270,15 @@ function alertFindings(current: Visit): Draft[] {
   });
 }
 
-/** Names the reports with an alert in one headline sentence, or returns undefined when no study has one. */
-function alertHeadline(current: Visit, findings: Draft[]) {
+/** Names the reports with an alert that no later report settles, in one headline sentence, or returns undefined. */
+export function alertHeadline(
+  current: Visit,
+  findings: Pick<FindingDraft, "kind" | "citedStudyIds" | "settlement">[],
+) {
   const alerted = new Set(
-    findings.flatMap(({ kind, citedStudyIds }) => (kind === "study_alert" ? citedStudyIds : [])),
+    findings.flatMap(({ kind, citedStudyIds, settlement }) =>
+      kind === "study_alert" && settlement?.state !== "settled" ? citedStudyIds : [],
+    ),
   );
   const names = [
     ...new Set(
@@ -275,8 +288,42 @@ function alertHeadline(current: Visit, findings: Draft[]) {
     ),
   ];
   if (names.length === 0) return undefined;
-  return `Ask your doctor about a line in your ${names.join(" and ")} ${names.length === 1 ? "report" : "reports"}.`;
+  return `${alertHeadlineStart}${names.join(" and ")} ${names.length === 1 ? "report" : "reports"}.`;
 }
+
+/**
+ * Adds what a later report says to a finding, so the body and the rank follow the latest result.
+ *
+ * @remarks
+ * A settled finding loses its note and its question, because both send the reader to the doctor about a result that a
+ * later report answers. The engine text names only the date, never a reason.
+ */
+function withSettlement(draft: Draft, settlement: Settlement | undefined): Draft {
+  if (!settlement) return draft;
+  const on = dayMonthYear(settlement.date);
+  if (settlement.state === "confirmed") {
+    return {
+      ...draft,
+      severity: settlement.severity ?? draft.severity,
+      settlement,
+      facts: [...draft.facts, `The report of ${on} repeats it. It reads: ${settlement.later}`],
+    };
+  }
+  return {
+    ...draft,
+    note: undefined,
+    askDoctor: undefined,
+    settlement,
+    facts: [
+      ...draft.facts,
+      `The report of ${on} reads: ${settlement.later}`,
+      `Write that the report of ${on} settles it. Do not write about it as a current result.`,
+    ],
+    fallback: `Settled by the report of ${on}.`,
+  };
+}
+
+const isSettled = ({ settlement }: Draft) => settlement?.state === "settled";
 
 function riskFinding({ entry, row, value }: Picked): Draft {
   const printed = withUnit(value ?? row.value, value === undefined ? (row.unit ?? "") : entry.unit);
@@ -336,8 +383,14 @@ function lastValues(earlier: Visit[]) {
  * `earlier` is newest first, and each change compares a marker with its last value in it.
  * A marker that a link or a change finding cites gets no risk or good news finding of its own.
  * Past 12 findings only core marker changes are kept, so every core marker that moved stays in the list.
+ * A finding that a later report settles goes last and outside the 12, with no question and no headline.
  */
-export function buildFindings(current: Visit, earlier: Visit[], patterns: PatternMatch[]) {
+export function buildFindings(
+  current: Visit,
+  earlier: Visit[],
+  patterns: PatternMatch[],
+  later: LaterVisit[] = [],
+) {
   const now = pickMarkers(current);
   const before = lastValues(earlier);
   const links = runLinks(
@@ -360,25 +413,29 @@ export function buildFindings(current: Visit, earlier: Visit[], patterns: Patter
       .map(riskFinding),
     ...studyFindings(current),
     ...goodNews(free.filter(({ entry, row }) => core.has(entry.key) && row.status === "optimal")),
-  ];
+  ].map((draft) => withSettlement(draft, settleFinding(draft, current, later)));
   const findings = drafts
     .toSorted(
       (a, b) =>
+        Number(isSettled(a)) - Number(isSettled(b)) ||
         severityOrder[a.severity] - severityOrder[b.severity] ||
         kindOrder[a.kind] - kindOrder[b.kind] ||
         Number(b.direction === "worsening") - Number(a.direction === "worsening") ||
         Number(core.has(b.citedKeys[0] ?? "")) - Number(core.has(a.citedKeys[0] ?? "")) ||
         catalogOrder(a) - catalogOrder(b),
     )
-    .filter((draft, index) => index < maxFindings || isCoreChange(draft))
+    .filter((draft, index) => index < maxFindings || isCoreChange(draft) || isSettled(draft))
     .map((draft, rank): FindingDraft => ({ ...draft, rank }));
   const questions = new Set([
     ...findings.flatMap(({ askDoctor }) => askDoctor ?? []),
     ...patterns.flatMap(({ askDoctor }) => askDoctor),
   ]);
+  const settled = findings.flatMap(({ settlement }) =>
+    settlement?.state === "settled" ? [settlement] : [],
+  );
   return {
     findings,
-    doctorQuestions: [...questions].slice(0, maxDoctorQuestions),
+    doctorQuestions: openQuestions([...questions], settled).slice(0, maxDoctorQuestions),
     headline: alertHeadline(current, findings),
   };
 }

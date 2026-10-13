@@ -8,6 +8,7 @@ import { chipClass } from "../config/report";
 import type { ReportDetail } from "../types";
 import { InsightCard } from "./insight-card";
 import { MarkerChip } from "./marker-chip";
+import { SequenceSteps } from "./sequence-steps";
 
 type FindingListProps = {
   reportId: string;
@@ -30,6 +31,7 @@ export function FindingList({ reportId, detail }: FindingListProps) {
             <li key={finding.title}>
               <InsightCard title={finding.title} badge={<StatusBadge status={finding.severity} />}>
                 <p className="text-sm">{finding.body}</p>
+                {finding.sequence && <SequenceSteps sequence={finding.sequence} />}
                 <ul className="mt-auto flex flex-wrap gap-1.5" aria-label={t.report.findings.cited}>
                   {chips.studies.map((study) => (
                     <li key={study.id}>

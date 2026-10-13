@@ -91,9 +91,25 @@ function saysPositive(rule: AlertRule, sentence: string) {
  * scoped negation window if real reports print that shape.
  */
 export function alertLine(texts: (string | null | undefined)[]) {
-  const sentences = texts
+  return sentencesOf(texts).find((sentence) =>
+    studyAlertRules.some((rule) => saysPositive(rule, sentence)),
+  );
+}
+
+/** Splits printed texts into trimmed lines and sentences. */
+export function sentencesOf(texts: (string | null | undefined)[]) {
+  return texts
     .flatMap((text) => (text ?? "").split(/\n|(?<=\.)\s+/))
     .map((sentence) => sentence.trim())
     .filter(Boolean);
-  return sentences.find((sentence) => studyAlertRules.some((rule) => saysPositive(rule, sentence)));
+}
+
+/** Lists the keys of every alert rule that the texts state as positive, so two studies can be compared rule by rule. */
+export function alertKeys(texts: (string | null | undefined)[]) {
+  const sentences = sentencesOf(texts);
+  return new Set(
+    studyAlertRules
+      .filter((rule) => sentences.some((sentence) => saysPositive(rule, sentence)))
+      .map(({ key }) => key),
+  );
 }

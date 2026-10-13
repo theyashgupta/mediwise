@@ -15,6 +15,14 @@ export type MarkerFilter = "all" | "attention";
 
 export type Finding = ReportDetail["findings"][number];
 
+export type SettledFinding = ReportDetail["settled"][number];
+
+export type FindingSequence = Pick<SettledFinding, "state" | "earlier" | "later">;
+
+export type ReportLink = ReportDetail["links"][number];
+
+export type LinkKind = ReportLink["kind"];
+
 export type ShareLink = InferResponseType<
   (typeof api.reports)[":id"]["share"]["$get"],
   200

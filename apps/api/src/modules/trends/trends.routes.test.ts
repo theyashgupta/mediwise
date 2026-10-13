@@ -30,6 +30,7 @@ const store = vi.hoisted(() => {
   };
   const reports: Report[] = [];
   const rows: Row[] = [];
+  const links: { earlierReportId: string; laterReportId: string }[] = [];
   const header = (report: Report) => ({
     labName: "Lab",
     ...report,
@@ -46,6 +47,7 @@ const store = vi.hoisted(() => {
   return {
     reports,
     rows,
+    links,
     profilesRepo: {
       findProfileById: async (owner: string, id: string) =>
         owner === "alice" && (id === ids.profile || id === ids.otherProfile)
@@ -76,6 +78,11 @@ const store = vi.hoisted(() => {
 });
 
 vi.mock("./trends.repo.js", () => store.repo);
+vi.mock("../links/links.repo.js", () => ({
+  listProfileLinks: async () => store.links,
+  listLinks: async () => [],
+  listReportsAfter: async () => [],
+}));
 vi.mock("../profiles/profiles.repo.js", () => store.profilesRepo);
 
 const app = new Hono<AuthEnv>()
@@ -95,6 +102,7 @@ const json = async (path: string, user = "alice") => {
 beforeEach(() => {
   store.reports.splice(0, store.reports.length);
   store.rows.splice(0, store.rows.length);
+  store.links.length = 0;
   store.reports.push(
     { id: ids.first, profileId: ids.profile, collectedAt: "2025-01-10" },
     { id: ids.second, profileId: ids.profile, collectedAt: "2025-07-10" },
@@ -215,6 +223,25 @@ test("a marker trend returns every point and the latest calibrated range", async
       { reportId: ids.second, value: 120, status: "watch" },
     ],
   });
+});
+
+test("a repeat within 30 days and a pair of linked reports mark their points as linked", async () => {
+  store.reports.push({ id: ids.third, profileId: ids.profile, collectedAt: "2025-07-25" });
+  store.rows.push({
+    reportId: ids.third,
+    markerKey: "ldl_cholesterol",
+    value: 110,
+    unit: "mg/dL",
+    status: "watch",
+  });
+  const linked = async () => {
+    const { body } = await json(`/trends/ldl_cholesterol?profileId=${ids.profile}`);
+    return (body.points as { linked: boolean }[]).map((point) => point.linked);
+  };
+
+  expect(await linked()).toEqual([false, true, true]);
+  store.links.push({ earlierReportId: ids.first, laterReportId: ids.second });
+  expect(await linked()).toEqual([true, true, true]);
 });
 
 test("two reports with one collection date give one point, the newest value, with the other value in sameDay", async () => {

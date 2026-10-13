@@ -64,5 +64,14 @@ export { retestDueDate } from "./retest.js";
 export { coverageCap, sameScoreScale, scoreFormula } from "./score.js";
 export { deviation, matchRange, trendDirection } from "./status.js";
 export type * from "./types.js";
-export { buildFindings } from "./findings.js";
+export { alertHeadline, alertHeadlineStart, buildFindings } from "./findings.js";
+export {
+  daysBetween,
+  openQuestions,
+  repeatMarkerDays,
+  repeatStudyDays,
+  repeatsStudy,
+  settleFinding,
+} from "./sequence.js";
 export { patterns } from "./patterns/catalog.js";
+export { alertKeys } from "./patterns/study-alerts.js";

@@ -1,13 +1,16 @@
 import {
   categories,
+  daysBetween,
   derived,
   type Marker,
   markers,
+  repeatMarkerDays,
   studyMarkers,
   toCanonical,
   trendDirection,
 } from "@mediwise/engine";
 import { AppError } from "../../common/errors.js";
+import { listLinkedPairs } from "../links/index.js";
 import { getOwnedProfile } from "../profiles/index.js";
 import type { CompareQuery } from "./trends.schemas.js";
 import * as repo from "./trends.repo.js";
@@ -133,11 +136,13 @@ export function visitDate(report: Pick<StoredReport, "collectedAt" | "createdAt"
  * Reports of one collection date are one visit, and the newest report's value wins that date. The other values of
  * that date ride along in `sameDay`, so the chart draws one point per day and the tooltip still shows each value.
  * Only points in the unit of the latest point are kept, so a series never mixes units.
+ * A point is linked when it and the point next to it come from linked reports or lie 30 days or fewer apart.
  */
 function toSeries(
   entry: Marker,
   ordered: StoredReport[],
   picked: Map<string, Map<string, StoredRow>>,
+  pairs: Set<string>,
 ) {
   type Found = { report: StoredReport; row: StoredRow; value: number };
   const byDate = new Map<string, Found[]>();
@@ -157,6 +162,14 @@ function toSeries(
   const previous = days.at(-2);
   const change = last && previous ? computeChange(previous.value, last.value) : null;
   const labChange = labChanges(days.map(({ report }) => report.labName));
+  const joined = days.map(({ report }, index) => {
+    const next = days[index + 1]?.report;
+    return (
+      next !== undefined &&
+      (pairs.has(`${report.id}:${next.id}`) ||
+        daysBetween(visitDate(report), visitDate(next)) <= repeatMarkerDays)
+    );
+  });
   const optimal = { low: last?.row.calibratedLow ?? null, high: last?.row.calibratedHigh ?? null };
   return {
     markerKey: entry.key,
@@ -181,6 +194,7 @@ function toSeries(
         value: other.value,
         status: statusOf(other.row),
       })),
+      linked: joined[index] === true || joined[index - 1] === true,
     })),
     labCount: new Set(days.map(({ report }) => labKey(report.labName)).filter(Boolean)).size,
     latestStatus: last ? statusOf(last.row) : "unknown",
@@ -196,15 +210,17 @@ function toSeries(
 /** Loads a profile's done reports, oldest first, and one series for each catalog marker they measure. */
 export async function listSeries(userId: string, profileId: string) {
   await getOwnedProfile(userId, profileId);
-  const [ordered, rows] = await Promise.all([
+  const [ordered, rows, pairs] = await Promise.all([
     repo.listDoneReports(userId, profileId),
     repo.listMarkerRows(userId, profileId),
+    listLinkedPairs(profileId),
   ]);
   const picked = pickRows(rows);
+  const linked = new Set(pairs);
   const keys = new Set([...picked.values()].flatMap((report) => [...report.keys()]));
   const series = [...keys].sort(byCatalogOrder).flatMap((key) => {
     const entry = catalog.get(key)?.entry;
-    return entry ? [toSeries(entry, ordered, picked)] : [];
+    return entry ? [toSeries(entry, ordered, picked, linked)] : [];
   });
   return { reports: ordered, series };
 }
@@ -227,11 +243,12 @@ export async function getTrend(userId: string, profileId: string, markerKey: str
   const notFound = new AppError(404, "This profile has no value for this marker");
   if (!known) throw notFound;
   await getOwnedProfile(userId, profileId);
-  const [ordered, rows] = await Promise.all([
+  const [ordered, rows, pairs] = await Promise.all([
     repo.listDoneReports(userId, profileId),
     repo.listMarkerRows(userId, profileId, markerKey),
+    listLinkedPairs(profileId),
   ]);
-  const series = toSeries(known.entry, ordered, pickRows(rows));
+  const series = toSeries(known.entry, ordered, pickRows(rows), new Set(pairs));
   if (series.points.length === 0) throw notFound;
   return series;
 }

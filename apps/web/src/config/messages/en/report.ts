@@ -64,6 +64,35 @@ export const report = {
     description: "What changed since your last report, and which results go together.",
     cited: "Cited in this finding",
   },
+  settled: {
+    title: "Settled",
+    description:
+      "A later report answers these results. Each line is copied from the printed reports.",
+    settledBy: (date: string) => `Settled by the report of ${date}.`,
+  },
+  sequence: {
+    confirmedBy: (date: string) => `The report of ${date} repeats this result.`,
+    steps: "Results in date order",
+  },
+  links: {
+    title: "Linked reports",
+    description:
+      "A repeat or a second opinion of a report. A later report can settle a line of an earlier report.",
+    repeatOf: (report: string, date: string) => `Repeat of ${report} on ${date}`,
+    secondOpinionOf: (report: string, date: string) => `Second opinion of ${report} on ${date}`,
+    repeatedIn: (report: string, date: string) => `Repeated in ${report} on ${date}`,
+    secondOpinionIn: (report: string, date: string) => `Second opinion in ${report} on ${date}`,
+    proposed: "MediWise found this pair. Confirm it if the later report repeats the same test.",
+    confirm: "Confirm",
+    dismiss: "Dismiss",
+    otherReport: "Report",
+    kind: "Kind",
+    kinds: { repeat: "Repeat", second_opinion: "Second opinion" },
+    add: "Link reports",
+    adding: "Linking",
+    failed: "We could not save the link. Try again.",
+    unnamed: "your report",
+  },
   moveFirst: {
     title: "Move first",
     description: "The markers to work on first, in order.",
