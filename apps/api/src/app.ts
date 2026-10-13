@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
+import { compress } from "hono/compress";
 import { contextStorage } from "hono/context-storage";
 import { cors } from "hono/cors";
 import { requestId } from "hono/request-id";
@@ -39,7 +40,8 @@ export const app = new Hono()
   .use(requestId())
   .use(requestLogger)
   .use(secureHeaders())
-  .use(cors({ origin: env.CORS_ORIGINS }))
+  .use(cors({ origin: env.CORS_ORIGINS, maxAge: 600 }))
+  .use(compress())
   .use(
     bodyLimit({
       maxSize: 100 * 1024,
