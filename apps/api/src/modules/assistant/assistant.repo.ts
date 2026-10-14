@@ -1,7 +1,10 @@
-import { and, asc, desc, eq, gt, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import {
+  type AssistantReviewVerdict,
+  assistantConsents,
   assistantQuestions,
+  assistantReviews,
   clearedQuestion,
   episodes,
   findings,
@@ -304,4 +307,178 @@ export async function flagQuestion(ownerUserId: string, id: string) {
     )
     .returning(questionColumns);
   return row;
+}
+
+const none = Promise.resolve([]);
+
+/** Loads what the chips of cited rows show, for rows of the owner's reports and episodes only. */
+export async function findCiteRows(
+  ownerUserId: string,
+  ids: {
+    reports: string[];
+    studies: string[];
+    findings: string[];
+    followUps: string[];
+    episodes: string[];
+  },
+) {
+  const [reportRows, studyRows, findingRows, followUpRows, episodeRows] = await Promise.all([
+    ids.reports.length === 0
+      ? none
+      : db
+          .select({
+            id: reports.id,
+            title: reports.title,
+            labName: reports.labName,
+            date: visitDate,
+          })
+          .from(reports)
+          .innerJoin(profiles, eq(profiles.id, reports.profileId))
+          .where(and(inArray(reports.id, ids.reports), eq(profiles.ownerUserId, ownerUserId))),
+    ids.studies.length === 0
+      ? none
+      : db
+          .select({
+            id: studies.id,
+            reportId: studies.reportId,
+            kind: studies.kind,
+            bodyRegion: studies.bodyRegion,
+            performedAt: studies.performedAt,
+            labName: reportFiles.labName,
+          })
+          .from(studies)
+          .innerJoin(reportFiles, eq(reportFiles.id, studies.reportFileId))
+          .innerJoin(reports, eq(reports.id, studies.reportId))
+          .innerJoin(profiles, eq(profiles.id, reports.profileId))
+          .where(and(inArray(studies.id, ids.studies), eq(profiles.ownerUserId, ownerUserId))),
+    ids.findings.length === 0
+      ? none
+      : db
+          .select({ id: findings.id, reportId: findings.reportId, title: findings.title })
+          .from(findings)
+          .innerJoin(reports, eq(reports.id, findings.reportId))
+          .innerJoin(profiles, eq(profiles.id, reports.profileId))
+          .where(and(inArray(findings.id, ids.findings), eq(profiles.ownerUserId, ownerUserId))),
+    ids.followUps.length === 0
+      ? none
+      : db
+          .select({ id: followUps.id, reportId: followUps.reportId, title: followUps.title })
+          .from(followUps)
+          .innerJoin(reports, eq(reports.id, followUps.reportId))
+          .innerJoin(profiles, eq(profiles.id, reports.profileId))
+          .where(and(inArray(followUps.id, ids.followUps), eq(profiles.ownerUserId, ownerUserId))),
+    ids.episodes.length === 0
+      ? none
+      : db
+          .select({ id: episodes.id, name: episodes.name, startedOn: episodes.startedOn })
+          .from(episodes)
+          .innerJoin(profiles, eq(profiles.id, episodes.profileId))
+          .where(and(inArray(episodes.id, ids.episodes), eq(profiles.ownerUserId, ownerUserId))),
+  ]);
+  return {
+    reports: reportRows,
+    studies: studyRows,
+    findings: findingRows,
+    followUps: followUpRows,
+    episodes: episodeRows,
+  };
+}
+
+export async function hasConsent(ownerUserId: string) {
+  const [row] = await db
+    .select({ userId: assistantConsents.userId })
+    .from(assistantConsents)
+    .where(eq(assistantConsents.userId, ownerUserId));
+  return row !== undefined;
+}
+
+export async function insertConsent(ownerUserId: string) {
+  await db.insert(assistantConsents).values({ userId: ownerUserId }).onConflictDoNothing();
+}
+
+/**
+ * Lists the kept questions of one UTC day from accounts that agreed to the review before they asked, oldest first.
+ *
+ * @remarks
+ * The consent join keeps a question asked before the review month, or by an account that never agreed, out of the
+ * reviewer's sight.
+ */
+export async function listReviewDay(day: string) {
+  const start = sql`(${day}::timestamp at time zone 'UTC')`;
+  return db
+    .select({
+      id: assistantQuestions.id,
+      userId: assistantQuestions.userId,
+      question: assistantQuestions.question,
+      answer: assistantQuestions.answer,
+      refusalKind: assistantQuestions.refusalKind,
+      flaggedAt: assistantQuestions.flaggedAt,
+      createdAt: assistantQuestions.createdAt,
+      verdict: assistantReviews.verdict,
+    })
+    .from(assistantQuestions)
+    .innerJoin(assistantConsents, eq(assistantConsents.userId, assistantQuestions.userId))
+    .leftJoin(assistantReviews, eq(assistantReviews.questionId, assistantQuestions.id))
+    .where(
+      and(
+        isNull(assistantQuestions.clearedAt),
+        gte(assistantQuestions.createdAt, assistantConsents.agreedAt),
+        sql`${assistantQuestions.createdAt} >= ${start}`,
+        sql`${assistantQuestions.createdAt} < ${start} + interval '1 day'`,
+      ),
+    )
+    .orderBy(asc(assistantQuestions.createdAt));
+}
+
+export async function findMarkerFacts(
+  ownerUserId: string,
+  pairs: { reportId: string; markerKey: string }[],
+) {
+  if (pairs.length === 0) return [];
+  return db
+    .select({
+      reportId: reportMarkers.reportId,
+      markerKey: reportMarkers.markerKey,
+      value: reportMarkers.value,
+      valueText: reportMarkers.valueText,
+      unit: reportMarkers.unit,
+      labRangeLow: reportMarkers.labRangeLow,
+      labRangeHigh: reportMarkers.labRangeHigh,
+      calibratedLow: reportMarkers.calibratedLow,
+      calibratedHigh: reportMarkers.calibratedHigh,
+      status: reportMarkers.status,
+    })
+    .from(reportMarkers)
+    .innerJoin(reports, eq(reports.id, reportMarkers.reportId))
+    .innerJoin(profiles, eq(profiles.id, reports.profileId))
+    .where(
+      and(
+        eq(profiles.ownerUserId, ownerUserId),
+        inArray(
+          reportMarkers.reportId,
+          pairs.map(({ reportId }) => reportId),
+        ),
+        inArray(
+          reportMarkers.markerKey,
+          pairs.map(({ markerKey }) => markerKey),
+        ),
+      ),
+    );
+}
+
+export async function upsertReview(questionId: string, verdict: AssistantReviewVerdict) {
+  await db
+    .insert(assistantReviews)
+    .values({ questionId, verdict })
+    .onConflictDoUpdate({
+      target: assistantReviews.questionId,
+      set: { verdict, reviewedAt: sql`now()` },
+    });
+}
+
+export async function countReviews() {
+  return db
+    .select({ verdict: assistantReviews.verdict, total: sql<number>`count(*)::int` })
+    .from(assistantReviews)
+    .groupBy(assistantReviews.verdict);
 }

@@ -89,7 +89,14 @@ const store = vi.hoisted(() => {
   };
 });
 
+const findings = vi.hoisted(() => new Map<string, { title: string }[]>());
+
 vi.mock("./dashboard.repo.js", () => store.repo);
+vi.mock("../findings/findings.repo.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../findings/findings.repo.js")>()),
+  listFindings: async (reportId: string) => findings.get(reportId) ?? [],
+  findVisit: async () => undefined,
+}));
 vi.mock("../profiles/profiles.repo.js", () => store.profilesRepo);
 
 const app = new Hono<AuthEnv>()
@@ -144,6 +151,7 @@ async function body() {
 }
 
 beforeEach(() => {
+  findings.clear();
   store.reports.length = 0;
   store.family.length = 0;
   store.markers.clear();
@@ -157,9 +165,34 @@ test("a profile with no reports gets an empty dashboard", async () => {
     newSince: [],
     moveFirst: [],
     retests: [],
+    newestFinding: null,
     recent: [],
     processingCount: 0,
   });
+});
+
+test("the newest finding is the top open finding of the newest report that has one", async () => {
+  store.reports.push(
+    done("full", "2026-09-15", 80),
+    glucoseOnly("week-1", "2026-09-22"),
+    glucoseOnly("week-2", "2026-09-29"),
+  );
+  findings.set("full", [{ title: "HbA1c is in the risk range" }, { title: "LDL is high" }]);
+  expect((await body()).newestFinding).toEqual({
+    reportId: "full",
+    title: "HbA1c is in the risk range",
+  });
+
+  findings.set("week-2", [{ title: "Fasting glucose is up" }]);
+  expect((await body()).newestFinding).toEqual({
+    reportId: "week-2",
+    title: "Fasting glucose is up",
+  });
+});
+
+test("reports with no finding give no newest finding", async () => {
+  store.reports.push(done("full", "2026-09-15", 80));
+  expect((await body()).newestFinding).toBeNull();
 });
 
 test("the latest done report carries its counts and the score change since the previous one", async () => {

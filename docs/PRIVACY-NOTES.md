@@ -45,6 +45,9 @@ This file records what MediWise does with the data of family members and childre
 - "Clear chat", profile deletion and account deletion remove the question text, the answer text and the refusal kind.
 - The row stays with the user id, the model, the token counts, the cost, the charged flag and the time. Profile and account deletion also remove the profile from the row.
 - These counts keep the question quota, the daily limit and the monthly Claude spend correct. The kept row holds no text.
+- In the review month (`ASSISTANT_REVIEW=true`), an account asks only after it agrees to the review on the Ask page. `assistant_consents` keeps the user id and the time it agreed.
+- The maintainer reads a sample of questions and answers with `pnpm --filter @mediwise/api assistant:review`. The sample holds only questions asked after the account agreed. The command never shows a profile name or an email.
+- Each verdict is a row in `assistant_reviews` with the question id, the verdict and the time. Account deletion removes the consent and keeps the verdict, which holds no text. The data download includes the consent.
 - Questions go to Anthropic, the same as report text. MediWise is built to follow the DPDP Act 2023 and Rules 2025. This note gives no legal advice.
 
 ## Rule 10 timeline

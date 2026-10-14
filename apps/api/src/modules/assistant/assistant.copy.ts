@@ -24,3 +24,5 @@ export const questionsPerDay = 30;
 export const minuteLimitCopy = `You can ask ${questionsPerMinute} questions in one minute. Try again later.`;
 
 export const dailyCapCopy = `You can ask ${questionsPerDay} questions in one day. Try again tomorrow.`;
+
+export const reviewConsentCopy = "Agree to the review before you ask a question.";

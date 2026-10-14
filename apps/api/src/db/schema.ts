@@ -465,6 +465,30 @@ export const assistantQuestions = pgTable(
   ],
 );
 
+/** One row per account that agreed to the human review of its questions in the review month. */
+export const assistantConsents = pgTable("assistant_consents", {
+  id: uuid().primaryKey().defaultRandom(),
+  userId: text("user_id").notNull().unique(),
+  agreedAt: timestamp("agreed_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const assistantReviewVerdicts = ["pass", "minor", "critical"] as const;
+export type AssistantReviewVerdict = (typeof assistantReviewVerdicts)[number];
+
+export const assistantReviews = pgTable(
+  "assistant_reviews",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    questionId: uuid("question_id")
+      .notNull()
+      .unique()
+      .references(() => assistantQuestions.id, { onDelete: "cascade" }),
+    verdict: text({ enum: assistantReviewVerdicts }).notNull(),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [check("assistant_reviews_verdict", sql`${t.verdict} in ('pass', 'minor', 'critical')`)],
+);
+
 export const clearedQuestion = {
   question: "",
   answer: { sentences: [] },

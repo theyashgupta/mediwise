@@ -1,14 +1,15 @@
 import { Logo } from "../../../web/src/common/components/brand/logo";
 import { LanguageSwitch } from "@/components/language-switch";
-import { messages, type Locale } from "@/config/messages";
+import { localePages, messages, type Locale } from "@/config/messages";
 import { appLinks } from "@/lib/site";
 
 export function Nav({ locale }: { locale: Locale }) {
   const t = messages[locale].site;
+  const home = localePages[locale].path;
   const links = [
-    { href: "#how-it-works", label: t.nav.howItWorks },
-    { href: "#pricing", label: t.nav.pricing },
-    { href: "#faq", label: t.nav.faq },
+    { href: `${home}#how-it-works`, label: t.nav.howItWorks },
+    { href: `${home}#pricing`, label: t.nav.pricing },
+    { href: `${home}#faq`, label: t.nav.faq },
   ];
   return (
     <header className="sticky top-0 z-40">
@@ -22,7 +23,7 @@ export function Nav({ locale }: { locale: Locale }) {
         className="relative mx-auto flex h-13 max-w-content items-center gap-8 px-4 text-sm md:h-14 md:px-8"
       >
         <a
-          href="#top"
+          href={`${home}#top`}
           className="rounded-md focus-visible:outline-2 focus-visible:outline-offset-4"
         >
           <Logo className="text-sm" />

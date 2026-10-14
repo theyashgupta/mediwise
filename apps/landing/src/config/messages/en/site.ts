@@ -16,6 +16,11 @@ export const site = {
     refunds: "Refund policy",
     contact: "Contact",
   },
+  notFound: {
+    title: "Page not found",
+    body: "This page does not exist. Check the address, or go to the home page.",
+    home: "Go to the home page",
+  },
   finalCta: {
     title: "Know what your next lab report says.",
     body: "Upload it to MediWise. You get every marker explained, a score and questions for your doctor.",

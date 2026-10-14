@@ -1,6 +1,14 @@
 import { plural } from "../plural";
 
 export const dashboard = {
+  ask: {
+    title: "Ask about your reports",
+    body: "Each answer names the report and the date of every number.",
+    changed: (marker: string) => `How has my ${marker} changed?`,
+    finding: (title: string) => `What does my report say about "${title}"?`,
+    retest: (marker: string) => `When should I retest ${marker}?`,
+    open: "Ask a question",
+  },
   greeting: {
     morning: "Good morning",
     afternoon: "Good afternoon",

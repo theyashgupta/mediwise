@@ -1,5 +1,12 @@
 import { getRouteApi, Link, useNavigate } from "@tanstack/react-router";
-import { CirclePause, FileDown, GitCompareArrows, LoaderCircle, Trash2 } from "lucide-react";
+import {
+  CirclePause,
+  FileDown,
+  GitCompareArrows,
+  LoaderCircle,
+  MessagesSquare,
+  Trash2,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useT } from "@/common/hooks/use-locale";
@@ -12,6 +19,8 @@ import { GlassButton } from "@/common/components/surface/glass";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReportEpisodeContainer } from "@/modules/episodes";
+import { useMe } from "@/modules/me";
+import { useActiveProfile } from "@/modules/profiles";
 import { DeleteReportDialog } from "../components/delete-report-dialog";
 import { DoctorQuestions } from "../components/doctor-questions";
 import { FindingList } from "../components/finding-list";
@@ -58,6 +67,9 @@ export function ReportContainer() {
   const saveTitle = useUpdateReportTitle();
   const links = useReportLinks();
   const siblings = useReports(report.data?.profileId);
+  const assistantOn = useMe().data?.assistant.enabled ?? false;
+  const { setActiveProfileId } = useActiveProfile();
+  const profileId = report.data?.profileId;
   const translation = useReportTranslation(reportId, report.data?.translation);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
@@ -123,6 +135,19 @@ export function ReportContainer() {
               <span data-testid="report-status">
                 <ReportStatusBadge status={status} />
               </span>
+            )}
+            {status === "done" && assistantOn && (
+              <GlassButton asChild>
+                <Link
+                  to="/ask"
+                  search={{ report: reportId }}
+                  data-testid="report-ask-link"
+                  onClick={() => profileId && setActiveProfileId(profileId)}
+                >
+                  <MessagesSquare aria-hidden />
+                  {t.assistant.askReport}
+                </Link>
+              </GlassButton>
             )}
             {status === "done" && (
               <GlassButton asChild>

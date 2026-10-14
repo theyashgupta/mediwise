@@ -1,5 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest";
 import {
+  cleanQuestion,
   guardianMessage,
   healthResponseSchema,
   isMinor,
@@ -98,4 +99,9 @@ test("reportFilesSchema refuses 21 files, a 30 MB file, 101 MB in total and a wr
     "Upload a PDF or photos in JPEG, PNG, HEIC or WebP",
   ]);
   expect(messages([])).toEqual(["Add a PDF or photos of your report"]);
+});
+
+test("a question of only zero-width characters and spaces cleans to an empty string", () => {
+  expect(cleanQuestion(" \u200B\u200C\u200D\u2060\uFEFF \n")).toBe("");
+  expect(cleanQuestion("  Which\u200B reports?  ")).toBe("Which reports?");
 });

@@ -1,3 +1,4 @@
+import { cleanQuestion } from "@mediwise/shared";
 import { z } from "zod";
 
 export const assistantParamsSchema = z.object({ id: z.uuid() });
@@ -5,7 +6,7 @@ export const assistantParamsSchema = z.object({ id: z.uuid() });
 export const askQuestionSchema = z.object({
   question: z
     .string()
-    .transform((text) => text.replace(/[\u200B-\u200D\uFEFF]/g, "").trim())
+    .transform(cleanQuestion)
     .pipe(
       z
         .string()

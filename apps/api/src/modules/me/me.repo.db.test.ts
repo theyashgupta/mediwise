@@ -2,7 +2,8 @@ import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { expect, test } from "vitest";
 import { db } from "../../db/client.js";
-import { assistantQuestions, deletionLog, profiles } from "../../db/schema.js";
+import { assistantConsents, assistantQuestions, deletionLog, profiles } from "../../db/schema.js";
+import { giveReviewConsent } from "../assistant/index.js";
 import { deleteAllByOwner, exportByOwner } from "./me.repo.js";
 
 async function ownerWithQuestions(questions: string[]) {
@@ -83,4 +84,21 @@ test("account deletion wipes the text of every question, keeps usage, cost and c
   }
   const [row] = await db.select().from(deletionLog).where(eq(deletionLog.userIdHash, userIdHash));
   expect(row?.counts).toEqual({ profiles: 1, reports: 0, files: 0, questions: 3 });
+});
+
+test("review consent keeps its first time, goes out with the data download and goes away with the account", async () => {
+  const owner = randomUUID();
+  await giveReviewConsent(owner);
+  const [first] = await db
+    .select({ agreedAt: assistantConsents.agreedAt })
+    .from(assistantConsents)
+    .where(eq(assistantConsents.userId, owner));
+  await giveReviewConsent(owner);
+  expect((await exportByOwner(owner)).assistantConsent).toEqual({ agreedAt: first!.agreedAt });
+
+  await deleteAllByOwner(owner, { userIdHash: "hash", files: 0 });
+  expect(
+    await db.select().from(assistantConsents).where(eq(assistantConsents.userId, owner)),
+  ).toEqual([]);
+  expect((await exportByOwner(owner)).assistantConsent).toBeNull();
 });

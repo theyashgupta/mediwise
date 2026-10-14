@@ -1,12 +1,14 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { AssistantAnswer, AssistantRefusalKind } from "@mediwise/shared";
+import { patterns } from "@mediwise/engine";
+import type { AssistantAnswer, AssistantCite, AssistantRefusalKind } from "@mediwise/shared";
+import type { AssistantReviewVerdict } from "../../db/schema.js";
 import { AppError } from "../../common/errors.js";
 import { env } from "../../config/env.js";
 import { log } from "../../middleware/logger.js";
 import { callTool, type StepUsage, stepUsage } from "../extraction/index.js";
 import { getOwnedProfile } from "../profiles/index.js";
 import { isOverBudget, stepCostCents } from "../spend/index.js";
-import { type AssistantContext, buildContext } from "./assistant.context.js";
+import { type AssistantContext, buildContext, nameOf } from "./assistant.context.js";
 import { assertQuestionLeft, type QuestionCounts, questionsLeftOf } from "../credits/index.js";
 import {
   dailyCapCopy,
@@ -14,6 +16,7 @@ import {
   questionsPerDay,
   questionsPerMinute,
   refusalCopy,
+  reviewConsentCopy,
   unavailableCopy,
 } from "./assistant.copy.js";
 import { gateQuestion } from "./assistant.gate.js";
@@ -44,6 +47,93 @@ function toItem({ answer, refusalKind, flaggedAt, ...row }: StoredQuestion) {
     copy: refusalKind ? refusalCopy[refusalKind] : null,
     flagged: flaggedAt !== null,
   };
+}
+
+const patternNames = new Map(patterns.map(({ key, name }) => [key, name]));
+
+function byId<Row extends { id: string }>(rows: Row[]) {
+  return new Map(rows.map((row) => [row.id, row]));
+}
+
+/**
+ * Gives every cite of the items the name, lab and date its chip shows.
+ *
+ * @remarks
+ * A cite whose report or episode the owner no longer has comes back `deleted` with no labels, so a deleted report or
+ * another account's report never shows a name. A cited row that a later read replaced falls back to its report title.
+ */
+async function withChips(userId: string, items: ReturnType<typeof toItem>[]) {
+  const cites = items.flatMap(({ sentences }) => sentences.flatMap(({ cites }) => cites));
+  const targets = (kind: AssistantCite["kind"]) => [
+    ...new Set(cites.flatMap((cite) => (cite.kind === kind && cite.target ? [cite.target] : []))),
+  ];
+  const rows = await repo.findCiteRows(userId, {
+    reports: [...new Set(cites.flatMap(({ reportId }) => (reportId ? [reportId] : [])))],
+    studies: targets("study"),
+    findings: targets("finding"),
+    followUps: targets("follow_up"),
+    episodes: targets("episode"),
+  });
+  const reports = byId(rows.reports);
+  const studies = byId(rows.studies);
+  const findings = byId(rows.findings);
+  const followUps = byId(rows.followUps);
+  const episodes = byId(rows.episodes);
+  const deleted = { label: null, labName: null, date: null, deleted: true };
+
+  const chip = (cite: AssistantCite) => {
+    const report = cite.reportId ? reports.get(cite.reportId) : undefined;
+    if (cite.reportId && !report) return { ...cite, ...deleted };
+    const inReport = <Row extends { reportId: string }>(row: Row | undefined) =>
+      row?.reportId === cite.reportId ? row : undefined;
+    const shown = {
+      label: report?.title ?? null,
+      labName: report?.labName ?? null,
+      date: report?.date ?? null,
+      deleted: false,
+    };
+    const target = cite.target ?? "";
+    switch (cite.kind) {
+      case "value":
+      case "catalog":
+        return { ...cite, ...shown, label: nameOf(target, target) };
+      case "study": {
+        const study = inReport(studies.get(target));
+        if (!study) return { ...cite, ...shown };
+        return {
+          ...cite,
+          ...shown,
+          label: [study.kind, study.bodyRegion].filter(Boolean).join(", "),
+          labName: study.labName ?? shown.labName,
+          date: study.performedAt ?? shown.date,
+        };
+      }
+      case "finding":
+        return { ...cite, ...shown, label: inReport(findings.get(target))?.title ?? shown.label };
+      case "follow_up":
+        return { ...cite, ...shown, label: inReport(followUps.get(target))?.title ?? shown.label };
+      case "pattern":
+        return { ...cite, ...shown, label: patternNames.get(target) ?? shown.label };
+      case "episode": {
+        const episode = episodes.get(target);
+        if (!episode) return { ...cite, ...deleted };
+        return { ...cite, ...shown, label: episode.name, date: episode.startedOn };
+      }
+      case "link":
+        return { ...cite, ...shown, label: null };
+      default:
+        return { ...cite, ...shown };
+    }
+  };
+  return items.map((item) => ({
+    ...item,
+    sentences: item.sentences.map((sentence) => ({ ...sentence, cites: sentence.cites.map(chip) })),
+  }));
+}
+
+async function withChip(userId: string, row: StoredQuestion) {
+  const [item] = await withChips(userId, [toItem(row)]);
+  return item!;
 }
 
 /** Writes the question turn: the last pairs of the chat, oldest first, the open report and the new question. */
@@ -218,6 +308,9 @@ function chargeRule(answer: AssistantAnswer, refusalKind: AssistantRefusalKind |
 export async function askQuestion(userId: string, profileId: string, body: AskQuestionInput) {
   const started = Date.now();
   await getOwnedProfile(userId, profileId);
+  if (isReviewRequired() && !(await repo.hasConsent(userId))) {
+    throw new AppError(403, reviewConsentCopy);
+  }
   const focusFound = body.reportId ? await repo.isProfileReport(profileId, body.reportId) : false;
   const base = {
     userId,
@@ -234,7 +327,7 @@ export async function askQuestion(userId: string, profileId: string, body: AskQu
     recordAsk(userId);
     const row = await store({ ...base, answer: { sentences: [] }, refusalKind: gated });
     logQuestion(row.id, `gate:${gated}`, [], null, started);
-    return toItem(row);
+    return withChip(userId, row);
   }
   await assertCanAsk(userId);
 
@@ -243,7 +336,7 @@ export async function askQuestion(userId: string, profileId: string, body: AskQu
   if (snapshot.reports.length === 0) {
     const row = await store({ ...base, answer: { sentences: [] }, refusalKind: "not_in_data" });
     logQuestion(row.id, "empty:not_in_data", [], null, started);
-    return toItem(row);
+    return withChip(userId, row);
   }
   const context = buildContext(snapshot);
   const number = new Map(
@@ -294,12 +387,12 @@ export async function askQuestion(userId: string, profileId: string, body: AskQu
         ? `refuse:${refusalKind}`
         : "answer";
   logQuestion(row.id, outcome, rules, usage, started);
-  return toItem(row);
+  return withChip(userId, row);
 }
 
 export async function listQuestions(userId: string, profileId: string) {
   await getOwnedProfile(userId, profileId);
-  return (await repo.listQuestions(userId, profileId, chatLimit)).map(toItem);
+  return withChips(userId, (await repo.listQuestions(userId, profileId, chatLimit)).map(toItem));
 }
 
 export async function clearQuestions(userId: string, profileId: string) {
@@ -311,5 +404,60 @@ export async function clearQuestions(userId: string, profileId: string) {
 export async function flagQuestion(userId: string, id: string) {
   const row = await repo.flagQuestion(userId, id);
   if (!row) throw new AppError(404, "We could not find this question");
-  return toItem(row);
+  return withChip(userId, row);
+}
+
+export function isReviewRequired() {
+  return env.ASSISTANT_ENABLED && env.ASSISTANT_REVIEW;
+}
+
+export function hasReviewConsent(userId: string) {
+  return repo.hasConsent(userId);
+}
+
+export function giveReviewConsent(userId: string) {
+  return repo.insertConsent(userId);
+}
+
+/**
+ * Loads the sampled questions of one UTC day with their chips and the stored values their value cites name.
+ *
+ * @remarks
+ * Each item is resolved as its own owner, so a cite never shows a row of another account. The owner id stays here and
+ * never reaches the item.
+ */
+export async function loadReviewDay(
+  day: string,
+  sampled: (row: { id: string; refusalKind: string | null; flagged: boolean }) => boolean,
+) {
+  const rows = (await repo.listReviewDay(day)).filter((row) =>
+    sampled({ id: row.id, refusalKind: row.refusalKind, flagged: row.flaggedAt !== null }),
+  );
+  return Promise.all(
+    rows.map(async ({ userId, ...row }) => {
+      const [item] = await withChips(userId, [toItem({ ...row, focusReportId: null })]);
+      const values = item!.sentences
+        .flatMap(({ cites }) => cites)
+        .filter((cite) => cite.kind === "value" && cite.reportId && cite.target && !cite.deleted);
+      const facts = await repo.findMarkerFacts(
+        userId,
+        values.map((cite) => ({ reportId: cite.reportId!, markerKey: cite.target! })),
+      );
+      return {
+        ...item!,
+        verdict: row.verdict,
+        facts: facts.filter((fact) =>
+          values.some((cite) => cite.reportId === fact.reportId && cite.target === fact.markerKey),
+        ),
+      };
+    }),
+  );
+}
+
+export function storeReview(questionId: string, verdict: AssistantReviewVerdict) {
+  return repo.upsertReview(questionId, verdict);
+}
+
+export function countReviews() {
+  return repo.countReviews();
 }

@@ -91,6 +91,20 @@ const store = vi.hoisted(() => {
           .toSorted((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
           .slice(0, limit)
           .map(pick),
+      findCiteRows: async () => ({
+        reports: [
+          {
+            id: "e1000000-0000-4000-8000-000000000001",
+            title: "Blood panel",
+            labName: "Sunrise Diagnostics",
+            date: "2026-08-04",
+          },
+        ],
+        studies: [],
+        findings: [],
+        followUps: [],
+        episodes: [],
+      }),
       countQuestionsToday: async () => state.today,
       insertClearedQuestion: async () => undefined,
       clearQuestions: async (userId: string, profileId: string) => {

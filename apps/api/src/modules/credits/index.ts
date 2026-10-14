@@ -12,6 +12,7 @@ export {
   findUserIdByEmail,
   getCreditBalance,
   getQuestionsLeft,
+  getQuestionState,
   grantCredits,
   questionsLeftOf,
   refundReport,

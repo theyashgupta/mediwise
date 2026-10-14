@@ -7,7 +7,7 @@ import { routeTree } from "@/routeTree.gen";
 const landingUrl = new URL(location.href);
 if (adoptLangParam(landingUrl)) history.replaceState(history.state, "", landingUrl);
 
-export const router = createRouter({ routeTree });
+export const router = createRouter({ routeTree, scrollRestoration: true });
 
 supabase.auth.onAuthStateChange((event, session) => {
   if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) void syncLocale(session);
