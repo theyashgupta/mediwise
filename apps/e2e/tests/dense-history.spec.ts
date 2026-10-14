@@ -81,6 +81,24 @@ test("Home compares the full panel with the previous full panel, lists the narro
   await expect(row.getByTestId("family-stale")).toHaveCount(0);
 });
 
+test("a report opened low on Home starts at the top, and back restores the Home scroll offset", async () => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  const link = page.getByTestId("recent-report-link").last();
+  await link.scrollIntoViewIfNeeded();
+  const offset = await page.evaluate(() => window.scrollY);
+  expect(offset).toBeGreaterThan(500);
+
+  await link.click();
+  await expect(page).toHaveURL(/\/reports\/[0-9a-f-]{36}$/);
+  await expect(page.getByTestId("report-done")).toBeVisible();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  await page.goBack();
+
+  await expect(page).toHaveURL(/\/$/);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(offset);
+});
+
 for (const width of [390, 1440]) {
   test(`the glucose trend at ${width} px shows one point per day without overlapping labels`, async () => {
     await page.setViewportSize({ width, height: 900 });
