@@ -7,3 +7,4 @@ The video files are not in the repo. They are in `~/Work/mediwise-demos` on the 
 | # | Feature | File | Duration | Viewport | Date |
 | - | - | - | - | - | - |
 | 1 | Landing page in English and Hindi | `01-landing-page.mp4` | 0:48 | Desktop | 2026-10-14 |
+| 3 | Sign in with Google | `03-google-sign-in.mp4` | 0:29 | Desktop | 2026-10-14 |
