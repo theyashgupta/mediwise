@@ -429,11 +429,11 @@ Note. Home also has a prompt to check an approximate date of birth. It shows onl
 
 ```bash
 pdftoppm -jpeg -r 150 -f 1 -l 1 apps/api/fixtures/golden/sample-2025.pdf "$JOB/page"
-ffmpeg -y -i "$JOB/page-1.jpg" -vf eq=brightness=-0.6 "$JOB/dark.jpg"
+ffmpeg -y -i "$JOB/page-1.jpg" -vf eq=brightness=-0.8 "$JOB/dark.jpg"
 pdftoppm -jpeg -r 60 -f 1 -l 1 apps/api/fixtures/golden/sample-2025.pdf "$JOB/small"
 ```
 
-The dark photo gets "This photo is dark. Take it again in good light." The 60 dpi photo gets "This photo is small. Take it again closer to the page." Remove both photos before you select "Read my report", so the read stays on the PDF. Delete the report between the desktop take and the phone take, because a profile skips a file it already has.
+The dark photo gets "This photo is dark. Take it again in good light." The check calls a photo dark when its mean brightness is under 64 of 255. A brightness of -0.6 gives about 94, so it gets no warning. A brightness of -0.8 gives about 45. The 60 dpi photo gets "This photo is small. Take it again closer to the page." Remove both photos before you select "Read my report", so the read stays on the PDF. Delete the report between the desktop take and the phone take, because a profile skips a file it already has.
 
 **Viewport.** Both. Desktop 1920 x 1080 and phone 390 x 844.
 
