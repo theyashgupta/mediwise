@@ -34,6 +34,7 @@ export function RecentReports({ reports }: RecentReportsProps) {
                 key={report.id}
                 to="/reports/$reportId"
                 params={{ reportId: report.id }}
+                data-testid="recent-report-link"
                 className="flex items-center gap-3 py-3 pr-3 pl-4 outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset"
               >
                 <span className="min-w-0 flex-1">
