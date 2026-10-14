@@ -23,3 +23,4 @@ The video files are not in the repo. They are in `~/Work/mediwise-demos` on the 
 | 16 | Notes for this visit | `16-visit-notes.mp4` | 0:38 | Desktop | 2026-10-15 |
 | 17 | Home | `17-home-dashboard.mp4`, phone `17-home-dashboard-phone.mp4` | 1:04, phone 0:49 | Both | 2026-10-15 |
 | 18 | Family profiles | `18-family-profiles.mp4` | 0:51 | Desktop | 2026-10-15 |
+| 19 | Confirm your family profiles | `19-consent-follow-up.mp4` | 0:35 | Desktop | 2026-10-15 |
