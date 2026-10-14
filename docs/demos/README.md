@@ -45,3 +45,4 @@ The video files are not in the repo. They are in `~/Work/mediwise-demos` on the 
 | 37 | Delete the account | `37-delete-account.mp4` | 0:29 | Desktop | 2026-10-15 |
 | 38 | The operator page | `38-operator-page.mp4` | 0:43 | Desktop | 2026-10-15 |
 | 39 | Ask about your reports | `39-ask-about-reports.mp4` | 0:33 | Desktop | 2026-10-15 |
+| 40 | Questions left, wrong answers and clear chat | `40-ask-chat-controls.mp4` | 0:33 | Desktop. The demo account has more than 5 questions left, so the recorder sets the count to 4 to show the counter. | 2026-10-15 |
