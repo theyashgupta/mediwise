@@ -24,7 +24,7 @@ These tests declare a timeout today:
 
 | Test | Timeout | Reason |
 | --- | --- | --- |
-| The 8 web page test files that render the whole app (`vi.setConfig`) | 15 s | The first test loads its route. Up to 9 s on a loaded Mac with 7 workers. |
+| The 11 web page test files that render the whole app (`vi.setConfig`) | 15 s | The first test loads its route. Up to 9 s on a loaded Mac with 7 workers. |
 | `assistant.context.test.ts`, over the cap | 15 s | Builds 7,200 values over the token cap. 6.8 s seen on a loaded Mac. |
 | `eslint.config.test.js` in api and web, `eslint.test.js` in config | 30 s | Loads the real ESLint config and its plugins. 23 s seen on a loaded Mac. |
 
