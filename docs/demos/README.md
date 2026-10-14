@@ -29,3 +29,4 @@ The video files are not in the repo. They are in `~/Work/mediwise-demos` on the 
 | 22 | Trends of every marker | `22-trends.mp4` | 0:37 | Desktop | 2026-10-15 |
 | 23 | One marker over time | `23-trend-detail.mp4` | 0:28 | Desktop | 2026-10-15 |
 | 24 | Compare two reports | `24-compare-reports.mp4` | 0:35 | Desktop | 2026-10-15 |
+| 25 | Episodes | `25-episodes.mp4` | 0:44 | Desktop | 2026-10-15 |
