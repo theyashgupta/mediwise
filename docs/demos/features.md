@@ -183,9 +183,9 @@ RECORD_STORAGE_STATE="$JOB/demo-state.json" RECORD_APP_URL=http://localhost:5173
 
 Flows that add, change or delete data run on a throwaway account, so the demo account stays as it is.
 
-1. Record feature 2 with a new address at `example.com`, for example `onboarding.demo@example.com`. Sign-up sends one confirmation email. The `example.com` domain takes no mail, so the email bounces. Make this account once.
+1. Record feature 2 with a new address in the form `<purpose>.demo@theyashgupta.me`, for example `onboarding.demo@theyashgupta.me`. Use a new local part for each take. Do not use `example.com`: Supabase checks the MX record of the domain, and `example.com` has a null MX, so sign-up fails with `email_address_invalid`. Sign-up sends one confirmation email. It goes to the maintainer's iCloud or it bounces. Supabase limits auth emails per hour. If sign-up shows "We sent too many emails", wait one hour. Make this account once.
 2. Off camera, run the sign-in script with that address. The sign-in link also confirms the email, so no inbox is needed.
-3. Give the account credits for the uploads: `pnpm --filter @mediwise/api credits:grant onboarding.demo@example.com 8 demo`. The throwaway flows need up to 7 reads: two takes each of features 5 and 10, two study uploads in feature 27 and one optional upload in feature 25.
+3. Give the account credits for the uploads: `pnpm --filter @mediwise/api credits:grant onboarding.demo@theyashgupta.me 8 demo`. The throwaway flows need up to 7 reads: two takes each of features 5 and 10, two study uploads in feature 27 and one optional upload in feature 25.
 4. One account can add 5 reports in one day. Spread the uploads over two days, or use a second throwaway account for the phone takes.
 5. Feature 37 deletes the account at the end.
 
@@ -257,7 +257,7 @@ Each entry URL is on the local web app, `http://localhost:5173`, unless it says 
 
 **Entry point.** `/signup`.
 
-**Demo data.** The throwaway account address, for example `onboarding.demo@example.com`. Record once only, because each try sends an email. Signed out.
+**Demo data.** The throwaway account address, for example `onboarding.demo@theyashgupta.me`. Record once only, because each try sends an email. Signed out.
 
 **Viewport.** Desktop 1920 x 1080.
 
