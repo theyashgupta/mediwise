@@ -33,3 +33,4 @@ The video files are not in the repo. They are in `~/Work/mediwise-demos` on the 
 | 26 | Year in review | `26-year-in-review.mp4` | 0:38 | Desktop | 2026-10-15 |
 | 27 | Report links and auto-link of a repeat study | `27-auto-link-repeat.mp4` | 0:49 | Desktop | 2026-10-15 |
 | 28 | Second opinions and settled alerts | `28-second-opinion-settled.mp4` | 1:13 | Desktop | 2026-10-15 |
+| 29 | Doctor export as PDF | `29-doctor-export.mp4` | 0:49 | Desktop | 2026-10-15 |
