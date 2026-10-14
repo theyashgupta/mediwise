@@ -710,6 +710,8 @@ The dark photo gets "This photo is dark. Take it again in good light." The 60 dp
 
 **Demo data.** The demo account, Arjun Mehta. LDL is at watch in both reports and rose between them. Both reports come from one lab, so the lab note does not show.
 
+The range buttons show only when three values or more fall in the last 90 days. No demo marker has that, so the video does not show them.
+
 **Viewport.** Desktop 1920 x 1080.
 
 **Narration script.**
@@ -717,8 +719,7 @@ The dark photo gets "This photo is dark. Take it again in good light." The 60 dp
 1. Anyone can open one marker and see every value it has had, on one chart.
 2. The band shows the optimal range for this profile.
 3. Each dot has the colour of its status.
-4. The time range switches between recent months and all reports.
-5. One chart tells the story of one marker across the years.
+4. One chart tells the story of one marker across the years.
 
 #### 24. Compare two reports
 
