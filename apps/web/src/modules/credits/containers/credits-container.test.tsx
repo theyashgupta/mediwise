@@ -4,6 +4,9 @@ import userEvent from "@testing-library/user-event";
 import { afterAll, afterEach, describe, expect, test, vi } from "vitest";
 import { messages } from "@/config/messages";
 
+/** Each test renders the whole app, and the first one loads its route, which can pass 5 s on a loaded 8 GB Mac. */
+vi.setConfig({ testTimeout: 15_000 });
+
 /**
  * Loads the app with the payments flag off, whatever `apps/web/.env` says.
  *

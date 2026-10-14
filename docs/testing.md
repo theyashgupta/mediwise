@@ -11,6 +11,25 @@ MediWise has these test layers. CI runs each of them on every push and every pul
 | Bundle size | `pnpm size` | The gzip size of each web chunk and of the landing first load, against a committed baseline. |
 | Performance | `pnpm perf` | Lighthouse budgets and INP on production builds, with the dense history fixture. |
 
+## Timeouts and workers
+
+Every Vitest project uses the default timeout of 5 s. A test that needs more declares its own timeout, with a one-line reason above it.
+
+- Declare the timeout on the test: `test("...", async () => { ... }, 15_000)`. When every test in a file renders the whole app, put `vi.setConfig({ testTimeout: 15_000 })` under the imports.
+- Give the reason as the work the test does on purpose and the time it takes alone and on a loaded machine, for example "Loads the real ESLint config and its plugins, about 1.5 s alone and over 20 s on a loaded 8 GB Mac".
+- Do not raise a timeout to hide a cost that is not necessary. Remove the cost: fake timers for a poll or a delay (`vi.useFakeTimers({ shouldAdvanceTime: true })` and `vi.advanceTimersByTimeAsync`), one fixture for a file in place of one for each test, a container render in place of the whole app.
+- Do not set `testTimeout` in a Vitest config.
+
+These tests declare a timeout today:
+
+| Test | Timeout | Reason |
+| --- | --- | --- |
+| The 11 web page test files that render the whole app (`vi.setConfig`) | 15 s | The first test loads its route. Up to 9 s on a loaded Mac with 7 workers. |
+| `assistant.context.test.ts`, over the cap | 15 s | Builds 7,200 values over the token cap. 6.8 s seen on a loaded Mac. |
+| `eslint.config.test.js` in api and web, `eslint.test.js` in config | 30 s | Loads the real ESLint config and its plugins. 23 s seen on a loaded Mac. |
+
+The web and api packages run at most 3 Vitest workers on a laptop. Without a cap, Vitest starts one worker for each core but one, so two `pnpm check` runs at once on an 8 GB Mac start up to 28 workers on 8 cores. Then the slowest page test took 7.7 s to 9.2 s, and with 3 workers it took 2.8 s to 3.4 s (MEDI-98). In CI, where `CI` is set, Vitest uses its default.
+
 ## Rendered page tests
 
 A web page test renders the whole app in jsdom with Testing Library. It uses the helper in `apps/web/src/test/render-app.tsx`.

@@ -1,6 +1,7 @@
 import { ESLint } from "eslint";
 import { expect, test } from "vitest";
 
+/** Loads the real ESLint config and its plugins, about 1.5 s alone and over 20 s on a loaded 8 GB Mac. */
 test("a service that imports app.ts and Hono fails the boundary rules", async () => {
   const eslint = new ESLint({ cwd: import.meta.dirname });
   const code =

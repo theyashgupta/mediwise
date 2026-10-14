@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { messages } from "@/config/messages";
 import {
   fakeNetwork,
@@ -12,6 +12,9 @@ import {
   resetApp,
   selfProfile,
 } from "@/test/render-app";
+
+/** Each test renders the whole app, and the first one loads its route, which can pass 5 s on a loaded 8 GB Mac. */
+vi.setConfig({ testTimeout: 15_000 });
 
 afterEach(resetApp);
 

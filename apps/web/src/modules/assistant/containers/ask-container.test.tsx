@@ -6,6 +6,9 @@ import { messages } from "@/config/messages";
 import { fakeNetwork, me, problem, renderApp, resetApp, selfProfile } from "@/test/render-app";
 import type { Question } from "../types";
 
+/** Each test renders the whole app, and the first one loads its route, which can pass 5 s on a loaded 8 GB Mac. */
+vi.setConfig({ testTimeout: 15_000 });
+
 const reportId = "00000000-0000-4000-8000-0000000000c1";
 const studyId = "00000000-0000-4000-8000-0000000000d1";
 const member = {

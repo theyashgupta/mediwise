@@ -5,6 +5,9 @@ import { afterAll, afterEach, describe, expect, test, vi } from "vitest";
 import { messages } from "@/config/messages";
 import type { CheckoutResult } from "../types";
 
+/** Each test renders the whole app, and the first one loads its route, which can pass 5 s on a loaded 8 GB Mac. */
+vi.setConfig({ testTimeout: 15_000 });
+
 /**
  * Loads the app with the payments flag on, whatever `apps/web/.env` says.
  *
@@ -17,6 +20,7 @@ async function loadAppWithPayments() {
 }
 
 const app = await loadAppWithPayments();
+const { orderPollMs } = await import("../config/payments");
 
 const orderId = "00000000-0000-4000-8000-0000000000c3";
 
@@ -57,6 +61,7 @@ const sentences = (text: string) => text.split(/(?<=[.।?])\s+/).filter(Boolean
 afterEach(() => {
   observer?.disconnect();
   app.resetApp();
+  vi.useRealTimers();
 });
 
 afterAll(() => {
@@ -218,12 +223,12 @@ test("a pending order turns to paid when the next check finds the payment", asyn
       return order;
     },
   });
+  vi.useFakeTimers({ shouldAdvanceTime: true });
   await app.renderApp(`/credits?order=${orderId}`);
 
   expect(await screen.findByText(messages.en.payments.status.waiting)).toBeTruthy();
-  expect(
-    await screen.findByText(messages.en.payments.status.paid(1), {}, { timeout: 4000 }),
-  ).toBeTruthy();
+  await vi.advanceTimersByTimeAsync(orderPollMs);
+  expect(await screen.findByText(messages.en.payments.status.paid(1))).toBeTruthy();
 });
 
 test("an order the API refuses shows the API message and opens no checkout", async () => {

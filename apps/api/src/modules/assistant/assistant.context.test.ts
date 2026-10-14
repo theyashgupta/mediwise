@@ -278,6 +278,7 @@ describe("buildContext", () => {
     expect(refs.size).toBe(0);
   });
 
+  /** Builds a 7,200-value history over the token cap on purpose, about 0.4 s alone and over 5 s on a loaded 8 GB Mac. */
   test("over the cap, old optimal values go first, then study text, then old reports", () => {
     const reports = Array.from({ length: 60 }, (_, index) => ({
       id: `r-${String(index).padStart(3, "0")}`,
@@ -330,7 +331,7 @@ describe("buildContext", () => {
     ).toBeGreaterThanOrEqual(12);
     expect(text).toContain(`Left out to keep this short: ${cuts.join(" ")}`);
     expect(text).not.toContain("R49:");
-  });
+  }, 15_000);
 
   test("two rows of one marker in one report give one value, the scored one", () => {
     const duplicated = snapshot();
