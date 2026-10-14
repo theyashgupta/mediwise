@@ -37,3 +37,4 @@ The video files are not in the repo. They are in `~/Work/mediwise-demos` on the 
 | 30 | Share a report with a link | `30-share-with-doctor.mp4` | 0:45 | Desktop | 2026-10-15 |
 | 31 | What the doctor sees from a link | `31-open-shared-link.mp4` | 0:43 | Desktop | 2026-10-15 |
 | 32 | Download all values (CSV) and my data | `32-download-data.mp4` | 0:28 | Desktop | 2026-10-15 |
+| 33 | Settings | `33-settings-account.mp4` | 0:43 | Desktop | 2026-10-15 |
