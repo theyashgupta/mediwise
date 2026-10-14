@@ -21,3 +21,4 @@ The video files are not in the repo. They are in `~/Work/mediwise-demos` on the 
 | 14 | Scan and ECG reports kept with the blood values | `14-report-studies.mp4` | 0:37 | Desktop | 2026-10-14 |
 | 15 | Report titles and rename | `15-rename-report.mp4` | 1:07 | Desktop | 2026-10-14 |
 | 16 | Notes for this visit | `16-visit-notes.mp4` | 0:38 | Desktop | 2026-10-15 |
+| 18 | Family profiles | `18-family-profiles.mp4` | 0:51 | Desktop | 2026-10-15 |
