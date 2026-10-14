@@ -47,7 +47,7 @@ A web page test renders the whole app in jsdom with Testing Library. It uses the
 `pnpm coverage` runs the `coverage` script of each package that has unit tests: api, web, landing, engine, shared and design-tokens. The CI `check` job runs it after `pnpm check`, so the job log shows the four numbers (statements, branches, functions, lines) of each package.
 
 - Coverage counts every `.ts` and `.tsx` file under `src`, also a file that no test loads. Test files are not counted.
-- Each package sets four thresholds in its `coverage` script, at the numbers of 2026-10-13 rounded down to a whole percent. A change that drops a package below a threshold fails the job.
+- Each package sets four thresholds in its `coverage` script, never lower than measured minus 10, revisited when a ticket adds tests. A change that drops a package below a threshold fails the job.
 - When coverage goes up, raise the thresholds in the same pull request. Never lower a threshold to make a change pass.
 - `packages/config` has no `coverage` script. Its test checks the ESLint config, which has no code to count.
 

@@ -9,7 +9,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
-    "coverage": "vitest run --coverage --coverage.include=src/**/*.{ts,tsx} --coverage.reporter=text-summary --coverage.thresholds.statements=17 --coverage.thresholds.branches=17 --coverage.thresholds.functions=15 --coverage.thresholds.lines=17"
+    "coverage": "vitest run --coverage --coverage.include=src/**/*.{ts,tsx} --coverage.reporter=text-summary --coverage.thresholds.statements=36 --coverage.thresholds.branches=17 --coverage.thresholds.functions=38 --coverage.thresholds.lines=38"
   },
   "dependencies": {
     "@mediwise/design-tokens": "workspace:*",

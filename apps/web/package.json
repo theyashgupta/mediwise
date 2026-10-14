@@ -13,7 +13,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
-    "coverage": "vitest run --coverage --coverage.include=src/**/*.{ts,tsx} --coverage.reporter=text-summary --coverage.thresholds.statements=45 --coverage.thresholds.branches=39 --coverage.thresholds.functions=39 --coverage.thresholds.lines=46"
+    "coverage": "vitest run --coverage --coverage.include=src/**/*.{ts,tsx} --coverage.reporter=text-summary --coverage.thresholds.statements=47 --coverage.thresholds.branches=40 --coverage.thresholds.functions=41 --coverage.thresholds.lines=48"
   },
   "dependencies": {
     "@hookform/resolvers": "5.9.1",
