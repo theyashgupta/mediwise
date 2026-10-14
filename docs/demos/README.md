@@ -40,4 +40,5 @@ The video files are not in the repo. They are in `~/Work/mediwise-demos` on the 
 | 33 | Settings | `33-settings-account.mp4` | 0:43 | Desktop | 2026-10-15 |
 | 34 | MediWise in Hindi | `34-hindi-language.mp4` | 0:53 | Desktop | 2026-10-15 |
 | 35 | Report credits | `35-report-credits.mp4` | 0:32 | Desktop | 2026-10-15 |
+| 36 | Terms, privacy, refunds and contact | `36-policy-pages.mp4` | 0:55 | Desktop | 2026-10-15 |
 | 37 | Delete the account | `37-delete-account.mp4` | 0:29 | Desktop | 2026-10-15 |
