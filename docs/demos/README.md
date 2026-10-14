@@ -35,4 +35,5 @@ The video files are not in the repo. They are in `~/Work/mediwise-demos` on the 
 | 28 | Second opinions and settled alerts | `28-second-opinion-settled.mp4` | 1:13 | Desktop | 2026-10-15 |
 | 29 | Doctor export as PDF | `29-doctor-export.mp4` | 0:49 | Desktop | 2026-10-15 |
 | 30 | Share a report with a link | `30-share-with-doctor.mp4` | 0:45 | Desktop | 2026-10-15 |
+| 31 | What the doctor sees from a link | `31-open-shared-link.mp4` | 0:43 | Desktop | 2026-10-15 |
 | 32 | Download all values (CSV) and my data | `32-download-data.mp4` | 0:28 | Desktop | 2026-10-15 |
