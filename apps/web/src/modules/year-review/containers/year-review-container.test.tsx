@@ -2,10 +2,13 @@
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { InferResponseType } from "hono/client";
-import { afterEach, describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { messages } from "@/config/messages";
 import type { api } from "@/lib/api";
 import { fakeNetwork, never, problem, renderApp, resetApp, selfProfile } from "@/test/render-app";
+
+/** Each test renders the whole app, and the first one loads its route, which can pass 5 s on a loaded 8 GB Mac. */
+vi.setConfig({ testTimeout: 15_000 });
 
 type YearReview = InferResponseType<(typeof api.profiles)[":id"]["year-review"]["$get"], 200>;
 
