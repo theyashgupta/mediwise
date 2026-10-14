@@ -26,3 +26,4 @@ The video files are not in the repo. They are in `~/Work/mediwise-demos` on the 
 | 19 | Confirm your family profiles | `19-consent-follow-up.mp4` | 0:35 | Desktop | 2026-10-15 |
 | 20 | Due for retest, with a calendar file | `20-retest-reminders.mp4` | 0:32 | Desktop. No demo report has a retest date, so the recorder adds two rows to the Home data. | 2026-10-15 |
 | 21 | Reports list | `21-reports-list.mp4` | 0:27 | Desktop | 2026-10-15 |
+| 22 | Trends of every marker | `22-trends.mp4` | 0:37 | Desktop | 2026-10-15 |
