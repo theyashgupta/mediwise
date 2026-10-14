@@ -17,3 +17,4 @@ The video files are not in the repo. They are in `~/Work/mediwise-demos` on the 
 | 11 | The report page | `11-report-page.mp4`, phone `11-report-page-phone.mp4` | 0:56, phone 1:02 | Both | 2026-10-14 |
 | 12 | Markers, follow-ups, unmeasured and doctor questions | `12-report-tabs.mp4` | 0:50 | Desktop | 2026-10-14 |
 | 13 | One marker explained | `13-marker-page.mp4` | 0:59 | Desktop | 2026-10-14 |
+| 14 | Scan and ECG reports kept with the blood values | `14-report-studies.mp4` | 0:37 | Desktop | 2026-10-14 |
