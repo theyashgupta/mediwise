@@ -1,7 +1,18 @@
 import { configDefaults, defineConfig } from "vitest/config";
 
+/**
+ * Caps Vitest at 3 workers on a laptop and keeps the Vitest default in CI.
+ *
+ * @remarks
+ * Two `pnpm check` runs at once on an 8 GB Mac start up to 28 workers on 8 cores, and tests then pass their timeout.
+ */
+function testWorkers() {
+  return process.env.CI ? undefined : 3;
+}
+
 export default defineConfig({
   test: {
+    maxWorkers: testWorkers(),
     exclude: [...configDefaults.exclude, "**/*.db.test.ts"],
     env: {
       NODE_ENV: "test",

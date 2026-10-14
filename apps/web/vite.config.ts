@@ -74,6 +74,16 @@ function forceTestNodeEnv(mode: string) {
   if (mode === "test") process.env.NODE_ENV = "test";
 }
 
+/**
+ * Caps Vitest at 3 workers on a laptop and keeps the Vitest default in CI.
+ *
+ * @remarks
+ * Two `pnpm check` runs at once on an 8 GB Mac start up to 28 workers on 8 cores, and page tests then pass their timeout.
+ */
+function testWorkers() {
+  return process.env.CI ? undefined : 3;
+}
+
 export default defineConfig(({ mode }) => {
   forceTestNodeEnv(mode);
   const appOrigin = new URL(
@@ -92,7 +102,7 @@ export default defineConfig(({ mode }) => {
       alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
     },
     test: {
-      testTimeout: 15_000,
+      maxWorkers: testWorkers(),
       env: { VITE_SUPABASE_URL: "http://localhost:54321", VITE_SUPABASE_ANON_KEY: "test" },
     },
   };
