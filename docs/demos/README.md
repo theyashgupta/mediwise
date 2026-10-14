@@ -31,3 +31,4 @@ The video files are not in the repo. They are in `~/Work/mediwise-demos` on the 
 | 24 | Compare two reports | `24-compare-reports.mp4` | 0:35 | Desktop | 2026-10-15 |
 | 25 | Episodes | `25-episodes.mp4` | 0:44 | Desktop | 2026-10-15 |
 | 26 | Year in review | `26-year-in-review.mp4` | 0:38 | Desktop | 2026-10-15 |
+| 28 | Second opinions and settled alerts | `28-second-opinion-settled.mp4` | 1:13 | Desktop | 2026-10-15 |
