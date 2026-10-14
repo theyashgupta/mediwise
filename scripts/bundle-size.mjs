@@ -38,12 +38,14 @@ function closure(manifest, key, seen = new Set()) {
  *
  * @remarks
  * A chunk is named by its source path or its chunk name, never by its hash, so a name stays the same from build to build.
+ * Chunks that share a name, such as the `dist` chunks of several packages, are summed, because the manifest order between them follows the hash.
  */
 function webSizes() {
   const manifest = JSON.parse(readFileSync(new URL(".vite/manifest.json", webDist), "utf8"));
   const sizes = {};
   for (const chunk of Object.values(manifest)) {
-    sizes[`web ${chunk.src ?? chunk.name}`] = gzipBytes(webDist, chunk.file);
+    const name = `web ${chunk.src ?? chunk.name}`;
+    sizes[name] = (sizes[name] ?? 0) + gzipBytes(webDist, chunk.file);
   }
   const main = closure(manifest, "index.html");
   sizes["web first load"] = [...main].reduce((sum, file) => sum + gzipBytes(webDist, file), 0);
