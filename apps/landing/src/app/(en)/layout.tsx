@@ -10,6 +10,7 @@ const instrumentSerif = Instrument_Serif({
   weight: "400",
   variable: "--font-instrument-serif",
   display: "swap",
+  preload: false,
 });
 
 export const metadata = pageMetadata("en");
