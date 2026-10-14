@@ -9,3 +9,4 @@ The video files are not in the repo. They are in `~/Work/mediwise-demos` on the 
 | 1 | Landing page in English and Hindi | `01-landing-page.mp4` | 0:48 | Desktop | 2026-10-14 |
 | 3 | Sign in with Google | `03-google-sign-in.mp4` | 0:29 | Desktop | 2026-10-14 |
 | 7 | Sidebar, profile switcher and keyboard shortcuts | `07-app-navigation.mp4` | 0:47 | Desktop | 2026-10-14 |
+| 11 | The report page | `11-report-page.mp4`, phone `11-report-page-phone.mp4` | 0:56, phone 1:02 | Both | 2026-10-14 |
