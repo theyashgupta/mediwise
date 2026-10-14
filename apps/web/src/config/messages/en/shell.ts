@@ -7,6 +7,7 @@ export const shell = {
     settings: "Settings",
   },
   pages: {
+    ask: "Ask",
     home: "Home",
     reports: "Reports",
     upload: "Upload a report",

@@ -1,5 +1,5 @@
 import { useT } from "../hooks/use-locale";
-import { formatRange } from "../utils/range-scale";
+import { formatBounds } from "../utils/range-scale";
 
 type Bounds = { low: number | null; high: number | null };
 
@@ -19,11 +19,6 @@ type ValueTooltipProps = {
   episode?: string | null;
 };
 
-function rangeText(range: Bounds | null, unit: string | undefined, empty: string) {
-  if (!range) return empty;
-  return formatRange({ low: range.low ?? undefined, high: range.high ?? undefined }, unit);
-}
-
 export function ValueTooltip({ date, value, lab, sameDay = [], unit, episode }: ValueTooltipProps) {
   const t = useT();
   const { chart, range } = t.common;
@@ -31,8 +26,8 @@ export function ValueTooltip({ date, value, lab, sameDay = [], unit, episode }: 
   const rows = lab
     ? [
         [chart.lab, lab.name ?? chart.notPrinted],
-        [range.lab, rangeText(lab.range, unit, chart.notPrinted)],
-        [range.optimal, rangeText(lab.optimalRange, unit, chart.none)],
+        [range.lab, formatBounds(lab.range, unit, chart.notPrinted)],
+        [range.optimal, formatBounds(lab.optimalRange, unit, chart.none)],
       ]
     : [];
   if (episode) rows.push([chart.episode, episode]);

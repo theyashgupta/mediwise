@@ -46,20 +46,24 @@ export async function refundReport(reportId: string) {
   await repo.refundReportCredit(reportId);
 }
 
+export type QuestionsNextStep = "use_credit" | "buy" | "add_report";
+
 /**
- * Picks the copy for a user with no questions left, by the next step open to them.
+ * Picks the next step open to a user with no questions left.
  *
  * @remarks
  * With payments off and no free credit, a new report is the only way to more questions.
  */
-function noQuestionsMessage(freeCredit: boolean) {
-  if (freeCredit) {
-    return `You have no questions left. Use 1 credit to get ${questionsPerPack} more questions.`;
-  }
-  return env.PAYMENTS_ENABLED
-    ? "You have no questions left. Buy credits to ask more questions."
-    : `You have no questions left. Add a report to get ${questionsPerRead} more questions.`;
+function nextStepOf(freeCredit: boolean): QuestionsNextStep {
+  if (freeCredit) return "use_credit";
+  return env.PAYMENTS_ENABLED ? "buy" : "add_report";
 }
+
+const noQuestionsMessage: Record<QuestionsNextStep, string> = {
+  use_credit: `You have no questions left. Use 1 credit to get ${questionsPerPack} more questions.`,
+  buy: "You have no questions left. Buy credits to ask more questions.",
+  add_report: `You have no questions left. Add a report to get ${questionsPerRead} more questions.`,
+};
 
 /**
  * Counts the questions the account can still ask from its reads, packs and charged questions.
@@ -78,10 +82,17 @@ export async function getQuestionsLeft(userId: string) {
   return questionsLeftOf(await repo.findQuestionCounts(userId));
 }
 
+export async function getQuestionState(userId: string) {
+  const questionsLeft = await getQuestionsLeft(userId);
+  const nextStep =
+    questionsLeft >= 1 ? null : nextStepOf(hasFreeCredit(await repo.findCreditUsage(userId)));
+  return { questionsLeft, nextStep };
+}
+
 /** Refuses a question with 402 when the account has none left, with the copy for its next step. */
 export async function assertQuestionLeft(userId: string) {
-  if ((await getQuestionsLeft(userId)) >= 1) return;
-  throw new AppError(402, noQuestionsMessage(hasFreeCredit(await repo.findCreditUsage(userId))));
+  const { nextStep } = await getQuestionState(userId);
+  if (nextStep) throw new AppError(402, noQuestionsMessage[nextStep]);
 }
 
 /** Spends 1 credit on a pack of 20 questions, or answers 402 when no credit is free. */

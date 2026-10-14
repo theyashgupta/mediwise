@@ -8,6 +8,8 @@ import {
   type TextLocale,
   typicalGapDays,
 } from "@mediwise/engine";
+import { listFindings } from "../findings/index.js";
+import { loadSequence, settleStored } from "../links/index.js";
 import { getOwnedProfile } from "../profiles/index.js";
 import * as repo from "./dashboard.repo.js";
 
@@ -104,7 +106,15 @@ export async function getDashboard(userId: string, profileId: string, locale: Te
   );
   const latest = done[leadIndex];
   if (!latest)
-    return { latest: null, newSince: [], moveFirst: [], retests: [], recent, processingCount };
+    return {
+      latest: null,
+      newSince: [],
+      moveFirst: [],
+      retests: [],
+      newestFinding: null,
+      recent,
+      processingCount,
+    };
   const previous = done
     .slice(leadIndex + 1)
     .find(
@@ -115,9 +125,10 @@ export async function getDashboard(userId: string, profileId: string, locale: Te
         sameScoreScale(report.coverage ?? 100, latest.coverage ?? 100),
     );
 
-  const [rows, newSince] = await Promise.all([
+  const [rows, newSince, newestFinding] = await Promise.all([
     repo.listAssessedMarkers(latest.id),
     listReportMarkers(done.slice(0, Math.min(leadIndex, newSinceLimit))),
+    findNewestFinding([...new Set([done[0]!.id, latest.id])]),
   ]);
   const counts = { optimal: 0, watch: 0, risk: 0 };
   rows.forEach((row) => row.status && counts[row.status]++);
@@ -142,9 +153,28 @@ export async function getDashboard(userId: string, profileId: string, locale: Te
     newSince,
     moveFirst,
     retests: listRetests(newestByMarker),
+    newestFinding,
     recent,
     processingCount,
   };
+}
+
+/**
+ * Finds the top open finding of the newest report that has one, from the reports given newest first.
+ *
+ * @remarks
+ * Settled findings drop out the same way as on the report page, so Home never suggests a question about a settled alert.
+ */
+async function findNewestFinding(reportIds: string[]) {
+  for (const reportId of reportIds) {
+    const [stored, sequence] = await Promise.all([listFindings(reportId), loadSequence(reportId)]);
+    const open = sequence
+      ? settleStored(reportId, sequence, { findings: stored, doctorQuestions: [], narrative: null })
+          .findings
+      : stored;
+    if (open[0]) return { reportId, title: open[0].title };
+  }
+  return null;
 }
 
 type FamilyRow = Awaited<ReturnType<typeof repo.listFamilyDoneReports>>[number];

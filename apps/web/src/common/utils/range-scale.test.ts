@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { formatRange, rangeScale } from "./range-scale";
+import { formatBounds, formatRange, rangeScale } from "./range-scale";
 
 test("a value inside a closed range sits inside both bands", () => {
   const { value, lab, calibrated } = rangeScale(85, { low: 70, high: 100 }, { low: 75, high: 90 });
@@ -42,4 +42,11 @@ test("an open range reads as below or above its one bound", () => {
   expect(formatRange({ high: 100 }, "mg/dL")).toBe("below 100 mg/dL");
   expect(formatRange({ low: 30 })).toBe("above 30");
   expect(formatRange({ low: 13, high: 17 }, "g/dL")).toBe("13 to 17 g/dL");
+});
+
+test("formatBounds writes a stored range with its unit, and the empty text for no bound", () => {
+  expect(formatBounds({ low: null, high: 130 }, "mg/dL", "None")).toBe("below 130 mg/dL");
+  expect(formatBounds({ low: 4, high: 5.6 }, "%", "None")).toBe("4 to 5.6 %");
+  expect(formatBounds({ low: null, high: null }, "%", "None")).toBe("None");
+  expect(formatBounds(null, "%", "None")).toBe("None");
 });

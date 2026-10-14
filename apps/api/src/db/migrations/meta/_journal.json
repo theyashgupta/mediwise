@@ -183,6 +183,13 @@
       "when": 1791917194536,
       "tag": "0025_assistant_quota",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1791932419212,
+      "tag": "0026_assistant_review",
+      "breakpoints": true
     }
   ]
 }

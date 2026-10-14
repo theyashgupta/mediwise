@@ -41,6 +41,7 @@ export const me: InferResponseType<typeof api.me.$get, 200> = {
   name: selfProfile.name,
   credits: 2,
   questionsLeft: 0,
+  assistant: { enabled: false, outOfQuestions: null, reviewRequired: false, consented: false },
 };
 
 /**

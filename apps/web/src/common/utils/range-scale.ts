@@ -54,3 +54,13 @@ export function formatRange({ low, high }: Range, unit?: string) {
         : range.above(low ?? 0);
   return unit ? `${text} ${unit}` : text;
 }
+
+/** Writes a stored range with its unit, or `empty` when the range has no bound. */
+export function formatBounds(
+  range: { low: number | null; high: number | null } | null,
+  unit: string | undefined,
+  empty: string,
+) {
+  if (!range || (range.low === null && range.high === null)) return empty;
+  return formatRange({ low: range.low ?? undefined, high: range.high ?? undefined }, unit);
+}

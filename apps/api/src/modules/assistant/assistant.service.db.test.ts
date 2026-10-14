@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type Anthropic from "@anthropic-ai/sdk";
+import type { AssistantCite } from "@mediwise/shared";
 import { and, eq, inArray } from "drizzle-orm";
 import { beforeAll, beforeEach, expect, test, vi } from "vitest";
 import { db } from "../../db/client.js";
@@ -12,9 +13,17 @@ vi.mock("../spend/index.js", async (importOriginal) => ({
   isOverBudget: async () => edge.overBudget,
 }));
 
-const { askQuestion, clearQuestions, flagQuestion, listQuestions } =
-  await import("./assistant.service.js");
+const {
+  askQuestion,
+  clearQuestions,
+  flagQuestion,
+  giveReviewConsent,
+  listQuestions,
+  loadReviewDay,
+  storeReview,
+} = await import("./assistant.service.js");
 const { getQuestionsLeft } = await import("../credits/index.js");
+const { env } = await import("../../config/env.js");
 
 const marker = "ZORBEL";
 const userId = randomUUID();
@@ -454,4 +463,249 @@ test("a question refused 7 times in a minute for no quota stays a 402, never a 4
     });
   }
   expect(edge.create).not.toHaveBeenCalled();
+});
+
+async function storeCited(owner: string, profile: string, cites: AssistantCite[]) {
+  await db.insert(schema.assistantQuestions).values({
+    userId: owner,
+    profileId: profile,
+    question: "Which report?",
+    answer: { sentences: [{ text: "Cited.", cites }] },
+  });
+}
+
+test("an answer and the chat give each cite the name, lab and date its chip shows", async () => {
+  edge.create.mockResolvedValue(answer(good));
+  const item = await askQuestion(userId, profileId, { question: "What was my HbA1c?" });
+  const chip = {
+    kind: "value",
+    reportId,
+    target: "hba1c",
+    label: "HbA1c",
+    labName: "Sunrise Diagnostics",
+    date: "2026-08-04",
+    deleted: false,
+  };
+  expect(item.sentences[0]!.cites).toEqual([chip]);
+  expect((await listQuestions(userId, profileId))[0]!.sentences[0]!.cites).toEqual([chip]);
+});
+
+test("study, finding and episode chips show the printed study, the finding title and the episode name", async () => {
+  const [study] = await db
+    .select({ id: schema.studies.id })
+    .from(schema.studies)
+    .where(eq(schema.studies.reportId, reportId));
+  const [finding] = await db
+    .insert(schema.findings)
+    .values({
+      reportId,
+      kind: "risk",
+      severity: "watch",
+      title: "HbA1c is in the watch range",
+      body: "Body.",
+      citedKeys: ["hba1c"],
+      citedStudyIds: [],
+      rank: 1,
+    })
+    .returning();
+  const [report] = await db
+    .select({ episodeId: schema.reports.episodeId })
+    .from(schema.reports)
+    .where(eq(schema.reports.id, reportId));
+  await storeCited(userId, profileId, [
+    { kind: "study", reportId, target: study!.id },
+    { kind: "finding", reportId, target: finding!.id },
+    { kind: "episode", reportId: null, target: report!.episodeId },
+  ]);
+
+  const [cited] = await listQuestions(userId, profileId);
+  expect(cited!.sentences[0]!.cites).toMatchObject([
+    { label: "ultrasound, Abdomen", labName: "Sunrise Diagnostics", deleted: false },
+    { label: "HbA1c is in the watch range", labName: "Sunrise Diagnostics", date: "2026-08-04" },
+    { label: `${marker}-episode-name`, date: "2026-08-01", deleted: false },
+  ]);
+});
+
+test("a cite of a deleted report keeps its sentence and comes back deleted with no labels", async () => {
+  const report = await insertReport(profileId, 6.1, {});
+  await storeCited(userId, profileId, [{ kind: "value", reportId: report, target: "hba1c" }]);
+  await db.delete(schema.reports).where(eq(schema.reports.id, report));
+
+  const [cited] = await listQuestions(userId, profileId);
+  expect(cited!.sentences[0]).toEqual({
+    text: "Cited.",
+    cites: [
+      {
+        kind: "value",
+        reportId: report,
+        target: "hba1c",
+        label: null,
+        labName: null,
+        date: null,
+        deleted: true,
+      },
+    ],
+  });
+});
+
+test("a cite of another account's report comes back deleted and shows nothing of that report", async () => {
+  await storeCited(userId, profileId, [
+    { kind: "report", reportId: otherReportId, target: null },
+    { kind: "value", reportId: otherReportId, target: "hba1c" },
+  ]);
+
+  const [cited] = await listQuestions(userId, profileId);
+  for (const cite of cited!.sentences[0]!.cites) {
+    expect(cite).toMatchObject({ label: null, labName: null, date: null, deleted: true });
+  }
+});
+
+test("a cited study, finding or episode of another account comes back without its labels", async () => {
+  const [otherStudy] = await db
+    .select({ id: schema.studies.id })
+    .from(schema.studies)
+    .where(eq(schema.studies.reportId, otherReportId));
+  const [otherEpisode] = await db
+    .insert(schema.episodes)
+    .values({ profileId: otherProfileId, name: `${marker}-other-episode`, startedOn: "2026-08-01" })
+    .returning();
+  await storeCited(userId, profileId, [
+    { kind: "study", reportId, target: otherStudy!.id },
+    { kind: "episode", reportId: null, target: otherEpisode!.id },
+  ]);
+
+  const [cited] = await listQuestions(userId, profileId);
+  const [study, episode] = cited!.sentences[0]!.cites;
+  expect(study).toMatchObject({ label: null, deleted: false });
+  expect(episode).toMatchObject({ label: null, deleted: true });
+  expect(JSON.stringify(cited)).not.toContain(`${marker}-other-episode`);
+});
+
+test("a cited finding or follow-up of another account comes back with its report title, never its own title", async () => {
+  const [otherFinding] = await db
+    .insert(schema.findings)
+    .values({
+      reportId: otherReportId,
+      kind: "risk",
+      severity: "risk",
+      title: `${marker}-other-finding`,
+      body: "Body.",
+      citedKeys: [],
+      citedStudyIds: [],
+      rank: 1,
+    })
+    .returning();
+  const [otherFollowUp] = await db
+    .insert(schema.followUps)
+    .values({
+      reportId: otherReportId,
+      kind: "retest",
+      title: `${marker}-other-follow-up`,
+      why: "Why.",
+      nextAction: "Next.",
+      rank: 1,
+    })
+    .returning();
+  await storeCited(userId, profileId, [
+    { kind: "finding", reportId, target: otherFinding!.id },
+    { kind: "follow_up", reportId, target: otherFollowUp!.id },
+  ]);
+
+  const [cited] = await listQuestions(userId, profileId);
+  expect(cited!.sentences[0]!.cites).toMatchObject([
+    { labName: "Sunrise Diagnostics", deleted: false },
+    { labName: "Sunrise Diagnostics", deleted: false },
+  ]);
+  expect(JSON.stringify(cited)).not.toContain(`${marker}-other-`);
+});
+
+test("during the review month a question without consent answers 403 and stores nothing, and consent lets it through", async () => {
+  edge.create.mockResolvedValue(answer(good));
+  const { owner, profile } = await newAsker(1);
+  const enabled = env.ASSISTANT_ENABLED;
+  env.ASSISTANT_ENABLED = true;
+  env.ASSISTANT_REVIEW = true;
+  try {
+    await expect(
+      askQuestion(owner, profile, { question: "What was my HbA1c?" }),
+    ).rejects.toMatchObject({
+      status: 403,
+      message: "Agree to the review before you ask a question.",
+    });
+    expect(edge.create).not.toHaveBeenCalled();
+    expect(await listQuestions(owner, profile)).toHaveLength(0);
+
+    await giveReviewConsent(owner);
+    expect(
+      (await askQuestion(owner, profile, { question: "What was my HbA1c?" })).refusalKind,
+    ).toBeNull();
+
+    env.ASSISTANT_REVIEW = false;
+    const other = await newAsker(1);
+    expect(
+      (await askQuestion(other.owner, other.profile, { question: "And now?" })).refusalKind,
+    ).toBeNull();
+  } finally {
+    env.ASSISTANT_ENABLED = enabled;
+    env.ASSISTANT_REVIEW = false;
+  }
+});
+
+test("the review day lists the kept questions of that UTC day from consenting accounts, with chips and cited values, and a second verdict replaces the first", async () => {
+  const { owner, profile, report } = await newAsker(0);
+  const stranger = await newAsker(0);
+  await giveReviewConsent(owner);
+  const cite = { kind: "value" as const, reportId: report, target: "hba1c" };
+  await db.insert(schema.assistantQuestions).values({
+    userId: stranger.owner,
+    profileId: stranger.profile,
+    question: `${marker}-no-consent`,
+    answer: { sentences: [] },
+    createdAt: new Date("2031-03-03T09:00:00Z"),
+  });
+  const [kept] = await db
+    .insert(schema.assistantQuestions)
+    .values([
+      {
+        userId: owner,
+        profileId: profile,
+        question: `${marker}-kept`,
+        answer: { sentences: [{ text: "Your HbA1c was 5.9 % on 4 Aug 2026.", cites: [cite] }] },
+        createdAt: new Date("2031-03-03T10:00:00Z"),
+      },
+      {
+        userId: owner,
+        profileId: profile,
+        question: "",
+        answer: { sentences: [] },
+        clearedAt: new Date("2031-03-03T11:00:00Z"),
+        createdAt: new Date("2031-03-03T11:00:00Z"),
+      },
+      {
+        userId: owner,
+        profileId: profile,
+        question: `${marker}-other-day`,
+        answer: { sentences: [] },
+        createdAt: new Date("2031-03-04T00:30:00Z"),
+      },
+    ])
+    .returning();
+
+  const day = await loadReviewDay("2031-03-03", () => true);
+  expect(day.map(({ question }) => question)).toEqual([`${marker}-kept`]);
+  expect(day[0]!.sentences[0]!.cites[0]).toMatchObject({ label: "HbA1c", deleted: false });
+  expect(day[0]!.facts).toMatchObject([
+    { markerKey: "hba1c", value: 5.9, unit: "%", status: "watch", calibratedHigh: 5.6 },
+  ]);
+  expect(JSON.stringify(day)).not.toContain(owner);
+
+  await storeReview(kept!.id, "minor");
+  await storeReview(kept!.id, "pass");
+  expect((await loadReviewDay("2031-03-03", () => true))[0]!.verdict).toBe("pass");
+  expect(
+    await db
+      .select({ verdict: schema.assistantReviews.verdict })
+      .from(schema.assistantReviews)
+      .where(eq(schema.assistantReviews.questionId, kept!.id)),
+  ).toEqual([{ verdict: "pass" }]);
 });

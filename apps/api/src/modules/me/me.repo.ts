@@ -1,6 +1,7 @@
 import { and, count, eq, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import {
+  assistantConsents,
   assistantQuestions,
   clearedQuestion,
   deletionLog,
@@ -86,6 +87,7 @@ export async function deleteAllByOwner(
         );
     }
     await tx.delete(profiles).where(eq(profiles.ownerUserId, ownerUserId));
+    await tx.delete(assistantConsents).where(eq(assistantConsents.userId, ownerUserId));
     await tx
       .update(assistantQuestions)
       .set(clearedQuestion)
@@ -104,7 +106,7 @@ export async function deleteAllByOwner(
 }
 
 export async function exportByOwner(ownerUserId: string) {
-  const [profileRows, reportRows, markerRows, questionRows] = await Promise.all([
+  const [profileRows, reportRows, markerRows, questionRows, [consent]] = await Promise.all([
     db.select().from(profiles).where(eq(profiles.ownerUserId, ownerUserId)),
     db
       .select()
@@ -127,11 +129,16 @@ export async function exportByOwner(ownerUserId: string) {
       })
       .from(assistantQuestions)
       .where(and(eq(assistantQuestions.userId, ownerUserId), isNull(assistantQuestions.clearedAt))),
+    db
+      .select({ agreedAt: assistantConsents.agreedAt })
+      .from(assistantConsents)
+      .where(eq(assistantConsents.userId, ownerUserId)),
   ]);
   return {
     profiles: profileRows,
     reports: reportRows,
     markers: markerRows,
     questions: questionRows,
+    assistantConsent: consent ?? null,
   };
 }

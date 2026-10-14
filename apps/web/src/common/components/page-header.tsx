@@ -15,7 +15,7 @@ export function PageHeader({ title, heading, description, actions, glass }: Page
   const content = (
     <>
       <div className="min-w-0 flex-1 space-y-2">
-        {heading ?? <h1 className="font-display text-display text-balance">{title}</h1>}
+        {heading ?? <h1 className="font-display text-display text-balance wrap-anywhere">{title}</h1>}
         {description && <p className="max-w-measure text-muted-foreground">{description}</p>}
       </div>
       {actions && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
