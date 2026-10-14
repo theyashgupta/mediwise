@@ -526,6 +526,35 @@ test("study, finding and episode chips show the printed study, the finding title
   ]);
 });
 
+test("pattern, link and catalog chips show the pattern name, no label and the marker name, with the lab and date of the report", async () => {
+  await storeCited(userId, profileId, [
+    { kind: "pattern", reportId, target: "b12_deficiency" },
+    { kind: "link", reportId, target: randomUUID() },
+    { kind: "catalog", reportId: null, target: "hba1c" },
+  ]);
+
+  const [cited] = await listQuestions(userId, profileId);
+  const shown = { labName: "Sunrise Diagnostics", date: "2026-08-04", deleted: false };
+  expect(cited!.sentences[0]!.cites).toMatchObject([
+    { label: "B12 deficiency pattern", ...shown },
+    { label: null, ...shown },
+    { label: "HbA1c", labName: null, date: null, deleted: false },
+  ]);
+});
+
+test("a pattern, link or catalog cite of another account's report comes back deleted with no labels", async () => {
+  await storeCited(userId, profileId, [
+    { kind: "pattern", reportId: otherReportId, target: "b12_deficiency" },
+    { kind: "link", reportId: otherReportId, target: reportId },
+    { kind: "catalog", reportId: otherReportId, target: "hba1c" },
+  ]);
+
+  const [cited] = await listQuestions(userId, profileId);
+  for (const cite of cited!.sentences[0]!.cites) {
+    expect(cite).toMatchObject({ label: null, labName: null, date: null, deleted: true });
+  }
+});
+
 test("a cite of a deleted report keeps its sentence and comes back deleted with no labels", async () => {
   const report = await insertReport(profileId, 6.1, {});
   await storeCited(userId, profileId, [{ kind: "value", reportId: report, target: "hba1c" }]);
