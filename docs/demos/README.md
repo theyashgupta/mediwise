@@ -30,3 +30,4 @@ The video files are not in the repo. They are in `~/Work/mediwise-demos` on the 
 | 23 | One marker over time | `23-trend-detail.mp4` | 0:28 | Desktop | 2026-10-15 |
 | 24 | Compare two reports | `24-compare-reports.mp4` | 0:35 | Desktop | 2026-10-15 |
 | 25 | Episodes | `25-episodes.mp4` | 0:44 | Desktop | 2026-10-15 |
+| 26 | Year in review | `26-year-in-review.mp4` | 0:38 | Desktop | 2026-10-15 |
