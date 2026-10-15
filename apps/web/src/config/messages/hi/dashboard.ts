@@ -1,4 +1,5 @@
 import type { Messages } from "..";
+import { plural } from "../plural";
 import { review } from "../review";
 
 export const dashboard: Messages["dashboard"] = {
@@ -127,7 +128,7 @@ export const dashboard: Messages["dashboard"] = {
     title: "हाल की रिपोर्ट",
     all: "सभी रिपोर्ट",
     fallbackTitle: "रिपोर्ट",
-    files: (n: number) => `${n} फ़ाइलें`,
+    files: (n: number) => plural("hi", n, { one: `${n} फ़ाइल`, other: `${n} फ़ाइलें` }),
   },
   retest: {
     title: review("दोबारा टेस्ट का समय"),

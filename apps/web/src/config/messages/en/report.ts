@@ -1,6 +1,9 @@
+import { plural } from "../plural";
+
 export const report = {
   title: "Your report",
-  markerCount: (count: number) => `${count} markers`,
+  markerCount: (count: number) =>
+    plural("en", count, { one: `${count} marker`, other: `${count} markers` }),
   loadError: "We could not load this report.",
   readError: "We could not read this report.",
   deleted: "We deleted the report.",
