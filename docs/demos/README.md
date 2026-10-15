@@ -62,3 +62,17 @@ The 4K master (`pitch/doctor-pitch-4k.mp4`, 3840 x 2160) is pending. Render it w
 Features, in order: the report page, one marker explained, scans and ECG with the blood values, trends over time, compare two reports, episodes, second opinions and settled alerts, the doctor export, a report shared with a link, and due for retest. The closing shows the data downloads and MediWise in Hindi.
 
 The Remotion project is `~/Work/mediwise-promo/pitch`, a separate git repository. Its README gives the commands to make the voice, the music and the renders again.
+
+## Ad
+
+A 30-second motion-graphics ad (MEDI-146) built from the raw captures of the demo videos. `ad.md` has the brief, the storyboard, the review and the social copy.
+
+The files are in `~/Work/mediwise-demos/ad` on the maintainer's Mac. They are not in the repo.
+
+| File | Size | Duration | Use |
+| - | - | - | - |
+| `mediwise-ad-16x9.mp4` | 1920 x 1080, 30 fps, h264 crf 18 | 0:30 | Desktop, X, LinkedIn, YouTube |
+| `mediwise-ad-9x16.mp4` | 1080 x 1920, 30 fps, h264 crf 18 | 0:30 | Instagram reel. All text sits inside the reel safe zone: 150 px free at the top, 170 px free at the bottom. |
+| `mediwise-ad-hook.gif` | 960 x 540, 15 fps | 0:10 | Embeds. The first 10 seconds of the 16:9 cut. |
+
+The Remotion project is `~/Work/mediwise-promo/ad`, a separate git repo. Its README tells how to cut the footage and render both files. Music: "Corporate Ambient Piano" by Rockot from Pixabay, under the Pixabay Content License (commercial use, no attribution). The ad has no voice. Burned-in captions carry the story.
