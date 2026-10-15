@@ -1,6 +1,6 @@
 export const howItWorks = {
   eyebrow: "How it works",
-  title: "From a lab PDF to a clear report in three steps",
+  title: "From a lab PDF to a clear report",
   body: "You do not need to know what a marker means. MediWise reads the report and tells you.",
   upload: {
     title: "Upload",

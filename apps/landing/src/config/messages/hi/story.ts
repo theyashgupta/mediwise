@@ -2,8 +2,6 @@ import type { Messages } from "..";
 import { review } from "../review";
 
 export const story: Messages["story"] = {
-  eyebrow: "रिपोर्ट के अंदर",
-  title: "MediWise आपको क्या दिखाता है",
   body: "इस पेज की हर स्क्रीन अंग्रेज़ी वाले MediWise ऐप से है। स्क्रीन पर दिखे व्यक्ति और मान काल्पनिक हैं।",
   alert: {
     title: "डॉक्टर के लिए एक लाइन",
@@ -25,6 +23,5 @@ export const story: Messages["story"] = {
   questions: {
     title: "डॉक्टर से पूछने के सवाल",
     body: "MediWise आपके नतीजों से सवाल लिखता है। उन्हें कॉपी करें और अगली बार डॉक्टर के पास ले जाएँ।",
-    alt: "डॉक्टर के लिए 6 सवाल, और सब कॉपी करने का बटन।",
   },
 };

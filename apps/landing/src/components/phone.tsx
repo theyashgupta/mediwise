@@ -2,17 +2,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 export type ScreenName =
-  | "report"
-  | "upload"
-  | "marker"
-  | "trends"
-  | "alert"
-  | "findings"
-  | "move-first"
-  | "questions"
-  | "settled"
-  | "episode"
-  | "hindi";
+  "report" | "upload" | "marker" | "trends" | "alert" | "findings" | "move-first";
 
 export function Phone({ children, className }: { children: ReactNode; className?: string }) {
   return (
