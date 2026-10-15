@@ -10,7 +10,9 @@ export const payments: Messages["payments"] = {
     contact: "संपर्क",
   },
   policy: {
-    lastChange: (date: string) => `पिछला बदलाव: ${date}`,
+    lastChange: (date: string) => `पिछला बदलाव: ${date}।`,
+    version: (version: string) => review(`नीति का वर्शन ${version}।`),
+    washingtonLink: review("वॉशिंगटन राज्य के उपभोक्ताओं का हेल्थ डेटा"),
     nav: "नीतियाँ",
   },
   buy: {

@@ -8,7 +8,9 @@ export const payments = {
     contact: "Contact",
   },
   policy: {
-    lastChange: (date: string) => `Last change: ${date}`,
+    lastChange: (date: string) => `Last change: ${date}.`,
+    version: (version: string) => `Version ${version}.`,
+    washingtonLink: "Washington state consumer health data",
     nav: "Policies",
   },
   buy: {

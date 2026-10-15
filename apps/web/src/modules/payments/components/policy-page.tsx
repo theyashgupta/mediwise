@@ -1,3 +1,4 @@
+import { policyVersion } from "@mediwise/shared";
 import { Link } from "@tanstack/react-router";
 import { Logo } from "@/common/components/brand/logo";
 import { Disclaimer } from "@/common/components/disclaimer";
@@ -7,8 +8,8 @@ import {
   contact,
   policies,
   policyLinks,
-  policyUpdated,
   type PolicyPage as Page,
+  washingtonSectionId,
 } from "../config/policies";
 
 type PolicyPageProps = {
@@ -23,17 +24,30 @@ export function PolicyPage({ page }: PolicyPageProps) {
     month: "long",
     year: "numeric",
     timeZone: "UTC",
-  }).format(new Date(policyUpdated));
+  }).format(new Date(policyVersion));
   return (
     <div className="mx-auto flex min-h-svh max-w-measure flex-col gap-10 px-4 py-12 md:px-8">
       <Link to="/" className="w-fit">
         <Logo className="text-lg" />
       </Link>
       <main>
-        <PageHeader title={policy.title} description={t.payments.policy.lastChange(updated)} />
+        <PageHeader
+          title={policy.title}
+          description={`${t.payments.policy.version(policyVersion)} ${t.payments.policy.lastChange(updated)}`}
+        />
+        {page === "privacy" && (
+          <p className="-mt-4 mb-8">
+            <a
+              href={`#${washingtonSectionId}`}
+              className="font-medium underline underline-offset-4"
+            >
+              {t.payments.policy.washingtonLink}
+            </a>
+          </p>
+        )}
         <div className="space-y-10">
           {policy.sections.map((section) => (
-            <section key={section.heading} className="space-y-3">
+            <section key={section.heading} id={section.id} className="scroll-mt-6 space-y-3">
               <h2 className="text-xl font-semibold">{section.heading}</h2>
               {section.body.map((line) => (
                 <p key={line}>{line}</p>
