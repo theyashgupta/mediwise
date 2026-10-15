@@ -2,12 +2,6 @@
 
 <img src="docs/assets/banner.png" width="720" alt="MediWise">
 
-**Upload a lab report. Understand every marker.**
-
-MediWise reads a lab report and explains each marker in plain English or Hindi.
-It scores each marker against ranges for your age, sex and ancestry.
-It tracks every marker across reports for your whole family.
-
 [![CI](https://github.com/theyashgupta/mediwise/actions/workflows/check.yml/badge.svg)](https://github.com/theyashgupta/mediwise/actions/workflows/check.yml)
 [![License: AGPL-3.0](https://img.shields.io/static/v1?label=license&message=AGPL-3.0&color=blue)](LICENSE)
 [![Node](https://img.shields.io/badge/node-24-brightgreen)](https://nodejs.org)
@@ -15,38 +9,92 @@ It tracks every marker across reports for your whole family.
 
 ![MediWise: your lab report, explained marker by marker. Every marker in plain words, scored for your age, sex and ancestry, tracked across every report](docs/assets/ad-hook.gif)
 
+## Know what your next lab report says.
+
+Upload a report as a PDF or photos. MediWise explains every marker and scores it for your age, sex and ancestry.
+
+**[Open the app](https://app.mediwise.theyashgupta.me)** · **[See it in videos](#see-it)**
+
 </div>
 
-MediWise is for information. It does not give a diagnosis and it does not replace a doctor.
+### Know where you stand and what to do first
 
-## What it does
+Each report gets a score from 0 to 100 and a tier. Fixed rules make the score, so the same values always give the same score. The report puts the markers to work on first in order. It also lists follow-ups and the important markers that the lab did not measure. Take the report to your doctor as a print-ready page or as a link. Your doctor can open the link without an account.
 
-- **Reads any lab report.** Upload up to 20 PDFs or photos in one report. MediWise reads the text layer first and sends a page as an image only when it has no text.
-- **Explains every marker.** Each marker gets a one-line description, what it is, why it matters and what moves it. Every range cites a source.
-- **Scores against your ranges.** A deterministic engine compares each value with a range for your age, sex and ancestry. It gives a score from 0 to 100 and a tier.
-- **Shows what to fix first.** The report page ranks the markers to move first. It lists follow-ups and the high-value markers that the lab did not measure.
-- **Finds patterns.** Rules join two or more markers into one signal, such as B12 with homocysteine.
-- **Reads scans and forms.** Ultrasound, X-ray and ECG pages become studies with their impression and measurements.
-- **Tracks trends.** Two reports are enough to compare values and see each marker move over time.
-- **Settles a line with a repeat scan.** MediWise links two reports when both have the same study within 90 days. You can undo the link. When the later report has no alert line, the earlier line moves to Settled.
-- **Groups a workup into an episode.** MediWise finds reports that may belong together. An episode shows its reports in date order, the markers that repeat and the scans.
-- **Names each report.** A report gets a title from its dates and contents, such as "29 Mar 2025 · blood panel (109 markers), ultrasound". You can rename it.
-- **Reads in English or Hindi.** Choose the language in Settings or on the sign-in page. Marker names and printed lines stay as the lab prints them.
-- **Shows the year in review.** With two reports or more, one page shows the markers that moved and the markers still at risk.
-- **Keeps family profiles.** One account holds reports for you, your parents, your partner and your children.
-- **Exports for your doctor.** Each report has a print-ready page, black on white.
+<p align="center">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="apps/landing/public/screens/report-dark.webp">
+  <img src="apps/landing/public/screens/report-light.webp" width="260" alt="A MediWise report: 67 of 81 markers sit in the calibrated ranges, and urine albumin is the one to move first. Score 89, Platinum.">
+</picture>
+</p>
 
-## Screens
+### Understand every marker
 
-Every screen is from the app. The people and the reports are made up. The landing page uses the same files.
+Each marker has its own page. The page tells you what the marker is, why it matters and what moves it. MediWise compares your value with a range for your age, sex and ancestry. Every range names its source. Rules also join two or more markers into one signal, such as B12 with homocysteine.
 
-| Report | Settled | Episode | Hindi |
-| - | - | - | - |
-| <img src="apps/landing/public/screens/report-light.webp" width="200" alt="The score card: 67 of 81 markers sit in the calibrated ranges, score 89"> | <img src="apps/landing/public/screens/settled-light.webp" width="200" alt="The Settled block: a cyst line settled by a repeat ultrasound"> | <img src="apps/landing/public/screens/episode-light.webp" width="200" alt="An episode timeline with five reports, oldest first"> | <img src="apps/landing/public/screens/hindi-light.webp" width="200" alt="The report summary in Hindi"> |
+<p align="center">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="apps/landing/public/screens/marker-dark.webp">
+  <img src="apps/landing/public/screens/marker-light.webp" width="260" alt="The Vitamin B12 page: what the marker is, the value, and where it sits in the range.">
+</picture>
+</p>
 
-## How a report becomes a score
+### Follow each marker over time, for all your family
+
+With two reports, you can see how each marker changes from one visit to the next. Compare two reports, or open the year in review to see the markers that moved and the markers still at risk. One account keeps a profile for each person in your family: you, your parents, your partner and your children.
+
+<p align="center">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="apps/landing/public/screens/trends-dark.webp">
+  <img src="apps/landing/public/screens/trends-light.webp" width="260" alt="The trends page: each marker with its change since the last report.">
+</picture>
+</p>
+
+### Keep scans and repeat tests in one history
+
+MediWise copies the words from your ultrasound, X-ray and ECG reports. When a line names a mass, a nodule, a stone or a similar finding, MediWise shows that line first. It tells you to ask your doctor. MediWise links two reports when both have the same study within 90 days. When the later report has no alert line, the earlier line moves to Settled. MediWise also finds reports that may belong together. Put them in one episode to see them in date order.
+
+<p align="center">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="apps/landing/public/screens/settled-dark.webp">
+  <img src="apps/landing/public/screens/settled-light.webp" width="260" alt="The Settled block: a 34 mm cyst on 10 Feb 2025. The repeat ultrasound of 17 Mar 2025 shows no cyst.">
+</picture>
+</p>
+
+### Read your report in English or Hindi
+
+Choose Hindi in Settings or on the sign-in page. The app, the marker explanations and the report summary show in Hindi. Marker names and printed lines stay as the lab prints them.
+
+<p align="center">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="apps/landing/public/screens/hindi-dark.webp">
+  <img src="apps/landing/public/screens/hindi-light.webp" width="260" alt="The report summary in Hindi. Marker names such as Urine albumin and Homocysteine stay in English.">
+</picture>
+</p>
+
+Every screen is from the app. The people and the reports are made up.
+
+## See it
+
+- **The app:** [app.mediwise.theyashgupta.me](https://app.mediwise.theyashgupta.me). It runs in the browser on a phone or a desktop.
+- **The landing page:** [mediwise.theyashgupta.me](https://mediwise.theyashgupta.me), in English and Hindi.
+- **The 30-second ad:** download the [16:9 cut](https://github.com/theyashgupta/mediwise/releases/download/demos-2026-10/mediwise-ad-16x9.mp4) for a desktop or the [9:16 cut](https://github.com/theyashgupta/mediwise/releases/download/demos-2026-10/mediwise-ad-9x16.mp4) for a phone.
+- **The film for doctors:** [doctor-pitch-1080p.mp4](https://github.com/theyashgupta/mediwise/releases/download/demos-2026-10/doctor-pitch-1080p.mp4) (3:40) shows the features that matter in a clinic.
+- **Forty walkthroughs:** [docs/demos](docs/demos/README.md) has one short video for each feature of the app.
+
+All the videos are attached to the release [demos-2026-10](https://github.com/theyashgupta/mediwise/releases/tag/demos-2026-10).
+
+**MediWise is for information. It does not give a diagnosis and it does not replace a doctor.**
+
+## For developers
+
+MediWise is open source under the AGPL-3.0. The sections below tell how the app reads a report, what it is built with, and how to run it.
+
+### How a report becomes a score
 
 The LLM reads values. It never scores and it never recommends. The same report always gives the same score.
+
+A report holds up to 20 PDFs or photos. A page goes to Claude as an image only when it has no text layer.
 
 ```
 PDF or photos
@@ -72,7 +120,7 @@ A report with scans adds one study pass per scan page. A report with findings ad
 
 **Cost.** The three passes on the 3-page sample report cost 0.48 US cents. The design target is at most 6 cents for a long report. A monthly spend cap (`CLAUDE_MONTHLY_CAP_CENTS`, default 20 USD) pauses the worker when the spend reaches the cap. The reasons for each model choice are in [docs/DECISIONS.md](docs/DECISIONS.md).
 
-## Stack
+### Stack
 
 | Part                            | Tools                                                                 |
 | - | - |
@@ -83,7 +131,7 @@ A report with scans adds one study pass per scan page. A report with findings ad
 | Data and auth                   | Supabase Postgres, Supabase Auth (email and Google), Supabase Storage |
 | Monorepo                        | pnpm 11 workspaces, Turborepo                                         |
 
-## Quick start
+### Quick start
 
 You need Node 24, pnpm 11, poppler (`brew install poppler` or `apt-get install poppler-utils`), a free [Supabase](https://supabase.com) project and an [Anthropic API key](https://console.anthropic.com).
 
@@ -130,11 +178,11 @@ The extraction eval runs the real pipeline on the two sample reports and compare
 pnpm eval:extraction
 ```
 
-## Self-hosting
+### Self-hosting
 
 The production setup costs nothing until users arrive. The web app and the landing page run on Cloudflare Pages. The API runs in Docker on Render free, with a free Supabase project. [docs/DEPLOY.md](docs/DEPLOY.md) has the runbook, every environment variable, the smoke test and the rollback steps.
 
-## Project structure
+### Project structure
 
 ```
 apps/
@@ -154,10 +202,10 @@ docs/
 
 The folder rules for each app are in [.claude/rules/structure.md](.claude/rules/structure.md). ESLint enforces the import rules.
 
-## Contributing
+### Contributing
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) before you open a pull request. It covers the setup, `pnpm check`, conventional commits and signed commits. File bugs and feature ideas through the [issue forms](https://github.com/theyashgupta/mediwise/issues/new/choose). Report a security problem in private, see [SECURITY.md](SECURITY.md). Everyone who participates agrees to the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-## License
+### License
 
 [GNU Affero General Public License v3.0](LICENSE). If you run a changed MediWise as a network service, you must offer its source code to its users.
