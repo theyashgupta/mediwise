@@ -45,7 +45,7 @@ export function GlassButton({
     <Button
       variant="outline"
       className={cn(
-        "bg-transparent hover:bg-foreground/5 dark:bg-transparent dark:hover:bg-foreground/8",
+        "bg-transparent hover:bg-foreground/5 active:bg-foreground/10 dark:hover:bg-foreground/8 dark:active:bg-foreground/12",
         className,
       )}
       {...props}

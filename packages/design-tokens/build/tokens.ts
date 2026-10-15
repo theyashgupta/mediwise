@@ -169,6 +169,24 @@ export const tokens = {
           "spread": -20,
           "inset": false
         }
+      ],
+      "control": [
+        {
+          "color": "rgba(255, 255, 255, 0.18)",
+          "offsetX": 0,
+          "offsetY": 1,
+          "blur": 0,
+          "spread": 0,
+          "inset": true
+        },
+        {
+          "color": "rgba(37, 33, 29, 0.18)",
+          "offsetX": 0,
+          "offsetY": 1,
+          "blur": 2,
+          "spread": 0,
+          "inset": false
+        }
       ]
     },
     "dark": {
@@ -215,6 +233,24 @@ export const tokens = {
           "offsetY": 16,
           "blur": 40,
           "spread": -20,
+          "inset": false
+        }
+      ],
+      "control": [
+        {
+          "color": "rgba(255, 255, 255, 0.25)",
+          "offsetX": 0,
+          "offsetY": 1,
+          "blur": 0,
+          "spread": 0,
+          "inset": true
+        },
+        {
+          "color": "rgba(0, 0, 0, 0.45)",
+          "offsetX": 0,
+          "offsetY": 1,
+          "blur": 2,
+          "spread": 0,
           "inset": false
         }
       ]
