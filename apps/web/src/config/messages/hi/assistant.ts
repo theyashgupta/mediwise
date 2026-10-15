@@ -55,6 +55,12 @@ export const assistant: Messages["assistant"] = {
     repeatStudy: "दोबारा की गई जांच",
     report: "रिपोर्ट",
   },
+  widget: {
+    open: "चैट खोलें",
+    close: "चैट बंद करें",
+    fullPage: review("चैट को पूरे पेज में खोलें"),
+    thread: "सवाल और उत्तर",
+  },
   fact: {
     title: "उद्धृत मान",
     hint: review("उसे यहां देखने के लिए कोई उद्धृत मान चुनें।"),

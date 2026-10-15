@@ -280,6 +280,28 @@ Measured on 2026-10-15 with `pnpm perf` on this 8 GB Mac, production build, dens
 
 The INP check now also runs at 390 px, because the tab bar and its blur render only under 768 px.
 
+### Ask chat widget (MEDI-151)
+
+- **Launcher.** A 56 px round button with the idle mascot at 48 px. It uses the bar glass, a 1 px border and `shadow-(--shadow-glass)`, as the tab bar does. On a phone it sits in the free corner, 16 px from the right edge and centred on the tab bar. From `md` it is 16 px from the right and the bottom. Its accessible name is "Open the chat".
+- **When it shows.** On every app page when `GET /me` has the assistant on. It does not show when the assistant is off, on `/ask` (the page has its own mascot) or offline.
+- **Room for the launcher.** Phone pages keep `7rem` of bottom padding. Desktop pages now have 96 px (was 48 px), so the last row of a page can scroll clear of the launcher.
+- **Panel.** From `md`, a 400 x 600 px glass surface (`GlassSurface layer="surface"`, 24 px radius) at the launcher corner. It grows from the bottom-right corner. Under `md`, a bottom sheet with the full height of the screen and round top corners. The scrim dims the page on a phone and is clear on desktop.
+- **Keyboard and screen readers.** The panel is a modal dialog. Focus stays in the panel, Escape closes it and focus goes back to the launcher. The input gets focus when the panel opens. The thread is a `log` region named "Questions and answers". The mascot stays hidden from screen readers, and "MediWise is writing the answer." is the text status.
+- **Scroll.** The page does not scroll under the panel. The thread scrolls inside the panel, and the tab bar slides down while the panel is open.
+- **Mascot state.** Listening while the input has text, thinking while the question runs, talking for 2.4 s when the answer comes in, idle at other times. The panel header shows the mascot. The launcher stays idle.
+- **Thread.** The same container renders the panel and `/ask`. A question is a `primary/10` bubble on the right. An answer is a solid card on the left with the citation chips under each sentence, because answers hold values. Send is the only primary button. "Use 1 credit" is now `secondary`.
+- **Entry points.** The Home suggestions and "Ask a question" open the widget with the question in the input. "Open the chat in a full page" in the panel header opens `/ask` with the same thread, the open report and the typed text. The report page link still opens `/ask`.
+- **Weight.** The thread code loads when the chat opens for the first time. The app shell grows by 1.8 kB gzip.
+
+Screenshots on 2026-10-15, web dev server against `mediwise-dev`, the demo account (made-up profile "Arjun Mehta"), light theme. The question is "Which values are in the watch range?", answered on Haiku.
+
+| State | 390 x 844 | 1440 x 900 |
+| - | - | - |
+| Closed | [390](design/pages/ask-widget-closed-light-390.jpg) | [1440](design/pages/ask-widget-closed-light-1440.jpg) |
+| Open | [390](design/pages/ask-widget-open-light-390.jpg) | [1440](design/pages/ask-widget-open-light-1440.jpg) |
+| Thinking | [390](design/pages/ask-widget-thinking-light-390.jpg) | [1440](design/pages/ask-widget-thinking-light-1440.jpg) |
+| Answer | [390](design/pages/ask-widget-answer-light-390.jpg) | [1440](design/pages/ask-widget-answer-light-1440.jpg) |
+
 ## Layout widths
 
 Every page fits the window from 390 px to 1920 px, with no sideways scroll.
