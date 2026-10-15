@@ -200,6 +200,54 @@ for (const width of [390, 1440]) {
   });
 }
 
+for (const width of [360, 390]) {
+  test(`the phone tab bar at ${width} px is centred, shows each label on one line and stays clear of the Ask launcher`, async () => {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto("/");
+    const bar = page.getByTestId("mobile-tab-bar");
+    const launcher = page.getByTestId("ask-launcher");
+    await expect(bar).toBeVisible();
+    await expect(launcher).toBeVisible();
+
+    const box = await bar.boundingBox();
+    expect(box).not.toBeNull();
+    if (!box) return;
+    expect(Math.abs(box.x - (width - box.x - box.width))).toBeLessThanOrEqual(1);
+
+    const tabs = bar.getByRole("link");
+    await expect(tabs).toHaveCount(6);
+    const labels = await tabs.evaluateAll((links) =>
+      links.map((link) => {
+        const label = link.lastElementChild as HTMLElement;
+        const outer = link.getBoundingClientRect();
+        const inner = label.getBoundingClientRect();
+        return {
+          text: label.textContent ?? "",
+          lines: Math.round(inner.height / parseFloat(getComputedStyle(label).lineHeight)),
+          inside: inner.left >= outer.left && inner.right <= outer.right,
+          clipped: label.scrollWidth > label.clientWidth,
+        };
+      }),
+    );
+    for (const label of labels) {
+      expect(label, label.text).toMatchObject({ lines: 1, inside: true, clipped: false });
+    }
+
+    const corner = await launcher.boundingBox();
+    expect(corner).not.toBeNull();
+    for (const tab of await tabs.all()) {
+      const tabBox = await tab.boundingBox();
+      if (!corner || !tabBox) continue;
+      const apart =
+        corner.x + corner.width <= tabBox.x ||
+        tabBox.x + tabBox.width <= corner.x ||
+        corner.y + corner.height <= tabBox.y ||
+        tabBox.y + tabBox.height <= corner.y;
+      expect(apart, (await tab.getAttribute("href")) ?? "").toBe(true);
+    }
+  });
+}
+
 test("compare takes the first and the last report, and one report never sits on both sides", async () => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/compare");
