@@ -24,6 +24,7 @@ export const trendsRoutes = new Hono<AuthEnv>()
           c.var.userId,
           c.req.valid("query").profileId,
           c.req.valid("param").markerKey,
+          requestLocale(c),
         ),
       ),
   );

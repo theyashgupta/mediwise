@@ -85,6 +85,21 @@ const store = vi.hoisted(() => {
       findReportProfileId: async (owner: string, id: string) =>
         owner === "alice" ? reports.find((report) => report.id === id)?.profileId : undefined,
     },
+    dashboardRepo: {
+      listMarkerHistory: async (owner: string, profileId: string) =>
+        done(owner, profileId).flatMap((report) =>
+          rows
+            .filter((row) => row.reportId === report.id && row.markerKey && row.value !== null)
+            .map((row) => ({
+              valueText: null,
+              calibratedLow: null,
+              calibratedHigh: null,
+              ...row,
+              markerKey: row.markerKey!,
+              date: report.collectedAt,
+            })),
+        ),
+    },
   };
 });
 
@@ -96,6 +111,7 @@ vi.mock("../links/links.repo.js", () => ({
   listVisitDates: async () => [],
 }));
 vi.mock("../profiles/profiles.repo.js", () => store.profilesRepo);
+vi.mock("../dashboard/dashboard.repo.js", () => store.dashboardRepo);
 
 const app = new Hono<AuthEnv>()
   .use(async (c, next) => {
@@ -182,6 +198,32 @@ test("trends list every marker measured twice, with the change and a direction f
   expect(hdl).toMatchObject({ change: { absolute: -12, percent: -24 }, direction: "worsening" });
   expect(sodium).toMatchObject({ change: { absolute: 0, percent: 0 }, direction: "stable" });
   expect(ldl?.points).toHaveLength(2);
+});
+
+test("trends list the markers to keep an eye on, worsening before watch, and a suggestion with the doctor line on each row", async () => {
+  const { body } = await json(`/trends?profileId=${ids.profile}`);
+  const attention = body.attention as { markerKey: string; group: string; previous: unknown }[];
+  expect(attention.map(({ markerKey, group }) => [markerKey, group])).toEqual([
+    ["hdl_cholesterol", "worsening"],
+    ["ldl_cholesterol", "watch"],
+  ]);
+  expect(attention[0]).toMatchObject({ value: 38, previous: { value: 50, date: "2025-01-10" } });
+  const markers = body.markers as unknown as { markerKey: string; suggestion: string }[];
+  expect(markers[0]?.suggestion).toBe(
+    "LDL cholesterol moves toward your optimal range. Retest it in 8 to 12 weeks. Ask your doctor before you act on this.",
+  );
+  for (const { suggestion } of markers) {
+    expect(suggestion).toMatch(/Ask your doctor before you act on this\.$/);
+  }
+});
+
+test("a marker trend in Hindi carries the Hindi suggestion", async () => {
+  const res = await app.request(`/trends/hdl_cholesterol?profileId=${ids.profile}`, {
+    headers: { "x-user": "alice", "accept-language": "hi" },
+  });
+  const body = (await res.json()) as { suggestion: string };
+  expect(body.suggestion).toMatch(/^8 से 12 हफ़्ते में HDL cholesterol का दोबारा टेस्ट करें/);
+  expect(body.suggestion).toMatch(/डॉक्टर से पूछें।$/);
 });
 
 test("a large move that stays inside the optimal range is stable and still shows the change", async () => {

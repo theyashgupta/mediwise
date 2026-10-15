@@ -116,11 +116,16 @@ async function listAlerts(userId: string, profileId: string) {
   });
 }
 
-/** Lists what needs attention across every done report of a profile, each row with a name to show. */
-async function listAttention(userId: string, profileId: string) {
+/**
+ * Lists what needs attention across every done report of a profile, each row with a name to show.
+ *
+ * @remarks
+ * Trends passes `withAlerts` false to get the marker rows only, so it skips the alert sequence queries.
+ */
+export async function listAttention(userId: string, profileId: string, withAlerts = true) {
   const [rows, alerts] = await Promise.all([
     repo.listMarkerHistory(userId, profileId),
-    listAlerts(userId, profileId),
+    withAlerts ? listAlerts(userId, profileId) : [],
   ]);
   return buildAttention(toVisits(rows), alerts).map((item) =>
     item.kind === "alert"
