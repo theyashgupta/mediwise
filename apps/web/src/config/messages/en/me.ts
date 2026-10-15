@@ -11,4 +11,20 @@ export const me = {
     signOut: "Sign out",
     signingOut: "Signing out",
   },
+  consent: {
+    termsBefore: "I am 18 or older and I accept the ",
+    termsLink: "Terms",
+    termsAfter: "",
+    healthBefore:
+      "I agree that MediWise stores my health reports and sends their content to Anthropic in the United States to read them. See the ",
+    healthLink: "Privacy policy",
+    healthAfter: ".",
+    required: "Tick this box to continue.",
+    gateTitle: "Give your consent before you upload a report",
+    gateDescription: "MediWise needs your consent before it reads a report.",
+    gateChanged: "The privacy policy changed. Give your consent again before you upload a report.",
+    agree: "Continue",
+    agreeing: "Saving",
+    loadError: "We could not load your consent.",
+  },
 };

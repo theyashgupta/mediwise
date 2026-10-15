@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { getIntlTag, useT } from "@/common/hooks/use-locale";
+import { CheckboxLine } from "@/common/components/checkbox-line";
 import { Button } from "@/components/ui/button";
 
 type ConsentPromptProps = {
@@ -11,28 +12,6 @@ type ConsentPromptProps = {
   error?: string;
   onConfirm: () => void;
 };
-
-function ConsentLine({
-  checked,
-  onChange,
-  children,
-}: {
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-  children: string;
-}) {
-  return (
-    <label className="flex items-start gap-3 text-sm">
-      <input
-        type="checkbox"
-        className="mt-0.5 size-4 shrink-0 accent-primary"
-        checked={checked}
-        onChange={(event) => onChange(event.target.checked)}
-      />
-      {children}
-    </label>
-  );
-}
 
 export function ConsentPrompt({
   permissionNames,
@@ -68,14 +47,14 @@ export function ConsentPrompt({
       </div>
       <div className="space-y-3">
         {permissionNames.length > 0 && (
-          <ConsentLine checked={permission} onChange={setPermission}>
+          <CheckboxLine className="text-sm" checked={permission} onChange={setPermission}>
             {text.permission(names.format(permissionNames))}
-          </ConsentLine>
+          </CheckboxLine>
         )}
         {guardianNames.length > 0 && (
-          <ConsentLine checked={guardian} onChange={setGuardian}>
+          <CheckboxLine className="text-sm" checked={guardian} onChange={setGuardian}>
             {text.guardian(names.format(guardianNames))}
-          </ConsentLine>
+          </CheckboxLine>
         )}
       </div>
       {error && (

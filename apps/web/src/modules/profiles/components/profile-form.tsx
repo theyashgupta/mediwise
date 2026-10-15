@@ -11,6 +11,7 @@ import { type Resolver, useForm, useWatch } from "react-hook-form";
 import type { z } from "zod";
 import { getT, useT } from "@/common/hooks/use-locale";
 import { Badge } from "@/components/ui/badge";
+import { CheckboxField } from "@/common/components/checkbox-field";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -73,36 +74,6 @@ const resolver: Resolver<ProfileFormValues, unknown, ProfileInput> = async (
   }
   return result;
 };
-
-function CheckboxField({
-  checked,
-  onChange,
-  label,
-  testId,
-}: {
-  checked?: boolean;
-  onChange: (checked: boolean) => void;
-  label: string;
-  testId: string;
-}) {
-  return (
-    <FormItem className="flex items-start gap-3">
-      <FormControl>
-        <input
-          type="checkbox"
-          className="mt-0.5 size-4 shrink-0 accent-primary"
-          data-testid={testId}
-          checked={checked ?? false}
-          onChange={(event) => onChange(event.target.checked)}
-        />
-      </FormControl>
-      <div className="grid gap-1">
-        <FormLabel className="font-normal leading-snug">{label}</FormLabel>
-        <FormMessage />
-      </div>
-    </FormItem>
-  );
-}
 
 function SelectField({
   value,

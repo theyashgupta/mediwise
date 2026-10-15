@@ -1,3 +1,4 @@
+import { policyVersion } from "@mediwise/shared";
 import type { AuthError } from "@supabase/supabase-js";
 import { useMutation } from "@tanstack/react-query";
 import { env } from "@/config/env";
@@ -21,15 +22,19 @@ export function useSignIn() {
  * Creates an account.
  *
  * @remarks
- * When the project asks for email confirmation, the result has no session until the user opens the link.
+ * The form submits only with both consent boxes ticked, so `consent_version` carries them to the upload page, which stores them.
  */
 export function useSignUp() {
   return useMutation({
-    mutationFn: (input: Credentials) =>
+    mutationFn: ({ email, password }: Credentials) =>
       unwrap(
         supabase.auth.signUp({
-          ...input,
-          options: { emailRedirectTo: `${window.location.origin}/` },
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: { consent_version: policyVersion },
+          },
         }),
       ),
   });

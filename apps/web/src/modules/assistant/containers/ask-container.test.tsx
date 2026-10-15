@@ -520,7 +520,7 @@ describe.each(["en", "hi"] as const)("the review month in %s", (locale) => {
     let consented = false;
     const requests = network([], {
       "GET /me": () => reviewMe(consented),
-      "POST /me/assistant-consent": () => {
+      "POST /me/consents": () => {
         consented = true;
         return new Response(null, { status: 204 });
       },
@@ -535,13 +535,13 @@ describe.each(["en", "hi"] as const)("the review month in %s", (locale) => {
 
     await waitFor(() => expect(screen.queryByText(t.consent)).toBeNull());
     expect((input as HTMLTextAreaElement).disabled).toBe(false);
-    expect(requests.filter(({ path }) => path === "/me/assistant-consent")).toHaveLength(1);
+    expect(requests.filter(({ path }) => path === "/me/consents")).toHaveLength(1);
   });
 
   test("a failed consent shows its title and leaves the box unticked and the input off", async () => {
     network([], {
       "GET /me": () => reviewMe(false),
-      "POST /me/assistant-consent": () => problem(404, "Not Found"),
+      "POST /me/consents": () => problem(404, "Not Found"),
     });
     await renderApp("/ask", { locale });
 
