@@ -4,6 +4,7 @@ export const me = {
     signedInAs: "Signed in as",
     loadingAccount: "Loading account",
     unavailable: "Account unavailable",
+    settings: "Settings",
     theme: "Theme",
     light: "Light",
     dark: "Dark",
