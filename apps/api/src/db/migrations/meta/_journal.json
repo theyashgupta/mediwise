@@ -197,6 +197,20 @@
       "when": 1792080604485,
       "tag": "0027_printed_units",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1792082294512,
+      "tag": "0028_consent_records",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1792082298923,
+      "tag": "0029_move_assistant_consents",
+      "breakpoints": true
     }
   ]
 }

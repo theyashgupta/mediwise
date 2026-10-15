@@ -10,6 +10,7 @@ export class AppError extends Error {
   constructor(
     readonly status: ContentfulStatusCode,
     message: string,
+    readonly extensions?: Record<string, string>,
   ) {
     super(message);
   }

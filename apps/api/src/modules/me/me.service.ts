@@ -4,7 +4,8 @@ import { AppError } from "../../common/errors.js";
 import { remove } from "../../lib/storage.js";
 import { supabase } from "../../lib/supabase.js";
 import { env } from "../../config/env.js";
-import { hasReviewConsent, isReviewRequired } from "../assistant/index.js";
+import { isReviewRequired } from "../assistant/index.js";
+import { hasConsent } from "../consents/index.js";
 import { getCreditBalance, getQuestionsLeft, getQuestionState } from "../credits/index.js";
 import { ensureSelfProfile } from "../profiles/index.js";
 import * as repo from "./me.repo.js";
@@ -21,7 +22,7 @@ export async function getMe(userId: string, email: string, googleName?: string) 
     enabled
       ? getQuestionState(userId)
       : getQuestionsLeft(userId).then((left) => ({ questionsLeft: left, nextStep: null })),
-    reviewRequired ? hasReviewConsent(userId) : false,
+    reviewRequired ? hasConsent(userId, "assistant_review") : false,
   ]);
   return {
     userId,

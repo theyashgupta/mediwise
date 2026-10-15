@@ -271,6 +271,25 @@ export const deleteMeSchema = z.object({
   confirm: z.literal("DELETE", 'Type "DELETE" to confirm'),
 });
 
+export const policyVersion = "2026-10-15";
+
+export const consentKinds = ["terms", "health_data", "assistant_review"] as const;
+export type ConsentKind = (typeof consentKinds)[number];
+
+export const requiredConsentKinds = ["terms", "health_data"] as const;
+export type RequiredConsentKind = (typeof requiredConsentKinds)[number];
+
+/**
+ * Body of `POST /me/consents`.
+ *
+ * @remarks
+ * The client names the kinds only. The API stamps the policy version, so no consent is stored with a version it did not set.
+ */
+export const giveConsentsSchema = z.object({
+  kinds: z.array(z.enum(consentKinds)).min(1, "Choose at least one consent"),
+});
+export type GiveConsentsInput = z.infer<typeof giveConsentsSchema>;
+
 /** Removes zero-width characters and outer whitespace, so a question of only invisible characters reads as empty. */
 export function cleanQuestion(text: string) {
   return text.replace(/[\u200B-\u200D\u2060\uFEFF]/g, "").trim();

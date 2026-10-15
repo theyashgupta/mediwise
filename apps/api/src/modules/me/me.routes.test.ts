@@ -1,3 +1,4 @@
+import { policyVersion } from "@mediwise/shared";
 import { Hono } from "hono";
 import { createHash } from "node:crypto";
 import { beforeEach, expect, test, vi } from "vitest";
@@ -62,14 +63,43 @@ const store = vi.hoisted(() => {
   };
 });
 
-const consents = vi.hoisted(() => new Map<string, Date>());
+type ConsentRow = {
+  userId: string;
+  kind: string;
+  policyVersion: string;
+  acceptedAt: Date;
+  withdrawnAt: Date | null;
+  userAgentHash: string | null;
+};
+const consents = vi.hoisted(() => [] as ConsentRow[]);
 
 vi.mock("./me.repo.js", () => store.repo);
-vi.mock("../assistant/assistant.repo.js", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../assistant/assistant.repo.js")>()),
-  hasConsent: async (owner: string) => consents.has(owner),
-  insertConsent: async (owner: string) => {
-    if (!consents.has(owner)) consents.set(owner, new Date());
+vi.mock("../consents/consents.repo.js", () => ({
+  listConsentsByUser: async (userId: string) =>
+    consents
+      .filter((row) => row.userId === userId)
+      .map(({ kind, policyVersion, acceptedAt, withdrawnAt }) => ({
+        kind,
+        policyVersion,
+        acceptedAt,
+        withdrawnAt,
+      })),
+  insertConsents: async (
+    userId: string,
+    kinds: string[],
+    policyVersion: string,
+    userAgentHash: string | null,
+  ) => {
+    for (const kind of kinds) {
+      consents.push({
+        userId,
+        kind,
+        policyVersion,
+        acceptedAt: new Date(),
+        withdrawnAt: null,
+        userAgentHash,
+      });
+    }
   },
 }));
 vi.mock("../credits/credits.repo.js", () => ({
@@ -135,7 +165,7 @@ beforeEach(() => {
   env.ASSISTANT_ENABLED = true;
   env.ASSISTANT_REVIEW = false;
   env.PAYMENTS_ENABLED = false;
-  consents.clear();
+  consents.length = 0;
 });
 
 test("GET /me returns the email, the self profile name, defaulting to the email name, the credit balance and the questions left", async () => {
@@ -322,18 +352,62 @@ test("GET /me/export answers a JSON attachment with the user's data", async () =
   ]);
 });
 
-test("during the review month GET /me asks for consent until POST /me/assistant-consent stores it", async () => {
+test("during the review month GET /me asks for consent until POST /me/consents stores assistant_review", async () => {
   env.ASSISTANT_REVIEW = true;
   expect((await getMeBody()).assistant).toMatchObject({ reviewRequired: true, consented: false });
 
-  expect((await call("POST", "/me/assistant-consent")).status).toBe(204);
+  expect((await call("POST", "/me/consents", { kinds: ["assistant_review"] })).status).toBe(201);
   expect((await getMeBody()).assistant).toMatchObject({ reviewRequired: true, consented: true });
 });
 
-test("the review month needs the assistant on, and the consent route answers 404 while it is off", async () => {
+test("the review month needs the assistant on", async () => {
   env.ASSISTANT_REVIEW = true;
   env.ASSISTANT_ENABLED = false;
   expect((await getMeBody()).assistant).toMatchObject({ reviewRequired: false, consented: false });
-  expect((await call("POST", "/me/assistant-consent")).status).toBe(404);
-  expect(consents.size).toBe(0);
+});
+
+test("GET /me/consents names the terms and the health data consent as missing for a new user", async () => {
+  const res = await call("GET", "/me/consents");
+  expect(res.status).toBe(200);
+  expect(await res.json()).toEqual({
+    policyVersion,
+    consents: [],
+    missing: ["terms", "health_data"],
+  });
+});
+
+test("POST /me/consents stores each kind with the server policy version and the user agent hash", async () => {
+  const res = await app.request("/me/consents", {
+    method: "POST",
+    headers: {
+      "x-user": "alice",
+      "Content-Type": "application/json",
+      "User-Agent": "Mozilla/5.0 Test",
+    },
+    body: JSON.stringify({ kinds: ["terms", "health_data"] }),
+  });
+
+  expect(res.status).toBe(201);
+  const body = (await res.json()) as { missing: string[]; consents: { policyVersion: string }[] };
+  expect(body.missing).toEqual([]);
+  expect(body.consents.map(({ policyVersion }) => policyVersion)).toEqual([
+    policyVersion,
+    policyVersion,
+  ]);
+  expect(consents.map(({ userAgentHash }) => userAgentHash)).toEqual([
+    "907a76066e8277153f98ff4c6d15d90597ab5330471855cfe14dc60ba7067843",
+    "907a76066e8277153f98ff4c6d15d90597ab5330471855cfe14dc60ba7067843",
+  ]);
+});
+
+test("POST /me/consents ignores a policy version in the body", async () => {
+  await call("POST", "/me/consents", { kinds: ["terms"], policyVersion: "1999-01-01" });
+  expect(consents.map(({ policyVersion }) => policyVersion)).toEqual([policyVersion]);
+});
+
+test("POST /me/consents answers 400 and stores nothing for an empty list or an unknown kind", async () => {
+  expect((await call("POST", "/me/consents", { kinds: [] })).status).toBe(400);
+  expect((await call("POST", "/me/consents", { kinds: ["marketing"] })).status).toBe(400);
+  expect((await call("POST", "/me/consents", {})).status).toBe(400);
+  expect(consents).toEqual([]);
 });

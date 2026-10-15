@@ -3,6 +3,7 @@ import {
   ancestries,
   type AssistantAnswer,
   assistantRefusalKinds,
+  consentKinds,
   type Narrative,
   pageClasses,
   relations,
@@ -468,12 +469,31 @@ export const assistantQuestions = pgTable(
   ],
 );
 
-/** One row per account that agreed to the human review of its questions in the review month. */
-export const assistantConsents = pgTable("assistant_consents", {
-  id: uuid().primaryKey().defaultRandom(),
-  userId: text("user_id").notNull().unique(),
-  agreedAt: timestamp("agreed_at", { withTimezone: true }).notNull().defaultNow(),
-});
+/**
+ * One row per consent a user gave, with the policy version the API stamped.
+ *
+ * @remarks
+ * Rows are never updated on a new version: a new row holds the new acceptance, so the history stays provable.
+ */
+export const consentRecords = pgTable(
+  "consent_records",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    userId: text("user_id").notNull(),
+    kind: text({ enum: consentKinds }).notNull(),
+    policyVersion: text("policy_version").notNull(),
+    acceptedAt: timestamp("accepted_at", { withTimezone: true }).notNull().defaultNow(),
+    withdrawnAt: timestamp("withdrawn_at", { withTimezone: true }),
+    userAgentHash: text("user_agent_hash"),
+  },
+  (t) => [
+    uniqueIndex("consent_records_one_per_version_idx")
+      .on(t.userId, t.kind, t.policyVersion)
+      .where(sql`${t.withdrawnAt} is null`),
+    check("consent_records_kind", sql`${t.kind} in ('terms', 'health_data', 'assistant_review')`),
+    check("consent_records_policy_version", sql`${t.policyVersion} <> ''`),
+  ],
+);
 
 export const assistantReviewVerdicts = ["pass", "minor", "critical"] as const;
 export type AssistantReviewVerdict = (typeof assistantReviewVerdicts)[number];
@@ -505,6 +525,7 @@ export type DeletionCounts = {
   reports: number;
   files: number;
   questions?: number;
+  consents?: number;
 };
 
 /**

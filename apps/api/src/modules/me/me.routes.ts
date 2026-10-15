@@ -1,8 +1,9 @@
-import { deleteMeSchema, updateMeSchema } from "@mediwise/shared";
+import { deleteMeSchema, giveConsentsSchema, updateMeSchema } from "@mediwise/shared";
 import { Hono } from "hono";
 import { validate } from "../../common/validate.js";
 import type { AuthEnv } from "../../middleware/auth.js";
-import { assistantEnabled, giveReviewConsent } from "../assistant/index.js";
+import { assistantEnabled } from "../assistant/index.js";
+import { getConsents, giveConsents } from "../consents/index.js";
 import { takeQuestionPack } from "../credits/index.js";
 import { deleteMe, exportMe, getMe, updateMe } from "./me.service.js";
 
@@ -18,10 +19,13 @@ export const meRoutes = new Hono<AuthEnv>()
   .post("/question-packs", assistantEnabled, async (c) =>
     c.json(await takeQuestionPack(c.var.userId), 201),
   )
-  .post("/assistant-consent", assistantEnabled, async (c) => {
-    await giveReviewConsent(c.var.userId);
-    return c.body(null, 204);
-  })
+  .get("/consents", async (c) => c.json(await getConsents(c.var.userId)))
+  .post("/consents", validate("json", giveConsentsSchema), async (c) =>
+    c.json(
+      await giveConsents(c.var.userId, c.req.valid("json").kinds, c.req.header("User-Agent")),
+      201,
+    ),
+  )
   .get("/export", async (c) =>
     c.json(await exportMe(c.var.userId), 200, {
       "Content-Disposition": 'attachment; filename="mediwise-export.json"',

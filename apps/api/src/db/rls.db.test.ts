@@ -1,3 +1,4 @@
+import { policyVersion } from "@mediwise/shared";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
@@ -133,8 +134,11 @@ async function seedRows(userId: string) {
         .returning(),
     ),
     assistant_questions: question,
-    assistant_consents: idOf(
-      await db.insert(schema.assistantConsents).values({ userId }).returning(),
+    consent_records: idOf(
+      await db
+        .insert(schema.consentRecords)
+        .values({ userId, kind: "terms", policyVersion })
+        .returning(),
     ),
     assistant_reviews: idOf(
       await db

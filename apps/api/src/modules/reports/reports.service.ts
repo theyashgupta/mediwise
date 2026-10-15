@@ -27,6 +27,7 @@ import { posix } from "node:path";
 import { AppError } from "../../common/errors.js";
 import { env } from "../../config/env.js";
 import { createSignedUploadUrl, list, remove } from "../../lib/storage.js";
+import { assertHealthDataConsent } from "../consents/index.js";
 import { assertCanAddReport } from "../credits/index.js";
 import { listFindings } from "../findings/index.js";
 import { listReportLinks, loadSequence, settleStored } from "../links/index.js";
@@ -60,6 +61,7 @@ export async function createReport(userId: string, input: CreateReportInput) {
     throw new AppError(503, "We do not accept new reports at the moment. Try again later.");
   }
   await getOwnedProfile(userId, input.profileId);
+  await assertHealthDataConsent(userId);
   const id = randomUUID();
   const files = input.files.map((file, index) => ({
     storagePath: `${userId}/${id}/${index}.${extensions[file.mime]}`,
@@ -88,6 +90,7 @@ export async function createReport(userId: string, input: CreateReportInput) {
 export async function markReportUploaded(userId: string, id: string) {
   const report = await getReport(userId, id);
   if (report.status !== "draft") return report;
+  await assertHealthDataConsent(userId);
   const files = await repo.listReportFiles(id);
   const objects = await list(`${userId}/${id}`);
   const complete = files.every((file) =>
@@ -641,6 +644,7 @@ export async function retryReport(userId: string, id: string) {
   const report = await getReport(userId, id);
   if (report.status !== "failed")
     throw new AppError(409, "You can retry only a report that failed");
+  await assertHealthDataConsent(userId);
   await repo.requeueFailedReport(userId, id);
   return getReport(userId, id);
 }

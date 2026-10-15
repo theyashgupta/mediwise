@@ -6,6 +6,7 @@ import { AppError } from "../../common/errors.js";
 import { env } from "../../config/env.js";
 import { log } from "../../middleware/logger.js";
 import { callTool, type StepUsage, stepUsage } from "../extraction/index.js";
+import { hasConsent } from "../consents/index.js";
 import { getOwnedProfile } from "../profiles/index.js";
 import { isOverBudget, stepCostCents } from "../spend/index.js";
 import { type AssistantContext, buildContext, nameOf } from "./assistant.context.js";
@@ -308,7 +309,7 @@ function chargeRule(answer: AssistantAnswer, refusalKind: AssistantRefusalKind |
 export async function askQuestion(userId: string, profileId: string, body: AskQuestionInput) {
   const started = Date.now();
   await getOwnedProfile(userId, profileId);
-  if (isReviewRequired() && !(await repo.hasConsent(userId))) {
+  if (isReviewRequired() && !(await hasConsent(userId, "assistant_review"))) {
     throw new AppError(403, reviewConsentCopy);
   }
   const focusFound = body.reportId ? await repo.isProfileReport(profileId, body.reportId) : false;
@@ -409,14 +410,6 @@ export async function flagQuestion(userId: string, id: string) {
 
 export function isReviewRequired() {
   return env.ASSISTANT_ENABLED && env.ASSISTANT_REVIEW;
-}
-
-export function hasReviewConsent(userId: string) {
-  return repo.hasConsent(userId);
-}
-
-export function giveReviewConsent(userId: string) {
-  return repo.insertConsent(userId);
 }
 
 /**

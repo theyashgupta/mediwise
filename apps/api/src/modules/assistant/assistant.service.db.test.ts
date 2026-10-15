@@ -13,16 +13,10 @@ vi.mock("../spend/index.js", async (importOriginal) => ({
   isOverBudget: async () => edge.overBudget,
 }));
 
-const {
-  askQuestion,
-  clearQuestions,
-  flagQuestion,
-  giveReviewConsent,
-  listQuestions,
-  loadReviewDay,
-  storeReview,
-} = await import("./assistant.service.js");
+const { askQuestion, clearQuestions, flagQuestion, listQuestions, loadReviewDay, storeReview } =
+  await import("./assistant.service.js");
 const { getQuestionsLeft } = await import("../credits/index.js");
+const { giveConsents } = await import("../consents/index.js");
 const { env } = await import("../../config/env.js");
 
 const marker = "ZORBEL";
@@ -664,7 +658,7 @@ test("during the review month a question without consent answers 403 and stores 
     expect(edge.create).not.toHaveBeenCalled();
     expect(await listQuestions(owner, profile)).toHaveLength(0);
 
-    await giveReviewConsent(owner);
+    await giveConsents(owner, ["assistant_review"]);
     expect(
       (await askQuestion(owner, profile, { question: "What was my HbA1c?" })).refusalKind,
     ).toBeNull();
@@ -683,7 +677,7 @@ test("during the review month a question without consent answers 403 and stores 
 test("the review day lists the kept questions of that UTC day from consenting accounts, with chips and cited values, and a second verdict replaces the first", async () => {
   const { owner, profile, report } = await newAsker(0);
   const stranger = await newAsker(0);
-  await giveReviewConsent(owner);
+  await giveConsents(owner, ["assistant_review"]);
   const cite = { kind: "value" as const, reportId: report, target: "hba1c" };
   await db.insert(schema.assistantQuestions).values({
     userId: stranger.owner,
