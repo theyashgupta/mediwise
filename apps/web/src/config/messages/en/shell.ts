@@ -43,7 +43,12 @@ export const shell = {
     show: "Show the keyboard shortcuts",
     then: "then",
   },
-  footer: { nav: "About and policies", about: "About MediWise" },
+  footer: {
+    nav: "About and policies",
+    about: "About MediWise",
+    legal: (year: number, company: string) =>
+      `© ${year} MediWise. MediWise is a brand of ${company}.`,
+  },
   offline: {
     title: "You are offline",
     body: "Connect to the internet to see your reports. MediWise keeps no report on this device.",

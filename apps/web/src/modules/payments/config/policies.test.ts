@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { policies } from "./policies";
+import { contact, policies } from "./policies";
 
 const sentences = Object.values(policies).flatMap((policy) =>
   policy.sections.flatMap((section) => section.body.flatMap((line) => line.split(/(?<=\.) /))),
@@ -24,4 +24,13 @@ test("the privacy policy explains family consent, child profiles and deletion re
     expect.arrayContaining(["Family members", "Children", "Deletion records"]),
   );
   expect(JSON.stringify(policies).toLowerCase()).not.toContain("compliant");
+});
+
+test("every policy page shows the company, proprietor, email, phone, address and GSTIN", () => {
+  for (const policy of Object.values(policies)) {
+    const text = policy.sections.flatMap((section) => section.body).join(" ");
+    expect(text).toContain("MediWise is a brand of Codegenix.");
+    for (const value of Object.values(contact)) expect(text, policy.title).toContain(value);
+    expect(text, policy.title).not.toMatch(/\[[a-z ]+\]/);
+  }
 });

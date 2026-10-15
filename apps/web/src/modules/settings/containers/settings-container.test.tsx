@@ -193,4 +193,28 @@ describe("delete account", () => {
     expect(screen.queryByText(t.settings.accountDeleted)).toBeNull();
     expect(requests.some((r) => r.path.startsWith("/auth/v1/logout"))).toBe(false);
   });
+
+});
+
+describe.each(["en", "hi"] as const)("about in %s", (locale) => {
+  const t = messages[locale];
+
+  test("the About section names the brand and the company and links the email and the four policies", async () => {
+    fakeNetwork({ "GET /me": () => me, "GET /profiles": () => [selfProfile] });
+    await renderApp("/settings", { locale });
+
+    const about = await screen.findByRole("region", { name: t.settings.about.title });
+    expect(within(about).getByText(t.settings.about.description("Codegenix"))).toBeTruthy();
+    expect(within(about).getByText("Codegenix")).toBeTruthy();
+    expect(
+      within(about).getByRole("link", { name: "yashguptaab66@gmail.com" }).getAttribute("href"),
+    ).toBe("mailto:yashguptaab66@gmail.com");
+    for (const page of ["terms", "privacy", "refunds", "contact"] as const) {
+      expect(
+        within(about)
+          .getByRole("link", { name: t.payments.policyLinks[page] })
+          .getAttribute("href"),
+      ).toBe(`/${page}`);
+    }
+  });
 });

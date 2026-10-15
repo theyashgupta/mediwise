@@ -1,4 +1,5 @@
 import { Logo } from "../../../web/src/common/components/brand/logo";
+import { contact } from "../../../web/src/modules/payments/config/policies";
 import { LanguageSwitch } from "@/components/language-switch";
 import { messages, type Locale } from "@/config/messages";
 import { appLinks, buttonStyles } from "@/lib/site";
@@ -63,7 +64,7 @@ export function Footer({ locale }: { locale: Locale }) {
         </div>
         <p className="text-sm text-muted-foreground">{t.disclaimer}</p>
         <div className="flex flex-wrap items-center justify-between gap-4 text-xs text-muted-foreground">
-          <p>© {new Date().getFullYear()} MediWise</p>
+          <p>{t.footer.legal(new Date().getFullYear(), contact.businessName)}</p>
           <LanguageSwitch current={locale} className="text-sm" />
         </div>
       </div>

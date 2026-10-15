@@ -1,7 +1,9 @@
 import { Inter, JetBrains_Mono } from "next/font/google";
 import type { ReactNode } from "react";
 import { localePages, type Locale } from "@/config/messages";
+import { siteUrl } from "@/lib/site";
 import { cn } from "@/lib/utils";
+import { contact } from "../../../web/src/modules/payments/config/policies";
 import "../app/globals.css";
 
 const inter = Inter({
@@ -15,6 +17,18 @@ const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
   display: "swap",
   preload: false,
+});
+
+const organization = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: contact.brand,
+  legalName: contact.businessName,
+  url: siteUrl,
+  logo: `${siteUrl}/apple-touch-icon.png`,
+  email: contact.email,
+  telephone: contact.phone,
+  address: contact.address,
 });
 
 const restoreMotion = `try{if(localStorage.getItem("motion")==="paused")document.documentElement.dataset.motion="paused"}catch(e){}`;
@@ -50,6 +64,7 @@ export function Document({
           fetchPriority="high"
         />
         <script dangerouslySetInnerHTML={{ __html: restoreMotion }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: organization }} />
       </head>
       <body>{children}</body>
     </html>

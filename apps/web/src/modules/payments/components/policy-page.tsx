@@ -3,7 +3,13 @@ import { Logo } from "@/common/components/brand/logo";
 import { Disclaimer } from "@/common/components/disclaimer";
 import { PageHeader } from "@/common/components/page-header";
 import { getIntlTag, useT } from "@/common/hooks/use-locale";
-import { policies, policyLinks, policyUpdated, type PolicyPage as Page } from "../config/policies";
+import {
+  contact,
+  policies,
+  policyLinks,
+  policyUpdated,
+  type PolicyPage as Page,
+} from "../config/policies";
 
 type PolicyPageProps = {
   page: Page;
@@ -52,6 +58,9 @@ export function PolicyPage({ page }: PolicyPageProps) {
           </ul>
         </nav>
         <Disclaimer />
+        <p className="text-xs text-muted-foreground">
+          {t.shell.footer.legal(new Date().getFullYear(), contact.businessName)}
+        </p>
       </footer>
     </div>
   );

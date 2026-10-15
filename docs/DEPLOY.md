@@ -520,7 +520,7 @@ Sign in as the `ADMIN_USER_ID` account and open `/admin`. The link is not in the
 
 Users buy report credits through Cashfree Payment Gateway. The packs and prices are in `apps/api/src/modules/payments/payments.config.ts`. The amount comes from that file, never from the web.
 
-The policy pages `/terms`, `/privacy`, `/refunds` and `/contact` are public. Cashfree checks them before it approves the account. Fill the contact details in `apps/web/src/modules/payments/config/policies.ts` first.
+The policy pages `/terms`, `/privacy`, `/refunds` and `/contact` are public. Cashfree checks them before it approves the account. The legal details are in the `contact` object in `apps/web/src/modules/payments/config/policies.ts`: brand, company (Codegenix), proprietor, email, phone, postal address and GSTIN. Each of the four pages shows all of these values in its Contact section. The footers of the app, the policy pages and the landing page, and the auth emails in `supabase/templates`, show the line "MediWise is a brand of Codegenix." To change a value, edit the `contact` object and set `policyUpdated` to the date of the change.
 
 ### Before you merge MEDI-33
 
@@ -530,7 +530,7 @@ Apply migrations `0013_payment_orders` and `0014_one_purchase_per_order` to `med
 
 Do the steps in this order. Do not set a flag to `true` before step 5 is complete.
 
-1. Policy placeholders. In `apps/web/src/modules/payments/config/policies.ts`, replace `[contact email]`, `[legal name of the business owner]` and `[postal address in India]`. Change `policyUpdated` to the date of the change. Open `/contact` and make sure that no square brackets show.
+1. Policy pages. Open `/terms`, `/privacy`, `/refunds` and `/contact`. Make sure that each page shows the legal name of the proprietor, the email, the phone in the +91 form and the postal address. Make sure that no square brackets show.
 2. Prices. Set the real packs in `apps/api/src/modules/payments/payments.config.ts`. The amount is in paise. The current packs are placeholders: 1 credit 4900, 5 credits 19900, 20 credits 59900.
 3. Production keys. In the Cashfree production dashboard, go to Developers, API Keys. On the Render service, set these variables:
    - `CASHFREE_APP_ID`: the production app id.
