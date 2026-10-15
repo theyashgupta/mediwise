@@ -44,6 +44,12 @@ const compactReportSchema = z.object({
     .describe("Patient age exactly as printed, for example 24 Y 8 M 21 D"),
   collectedAt: z.iso.date().optional(),
   reportedAt: z.iso.date().optional(),
+  dateAmbiguous: z
+    .boolean()
+    .optional()
+    .describe(
+      "true only when the document does not show whether dates are day first or month first",
+    ),
   panels: z.array(
     z.object({
       name: z.string().nullable(),
@@ -73,20 +79,33 @@ const extractionSystem = `You read laboratory reports and record what is printed
 - Never interpret a result. Do not judge whether a value is normal or not.
 - The report comes as numbered pages. A text page is the printed text with its column layout. An empty column means the field is not printed. Other pages are images.
 - panels lists the test groups in printed order. name is the main heading of the group, for example "Complete Blood Count" or "Complete Urine Examination", or null when no heading is printed. Do not use a sub-heading such as "Microscopic Examination".
+- Panel headings come in many languages and short forms, for example CBC, FBC, Blutbild, NFS, Hemograma, Emocromo, U&E, BMP, CMP, LFT, Hepatic function panel and Lipid panel. Such a heading is a panel name, never a test name.
 - rows has one entry per printed test result of the group, in printed order. Each entry has exactly 5 items: [name, value, unit, range, page].
 - name is the test name exactly as printed. A name or a value printed over two lines is one name or one value.
 - value is a number only when the printed result is a plain number. Otherwise copy the printed text, for example "Negative" or "<5".
-- unit is the printed unit, or null.
-- range is the printed reference range, verbatim, or null. Join a range printed over several lines with ", ".
+- A decimal comma is a decimal point. "4,5" is the number 4.5.
+- "1.234" or "1,234" can be a thousands separator or a decimal mark. Pick the reading that fits the usual range of that test.
+- A flag printed beside the value is not part of the value. For "115 H", "5.2 *", "88 L", "140 A" or a value with an arrow, value is the number only.
+- value is always the current result. Some reports print earlier results in another column, for example the French "Antériorités" or a history column. Never copy an earlier result.
+- A test printed in two units, for example HbA1c in % and in mmol/mol, gives one row per printed value, each with its own unit.
+- unit is the printed unit, or null. Never convert a unit. When the unit is printed only inside the range, for example "<5.7 % of total Hgb", copy it into unit too.
+- range is the printed reference range, verbatim, or null, for example "> OR = 46", "<5.7" or "4,5 - 5,9". Join a range printed over several lines with ", ", for example a Female line and a Male line.
+- Headers can be in two languages, for example Arabic beside English, French ("Résultats", "Valeurs de référence") or German ("Befund", "Referenzbereich"). A header is never a test.
+- When a test name is printed in two languages, copy the English name, or the name in Latin letters when no English name is printed.
+- When the report names the eGFR equation, add it to the eGFR name in parentheses, for example "eGFR (CKD-EPI 2021)". The equation can be CKD-EPI 2021, CKD-EPI 2009, MDRD or Cockcroft-Gault, and it can be printed on another line.
 - page is the number of the page the result is printed on.
 - A peripheral smear finding keeps the "Peripheral Smear" prefix in name, for example "Peripheral Smear RBC", also when the line prints only "RBC".
 - Reference tables, method names and interpretation text are not results. Skip them.
 - labName is the laboratory that ran the tests, from the letterhead or logo at the top of page 1, for example "GF Greenfield Health & Diagnostic Centre". It is never a doctor, a patient or a health check package.
-- referredBy is the value after "Ref. By Doctor", "Ref Doctor" or "Referred By", for example "CARE PLUS".
+- A US report can print three header boxes: Patient Information, Specimen Information and Client Information. The Client Information box names the ordering practice, not the lab.
+- A screenshot of a health app, for example an NHS App test results screen, names no lab. Leave out labName then.
+- referredBy is the value after "Ref. By Doctor", "Ref Doctor", "Referred By" or "Ordering Physician", for example "CARE PLUS".
 - packageName is the health check package printed above the results, for example "Care Plus (Acme Insure - Package 5)".
-- collectedAt is the sample collection date, for example "Collection Time : 01-Feb-2025 09:00 AM" gives 2025-02-01.
-- reportedAt is the report date, for example "Report Print Time : 01-Feb-2025 04:05 PM" gives 2025-02-01.
-- Write dates as YYYY-MM-DD. Leave out any field that is not printed.`;
+- collectedAt is the sample collection date, for example "Collection Time : 01-Feb-2025 09:00 AM" gives 2025-02-01. Other labels are "Collected", "Date taken", "Entnahme" and "Prélèvement".
+- reportedAt is the report date, for example "Report Print Time : 01-Feb-2025 04:05 PM" gives 2025-02-01. Another label is "Reported". On a US report, "Received" is the date the lab got the sample, so it is neither date.
+- Write dates as YYYY-MM-DD. Leave out any field that is not printed.
+- Printed dates can be MM/DD/YYYY (US), DD/MM/YYYY (UK, Europe, Australia, India), DD.MM.YYYY (Germany) or YYYY-MM-DD. Decide the order from the document: its language, the lab, the unit system (mg/dL points to the US, mmol/L to elsewhere) and any printed date whose first or second part is above 12.
+- Set dateAmbiguous to true only when these clues do not decide the order and a date has both parts at 12 or below. Still write the most likely reading.`;
 
 const mappingSystem = `You match lab test names to a marker catalog. Call the map_markers tool once, with one entry for each test.
 Each test comes with its panel and unit. A test in a urine panel maps only to a urine_ key, for example a bare "Protein" is urine_protein.
@@ -209,14 +228,29 @@ const below = new RegExp(String.raw`(?:<=?|${atMost}|<\/=|up\s*to)\s*${rangeNumb
 const above = new RegExp(String.raw`(?:>=?|${atLeast}|>\/=)\s*${rangeNumber}`, "i");
 
 /**
+ * Rewrites printed numbers with a point as the decimal mark and no thousands separator.
+ *
+ * @remarks
+ * A text with a sure decimal comma ("0,35", or 1 or 2 final digits as in "4,5") reads every comma as a decimal mark, so
+ * "0,270 - 4,200" is 0.27 to 4.2. Otherwise a comma before 3 digits, or before 2 digits and another comma (Indian
+ * "1,50,000"), separates thousands.
+ */
+function plainNumbers(text: string) {
+  const decimalComma = /(?<![\d.,])0,\d|\d,\d{1,2}(?![\d,])/.test(text);
+  return decimalComma
+    ? text.replace(/(\d),(?=\d)/g, "$1.")
+    : text.replace(/(\d),(?=\d{3}\b|\d{2},\d)/g, "$1");
+}
+
+/**
  * Reads the low and high bounds out of a printed range, only when it prints a single range.
  *
  * @remarks
- * "13 - 17" gives both bounds, "> 90" only the low one and "< 200" only the high one. A range with several categories,
+ * "13 - 17" gives both bounds, "> 90" and "> OR = 90" only the low one and "< 200" only the high one. A range with several categories,
  * such as Desirable and Borderline, has more numbers than one range and gives no bounds.
  */
 export function printedRange(range: string | null | undefined) {
-  const printed = (range ?? "").replace(/(\d),(?=\d{2,3}\b)/g, "$1");
+  const printed = plainNumbers(range ?? "").replace(/\s*\bOR\s*=/gi, "=");
   const numbers = printed.match(/\d+(?:\.\d+)?/g) ?? [];
   const pair = between.exec(printed);
   if (numbers.length === 2 && pair) {
@@ -229,14 +263,18 @@ export function printedRange(range: string | null | undefined) {
   return low ? { referenceLow: Number(low[1]) } : {};
 }
 
+const flaggedNumber = /^(-?\d+(?:\.\d+)?)\s*(?:HH?|LL?|A|\*{1,3}|\u2191|\u2193)?$/u;
+
 /**
- * Turns a value printed as a plain number into a number, and keeps any other text as printed.
+ * Turns a value printed as a number, with or without a flag such as "H" or "*", into a number, and keeps any other text.
  *
  * @remarks
- * claude-haiku-5-5 sometimes returns "102.10" as a string although the prompt asks for a number.
+ * claude-haiku-5-5 sometimes returns "102.10" or "115 H" as a string although the prompt asks for a plain number.
  */
-function printedValue(value: number | string) {
-  return typeof value === "string" && /^-?\d+(\.\d+)?$/.test(value.trim()) ? Number(value) : value;
+export function printedValue(value: number | string) {
+  if (typeof value !== "string") return value;
+  const number = flaggedNumber.exec(plainNumbers(value.trim()))?.[1];
+  return number === undefined ? value : Number(number);
 }
 
 /**
@@ -272,6 +310,7 @@ function expandReport(report: CompactReport, firstPage: string | undefined): Ext
     patient: printedAge(report.age),
     collectedAt: report.collectedAt,
     reportedAt: report.reportedAt,
+    dateAmbiguous: report.dateAmbiguous,
     markers: report.panels.flatMap(({ name, rows }) =>
       rows.map(([rawName, value, unit, range, page]) => ({
         rawName,
