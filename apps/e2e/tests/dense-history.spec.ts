@@ -153,28 +153,96 @@ test("Home at 1280 px gives a block alone in its row the full width, so no colum
   }
 });
 
-test("Home at 390 px with 200 percent text has no sideways scroll", async () => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/");
-  await expect(page.getByRole("region", { name: "Needs attention" })).toBeVisible();
-  await page.evaluate(() => {
+/** Sets the root text to 200 percent and returns the page width and the first elements past the right edge. */
+async function widthAt200Percent() {
+  const wide = await page.evaluate(() => {
     document.documentElement.style.fontSize = "32px";
-  });
-  const wide = await page.evaluate(() => ({
-    scroll: document.documentElement.scrollWidth,
-    view: window.innerWidth,
-    past: [...document.querySelectorAll("main *")]
-      .filter((node) => node.getBoundingClientRect().right > window.innerWidth + 1)
-      .map((node) => `${node.tagName} "${node.textContent?.trim().slice(0, 40)}"`)
-      .slice(0, 5),
-  }));
-  await page.evaluate(() => {
+    const result = {
+      scroll: document.documentElement.scrollWidth,
+      view: window.innerWidth,
+      past: [...document.querySelectorAll("main *")]
+        .filter((node) => node.getBoundingClientRect().right > window.innerWidth + 1)
+        .map((node) => `${node.tagName} "${node.textContent?.trim().slice(0, 40)}"`)
+        .slice(0, 5),
+    };
     document.documentElement.style.fontSize = "";
+    return result;
   });
   expect(
     wide.scroll,
     `page is ${wide.scroll} px wide: ${wide.past.join(" | ")}`,
   ).toBeLessThanOrEqual(wide.view);
+}
+
+/** Gives the id of the newest full panel, the report the Home attention rows point at. */
+async function fullPanelId() {
+  await page.goto("/");
+  const href = await page.getByTestId("attention-row").first().getAttribute("href");
+  return /\/reports\/([0-9a-f-]{36})/.exec(href ?? "")![1]!;
+}
+
+test("Home at 390 px with 200 percent text has no sideways scroll", async () => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await expect(page.getByRole("region", { name: "Needs attention" })).toBeVisible();
+  await widthAt200Percent();
+});
+
+for (const width of [1280, 390]) {
+  test(`the report header and the Trends toolbar at ${width} px with 200 percent text wrap with no sideways scroll`, async () => {
+    await page.setViewportSize({ width, height: 800 });
+    const reportId = await fullPanelId();
+    await page.goto(`/reports/${reportId}`);
+    await expect(page.getByTestId("report-done")).toBeVisible();
+    await widthAt200Percent();
+
+    await page.goto("/trends");
+    await expect(page.getByTestId("trend-row").first()).toBeAttached();
+    await widthAt200Percent();
+  });
+}
+
+test("at 390 px every Trends filter combination shows its rows or the empty state, never neither", async () => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const rows = page.getByTestId("trend-row");
+  const empty = page.getByTestId("trend-clear-filters");
+  for (const direction of ["worsening", "improving", "stable"]) {
+    for (const status of ["risk", "watch", "optimal"]) {
+      await page.goto(`/trends?direction=${direction}&status=${status}`);
+      await expect(rows.or(empty).first()).toBeAttached();
+      const shown = { rows: await rows.count(), empty: await empty.count() };
+      expect(shown.rows > 0 !== shown.empty > 0, `${direction} and ${status}`).toBe(true);
+    }
+  }
+  await page.goto("/trends?direction=improving&status=risk");
+  await expect(rows.first()).toBeAttached();
+  expect(await rows.count()).toBeGreaterThan(0);
+});
+
+test("the marker crumb at 390 px keeps the whole marker name and truncates the report title first", async () => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const reportId = await fullPanelId();
+  await page.goto(`/reports/${reportId}`);
+  await page.getByRole("button", { name: "Rename" }).click();
+  await page
+    .getByLabel("Report title")
+    .fill("Fasting lipid thyroid vitamin and urine albumin panel");
+  await page.getByRole("button", { name: "Save title" }).click();
+  await expect(page.getByRole("button", { name: "Rename" })).toBeVisible();
+
+  for (const markerKey of ["urine_specific_gravity", "urine_epithelial_cells", "vitamin_b12"]) {
+    await page.goto(`/reports/${reportId}/markers/${markerKey}`);
+    const crumbs = page.getByRole("navigation", { name: "Breadcrumb" }).filter({ visible: true });
+    const current = crumbs.locator('li[aria-current="page"]');
+    await expect(crumbs.getByRole("link", { name: /^Fasting lipid/ })).toBeVisible();
+    const cut = await current.evaluate((node) => node.scrollWidth > node.clientWidth);
+    expect(cut, `${markerKey} crumb is cut`).toBe(false);
+  }
+
+  await page.goto(`/reports/${reportId}`);
+  await page.getByRole("button", { name: "Rename" }).click();
+  await page.getByRole("button", { name: "Use the title MediWise made" }).click();
+  await expect(page.getByRole("button", { name: "Rename" })).toBeVisible();
 });
 
 test("Trends keeps an eye on B12, filters by direction and status through the URL and ends each suggestion with the doctor line", async () => {
@@ -222,10 +290,28 @@ test("a report opened low on Home starts at the top, and back restores the Home 
   const offset = await page.evaluate(() => window.scrollY);
   expect(offset).toBeGreaterThan(500);
 
+  await page.evaluate(() => {
+    const frames: { y: number; home: boolean }[] = [];
+    Object.assign(window, { reportFrames: frames });
+    const sample = () => {
+      frames.push({
+        y: window.scrollY,
+        home: document.querySelector('[data-testid="recent-report-link"]') !== null,
+      });
+      if (frames.length < 90) requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  });
   await link.click();
   await expect(page).toHaveURL(/\/reports\/[0-9a-f-]{36}$/);
   await expect(page.getByTestId("report-done")).toBeVisible();
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  const frames = await page.evaluate(
+    () => (window as unknown as { reportFrames: { y: number; home: boolean }[] }).reportFrames,
+  );
+  expect(frames.filter(({ home }) => !home).map(({ y }) => y)).toEqual(
+    frames.filter(({ home }) => !home).map(() => 0),
+  );
   await page.goBack();
 
   await expect(page).toHaveURL(/\/$/);
