@@ -15,6 +15,7 @@ import type { ExtractedMarker, ExtractedReport, PageClass } from "@mediwise/shar
 import { createHash, randomUUID } from "node:crypto";
 import sharp from "sharp";
 import { AppError } from "../../common/errors.js";
+import { claudeUser } from "../../lib/claude-user.js";
 import { keepPdfPages } from "../../lib/pdf-pages.js";
 import { download, remove, upload } from "../../lib/storage.js";
 import { log } from "../../middleware/logger.js";
@@ -525,13 +526,24 @@ function fileLabs(
  *
  * @remarks
  * `usage` belongs to the job, so the worker can store the tokens of an attempt that fails.
+ * Each Claude call of the read carries the owner, because the worker runs outside a request.
+ */
+export async function processReport(reportId: string, usage: ReportUsage, reclassify = false) {
+  const report = await repo.findReportForProcessing(reportId);
+  if (!report) throw new Error(`Report ${reportId} not found`);
+  return claudeUser.run(report.ownerUserId, () => readReportFiles(report, usage, reclassify));
+}
+
+/**
+ * Runs every step of one report read.
+ *
+ * @remarks
  * A report with studies and no lab values is done with no score, because a scan or an ECG never gives one.
  * `reclassify` asks Claude for the page classes again, for a re-read after the class list changed.
  */
-export async function processReport(reportId: string, usage: ReportUsage, reclassify = false) {
+async function readReportFiles(report: StoredReport, usage: ReportUsage, reclassify: boolean) {
+  const reportId = report.id;
   const step = stepLogger(reportId);
-  const report = await repo.findReportForProcessing(reportId);
-  if (!report) throw new Error(`Report ${reportId} not found`);
   await repo.updateReportStatus(reportId, "processing");
   step("processing");
 

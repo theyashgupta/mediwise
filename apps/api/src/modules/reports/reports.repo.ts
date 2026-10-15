@@ -329,6 +329,7 @@ export async function findReportForProcessing(id: string) {
     .select({
       id: reports.id,
       profileId: reports.profileId,
+      ownerUserId: profiles.ownerUserId,
       createdAt: reports.createdAt,
       dateOfBirth: profiles.dateOfBirth,
       sex: profiles.sex,
