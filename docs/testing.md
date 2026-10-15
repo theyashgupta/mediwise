@@ -248,7 +248,7 @@ Update the baseline only when the growth is necessary, or when a chunk is new, r
 
 ## Supply-chain scan
 
-`.github/workflows/supply-chain-scan.yml` looks for the signs of an npm worm of the Shai-Hulud type. Such a worm adds an install hook to a package, writes loader or exfil files, and publishes stolen credentials. The workflow runs on a push to `main`, on each pull request, every day at 03:30 UTC, and by hand from the Actions tab. It uses no secrets. Each action is pinned to a commit SHA.
+`.github/workflows/supply-chain-scan.yml` looks for the signs of a self-spreading npm worm. Such a worm adds an install hook to a package, writes loader or exfil files, and publishes stolen credentials. The workflow runs on a push to `main`, on each pull request, every day at 03:30 UTC, and by hand from the Actions tab. It uses no secrets. Each action is pinned to a commit SHA.
 
 | Step | What it catches |
 | --- | --- |
