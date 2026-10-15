@@ -2,12 +2,13 @@
 import { policyVersion } from "@mediwise/shared";
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, expect, test } from "vitest";
+import { afterEach, beforeEach, expect, test } from "vitest";
 import { messages } from "@/config/messages";
 import { fakeNetwork, never, renderApp, resetApp } from "@/test/render-app";
 
 const t = messages.en;
 
+beforeEach(resetApp);
 afterEach(resetApp);
 
 async function fillCredentials() {
@@ -98,8 +99,10 @@ test("a double click and two Enter presses on Create account send one sign-up re
   fireEvent.submit(submit.closest("form") as HTMLFormElement);
   fireEvent.submit(submit.closest("form") as HTMLFormElement);
 
-  await waitFor(() => expect((submit as HTMLButtonElement).disabled).toBe(true));
-  expect(requests.filter(({ path }) => path.startsWith("/auth/v1/signup"))).toHaveLength(1);
+  await waitFor(() =>
+    expect(requests.filter(({ path }) => path.startsWith("/auth/v1/signup"))).toHaveLength(1),
+  );
+  expect((submit as HTMLButtonElement).disabled).toBe(true);
 });
 
 test("a sign-up that starts a session stores both consents before it opens Home", async () => {
