@@ -520,7 +520,7 @@ Sign in as the `ADMIN_USER_ID` account and open `/admin`. The link is not in the
 
 Users buy report credits through Cashfree Payment Gateway. The packs and prices are in `apps/api/src/modules/payments/payments.config.ts`. The amount comes from that file, never from the web.
 
-The policy pages `/terms`, `/privacy`, `/refunds` and `/contact` are public. Cashfree checks them before it approves the account. The legal details are in the `contact` object in `apps/web/src/modules/payments/config/policies.ts`: brand, company (Codegenix), proprietor, email, phone, postal address and GSTIN. Each of the four pages shows all of these values in its Contact section. The footers of the app, the policy pages and the landing page, and the auth emails in `supabase/templates`, show the line "MediWise is a brand of Codegenix." To change a value, edit the `contact` object and set `policyUpdated` to the date of the change.
+The policy pages `/terms`, `/privacy`, `/refunds` and `/contact` are public. Cashfree checks them before it approves the account. The legal details are in the `contact` object in `apps/web/src/modules/payments/config/policies.ts`: brand, company (Codegenix), proprietor, email and phone. Cashfree needs only the email, the phone and the registered business name, so the pages show no postal address and no GSTIN. Each of the four pages shows all of these values in its Contact section. The footers of the app, the policy pages and the landing page, and the auth emails in `supabase/templates`, show the line "MediWise is a brand of Codegenix." To change a value, edit the `contact` object and set `policyUpdated` to the date of the change.
 
 ### Before you merge MEDI-33
 

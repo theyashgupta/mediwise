@@ -4,8 +4,6 @@ export const contact = {
   proprietor: "Yash Anil Gupta",
   email: "yashguptaab66@gmail.com",
   phone: "+91 94044 12694",
-  address: "Dondaicha, Dhule, Maharashtra 425408, India",
-  gstin: "27CYZPG9330A1Z6",
 };
 
 export const policyUpdated = "2026-10-15";
@@ -16,8 +14,6 @@ const contactLines = [
   `Proprietor: ${contact.proprietor}`,
   `Email: ${contact.email}`,
   `Phone: ${contact.phone}`,
-  `Address: ${contact.address}`,
-  `GSTIN: ${contact.gstin}`,
 ];
 
 const contactSection = { heading: "Contact", body: contactLines };
