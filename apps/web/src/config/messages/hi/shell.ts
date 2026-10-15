@@ -9,6 +9,14 @@ export const shell: Messages["shell"] = {
     profiles: "प्रोफ़ाइल",
     settings: "सेटिंग",
   },
+  tabs: {
+    home: "होम",
+    reports: "रिपोर्ट",
+    upload: "अपलोड",
+    trends: "ट्रेंड",
+    profiles: "परिवार",
+    settings: "सेटिंग",
+  },
   pages: {
     ask: "पूछें",
     home: "होम",

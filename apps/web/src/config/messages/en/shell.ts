@@ -6,6 +6,14 @@ export const shell = {
     profiles: "Profiles",
     settings: "Settings",
   },
+  tabs: {
+    home: "Home",
+    reports: "Reports",
+    upload: "Upload",
+    trends: "Trends",
+    profiles: "Family",
+    settings: "Settings",
+  },
   pages: {
     ask: "Ask",
     home: "Home",
