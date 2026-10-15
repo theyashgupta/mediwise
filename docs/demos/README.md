@@ -46,3 +46,18 @@ The video files are not in the repo. They are in `~/Work/mediwise-demos` on the 
 | 38 | The operator page | `38-operator-page.mp4` | 0:43 | Desktop | 2026-10-15 |
 | 39 | Ask about your reports | `39-ask-about-reports.mp4` | 0:33 | Desktop | 2026-10-15 |
 | 40 | Questions left, wrong answers and clear chat | `40-ask-chat-controls.mp4` | 0:33 | Desktop. The demo account has more than 5 questions left, so the recorder sets the count to 4 to show the counter. | 2026-10-15 |
+
+## Pitch
+
+One narrated film for doctors, cut from the raw captures of the videos above. `pitch.md` has the feature list, the reason a doctor cares about each feature, and the script.
+
+| File | Size | Duration |
+| - | - | - |
+| `pitch/doctor-pitch-1080p.mp4` | 1920 x 1080, H.264 | 3:40 |
+| `pitch/doctor-pitch-4k.mp4` | 3840 x 2160, H.264 master | 3:40 |
+
+The files are in `~/Work/mediwise-demos/pitch` on the maintainer's Mac.
+
+Features, in order: the report page, one marker explained, scans and ECG with the blood values, trends over time, compare two reports, episodes, second opinions and settled alerts, the doctor export, a report shared with a link, and due for retest. The closing shows the data downloads and MediWise in Hindi.
+
+The Remotion project is `~/Work/mediwise-promo/pitch`, a separate git repository. Its README gives the commands to make the voice, the music and both renders again.
