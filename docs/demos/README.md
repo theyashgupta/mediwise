@@ -54,10 +54,11 @@ One narrated film for doctors, cut from the raw captures of the videos above. `p
 | File | Size | Duration |
 | - | - | - |
 | `pitch/doctor-pitch-1080p.mp4` | 1920 x 1080, H.264 | 3:40 |
-| `pitch/doctor-pitch-4k.mp4` | 3840 x 2160, H.264 master | 3:40 |
 
-The files are in `~/Work/mediwise-demos/pitch` on the maintainer's Mac.
+The file is in `~/Work/mediwise-demos/pitch` on the maintainer's Mac.
+
+The 4K master (`pitch/doctor-pitch-4k.mp4`, 3840 x 2160) is pending. Render it when the Mac is idle with `scripts/render.sh 4k` in the Remotion project.
 
 Features, in order: the report page, one marker explained, scans and ECG with the blood values, trends over time, compare two reports, episodes, second opinions and settled alerts, the doctor export, a report shared with a link, and due for retest. The closing shows the data downloads and MediWise in Hindi.
 
-The Remotion project is `~/Work/mediwise-promo/pitch`, a separate git repository. Its README gives the commands to make the voice, the music and both renders again.
+The Remotion project is `~/Work/mediwise-promo/pitch`, a separate git repository. Its README gives the commands to make the voice, the music and the renders again.

@@ -2,7 +2,7 @@
 
 One narrated film that shows a doctor the MediWise features that matter in a clinic. It is cut from the raw captures of the feature demos (see `features.md` and `README.md`), with a new narration for doctors.
 
-- Files: `~/Work/mediwise-demos/pitch/doctor-pitch-1080p.mp4` (1920 x 1080) and `doctor-pitch-4k.mp4` (3840 x 2160 master).
+- File: `~/Work/mediwise-demos/pitch/doctor-pitch-1080p.mp4` (1920 x 1080). The 4K master is pending, see `README.md`.
 - Duration: 3:40.
 - Remotion project: `~/Work/mediwise-promo/pitch` (its own git repository). `script.json` in that project is the source of the narration, the captions and the script below.
 - Data on screen: the demo account only (Arjun Mehta, Meera Mehta, Sunrise Diagnostics) and the made-up fixtures.
