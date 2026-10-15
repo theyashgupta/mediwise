@@ -62,3 +62,19 @@ test("audit row 10: a profile with weekly reports has a typical gap of 7 days", 
 
   expect(profile).toMatchObject({ typicalGapDays: 7, latest: { date: lastDate } });
 });
+
+test("Home attention reads every report: B12 at risk on the full panel stays, HbA1c optimal on the last report drops out", async () => {
+  const userId = randomUUID();
+  const { profileId, reportIds } = await insertDenseHistory(userId, dense);
+
+  const { attention } = await getDashboard(userId, profileId);
+
+  const keys = attention.map(({ markerKey }) => markerKey);
+  expect(new Set(keys).size).toBe(keys.length);
+  expect(keys).not.toContain("hba1c");
+  expect(attention.find(({ markerKey }) => markerKey === "vitamin_b12")).toMatchObject({
+    group: "risk",
+    reportId: reportIds[dense.findIndex((report) => report.labName === "Moon Labs")],
+    date: "2026-09-15",
+  });
+});

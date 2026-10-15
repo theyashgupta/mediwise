@@ -77,7 +77,7 @@ async function doneReport(
   return { reportId: report!.id, studyId: stored!.id };
 }
 
-test("the newest finding drops a study alert that a confirmed link to a later report settled", async () => {
+test("the newest finding and the attention list drop a study alert that a confirmed link to a later report settled", async () => {
   const [profile] = await db
     .insert(schema.profiles)
     .values({ ownerUserId: userId, name: "Asha Testcase", relation: "self", ancestry: "unknown" })
@@ -102,16 +102,20 @@ test("the newest finding drops a study alert that a confirmed link to a later re
     citedStudyIds: [earlier.studyId],
     rank: 1,
   });
-  const newestFinding = async () => {
+  const home = async () => {
     const res = await testClient(app).dashboard.$get({ query: { profileId: profile!.id } });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return (await res.json()).newestFinding;
+    return res.json();
   };
+  const newestFinding = async () => (await home()).newestFinding;
+  const alerts = async () =>
+    (await home()).attention.flatMap((item) => (item.kind === "alert" ? [item.title] : []));
 
   expect(await newestFinding()).toEqual({
     reportId: earlier.reportId,
     title: "The ultrasound shows a mass in the right adnexa",
   });
+  expect(await alerts()).toEqual(["The ultrasound shows a mass in the right adnexa"]);
 
   await db.insert(schema.reportLinks).values({
     earlierReportId: earlier.reportId,
@@ -121,4 +125,5 @@ test("the newest finding drops a study alert that a confirmed link to a later re
     state: "confirmed",
   });
   expect(await newestFinding()).toBeNull();
+  expect(await alerts()).toEqual([]);
 });

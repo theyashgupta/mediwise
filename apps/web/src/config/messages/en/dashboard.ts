@@ -65,8 +65,13 @@ export const dashboard = {
   },
   attention: {
     title: "Needs attention",
-    seeAll: (n: number) => `See all ${n}`,
     none: "All scored markers are in their optimal range.",
+    filter: "Filter the list",
+    filters: { all: "All", worsening: "Worsening", risk: "Risk", watch: "Watch" },
+    noneInFilter: "No item in this group.",
+    worsening: "Worsening",
+    change: (delta: string, date: string) => `${delta} since ${date}`,
+    study: "Study report",
   },
   recent: {
     title: "Recent reports",

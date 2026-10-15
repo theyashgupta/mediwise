@@ -35,6 +35,49 @@ const dashboard = {
       status: "watch",
     },
   ],
+  attention: [
+    {
+      kind: "alert",
+      group: "risk",
+      markerKey: null,
+      name: 'Your ultrasound report says: "Grade II fatty liver."',
+      title: 'Your ultrasound report says: "Grade II fatty liver."',
+      reportId,
+      date: "2026-08-04",
+    },
+    {
+      kind: "marker",
+      group: "risk",
+      markerKey: "vitamin_b12",
+      name: "Vitamin B12",
+      reportId: "00000000-0000-4000-8000-0000000000c0",
+      date: "2026-03-12",
+      value: 186,
+      unit: "pg/mL",
+      status: "risk",
+      direction: "stable",
+      precision: 0,
+      previous: null,
+    },
+    {
+      kind: "marker",
+      group: "worsening",
+      markerKey: "tsh",
+      name: "Thyroid stimulating hormone",
+      reportId,
+      date: "2026-08-04",
+      value: 5.8,
+      unit: "µIU/mL",
+      status: "watch",
+      direction: "worsening",
+      precision: 2,
+      previous: {
+        reportId: "00000000-0000-4000-8000-0000000000c0",
+        date: "2026-03-12",
+        value: 4.6,
+      },
+    },
+  ],
   retests: [{ markerKey: "hba1c", name: "HbA1c", dueOn: "2027-08-03", measuredOn: "2025-08-04" }],
   newestFinding: { reportId, title: "HbA1c is in the watch range" },
   recent: [],
@@ -46,11 +89,11 @@ const meOn = {
   assistant: { enabled: true, outOfQuestions: null, reviewRequired: false, consented: false },
 };
 
-function network(assistantMe: object) {
+function network(assistantMe: object, home: object = dashboard) {
   return fakeNetwork({
     "GET /me": () => assistantMe,
     "GET /profiles": () => [selfProfile],
-    "GET /dashboard": () => dashboard,
+    "GET /dashboard": () => home,
     "GET /dashboard/family": () => [],
     [`GET /profiles/${selfProfile.id}/questions`]: () => [],
   });
@@ -106,4 +149,44 @@ test("a suggestion opens the ask page with the question in the input and sends n
   );
   expect(window.location.search).toContain(`report=${reportId}`);
   expect(requests.some(({ method }) => method === "POST")).toBe(false);
+});
+
+describe.each(["en", "hi"] as const)("the attention list on Home in %s", (locale) => {
+  const t = messages[locale].dashboard.attention;
+
+  test("rows from every report show with their date and change, and the chips filter them", async () => {
+    const recent = {
+      id: reportId,
+      status: "done",
+      error: null,
+      labName: "Made-up Labs B",
+      title: "Blood panel",
+      collectedAt: "2026-08-04",
+      date: "2026-08-04",
+      score: null,
+      tier: null,
+      fileNames: [],
+    };
+    network(me, { ...dashboard, recent: [recent] });
+    await renderApp("/", { locale });
+
+    const list = await screen.findByRole("region", { name: t.title });
+    const rows = () =>
+      within(list)
+        .getAllByTestId("attention-row")
+        .map((row) => row.textContent);
+    expect(rows()).toHaveLength(3);
+    expect(rows()[1]).toContain("Vitamin B12");
+    expect(rows()[2]).toContain(t.worsening);
+    expect(rows()[2]).toContain("+1.2");
+
+    await userEvent.click(within(list).getByRole("button", { name: t.filters.worsening }));
+    expect(rows()).toEqual([expect.stringContaining("Thyroid stimulating hormone")]);
+
+    await userEvent.click(within(list).getByRole("button", { name: t.filters.risk }));
+    expect(rows()).toHaveLength(2);
+
+    await userEvent.click(within(list).getByRole("button", { name: t.filters.watch }));
+    expect(rows()).toEqual([expect.stringContaining("Thyroid stimulating hormone")]);
+  });
 });

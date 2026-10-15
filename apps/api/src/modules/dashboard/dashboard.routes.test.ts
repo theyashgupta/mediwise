@@ -40,12 +40,14 @@ const store = vi.hoisted(() => {
   };
   const reports: Report[] = [];
   const markers = new Map<string, Marker[]>();
+  const alerts = new Map<string, string[]>();
   const family: FamilyRow[] = [];
   const owned = (owner: string, id: string) => owner === "alice" && id === profileId;
   const newestFirst = () => [...reports].sort((a, b) => b.date.localeCompare(a.date));
   return {
     reports,
     markers,
+    alerts,
     family,
     profilesRepo: {
       findProfileById: async (owner: string, id: string) =>
@@ -65,6 +67,32 @@ const store = vi.hoisted(() => {
           ? reports.filter((report) => ["queued", "processing"].includes(report.status)).length
           : 0,
       listAssessedMarkers: async (reportId: string) => markers.get(reportId) ?? [],
+      listMarkerHistory: async (owner: string, id: string) =>
+        owned(owner, id)
+          ? newestFirst()
+              .toReversed()
+              .filter((report) => report.status === "done")
+              .flatMap((report) =>
+                (markers.get(report.id) ?? []).flatMap(({ markerKey, ...row }) =>
+                  markerKey ? [{ reportId: report.id, date: report.date, markerKey, ...row }] : [],
+                ),
+              )
+          : [],
+      listAlertFindings: async (owner: string, id: string) =>
+        owned(owner, id)
+          ? newestFirst()
+              .toReversed()
+              .flatMap((report) =>
+                (alerts.get(report.id) ?? []).map((title, index) => ({
+                  reportId: report.id,
+                  date: report.date,
+                  kind: "study_alert" as const,
+                  title,
+                  citedKeys: [],
+                  citedStudyIds: [`${report.id}-study-${index}`],
+                })),
+              )
+          : [],
       listLatestAssessedByMarker: async (owner: string, id: string) => {
         if (!owned(owner, id)) return [];
         const worst = { risk: 0, watch: 1, optimal: 2 };
@@ -155,6 +183,7 @@ beforeEach(() => {
   store.reports.length = 0;
   store.family.length = 0;
   store.markers.clear();
+  store.alerts.clear();
 });
 
 test("a profile with no reports gets an empty dashboard", async () => {
@@ -164,6 +193,7 @@ test("a profile with no reports gets an empty dashboard", async () => {
     latest: null,
     newSince: [],
     moveFirst: [],
+    attention: [],
     retests: [],
     newestFinding: null,
     recent: [],
@@ -348,6 +378,60 @@ test("move first lists risk before watch, furthest from optimal first, three at 
     status: "risk",
   });
   expect(data.moveFirst[0]?.description).toEqual(expect.any(String));
+});
+
+function banded(
+  markerKey: string,
+  value: number,
+  status: "optimal" | "watch" | "risk",
+  [calibratedLow, calibratedHigh]: [number | null, number | null],
+) {
+  return { ...marker(markerKey, value, status), calibratedLow, calibratedHigh };
+}
+
+test("attention lists a worsening marker of the latest report and a risk marker measured only on an older one", async () => {
+  store.reports.push(done("older", "2026-08-04", 70), done("latest", "2026-09-15", 74));
+  store.markers.set("older", [
+    banded("vitamin_b12", 450, "optimal", [300, null]),
+    banded("tsh", 4.6, "watch", [0.45, 4.12]),
+    marker("vitamin_d", 4, "risk"),
+  ]);
+  store.markers.set("latest", [
+    banded("vitamin_b12", 280, "watch", [300, null]),
+    banded("tsh", 5.8, "watch", [0.45, 4.12]),
+    marker("hba1c", 40, "risk"),
+    marker("ldl", 35, "risk"),
+    marker("glucose_fasting", 30, "risk"),
+    marker("ferritin", 22, "watch"),
+  ]);
+  store.alerts.set("older", ['Your ultrasound report says: "Grade II fatty liver."']);
+
+  const data = await body();
+
+  expect(data.attention.map((row) => [row.group, row.markerKey ?? row.title])).toEqual([
+    ["risk", 'Your ultrasound report says: "Grade II fatty liver."'],
+    ["risk", "hba1c"],
+    ["risk", "ldl"],
+    ["risk", "glucose_fasting"],
+    ["risk", "vitamin_d"],
+    ["worsening", "tsh"],
+    ["worsening", "vitamin_b12"],
+    ["watch", "ferritin"],
+  ]);
+  expect(data.attention.find((row) => row.markerKey === "vitamin_d")).toMatchObject({
+    reportId: "older",
+    date: "2026-08-04",
+    name: "Vitamin D (25-OH)",
+    previous: null,
+  });
+  expect(data.attention.find((row) => row.markerKey === "vitamin_b12")).toMatchObject({
+    reportId: "latest",
+    date: "2026-09-15",
+    value: 280,
+    status: "watch",
+    direction: "worsening",
+    previous: { value: 450, date: "2026-08-04" },
+  });
 });
 
 test("a ratio the lab reported carries its catalog description", async () => {
