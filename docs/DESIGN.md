@@ -273,10 +273,11 @@ Lighthouse accessibility on 2026-10-13 (desktop, dev server, Lighthouse 12.8.2):
 - **Ask launcher.** The launcher sits above the bar at the right edge, 92 px from the bottom plus the safe-area inset, so it never covers a tab (MEDI-169). The bar no longer keeps a free corner.
 - **Items.** Each item shows its icon and a one-word label under it, 11 px, medium weight, one line (MEDI-169). The labels are `shell.tabs` in the message files: Home, Reports, Upload, Trends, Family. Settings left the bar for the user menu (MEDI-173), so Upload has two tabs on each side and sits in the exact centre of the bar. The routes and the accessible names did not change. Upload is a 48 px primary circle that rises 28 px out of its slot, with its label in line with the other labels. Its accessible name stays "Upload a report".
 - **Active item.** A 16 px rounded `bg-primary/10` square holds the icon and the label, both in `text-primary`. The icon keeps the 15% fill and the heavier stroke. The dot is gone (MEDI-169).
-- **Hover and press.** A `foreground/5` fill on hover (pointer devices only). The item scales to 90% while pressed. `motion-reduce` turns the transitions off.
-- **Hide on scroll.** The bar slides down when the page scrolls down and comes back when it scrolls up or reaches the top (`useScrollingDown`, steps under 8 px do not count). It stays in view while focus is in it.
+- **Hover and press.** A `foreground/5` fill on hover (pointer devices only). The item scales to 90% while pressed, only when the system allows motion (MEDI-178). With reduced motion the item does not move and the transitions are off.
+- **Hide on scroll.** The bar slides down when the page scrolls down and comes back when it scrolls up or reaches the top (`useScrollingDown`, steps under 8 px do not count). A step that comes with a new page height does not count either, because the browser makes it when rows above the view render (MEDI-178). It stays in view while focus is in it.
 - **Dialogs and sheets.** The bar slides down while a dialog, a sheet or a menu locks the page scroll (`data-scroll-locked` on `body`).
-- **Room under the bar.** The page content has 152 px of bottom padding plus the safe-area inset, so the last row scrolls clear of the launcher (MEDI-169, was `7rem`). The Ask composer sits 88 px from the bottom, above the bar.
+- **Room under the bar.** The page content has 164 px of bottom padding plus the safe-area inset on every page, so the last row scrolls clear of the bar and the launcher (MEDI-169, MEDI-176, was `7rem`). The Ask composer sits 88 px from the bottom, above the bar.
+- **Long lists on a phone.** Trends rows skip rendering off screen (`content-visibility: auto`) with a size estimate per row on a phone: 10rem with a suggestion line, 6rem without (MEDI-178). The measured averages at 390 px are 157 px and 93 px. The old 5rem estimate fits only from `sm` (79 px) and moved the page end by 1600 px after a scroll to the bottom.
 
 Screenshots on 2026-10-15, web dev server on the local e2e stack, the made-up dense history fixture (`db:seed-history`), 390 x 844.
 
@@ -315,6 +316,15 @@ Screenshots for MEDI-173 on 2026-10-16, web dev server against `mediwise-dev`, t
 | User menu with Settings, 360 x 800 | [light](design/screenshots/medi-173-avatar-menu-light-360.png) | [dark](design/screenshots/medi-173-avatar-menu-dark-360.png) |
 
 Measured for MEDI-173: the tabs left of Upload span 125.6 px and the tabs right of it span 125.6 px at 360 px, and 137.6 px on each side at 390 px. The Upload centre is within 0.01 px of the bar centre. The e2e check allows 2 px.
+
+Screenshots for MEDI-178 on 2026-10-16, web dev server against `mediwise-dev`, the demo account, light theme.
+
+| View | Screenshot |
+| - | - |
+| Trends at the bottom, 390 x 844 | [light](design/screenshots/medi-178-trends-bottom-390.png) |
+| Operator totals, 320 x 800 | [light](design/screenshots/medi-178-operator-320.png) |
+
+Measured for MEDI-178: on Trends at 390 px the last footer link ends at 720 px, the bar starts at 762 px and the launcher at 696 px on the right. At 320 px the operator total "1,23,640" fits its 104 px tile on one line, and a ten-digit total wraps to two lines.
 
 ### Ask chat widget (MEDI-151)
 
