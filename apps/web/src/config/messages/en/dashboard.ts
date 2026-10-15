@@ -107,7 +107,7 @@ export const dashboard = {
     title: "Recent reports",
     all: "All reports",
     fallbackTitle: "Report",
-    files: (n: number) => `${n} files`,
+    files: (n: number) => plural("en", n, { one: `${n} file`, other: `${n} files` }),
   },
   retest: {
     title: "Due for retest",
