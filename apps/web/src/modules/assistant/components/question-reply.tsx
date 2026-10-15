@@ -1,4 +1,5 @@
 import { useT } from "@/common/hooks/use-locale";
+import { Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { FactTarget, Question } from "../types";
 import { CitationChip } from "./citation-chip";
@@ -55,6 +56,7 @@ export function QuestionReply({ item, flagging, onFact, onFlag }: QuestionReplyP
           disabled={flagging}
           onClick={() => onFlag(item.id)}
         >
+          <Flag aria-hidden />
           {t.wrong}
         </Button>
       )}

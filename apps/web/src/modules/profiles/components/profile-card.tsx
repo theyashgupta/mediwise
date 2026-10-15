@@ -72,6 +72,7 @@ export function ProfileCard({
             <Button
               variant="ghost"
               size="icon"
+              className="ml-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
               onClick={onRemove}
               aria-label={text.remove(profile.name)}
             >

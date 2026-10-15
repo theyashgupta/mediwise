@@ -173,7 +173,8 @@ export function ReportContainer() {
             {status === "done" && <ShareReportContainer reportId={reportId} glass />}
             {status !== "processing" && (
               <Button
-                variant="ghost"
+                variant="destructive"
+                className="xl:ml-4"
                 onClick={() => {
                   remove.reset();
                   setConfirmingDelete(true);

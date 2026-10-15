@@ -101,16 +101,16 @@ export function ReportLinks({
       )}
       {candidates.length > 0 && (
         <form
-          className="flex flex-wrap items-end gap-3"
+          className="grid gap-3 sm:grid-cols-[18rem_11rem_auto] sm:justify-start"
           onSubmit={(event) => {
             event.preventDefault();
             if (otherId) onLink(otherId, kind);
           }}
         >
-          <div className="space-y-2">
+          <div className="grid gap-2">
             <Label htmlFor="link-report">{text.otherReport}</Label>
             <Select value={otherId} onValueChange={setOtherId}>
-              <SelectTrigger id="link-report" className="w-full sm:w-72">
+              <SelectTrigger id="link-report" className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -122,10 +122,10 @@ export function ReportLinks({
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-2">
+          <div className="grid gap-2">
             <Label htmlFor="link-kind">{text.kind}</Label>
             <Select value={kind} onValueChange={(value) => setKind(value as LinkKind)}>
-              <SelectTrigger id="link-kind" className="w-full sm:w-44">
+              <SelectTrigger id="link-kind" className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -137,7 +137,13 @@ export function ReportLinks({
               </SelectContent>
             </Select>
           </div>
-          <Button type="submit" variant="outline" disabled={busy || !otherId}>
+          <Button
+            type="submit"
+            variant="outline"
+            className="justify-self-start sm:self-end"
+            disabled={busy || !otherId}
+          >
+            <Link2 aria-hidden />
             {busy ? text.adding : text.add}
           </Button>
         </form>

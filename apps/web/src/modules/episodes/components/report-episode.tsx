@@ -67,14 +67,14 @@ export function ReportEpisode({
         </div>
       ) : (
         <form
-          className="flex flex-wrap items-end gap-3"
+          className="grid gap-3 sm:flex sm:flex-wrap sm:items-end"
           onSubmit={(event) => {
             event.preventDefault();
             if (creating) onCreate(name.trim());
             else onAdd(choice);
           }}
         >
-          <div className="space-y-2">
+          <div className="grid gap-2">
             <Label htmlFor="report-episode-choice">{text.episode}</Label>
             <Select value={choice} onValueChange={setChoice}>
               <SelectTrigger id="report-episode-choice" className="w-full sm:w-64">
@@ -91,7 +91,7 @@ export function ReportEpisode({
             </Select>
           </div>
           {creating && (
-            <div className="space-y-2">
+            <div className="grid gap-2">
               <Label htmlFor="report-episode-name">{t.fields.name}</Label>
               <Input
                 id="report-episode-name"
@@ -104,7 +104,12 @@ export function ReportEpisode({
               />
             </div>
           )}
-          <Button type="submit" variant="outline" disabled={busy || (creating && !name.trim())}>
+          <Button
+            type="submit"
+            variant="outline"
+            className="justify-self-start"
+            disabled={busy || (creating && !name.trim())}
+          >
             {busy ? text.adding : text.add}
           </Button>
         </form>

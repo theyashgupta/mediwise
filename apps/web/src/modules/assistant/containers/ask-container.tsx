@@ -110,14 +110,17 @@ export function AskContainer() {
     <div>
       <PageHeader
         title={title}
-        actions={
-          <div className="flex items-center gap-3">
-            {left >= 1 && left <= 5 && (
-              <span data-testid="assistant-left" className="text-sm text-muted-foreground">
-                {t.left(left)}
-              </span>
-            )}
-            <ChatMenu canClear={items.length > 0} onClear={() => setClearing(true)} />
+        heading={
+          <div className="flex items-start justify-between gap-4">
+            <h1 className="font-display text-display text-balance wrap-anywhere">{title}</h1>
+            <div className="flex shrink-0 items-center gap-3">
+              {left >= 1 && left <= 5 && (
+                <span data-testid="assistant-left" className="text-sm text-muted-foreground">
+                  {t.left(left)}
+                </span>
+              )}
+              <ChatMenu canClear={items.length > 0} onClear={() => setClearing(true)} />
+            </div>
           </div>
         }
       />

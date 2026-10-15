@@ -13,12 +13,17 @@ export function DataActions({ downloading, error, onDownload, onDelete }: DataAc
   const t = useT();
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <Button variant="outline" onClick={onDownload} disabled={downloading}>
-          <Download aria-hidden />
-          {downloading ? t.settings.data.preparing : t.settings.data.download}
-        </Button>
-        <Button variant="destructive" onClick={onDelete}>
+      <Button
+        variant="outline"
+        className="w-full sm:w-fit"
+        onClick={onDownload}
+        disabled={downloading}
+      >
+        <Download aria-hidden />
+        {downloading ? t.settings.data.preparing : t.settings.data.download}
+      </Button>
+      <div className="border-t pt-4">
+        <Button variant="destructive" className="w-full sm:w-fit" onClick={onDelete}>
           <Trash2 aria-hidden />
           {t.settings.data.delete}
         </Button>
