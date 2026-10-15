@@ -10,7 +10,7 @@ export const assistant = {
   inputLabel: "Your question",
   emptyQuestion: "Write a question.",
   placeholder: "Ask a question about your reports",
-  send: "Ask",
+  send: "Send",
   writing: "MediWise is writing the answer.",
   you: "You",
   empty: {
@@ -28,7 +28,7 @@ export const assistant = {
     buyCredits: "Buy credits",
     addReport: "Add a report",
   },
-  wrong: "This answer is wrong",
+  wrong: "Mark as wrong",
   markedWrong: "You marked this answer as wrong.",
   englishOnly: "Answers are in English.",
   menu: {

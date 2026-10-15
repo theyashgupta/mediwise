@@ -36,7 +36,7 @@ export const dashboard: Messages["dashboard"] = {
     title: "MediWise इंस्टॉल करें",
     body: "MediWise को अपनी होम स्क्रीन पर जोड़ें। फिर यह एक ऐप की तरह खुलेगा।",
     action: "इंस्टॉल करें",
-    dismiss: "अभी नहीं",
+    dismiss: "बंद करें",
     ios: {
       title: "MediWise को होम स्क्रीन पर जोड़ें",
       body: "फिर MediWise एक ऐप की तरह खुलेगा।",

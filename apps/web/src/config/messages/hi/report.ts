@@ -114,9 +114,9 @@ export const report: Messages["report"] = {
     detected: review(
       "दोनों रिपोर्ट में 90 दिन के अंदर एक ही जाँच है। इसलिए MediWise ने इन्हें जोड़ा।",
     ),
-    undo: "वापस लें",
-    confirm: "पुष्टि करें",
-    dismiss: "खारिज करें",
+    undo: "लिंक हटाएँ",
+    confirm: "लिंक की पुष्टि करें",
+    dismiss: "लिंक हटाएँ",
     otherReport: "रिपोर्ट",
     kind: "प्रकार",
     kinds: { repeat: "दोबारा जाँच", second_opinion: "दूसरी राय" },
