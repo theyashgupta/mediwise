@@ -8,7 +8,9 @@ import type {
   Direction,
   ReportHeader,
   TrendItem,
+  TrendSearch,
   TrendSort,
+  TrendStatus,
 } from "../types";
 
 export const directionStyles: Record<Direction, { text: string; badge: string }> = {
@@ -87,6 +89,36 @@ export function summaryLine(summary: Comparison["summary"]) {
   ];
   if (summary.gone > 0) parts.push(t.gone(summary.gone));
   return parts.join(", ");
+}
+
+export const trendDirections: Direction[] = ["worsening", "improving", "stable"];
+
+export const trendStatuses: TrendStatus[] = ["risk", "watch", "optimal"];
+
+/**
+ * Reads the Trends filters from the URL, so a shared link opens the same view.
+ *
+ * @remarks
+ * An unknown value drops out, so an old or edited link never filters on a value no chip can clear.
+ */
+export function validateTrendsSearch(search: Record<string, unknown>): TrendSearch {
+  const pick = <T extends string>(value: unknown, allowed: T[]) =>
+    allowed.find((item) => item === value);
+  return {
+    category: typeof search.category === "string" && search.category ? search.category : undefined,
+    direction: pick(search.direction, trendDirections),
+    status: pick(search.status, trendStatuses),
+    sort: search.sort === "name" ? "name" : undefined,
+  };
+}
+
+/** Tells whether a trend row passes every active filter. */
+export function matchesTrend(item: TrendItem, { category, direction, status }: TrendSearch) {
+  return (
+    (!category || item.category === category) &&
+    (!direction || item.direction === direction) &&
+    (!status || item.latestStatus === status)
+  );
 }
 
 export function validateCompareSearch(search: Record<string, unknown>): { a?: string; b?: string } {

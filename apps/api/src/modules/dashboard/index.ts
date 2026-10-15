@@ -1,2 +1,2 @@
 export { dashboardRoutes } from "./dashboard.routes.js";
-export { rankStoredMoveFirst } from "./dashboard.service.js";
+export { listAttention, rankStoredMoveFirst } from "./dashboard.service.js";

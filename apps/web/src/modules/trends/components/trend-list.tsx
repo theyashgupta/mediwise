@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { memo } from "react";
 import { useT } from "@/common/hooks/use-locale";
 import { cn } from "@/lib/utils";
 import { MarkerValue } from "@/modules/reports";
@@ -14,7 +15,7 @@ type TrendListProps = {
 const columns =
   "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 sm:grid-cols-[minmax(0,1fr)_6rem_10rem_13rem]";
 
-export function TrendList({ items }: TrendListProps) {
+export const TrendList = memo(function TrendList({ items }: TrendListProps) {
   const t = useT();
   return (
     <div className="overflow-hidden rounded-xl border bg-card">
@@ -35,7 +36,10 @@ export function TrendList({ items }: TrendListProps) {
           const latest = item.points.at(-1);
           const style = directionStyles[item.direction];
           return (
-            <li key={item.markerKey}>
+            <li
+              key={item.markerKey}
+              className="[contain-intrinsic-size:auto_5rem] [content-visibility:auto]"
+            >
               <Link
                 to="/trends/$markerKey"
                 params={{ markerKey: item.markerKey }}
@@ -67,6 +71,14 @@ export function TrendList({ items }: TrendListProps) {
                   unit={item.unit}
                   className={cn("justify-end whitespace-normal text-right", style.text)}
                 />
+                {item.suggestion && (
+                  <span
+                    data-testid="trend-suggestion"
+                    className="col-span-full text-sm text-muted-foreground"
+                  >
+                    {item.suggestion}
+                  </span>
+                )}
               </Link>
             </li>
           );
@@ -74,4 +86,4 @@ export function TrendList({ items }: TrendListProps) {
       </ul>
     </div>
   );
-}
+});

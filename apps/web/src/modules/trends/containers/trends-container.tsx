@@ -1,6 +1,6 @@
-import { Link } from "@tanstack/react-router";
-import { GitCompareArrows, TrendingUp, Upload } from "lucide-react";
-import { useState } from "react";
+import { getRouteApi, Link } from "@tanstack/react-router";
+import { GitCompareArrows, ListFilter, TrendingUp, Upload } from "lucide-react";
+import { useDeferredValue, useMemo } from "react";
 import { EmptyState } from "@/common/components/empty-state";
 import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
@@ -10,16 +10,31 @@ import { Button } from "@/components/ui/button";
 import { useActiveProfile } from "@/modules/profiles";
 import { TrendControls } from "../components/trend-controls";
 import { TrendList } from "../components/trend-list";
-import { sortTrends } from "../config/trends";
+import { WatchList } from "../components/watch-list";
+import { matchesTrend, sortTrends } from "../config/trends";
 import { useTrends } from "../hooks/use-trends";
-import type { TrendSort } from "../types";
+import type { TrendSearch } from "../types";
+
+const route = getRouteApi("/_app/trends/");
 
 function Content() {
   const { profile } = useActiveProfile();
   const trends = useTrends(profile?.id);
-  const [category, setCategory] = useState<string | null>(null);
-  const [sort, setSort] = useState<TrendSort>("change");
+  const search = route.useSearch();
+  const listSearch = useDeferredValue(search);
+  const navigate = route.useNavigate();
   const t = useT();
+  const setSearch = (patch: TrendSearch) =>
+    void navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
+  const markers = trends.data?.markers;
+  const visible = useMemo(
+    () =>
+      sortTrends(
+        (markers ?? []).filter((item) => matchesTrend(item, listSearch)),
+        listSearch.sort ?? "change",
+      ),
+    [markers, listSearch],
+  );
 
   if (!profile || trends.isPending) return <LoadingState variant="list" />;
   if (trends.isError) {
@@ -52,19 +67,36 @@ function Content() {
     );
   }
 
-  const visible = trends.data.markers.filter(
-    (item) => category === null || item.category === category,
-  );
   return (
-    <div className="space-y-6">
-      <TrendControls
-        categories={trends.data.categories}
-        category={category}
-        sort={sort}
-        onCategoryChange={setCategory}
-        onSortChange={setSort}
-      />
-      <TrendList items={sortTrends(visible, sort)} />
+    <div className="space-y-8">
+      <WatchList items={trends.data.attention} />
+      <div className="space-y-6">
+        <TrendControls
+          categories={trends.data.categories}
+          search={search}
+          onSearchChange={setSearch}
+        />
+        {visible.length === 0 ? (
+          <EmptyState
+            icon={ListFilter}
+            title={t.trends.list.noMatchTitle}
+            body={t.trends.list.noMatchBody}
+            action={
+              <Button
+                variant="outline"
+                data-testid="trend-clear-filters"
+                onClick={() =>
+                  setSearch({ category: undefined, direction: undefined, status: undefined })
+                }
+              >
+                {t.trends.list.clearFilters}
+              </Button>
+            }
+          />
+        ) : (
+          <TrendList items={visible} />
+        )}
+      </div>
     </div>
   );
 }

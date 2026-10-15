@@ -10,9 +10,11 @@ import {
   type TextLocale,
   toCanonical,
   trendDirection,
+  trendSuggestion,
   typicalGapDays,
 } from "@mediwise/engine";
 import { AppError } from "../../common/errors.js";
+import { listAttention } from "../dashboard/index.js";
 import { listLinkedPairs } from "../links/index.js";
 import { getOwnedProfile } from "../profiles/index.js";
 import type { CompareQuery } from "./trends.schemas.js";
@@ -230,9 +232,39 @@ export async function listSeries(userId: string, profileId: string) {
   return { reports: ordered, series };
 }
 
-/** Lists every marker of a profile measured in at least two done reports, in catalog order. */
+type Series = ReturnType<typeof toSeries>;
+
+/** Adds the engine's one-line suggestion to a series, from its latest point. */
+function withSuggestion<T extends Series>(series: T, locale: TextLocale) {
+  const last = series.points.at(-1);
+  const suggestion = last
+    ? trendSuggestion(
+        {
+          markerKey: series.markerKey,
+          value: last.value,
+          status: series.latestStatus,
+          direction: series.direction,
+          optimalLow: series.calibratedRange?.low ?? null,
+          optimalHigh: series.calibratedRange?.high ?? null,
+        },
+        locale,
+      )
+    : null;
+  return { ...series, suggestion };
+}
+
+/**
+ * Lists every marker of a profile measured in at least two done reports, in catalog order, and the markers to keep an
+ * eye on.
+ *
+ * @remarks
+ * `attention` is the Home attention set without the study alerts, so a marker measured once still shows when it is at risk.
+ */
 export async function listTrends(userId: string, profileId: string, locale: TextLocale = "en") {
-  const { reports, series: all } = await listSeries(userId, profileId);
+  const [{ reports, series: all }, attention] = await Promise.all([
+    listSeries(userId, profileId),
+    listAttention(userId, profileId, false),
+  ]);
   const series = all.filter((item) => item.points.length >= 2);
   const present = new Set(series.map((item) => item.category));
   return {
@@ -240,12 +272,18 @@ export async function listTrends(userId: string, profileId: string, locale: Text
     categories: categories
       .filter(({ key }) => present.has(key))
       .map(({ key }) => ({ key, label: categoryLabel(key, locale) })),
-    markers: series,
+    markers: series.map((item) => withSuggestion(item, locale)),
+    attention: attention.flatMap((item) => (item.kind === "marker" ? [item] : [])),
   };
 }
 
 /** Loads every point of one marker for a profile, with the latest calibrated range. */
-export async function getTrend(userId: string, profileId: string, markerKey: string) {
+export async function getTrend(
+  userId: string,
+  profileId: string,
+  markerKey: string,
+  locale: TextLocale = "en",
+) {
   const known = catalog.get(markerKey);
   const notFound = new AppError(404, "This profile has no value for this marker");
   if (!known) throw notFound;
@@ -257,7 +295,7 @@ export async function getTrend(userId: string, profileId: string, markerKey: str
   ]);
   const series = toSeries(known.entry, ordered, pickRows(rows), new Set(pairs));
   if (series.points.length === 0) throw notFound;
-  return series;
+  return withSuggestion(series, locale);
 }
 
 /**

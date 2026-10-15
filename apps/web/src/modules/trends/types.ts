@@ -18,3 +18,14 @@ export type Change = TrendItem["change"];
 export type Direction = TrendItem["direction"];
 
 export type TrendSort = "change" | "name";
+
+export type TrendStatus = "risk" | "watch" | "optimal";
+
+export type TrendSearch = {
+  category?: string;
+  direction?: Direction;
+  status?: TrendStatus;
+  sort?: "name";
+};
+
+export type WatchItem = Trends["attention"][number];
