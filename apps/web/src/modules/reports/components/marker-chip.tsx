@@ -15,7 +15,9 @@ export function MarkerChip({ reportId, markerKey, value, children }: MarkerChipP
     <Badge asChild variant="outline" className={chipClass}>
       <Link {...markerLink(reportId, markerKey)}>
         {children}
-        {value && <span className="font-mono text-muted-foreground">{value}</span>}
+        {value && (
+          <span className="font-mono whitespace-nowrap text-muted-foreground">{value}</span>
+        )}
       </Link>
     </Badge>
   );

@@ -1,6 +1,7 @@
 import type { Messages } from "..";
 import { plural } from "../plural";
 import { review } from "../review";
+import { formatCount } from "../locales";
 
 export const trends: Messages["trends"] = {
   direction: {
@@ -16,11 +17,12 @@ export const trends: Messages["trends"] = {
     gone: "दोबारा जाँच नहीं हुई",
   },
   summary: {
-    improved: (n: number) => review(`${n} में सुधार`),
-    worsened: (n: number) => review(`${n} में गिरावट`),
-    same: (n: number) => `${n} में बदलाव नहीं`,
-    new: (n: number) => plural("hi", n, { one: `${n} नया`, other: `${n} नए` }),
-    gone: (n: number) => `${n} की दोबारा जाँच नहीं हुई`,
+    improved: (n: number) => review(`${formatCount("hi", n)} में सुधार`),
+    worsened: (n: number) => review(`${formatCount("hi", n)} में गिरावट`),
+    same: (n: number) => `${formatCount("hi", n)} में बदलाव नहीं`,
+    new: (n: number) =>
+      plural("hi", n, { one: `${formatCount("hi", n)} नया`, other: `${formatCount("hi", n)} नए` }),
+    gone: (n: number) => `${formatCount("hi", n)} की दोबारा जाँच नहीं हुई`,
   },
   upload: "रिपोर्ट अपलोड करें",
   columns: {
@@ -54,7 +56,7 @@ export const trends: Messages["trends"] = {
       "ताज़ा मान में जोखिम या ध्यान दें वाले मार्कर, या पिछले मान से बिगड़े मार्कर।",
     ),
     none: review("कोई मार्कर जोखिम में, ध्यान दें में या पहले से बिगड़ा हुआ नहीं है।"),
-    more: (n: number) => review(`${n} और दिखाएँ`),
+    more: (n: number) => review(`${formatCount("hi", n)} और दिखाएँ`),
     change: (delta: string, date: string) => `${date} से ${delta}`,
   },
   suggestion: review("सुझाव"),
@@ -72,11 +74,13 @@ export const trends: Messages["trends"] = {
     loadError: "हम यह ट्रेंड लोड नहीं कर सके।",
     emptyTitle: "इस मार्कर का कोई मान नहीं",
     emptyBody: "इस प्रोफ़ाइल की किसी रिपोर्ट में यह मार्कर नहीं है।",
-    values: (n: number, name: string) => `${name} के ${n} मान`,
+    values: (n: number, name: string) => `${name} के ${formatCount("hi", n)} मान`,
     sinceBefore: "पिछली रिपोर्ट के बाद से।",
     band: review("आपकी प्रोफ़ाइल के लिए सबसे अच्छी रेंज"),
     labNote: (n: number) =>
-      review(`इस चार्ट में ${n} लैब के नतीजे हैं। रेंज हर लैब में अलग हो सकती है।`),
+      review(
+        `इस चार्ट में ${formatCount("hi", n)} लैब के नतीजे हैं। रेंज हर लैब में अलग हो सकती है।`,
+      ),
   },
   compare: {
     title: "रिपोर्ट की तुलना करें",

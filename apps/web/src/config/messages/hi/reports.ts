@@ -1,6 +1,7 @@
 import type { Messages } from "..";
 import { plural } from "../plural";
 import { review } from "../review";
+import { formatCount } from "../locales";
 
 export const reports: Messages["reports"] = {
   list: {
@@ -30,14 +31,14 @@ export const reports: Messages["reports"] = {
     ],
     selected: "चुनी गई फ़ाइलें",
     fileCount: (count: number, max: number) =>
-      `${max} में से ${plural("hi", count, { one: `${count} फ़ाइल`, other: `${count} फ़ाइलें` })}`,
+      `${max} में से ${plural("hi", count, { one: `${formatCount("hi", count)} फ़ाइल`, other: `${formatCount("hi", count)} फ़ाइलें` })}`,
     totalSize: (size: string, max: number) => `${max} MB में से ${size} MB`,
     fileSize: (size: string) => `${size} MB`,
     uploadingFile: (name: string) => `${name} अपलोड हो रही है`,
     uploaded: "अपलोड हो गई",
     remove: (name: string) => `${name} हटाएँ`,
     shared: (count: number) =>
-      `${plural("hi", count, { one: `हमने दूसरे ऐप से ${count} फ़ाइल जोड़ी।`, other: `हमने दूसरे ऐप से ${count} फ़ाइलें जोड़ीं।` })} प्रोफ़ाइल जाँचें। फिर “मेरी रिपोर्ट पढ़ें” चुनें।`,
+      `${plural("hi", count, { one: `हमने दूसरे ऐप से ${formatCount("hi", count)} फ़ाइल जोड़ी।`, other: `हमने दूसरे ऐप से ${formatCount("hi", count)} फ़ाइलें जोड़ीं।` })} प्रोफ़ाइल जाँचें। फिर “मेरी रिपोर्ट पढ़ें” चुनें।`,
     photo: {
       small: "यह फ़ोटो छोटी है। पेज के और पास से फिर से फ़ोटो लें।",
       dark: "यह फ़ोटो अँधेरी है। अच्छी रोशनी में फिर से फ़ोटो लें।",
@@ -77,7 +78,8 @@ export const reports: Messages["reports"] = {
     listEndsOn: (date: string) => `${date} को बंद होगा`,
     madeOn: (date: string) => `${date} को बना।`,
     notOpened: "अभी तक नहीं खुला।",
-    opened: (count: number, date: string) => `${count} बार खुला। आख़िरी बार ${date} को खुला।`,
+    opened: (count: number, date: string) =>
+      `${formatCount("hi", count)} बार खुला। आख़िरी बार ${date} को खुला।`,
     endedTitle: "यह लिंक बंद हो गया है",
     endedBody: "जिसने आपको यह लिंक भेजा, उनसे नया लिंक माँगें।",
   },
@@ -98,7 +100,7 @@ export const reports: Messages["reports"] = {
     dateOfBirthApproximate: "जन्म की तारीख (लगभग)",
     sex: "लिंग",
     age: "उम्र",
-    years: (age: number) => `${age} साल`,
+    years: (age: number) => `${formatCount("hi", age)} साल`,
     report: "रिपोर्ट",
     labs: "लैब",
     collectedOn: "सैंपल की तारीख",

@@ -1,9 +1,14 @@
 import type { Messages } from "..";
 import { plural } from "../plural";
 import { review } from "../review";
+import { formatCount } from "../locales";
 
 export const credits: Messages["credits"] = {
-  left: (n: number) => plural("hi", n, { one: `${n} रिपोर्ट बाकी`, other: `${n} रिपोर्ट बाकी` }),
+  left: (n: number) =>
+    plural("hi", n, {
+      one: `${formatCount("hi", n)} रिपोर्ट बाकी`,
+      other: `${formatCount("hi", n)} रिपोर्ट बाकी`,
+    }),
   title: "रिपोर्ट क्रेडिट",
   description: "MediWise पढ़ी गई रिपोर्ट को कैसे गिनता है।",
   loadError: "हम आपके क्रेडिट लोड नहीं कर सके।",

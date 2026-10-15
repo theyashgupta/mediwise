@@ -20,13 +20,16 @@ const member = {
   isSelf: false,
 };
 
+const intro = ["This review covers 3 reports from 2 labs.", "Your score went from 71 to 78."];
+const introText = intro.join(" ");
+
 const review: YearReview = {
   from: "2025-11-02",
   to: "2026-09-20",
   reportCount: 3,
   labCount: 2,
   score: { from: 71, to: 78 },
-  intro: ["This review covers 3 reports from 2 labs.", "Your score went from 71 to 78."],
+  intro,
   moved: [
     {
       markerKey: "vitamin_d",
@@ -53,6 +56,7 @@ const review: YearReview = {
 };
 
 const reviewPath = (id: string) => `GET /profiles/${id}/year-review`;
+const introPath = (id: string) => `POST /profiles/${id}/year-review/intro`;
 
 afterEach(resetApp);
 
@@ -93,7 +97,7 @@ describe.each(["en", "hi"] as const)("year in review in %s", (locale) => {
     });
     await renderApp("/year-review", { locale });
 
-    expect(await screen.findByText(review.intro.join(" "))).toBeTruthy();
+    expect(await screen.findByText(introText)).toBeTruthy();
     expect(screen.getByText("71 → 78")).toBeTruthy();
     expect(screen.getByRole("button", { name: t.yearReview.page.print })).toBeTruthy();
 
@@ -110,6 +114,41 @@ describe.each(["en", "hi"] as const)("year in review in %s", (locale) => {
     expect(within(once).getByRole("link", { name: "TSH" })).toBeTruthy();
   });
 
+  test("a review with no intro shows the numbers, and Write the intro asks for it once", async () => {
+    const requests = fakeNetwork({
+      "GET /profiles": () => [selfProfile],
+      [reviewPath(selfProfile.id)]: () => ({ ...review, intro: null }),
+      [introPath(selfProfile.id)]: () => review,
+    });
+    await renderApp("/year-review", { locale });
+
+    const write = await screen.findByRole("button", { name: t.yearReview.page.writeIntro });
+    expect(screen.getByText("71 → 78")).toBeTruthy();
+    expect(screen.queryByText(introText)).toBeNull();
+
+    await userEvent.click(write);
+
+    expect(await screen.findByText(introText)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: t.yearReview.page.writeIntro })).toBeNull();
+    expect(requests.filter((r) => r.method === "POST")).toHaveLength(1);
+  });
+
+  test("a failed intro write shows the error and keeps the button", async () => {
+    fakeNetwork({
+      "GET /profiles": () => [selfProfile],
+      [reviewPath(selfProfile.id)]: () => ({ ...review, intro: null }),
+      [introPath(selfProfile.id)]: () => problem(500),
+    });
+    await renderApp("/year-review", { locale });
+
+    await userEvent.click(
+      await screen.findByRole("button", { name: t.yearReview.page.writeIntro }),
+    );
+
+    expect(await screen.findByText(t.yearReview.page.introError)).toBeTruthy();
+    expect(screen.getByRole("button", { name: t.yearReview.page.writeIntro })).toBeTruthy();
+  });
+
   test("a failed load shows the error, and retry loads the review", async () => {
     let failing = true;
     fakeNetwork({
@@ -124,7 +163,7 @@ describe.each(["en", "hi"] as const)("year in review in %s", (locale) => {
     failing = false;
     await userEvent.click(within(alert).getByRole("button", { name: t.common.retry }));
 
-    expect(await screen.findByText(review.intro.join(" "))).toBeTruthy();
+    expect(await screen.findByText(introText)).toBeTruthy();
     expect(screen.queryByText(t.yearReview.page.loadError)).toBeNull();
   });
 });
@@ -136,7 +175,7 @@ test("the profileId in the address picks the review of that family member", asyn
   });
   await renderApp(`/year-review?profileId=${member.id}`);
 
-  expect(await screen.findByText(review.intro.join(" "))).toBeTruthy();
+  expect(await screen.findByText(introText)).toBeTruthy();
   expect(screen.getByText(/^Ravi Rao · /)).toBeTruthy();
   expect(requests.map((r) => r.path)).not.toContain(`/profiles/${selfProfile.id}/year-review`);
 });

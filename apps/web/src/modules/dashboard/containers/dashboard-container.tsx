@@ -126,7 +126,7 @@ export function DashboardContainer() {
         )}
         {data?.latest && <AttentionList items={data.attention} />}
         {data?.latest && (
-          <div className="grid grid-cols-1 gap-10 empty:hidden lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-10 empty:hidden lg:grid-cols-2 lg:[&>:last-child:nth-child(odd)]:col-span-2">
             <DoctorList suggestions={ofKind("doctor_now", "doctor_soon")} />
             <PatternTrendList
               patterns={data.patterns}

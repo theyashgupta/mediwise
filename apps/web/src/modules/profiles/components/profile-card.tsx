@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Profile } from "../types";
 import { ProfileCsvButton } from "./profile-csv-button";
+import { initial } from "@/common/utils/initial";
 
 type ProfileCardProps = {
   profile: Profile;
@@ -41,7 +42,7 @@ export function ProfileCard({
           className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 font-medium text-primary uppercase"
           aria-hidden
         >
-          {profile.name.charAt(0)}
+          {initial(profile.name)}
         </span>
         <div className="min-w-0 flex-1">
           <h2 className="truncate font-medium">{profile.name}</h2>

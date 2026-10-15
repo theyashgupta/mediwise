@@ -1,7 +1,12 @@
 import { plural } from "../plural";
+import { formatCount } from "../locales";
 
 export const credits = {
-  left: (n: number) => plural("en", n, { one: `${n} report left`, other: `${n} reports left` }),
+  left: (n: number) =>
+    plural("en", n, {
+      one: `${formatCount("en", n)} report left`,
+      other: `${formatCount("en", n)} reports left`,
+    }),
   title: "Report credits",
   description: "How MediWise counts the reports it reads.",
   loadError: "We could not load your credits.",

@@ -1,4 +1,5 @@
 import { plural } from "../plural";
+import { formatCount } from "../locales";
 
 export const dashboard = {
   ask: {
@@ -46,7 +47,7 @@ export const dashboard = {
   },
   processing: {
     titleOne: "Reading your report",
-    titleMany: (n: number) => `Reading your ${n} reports`,
+    titleMany: (n: number) => `Reading your ${formatCount("en", n)} reports`,
     bodyOne: "This page updates when the report is ready.",
     bodyMany: "This page updates when each report is ready.",
   },
@@ -107,7 +108,11 @@ export const dashboard = {
     title: "Recent reports",
     all: "All reports",
     fallbackTitle: "Report",
-    files: (n: number) => plural("en", n, { one: `${n} file`, other: `${n} files` }),
+    files: (n: number) =>
+      plural("en", n, {
+        one: `${formatCount("en", n)} file`,
+        other: `${formatCount("en", n)} files`,
+      }),
   },
   retest: {
     title: "Due for retest",
@@ -129,7 +134,10 @@ export const dashboard = {
     add: "Add a family member",
     noReport: "No report yet.",
     atRisk: (n: number) =>
-      plural("en", n, { one: `${n} marker at risk`, other: `${n} markers at risk` }),
+      plural("en", n, {
+        one: `${formatCount("en", n)} marker at risk`,
+        other: `${formatCount("en", n)} markers at risk`,
+      }),
     stale: "No report in the last 12 months.",
     staleFrequent: "No report in the last 3 months.",
     upload: "Upload a report",

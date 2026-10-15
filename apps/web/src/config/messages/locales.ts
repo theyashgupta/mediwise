@@ -15,6 +15,11 @@ export function intlTag(locale: Locale) {
   return locale === "hi" ? "hi-IN-u-nu-latn" : "en-IN";
 }
 
+/** Formats a count with the locale's digit grouping, for example 1,284 or 1,23,640. */
+export function formatCount(locale: Locale, count: number) {
+  return new Intl.NumberFormat(intlTag(locale)).format(count);
+}
+
 /**
  * Narrows an unknown stored value to a supported locale.
  */

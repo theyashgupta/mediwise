@@ -1,4 +1,5 @@
 import { plural } from "../plural";
+import { formatCount } from "../locales";
 
 export const profiles = {
   relation: {
@@ -22,7 +23,8 @@ export const profiles = {
   },
   approximate: "Approximate",
   approximateBirthNote: "We calculated this date from the age on a report. Enter the exact date.",
-  rows: (n: number) => plural("en", n, { one: `${n} row`, other: `${n} rows` }),
+  rows: (n: number) =>
+    plural("en", n, { one: `${formatCount("en", n)} row`, other: `${formatCount("en", n)} rows` }),
   rowsFor: (rows: string, name: string) => `${rows} for ${name}`,
   saving: "Saving",
   form: {
@@ -77,10 +79,18 @@ export const profiles = {
     removed: (name: string) => `We removed ${name}.`,
   },
   card: {
-    years: (n: number) => plural("en", n, { one: `${n} year`, other: `${n} years` }),
+    years: (n: number) =>
+      plural("en", n, {
+        one: `${formatCount("en", n)} year`,
+        other: `${formatCount("en", n)} years`,
+      }),
     dateOfBirthMissing: "Date of birth missing",
     noReports: "No reports",
-    reports: (n: number) => plural("en", n, { one: `${n} report`, other: `${n} reports` }),
+    reports: (n: number) =>
+      plural("en", n, {
+        one: `${formatCount("en", n)} report`,
+        other: `${formatCount("en", n)} reports`,
+      }),
     yearReview: (name: string) => `Year in review for ${name}`,
     edit: (name: string) => `Edit ${name}`,
     remove: (name: string) => `Remove ${name}`,

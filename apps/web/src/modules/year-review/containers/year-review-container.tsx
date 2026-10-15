@@ -4,12 +4,13 @@ import { EmptyState } from "@/common/components/empty-state";
 import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
 import { PageHeader } from "@/common/components/page-header";
+import { useInFlight } from "@/common/hooks/use-in-flight";
 import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 import { useActiveProfile } from "@/modules/profiles";
 import { YearReviewView } from "../components/year-review-view";
 import { formatReviewDate } from "../config/year-review";
-import { useYearReview } from "../hooks/use-year-review";
+import { useWriteYearReviewIntro, useYearReview } from "../hooks/use-year-review";
 
 const route = getRouteApi("/_app/year-review");
 
@@ -20,6 +21,8 @@ export function YearReviewContainer() {
   const review = useYearReview(profile?.id);
   const data = review.data;
   const t = useT();
+  const writeIntro = useWriteYearReviewIntro();
+  const write = useInFlight(() => writeIntro.mutateAsync(profile?.id ?? ""));
 
   return (
     <>
@@ -58,7 +61,14 @@ export function YearReviewContainer() {
           }
         />
       )}
-      {data && <YearReviewView review={data} />}
+      {data && (
+        <YearReviewView
+          review={data}
+          writingIntro={write.pending}
+          introError={writeIntro.isError}
+          onWriteIntro={() => void write.run()}
+        />
+      )}
     </>
   );
 }

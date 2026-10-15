@@ -1,4 +1,5 @@
 import { plural } from "../plural";
+import { formatCount } from "../locales";
 
 export const payments = {
   policyLinks: {
@@ -24,7 +25,7 @@ export const payments = {
   status: {
     waiting: "We are waiting for your bank to confirm the payment.",
     paid: (n: number) =>
-      `Payment received. We added ${plural("en", n, { one: `${n} report credit`, other: `${n} report credits` })} to your account.`,
+      `Payment received. We added ${plural("en", n, { one: `${formatCount("en", n)} report credit`, other: `${formatCount("en", n)} report credits` })} to your account.`,
     late: "Your bank did not confirm the payment yet. Your credits show here when it does.",
   },
 };
