@@ -21,10 +21,10 @@ export function PageHeader({
 }: PageHeaderProps) {
   const className = cn(
     "mb-10 flex flex-col gap-4",
-    !tools && "xl:flex-row xl:items-end xl:justify-between",
+    !tools && "xl:flex-row xl:flex-wrap xl:items-end xl:justify-between",
   );
   const intro = (
-    <div className="min-w-0 flex-1 space-y-2 xl:min-w-96">
+    <div className="min-w-0 flex-1 space-y-2 xl:basis-96">
       {heading ?? <h1 className="font-display text-display text-balance wrap-anywhere">{title}</h1>}
       {description && <p className="max-w-measure text-muted-foreground">{description}</p>}
     </div>
@@ -35,7 +35,7 @@ export function PageHeader({
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
           {intro}
           <div
-            className="order-first flex shrink-0 gap-1 self-end sm:order-none sm:self-start"
+            className="order-first flex flex-wrap justify-end gap-1 self-end sm:order-none sm:self-start"
             data-testid="page-tools"
           >
             {tools}

@@ -13,7 +13,13 @@ const ids = vi.hoisted(() => ({
 const store = vi.hoisted(() => {
   const owned = {
     reports: [
-      { id: ids.report, title: "Blood panel", labName: "Sunrise Diagnostics", date: "2026-08-04" },
+      {
+        id: ids.report,
+        title: "Blood panel",
+        labName: "Sunrise Diagnostics",
+        date: "2026-08-04",
+        patterns: [{ key: "b12_deficiency" }],
+      },
     ],
     studies: [
       {
@@ -161,4 +167,20 @@ test("a stored verdict is counted in the review tally", async () => {
 
   expect(store.reviews).toEqual([{ questionId: "q1", verdict: "pass" }]);
   expect(await countReviews()).toEqual([{ verdict: "pass", total: 1 }]);
+});
+
+test("a pattern chip keeps its target only when its report holds that pattern, so it never links to a missing fold", async () => {
+  store.day = [
+    question("q1", "alice", [
+      { kind: "pattern", reportId: ids.report, target: "b12_deficiency" },
+      { kind: "pattern", reportId: ids.report, target: "prediabetes" },
+    ]),
+  ];
+
+  const [item] = await loadReviewDay("2026-10-13", () => true);
+
+  expect(item!.sentences[0]!.cites).toMatchObject([
+    { target: "b12_deficiency", label: "B12 deficiency pattern" },
+    { target: null, label: "Prediabetes range" },
+  ]);
 });

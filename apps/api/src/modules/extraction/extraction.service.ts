@@ -247,10 +247,13 @@ function plainNumbers(text: string) {
  *
  * @remarks
  * "13 - 17" gives both bounds, "> 90" and "> OR = 90" only the low one and "< 200" only the high one. A range with several categories,
- * such as Desirable and Borderline, has more numbers than one range and gives no bounds.
+ * such as Desirable and Borderline, has more numbers than one range and gives no bounds. Numbers inside a printed unit, such as
+ * the 1.73 of "mL/min/1.73m2" or the 10^3 of "x10^3/uL", are not bounds and are dropped first.
  */
 export function printedRange(range: string | null | undefined) {
-  const printed = plainNumbers(range ?? "").replace(/\s*\bOR\s*=/gi, "=");
+  const printed = plainNumbers(range ?? "")
+    .replace(/\s*\bOR\s*=/gi, "=")
+    .replace(/(?<=[\p{L}/^])\d+(?:\.\d+)?|\d+[*^]\d+/gu, "");
   const numbers = printed.match(/\d+(?:\.\d+)?/g) ?? [];
   const pair = between.exec(printed);
   if (numbers.length === 2 && pair) {

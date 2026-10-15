@@ -332,7 +332,7 @@ export function ReportContainer() {
               </span>
             )}
             {status === "done" && assistantOn && (
-              <GlassButton asChild>
+              <GlassButton asChild className="h-auto min-h-9 max-w-full py-1.5 whitespace-normal">
                 <Link
                   to="/ask"
                   search={{ report: reportId }}

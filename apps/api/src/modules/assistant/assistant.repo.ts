@@ -331,6 +331,7 @@ export async function findCiteRows(
             title: reports.title,
             labName: reports.labName,
             date: visitDate,
+            patterns: reports.patterns,
           })
           .from(reports)
           .innerJoin(profiles, eq(profiles.id, reports.profileId))

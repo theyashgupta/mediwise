@@ -8,9 +8,7 @@ import {
   type EngineValue,
   isPopulationRow,
   joinWrappedNames,
-  markers,
   runEngine,
-  toCanonical,
   type Visit,
 } from "@mediwise/engine";
 import type { ExtractedMarker, ExtractedReport, PageClass } from "@mediwise/shared";
@@ -53,19 +51,33 @@ import { ruleTitle } from "./reports.title.js";
 const maxPagesBytes = 40 * 1024 * 1024;
 const photoPixels = 1568;
 const derivedNames = new Map(derived.map((entry) => [entry.key, entry.name]));
-const catalogEntries = new Map([...markers, ...derived].map((entry) => [entry.key, entry]));
 
 /**
- * Converts a repeated value of an already scored marker to the canonical unit, when the catalog lists its unit.
+ * Keeps the first row of each marker in a report and writes every later print of it into that row's note.
  *
  * @remarks
- * A test printed in two units, such as HbA1c in % and mmol/mol, gives two rows. Episodes and trends read every row of a
- * marker, so the unscored repeat must sit in the same unit as the scored row.
+ * A test printed in two units, such as HbA1c in % and mmol/mol, is one result. The engine scores the first print only.
  */
-function canonicalRepeat(markerKey: string | null, value: number | null, unit: string | undefined) {
-  const entry = markerKey ? catalogEntries.get(markerKey) : undefined;
-  const canonical = entry && value !== null ? toCanonical(entry, value, unit) : undefined;
-  return entry && canonical !== undefined ? { value: canonical, unit: entry.unit } : undefined;
+function foldRepeats<
+  Row extends {
+    markerKey: string | null;
+    printedValue: number | null;
+    valueText: string | null;
+    printedUnit: string | null;
+    note: string | null;
+  },
+>(rows: Row[]) {
+  const first = new Map<string, Row>();
+  return rows.filter((row) => {
+    const kept = row.markerKey ? first.get(row.markerKey) : undefined;
+    if (!kept) {
+      if (row.markerKey) first.set(row.markerKey, row);
+      return true;
+    }
+    const printed = [row.printedValue ?? row.valueText, row.printedUnit].filter(Boolean).join(" ");
+    kept.note = kept.note ? `${kept.note}, ${printed}` : printed;
+    return false;
+  });
 }
 
 /**
@@ -369,17 +381,13 @@ export async function readReport(
   step("narrative", ` status=${narrative ? "done" : "failed"}`);
 
   const results = new Map(output.markers.map((result) => [result.markerKey, result]));
-  const markerRows = rows.map((marker, i) => {
+  const printedRows = rows.map((marker, i) => {
     const markerKey = mappings[i]?.markerKey ?? null;
     const numeric = typeof marker.value === "number" ? marker.value : null;
     const result = markerKey ? results.get(markerKey) : undefined;
     if (markerKey && result) results.delete(markerKey);
     const converted =
-      typeof result?.value === "number"
-        ? { value: result.value, unit: result.unit }
-        : result
-          ? undefined
-          : canonicalRepeat(markerKey, numeric, marker.unit);
+      typeof result?.value === "number" ? { value: result.value, unit: result.unit } : undefined;
     return {
       id: randomUUID(),
       reportId,
@@ -396,8 +404,10 @@ export async function readReport(
       status: result && result.status !== "unknown" ? result.status : null,
       calibratedLow: result?.calibrated?.optimalLow ?? null,
       calibratedHigh: result?.calibrated?.optimalHigh ?? null,
+      note: null as string | null,
     };
   });
+  const markerRows = foldRepeats(printedRows);
   const derivedRows = output.derived.map((result) => ({
     reportId,
     markerKey: result.markerKey,
@@ -410,8 +420,8 @@ export async function readReport(
     calibratedHigh: result.calibrated?.optimalHigh ?? null,
     derived: true,
   }));
-  const suggestions = markerRows.flatMap((row, i) =>
-    mappings[i]?.suggested
+  const suggestions = printedRows.flatMap((row, i) =>
+    mappings[i]?.suggested && markerRows.includes(row)
       ? [
           {
             reportMarkerId: row.id,

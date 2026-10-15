@@ -62,6 +62,7 @@ function byId<Row extends { id: string }>(rows: Row[]) {
  * @remarks
  * A cite whose report or episode the owner no longer has comes back `deleted` with no labels, so a deleted report or
  * another account's report never shows a name. A cited row that a later read replaced falls back to its report title.
+ * A pattern its report does not hold loses its target, so the chip never links to a fold the page does not show.
  */
 async function withChips(userId: string, items: ReturnType<typeof toItem>[]) {
   const cites = items.flatMap(({ sentences }) => sentences.flatMap(({ cites }) => cites));
@@ -114,7 +115,12 @@ async function withChips(userId: string, items: ReturnType<typeof toItem>[]) {
       case "follow_up":
         return { ...cite, ...shown, label: inReport(followUps.get(target))?.title ?? shown.label };
       case "pattern":
-        return { ...cite, ...shown, label: patternNames.get(target) ?? shown.label };
+        return {
+          ...cite,
+          ...shown,
+          target: report?.patterns?.some(({ key }) => key === target) ? target : null,
+          label: patternNames.get(target) ?? shown.label,
+        };
       case "episode": {
         const episode = episodes.get(target);
         if (!episode) return { ...cite, ...deleted };

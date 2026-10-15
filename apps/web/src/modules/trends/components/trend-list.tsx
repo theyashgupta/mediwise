@@ -13,17 +13,17 @@ type TrendListProps = {
 };
 
 const columns =
-  "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 sm:grid-cols-[minmax(0,1fr)_6rem_10rem_13rem]";
+  "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 @xl:grid-cols-[minmax(0,1fr)_6rem_10rem_13rem]";
 
 export const TrendList = memo(function TrendList({ items }: TrendListProps) {
   const t = useT();
   return (
-    <div className="overflow-hidden rounded-xl border bg-card">
+    <div className="@container overflow-hidden rounded-xl border bg-card">
       <div
         aria-hidden
         className={cn(
           columns,
-          "hidden border-b px-4 py-2 text-xs font-medium text-muted-foreground sm:grid",
+          "hidden border-b px-4 py-2 text-xs font-medium text-muted-foreground @xl:grid",
         )}
       >
         <span>{t.trends.columns.marker}</span>
@@ -43,6 +43,7 @@ export const TrendList = memo(function TrendList({ items }: TrendListProps) {
               <Link
                 to="/trends/$markerKey"
                 params={{ markerKey: item.markerKey }}
+                data-testid="trend-row"
                 className={cn(
                   columns,
                   "px-4 py-3 outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset",
@@ -63,7 +64,7 @@ export const TrendList = memo(function TrendList({ items }: TrendListProps) {
                   valueText={null}
                   unit={item.unit}
                   precision={item.precision}
-                  className="text-sm whitespace-normal sm:text-right"
+                  className="text-sm whitespace-normal @xl:text-right"
                 />
                 <ChangeLabel
                   change={item.change}

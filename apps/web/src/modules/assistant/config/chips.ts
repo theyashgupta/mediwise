@@ -20,12 +20,12 @@ const reportHash: Partial<Record<Cite["kind"], (target: string) => string>> = {
  * Picks what a chip opens.
  *
  * @remarks
- * A catalog cite has no report, so it stays plain text.
+ * A catalog cite has no report, and a pattern cite whose report has no such pattern has no target, so both stay plain text.
  */
 export function chipTarget(cite: Cite): ChipTarget {
   if (cite.deleted) return { kind: "none" };
   if (cite.kind === "episode" && cite.target) return { kind: "episode", episodeId: cite.target };
-  if (!cite.reportId) return { kind: "none" };
+  if (!cite.reportId || (cite.kind === "pattern" && !cite.target)) return { kind: "none" };
   if (cite.kind === "value" && cite.target) {
     return { kind: "fact", reportId: cite.reportId, markerKey: cite.target };
   }
