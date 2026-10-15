@@ -13,6 +13,7 @@ export default defineConfig({
   reporter: ci ? [["list"], ["html", { open: "never" }]] : "list",
   use: {
     baseURL: webOrigin,
+    locale: "en-GB",
     testIdAttribute: "data-testid",
     actionTimeout: 15_000,
     trace: "retain-on-failure",

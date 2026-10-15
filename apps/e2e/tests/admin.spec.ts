@@ -183,7 +183,7 @@ test("the admin sees the credit history totals as GET /admin/credits returns the
 
   for (const total of [...history.reportCredits.totals, ...history.questionPacks.totals]) {
     await expect(adminPage.getByTestId(`admin-total-${total.kind}`), total.kind).toHaveText(
-      total.events.toLocaleString("en-IN"),
+      total.events.toLocaleString("en-GB"),
     );
   }
   await expect(adminPage.locator("main")).not.toContainText("$");
