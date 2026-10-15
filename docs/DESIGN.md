@@ -105,6 +105,8 @@ Screenshots on 2026-10-15, web dev server on `mediwise-dev`, the demo account. A
 | 1280 px, tooltip and menu | [tooltip](design/screenshots/medi-170-report-header-1280-light-tooltip.png) | [menu](design/screenshots/medi-170-report-header-1280-light-menu.png) |
 | Marker crumb, three levels | [1280 px](design/screenshots/medi-170-marker-crumb-1280-light.png) | [390 px](design/screenshots/medi-170-marker-crumb-390-light.png) |
 
+**Large text and the crumb (MEDI-177).** The Trends list switches to its wide columns by the width of the list, not the width of the screen, so 200 percent text gets the phone layout. Header action rows wrap. A marker name stays whole in the crumb at 390 px, and the report title truncates. Screenshots on 2026-10-16, web dev server on `mediwise-dev`, the demo account: [marker page at 390 px](design/screenshots/medi-177-marker-crumb-390-light.png), [Trends at 390 px with Improving and Risk](design/screenshots/medi-177-trends-improving-risk-390-light.png).
+
 ## Brand
 
 The mark is a drop with a reading line: a blood sample and the value read from it. The maintainer chose it on 2026-10-13 from three candidates, see the [renders](design/logo/candidates/).
