@@ -6,7 +6,7 @@ name: Supply-chain scan
 # schedule when nothing is committed. Ported from the Dispatch repo for pnpm.
 on:
   push:
-    branches: [main]
+    branches: [main, MEDI-154]
   pull_request:
   schedule:
     - cron: "30 3 * * *"
