@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    .body { fill: var(--mascot-body, #176b6b); }
+    .face { fill: var(--mascot-face, #fbfaf7); }
+    .smile { fill: none; stroke: var(--mascot-face, #fbfaf7); stroke-width: 2; stroke-linecap: round; }
+  </style>
+  <g class="figure">
+    <path class="body" d="M16 3s-9.1 9.88-9.1 16.9a9.1 9.1 0 0 0 18.2 0c0-7.02-9.1-16.9-9.1-16.9Z" />
+    <g class="eyes">
+      <ellipse class="face eye" cx="12.7" cy="17.4" rx="1.4" ry="1.9" />
+      <ellipse class="face eye" cx="19.3" cy="17.4" rx="1.4" ry="1.9" />
+    </g>
+    <path class="smile" d="M12.9 22.2q3.1 1.5 6.2 0" />
+    <ellipse class="face open" cx="16" cy="22.6" rx="2.6" ry="1.8" />
+  </g>
+</svg>
