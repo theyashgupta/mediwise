@@ -27,7 +27,12 @@ export function AppBreadcrumb({ className, innerOnly }: AppBreadcrumbProps) {
       <ol className="flex min-w-0 items-center gap-1.5 text-sm">
         {trail.map(({ href, label }, index) =>
           index === trail.length - 1 ? (
-            <li key={href} aria-current="page" className="truncate font-medium">
+            <li
+              key={href}
+              aria-current="page"
+              title={label}
+              className="min-w-0 truncate text-base font-semibold md:text-lg"
+            >
               {label}
             </li>
           ) : (
