@@ -120,7 +120,7 @@ export function AppShell() {
         <main
           id="content"
           tabIndex={-1}
-          className="mx-auto w-full max-w-content flex-1 px-4 pt-6 pb-[calc(--spacing(28)+env(safe-area-inset-bottom))] outline-none md:px-8 md:pt-10 md:pb-12 print:p-0"
+          className="mx-auto w-full max-w-content flex-1 px-4 pt-6 pb-[calc(--spacing(28)+env(safe-area-inset-bottom))] outline-none md:px-8 md:pt-10 md:pb-24 print:p-0"
         >
           <AppBreadcrumb innerOnly className="mb-4 md:hidden print:hidden" />
           <UpdateLine />
