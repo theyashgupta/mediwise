@@ -46,3 +46,17 @@ The video files are not in the repo. They are in `~/Work/mediwise-demos` on the 
 | 38 | The operator page | `38-operator-page.mp4` | 0:43 | Desktop | 2026-10-15 |
 | 39 | Ask about your reports | `39-ask-about-reports.mp4` | 0:33 | Desktop | 2026-10-15 |
 | 40 | Questions left, wrong answers and clear chat | `40-ask-chat-controls.mp4` | 0:33 | Desktop. The demo account has more than 5 questions left, so the recorder sets the count to 4 to show the counter. | 2026-10-15 |
+
+## Ad
+
+A 30-second motion-graphics ad (MEDI-146) built from the raw captures of the demo videos. `ad.md` has the brief, the storyboard, the review and the social copy.
+
+The files are in `~/Work/mediwise-demos/ad` on the maintainer's Mac. They are not in the repo.
+
+| File | Size | Duration | Use |
+| - | - | - | - |
+| `mediwise-ad-16x9.mp4` | 1920 x 1080, 30 fps, h264 crf 18 | 0:30 | Desktop, X, LinkedIn, YouTube |
+| `mediwise-ad-9x16.mp4` | 1080 x 1920, 30 fps, h264 crf 18 | 0:30 | Instagram reel. All text sits inside the reel safe zone: 150 px free at the top, 170 px free at the bottom. |
+| `mediwise-ad-hook.gif` | 960 x 540, 15 fps | 0:10 | Embeds. The first 10 seconds of the 16:9 cut. |
+
+The Remotion project is `~/Work/mediwise-promo/ad`, a separate git repo. Its README tells how to cut the footage and render both files. Music: "Corporate Ambient Piano" by Rockot from Pixabay, under the Pixabay Content License (commercial use, no attribution). The ad has no voice. Burned-in captions carry the story.
