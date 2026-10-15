@@ -183,6 +183,8 @@ Supabase Auth sends the sign-up, sign-in link, password reset, email change and 
 
 Limits: Resend free sends 100 emails a day and 3,000 a month. Dev and prod use the same Resend account, so they share this limit. Supabase sends at most 30 auth emails an hour per project (`email_sent` below).
 
+When you run the app locally against dev, never sign up or ask for a reset link with a made-up address on a real domain, such as `theyashgupta.me`: the email bounces, and Supabase sends the maintainer a bounce warning. Use Resend's test inbox, `delivered+<purpose>@resend.dev`, which accepts every email and never bounces.
+
 ### Env-vault names
 
 | Name | Value |

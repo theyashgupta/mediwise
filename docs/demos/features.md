@@ -183,11 +183,27 @@ RECORD_STORAGE_STATE="$JOB/demo-state.json" RECORD_APP_URL=http://localhost:5173
 
 Flows that add, change or delete data run on a throwaway account, so the demo account stays as it is.
 
-1. Record feature 2 with a new address in the form `<purpose>.demo@theyashgupta.me`, for example `onboarding.demo@theyashgupta.me`. Use a new local part for each take. Do not use `example.com`: Supabase checks the MX record of the domain, and `example.com` has a null MX, so sign-up fails with `email_address_invalid`. Sign-up sends one confirmation email. It goes to the maintainer's iCloud or it bounces. Supabase limits auth emails per hour. If sign-up shows "We sent too many emails", wait one hour. Make this account once.
-2. Off camera, run the sign-in script with that address. The sign-in link also confirms the email, so no inbox is needed.
-3. Give the account credits for the uploads: `pnpm --filter @mediwise/api credits:grant onboarding.demo@theyashgupta.me 8 demo`. The throwaway flows need up to 7 reads: two takes each of features 5 and 10, two study uploads in feature 27 and one optional upload in feature 25.
+Never use a made-up address on a real domain, such as `theyashgupta.me`. That address does not exist, so each auth email to it bounces, and Supabase sends the maintainer a bounce warning. When a flow must send a real email on camera (the sign-up confirmation in feature 2, the reset link in feature 4), use Resend's test inbox in the form `delivered+<purpose>@resend.dev`, for example `delivered+onboarding@resend.dev`. Resend accepts every email to it and never bounces, and the domain passes the mail-server check of Supabase. Do not use `example.com`: it has a null MX, so sign-up fails with `email_address_invalid`.
+
+1. Off camera, make the account with the service role admin API. This sends no email, and the account is confirmed at once. Use a new label for each account.
+
+   ```bash
+   node --env-file=apps/api/.env --input-type=module -e '
+   const r = await fetch(`${process.env.SUPABASE_URL}/auth/v1/admin/users`, {
+     method: "POST",
+     headers: { apikey: process.env.SUPABASE_SERVICE_ROLE_KEY, authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`, "content-type": "application/json" },
+     body: JSON.stringify({ email: process.argv[1], email_confirm: true }),
+   });
+   console.log(r.status, (await r.json()).id);
+   ' delivered+onboarding@resend.dev
+   ```
+
+2. Off camera, run the sign-in script with that address. The script sends no email.
+3. Give the account credits for the uploads: `pnpm --filter @mediwise/api credits:grant delivered+onboarding@resend.dev 8 demo`. The throwaway flows need up to 7 reads: two takes each of features 5 and 10, two study uploads in feature 27 and one optional upload in feature 25.
 4. One account can add 5 reports in one day. Spread the uploads over two days, or use a second throwaway account for the phone takes.
 5. Feature 37 deletes the account at the end.
+
+Feature 2 signs up on camera, so it sends one confirmation email. Use a new `delivered+signup-<n>@resend.dev` address for each take. Supabase limits auth emails per hour. If sign-up shows "We sent too many emails", wait one hour.
 
 ### Flags
 
@@ -204,6 +220,7 @@ Flows that add, change or delete data run on a throwaway account, so the demo ac
 | - | - | - |
 | The Google account screens | Google blocks sign-in in a headless browser, and the screens would show a real Google account. | The button and the "Opening Google" state (feature 3). |
 | Auth emails | Dev sends real email through Resend. A recording cannot open an inbox. | The page that says the email was sent, then the page that the link opens, through a service role link. |
+| Email to a made-up address | A made-up address on a real domain, such as `theyashgupta.me`, bounces, and Supabase sends the maintainer a bounce warning. Never use one. | `delivered+<purpose>@resend.dev` (see The throwaway account). |
 | Paying for credits | Payments are off on dev and in production. The Cashfree checkout needs sandbox keys, and the credits come from a signed webhook. | The credit page with payments off (feature 35). |
 | Sharing a file from another app into MediWise | It needs the installed app on an Android phone. | Nothing. Mention it in the upload video only if asked. |
 | The print window and the saved PDF | The print window belongs to the browser, not the page. A headless recorder does not show it. | The export page and the "Download PDF" button (feature 29). |
@@ -257,7 +274,7 @@ Each entry URL is on the local web app, `http://localhost:5173`, unless it says 
 
 **Entry point.** `/signup`.
 
-**Demo data.** The throwaway account address, for example `onboarding.demo@theyashgupta.me`. Record once only, because each try sends an email. Signed out.
+**Demo data.** A new address in the form `delivered+signup-<n>@resend.dev`, for example `delivered+signup-1@resend.dev`. Use a new label for each take, because each try sends an email. Signed out.
 
 **Viewport.** Desktop 1920 x 1080.
 
@@ -297,7 +314,7 @@ Each entry URL is on the local web app, `http://localhost:5173`, unless it says 
 
 **Entry point.** `/login`, `/forgot-password`, then the reset link, which opens `/reset-password`.
 
-**Demo data.** Show the sign in form and the wrong password message ("The email or the password is not correct.") with the demo address. Do the reset on the throwaway account only: "Send reset link" sends one email to it, which bounces. The email cannot be shown, so sign the throwaway account in off camera with the script, then open `/reset-password`. That page accepts any signed-in session and shows "Set a new password". Never save a new password on the demo account.
+**Demo data.** Show the sign in form and the wrong password message ("The email or the password is not correct.") with the demo address. Do the reset on the throwaway account only, with its `delivered+<purpose>@resend.dev` address: "Send reset link" sends one email to the Resend test inbox. The email cannot be shown, so sign the throwaway account in off camera with the script, then open `/reset-password`. That page accepts any signed-in session and shows "Set a new password". Never save a new password on the demo account.
 
 **Viewport.** Desktop 1920 x 1080.
 
