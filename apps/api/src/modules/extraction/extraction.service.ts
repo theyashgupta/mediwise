@@ -8,6 +8,7 @@ import {
 import { z } from "zod";
 import { AppError } from "../../common/errors.js";
 import { anthropic } from "../../lib/anthropic.js";
+import { claudeMetadata } from "../../lib/claude-user.js";
 import {
   compactPageTexts,
   pdfPageTexts,
@@ -157,6 +158,7 @@ export async function callTool(
     tools: [tool],
     tool_choice: { type: "auto", disable_parallel_tool_use: true },
     messages: [{ role: "user", content }],
+    metadata: claudeMetadata(),
   });
   addUsage(usage, response.usage);
   if (response.stop_reason === "refusal") throw new Error(`Claude declined the ${tool.name} call`);

@@ -114,6 +114,9 @@ export async function findReportById(ownerUserId: string, id: string) {
 
 - Log only through `log` from `src/middleware/logger.ts`. `console` is a lint error everywhere else.
 - Never log a token, a key, a file's contents or extracted health values.
+- `log` masks the path segment after `/share/` and logs an `Error` as its name and the first 500 characters of its message. Production logs carry no stack. A new route that puts a secret in its path adds a mask to `redact` in `logger.ts`, with a test.
+- Rate-limit a costly or sensitive route with `hourlyLimit` in `src/middleware/rate-limit.ts`. The counts are per process.
+- Send every Claude call through `callTool`, so it carries `claudeMetadata()` from `src/lib/claude-user.ts`. A worker job runs its Claude work inside `claudeUser.run(ownerUserId, ...)`. Never send a raw user id to Anthropic.
 - Read env only through `env` from `src/config/env.ts`. Add each new variable to its zod schema and to `.env.example`.
 
 ## TypeScript

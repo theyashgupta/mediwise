@@ -1,9 +1,10 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { Visit } from "@mediwise/engine";
 import type { ExtractedReport } from "@mediwise/shared";
-import { createHash } from "node:crypto";
+import { createHash, createHmac } from "node:crypto";
 import sharp from "sharp";
 import { beforeEach, expect, test, vi } from "vitest";
+import { env } from "../config/env.js";
 import { pdfPageTexts } from "../lib/poppler.js";
 import { reportUsage } from "../modules/extraction/index.js";
 import { processReport } from "../modules/reports/index.js";
@@ -150,6 +151,7 @@ vi.mock("../modules/reports/reports.repo.js", () => ({
   findReportForProcessing: async (id: string) => ({
     id,
     profileId: "profile-1",
+    ownerUserId: "owner-1",
     createdAt: new Date("2024-03-12T10:00:00Z"),
     dateOfBirth: edge.dateOfBirth,
     sex: "female",
@@ -420,6 +422,24 @@ test("a date of birth already on the profile is kept and scores the report", asy
 
   expect(edge.filledBirths).toEqual([]);
   expect(engineAge).toBe("24");
+});
+
+test("every Claude call of a worker read names the owner by a salted hash, never by the raw id", async () => {
+  env.ANTHROPIC_USER_SALT = "test-salt-0123456789";
+  edge.create
+    .mockResolvedValueOnce(classified("lab_panel"))
+    .mockResolvedValueOnce(toolUse("record_extraction", compact(extraction)))
+    .mockResolvedValueOnce(toolUse("map_markers", mappings))
+    .mockResolvedValueOnce(toolUse("write_narrative", draft));
+
+  await read().finally(() => (env.ANTHROPIC_USER_SALT = undefined));
+
+  const hashed = createHmac("sha256", "test-salt-0123456789").update("owner-1").digest("hex");
+  const users = edge.create.mock.calls.map(
+    ([request]) => (request as { metadata?: { user_id: string } }).metadata?.user_id,
+  );
+  expect(users).toEqual([hashed, hashed, hashed, hashed]);
+  expect(JSON.stringify(edge.create.mock.calls)).not.toContain("owner-1");
 });
 
 test("a narrative rejected twice leaves the report done with narrative status failed", async () => {

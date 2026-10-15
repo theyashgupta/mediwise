@@ -111,6 +111,11 @@ Decide the state in the container. Pass plain props to the component.
 - Support light and dark. Use token classes (`bg-background`, `text-muted-foreground`), not raw colours.
 - Merge classes with `cn` from `@/lib/utils`.
 
+## Security headers
+
+- `public/_headers` sets the CSP on Cloudflare Pages. A new external origin (script, API, image, frame) goes into the CSP in the same change. Load fonts from `public/fonts` only.
+- An inline script in `index.html` needs its SHA-256 in `script-src`. `src/config/headers.test.ts` fails until the hash matches. Prefer a module script to a new inline one.
+
 ## TypeScript
 
 - No `any`. Use `unknown` and narrow, or infer from the Hono client or a zod schema.

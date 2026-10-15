@@ -32,7 +32,7 @@ Never commit a secret. Put API values in the Render dashboard only. The web valu
 - The next request wakes it. That first request can take up to a minute. The web waits for the answer.
 - The job worker sleeps with the API. A report upload wakes the API, and the web asks for the report status while it waits, so the API stays awake until the report is done.
 - A job cut off by a stop is claimed again after 10 minutes.
-- The upload rate limit counts in memory, so a stop resets it.
+- The rate limits count in memory, so a stop resets them (see Production limits in the API).
 
 ## Environment variables
 
@@ -46,6 +46,7 @@ Never commit a secret. Put API values in the Render dashboard only. The web valu
 | `SUPABASE_URL` | yes | `https://adnvhcharmqykmlyrepq.supabase.co` |
 | `SUPABASE_SERVICE_ROLE_KEY` | yes | Service role key of `mediwise-prod`. Server only. |
 | `ANTHROPIC_API_KEY` | yes | Anthropic key for production. Without it, every report fails. |
+| `ANTHROPIC_USER_SALT` | yes | Random string of 32 or more characters, for example `openssl rand -hex 32`. Server only. Each Claude call sends an HMAC-SHA256 of the user id with this key as `metadata.user_id`. When it is empty, the calls send no user id. Do not change it, because a new value gives each user a new id at Anthropic. |
 | `CORS_ORIGINS` | yes | `https://app.mediwise.theyashgupta.me,https://mediwise.pages.dev`, set by `render.yaml`. Origins that CORS allows, separated by commas. The first one is the main app origin, and Cashfree sends the buyer back there. |
 | `WEB_ORIGIN` | no | Old name for one CORS origin. The API reads it only when `CORS_ORIGINS` is empty. Remove it after one release. |
 | `RUN_WORKER` | yes | `true`, set by `render.yaml`. The report worker runs only when this is `true`. |
@@ -100,7 +101,7 @@ Do the steps in this order. The API URL must exist before the web build, and the
 1. Sign in at dashboard.render.com with GitHub. No payment card is needed for the free plan.
 2. Click New, Blueprint. Connect the `theyashgupta/mediwise` repository. Give Render access to this repository only.
 3. Render reads `render.yaml` and shows one service: `mediwise-api`, Docker, Free, Singapore.
-4. Enter the `sync: false` values: `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`. `render.yaml` sets `CORS_ORIGINS`.
+4. Enter the `sync: false` values: `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`, `ANTHROPIC_USER_SALT`. `render.yaml` sets `CORS_ORIGINS`.
 5. Click Apply. Wait for the first deploy to show Live.
 6. Copy the service URL (`https://mediwise-api-ij2v.onrender.com`). This is `VITE_API_URL`.
 7. Check: `curl https://mediwise-api-ij2v.onrender.com/health` returns `{"status":"ok",...}`.
@@ -499,14 +500,65 @@ Run these from `apps/api` with the target environment loaded.
 
 - API: Render, `mediwise-api`, Logs. Every request log line starts with `[<request id>]`. The API returns the same id in the `X-Request-Id` response header, so a user report can be matched to its log lines.
 - Worker lines start with `worker job=<id>` or `process_report report=<id>`.
+- A share token never appears in a log line. The logger writes `/share/***` in its place.
+- An unknown error is logged as its name and the first 500 characters of its message. Production logs have no stack trace. Run the API with `NODE_ENV=development` to see the stack.
 - Web and landing page: the build and deploy logs are in GitHub, Actions, `deploy-web` or `deploy-landing`. Cloudflare has no build or runtime logs, because the pages are static. `npx wrangler pages deployment list --project-name mediwise` lists the deploys.
 
 ## Production limits in the API
 
-- Security headers on every response (`hono/secure-headers`).
+- Security headers on every response (`hono/secure-headers`), with `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'` and HSTS for one year. See Security headers.
 - Request body limit of 100 KB. Files go to Supabase Storage through signed URLs, so the API receives JSON only.
 - `POST /reports`: 10 per hour per user. The 11th answers 429 with `Retry-After`.
+- `GET /share/:token`: 60 per hour per IP. The IP is the first address in `X-Forwarded-For`. A client can set that header, so this limit slows scraping only. The 256-bit token keeps a link secret.
+- `DELETE /me` and `GET /me/export`: 5 per hour per user, each.
+- Each rate limit counts in the memory of one API process. A restart resets the counts. With more than one instance, each instance counts on its own, so the real limit is the number of instances times the limit. Move the counts to Postgres before you add a second instance.
 - CORS allows the origins in `CORS_ORIGINS` only.
+
+## Security headers
+
+The web and the landing page get their headers from `_headers` on Cloudflare Pages. The API sets its own.
+
+| Header | Web (`apps/web/public/_headers`) | Landing (`apps/landing/public/_headers`) | API (`apps/api/src/app.ts`) |
+|---|---|---|---|
+| `Content-Security-Policy` | `default-src 'self'`, plus the API, Supabase and Cashfree origins | `default-src 'self'`, plus the inline script hashes | `default-src 'none'; frame-ancestors 'none'` |
+| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains` | same | same |
+| `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy` | `nosniff`, `DENY`, `strict-origin-when-cross-origin`, camera, microphone and geolocation off | same | `hono/secure-headers` defaults |
+
+Rules for a change:
+
+- The web CSP names the production API (`https://mediwise-api-ij2v.onrender.com`) and Supabase (`https://adnvhcharmqykmlyrepq.supabase.co`) origins. If either origin changes, change `apps/web/public/_headers` in the same deploy, or the browser blocks every API call.
+- Cashfree needs `https://sdk.cashfree.com` in `script-src`, `api.cashfree.com` and `sandbox.cashfree.com` in `connect-src`, and five Cashfree hosts in `frame-src` for the checkout modal (Cashfree's CSP list).
+- The inline theme script in `apps/web/index.html` is allowed by its SHA-256. After you change that script, put the new hash in `_headers`. `apps/web/src/config/headers.test.ts` fails until you do.
+- The landing page has inline scripts from Next that change on each build. `apps/landing/scripts/csp-hashes.mjs` runs after `next build` and writes their hashes into `out/_headers` in place of `INLINE_SCRIPT_HASHES`. The build fails when a header line passes the 2,000 character limit of Cloudflare Pages.
+- Camera off does not stop photo upload on a phone. The file input opens the system camera, which needs no permission from the page.
+
+Check a local build. Wrangler serves the build with its `_headers`, as Cloudflare Pages does:
+
+```sh
+pnpm turbo run build --filter @mediwise/web --filter @mediwise/landing
+npx wrangler pages dev apps/web/dist --port 8888
+curl -sI http://localhost:8888/ | grep -iE 'content-security|strict-transport|x-content-type|x-frame|referrer-policy|permissions-policy'
+npx wrangler pages dev apps/landing/out --port 8889
+curl -sI http://localhost:8889/ | grep -iE 'content-security|strict-transport|x-content-type|x-frame|referrer-policy|permissions-policy'
+```
+
+Each `curl` prints six headers. Run each `wrangler` line in its own terminal. Open both pages in a browser. The console must show no `Content-Security-Policy` error.
+
+Check the API, local or production:
+
+```sh
+curl -sI http://localhost:3001/health | grep -iE 'content-security|strict-transport'
+curl -sI https://mediwise-api-ij2v.onrender.com/health | grep -iE 'content-security|strict-transport'
+```
+
+Check a deploy:
+
+```sh
+curl -sI https://app.mediwise.theyashgupta.me/ | grep -iE 'content-security|strict-transport|x-frame'
+curl -sI https://mediwise.theyashgupta.me/ | grep -iE 'content-security|strict-transport|x-frame'
+```
+
+Then enter both URLs at securityheaders.com. The grade must be A or better.
 
 ## Report credits
 

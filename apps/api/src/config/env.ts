@@ -30,6 +30,7 @@ const envSchema = z
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
     DEV_USER_ID: z.string().min(1).default("dev-user"),
     ANTHROPIC_API_KEY: z.string().min(1).optional(),
+    ANTHROPIC_USER_SALT: z.string().min(16).optional(),
     ANTHROPIC_MODEL: z.string().min(1).default("claude-sonnet-5-5"),
     ANTHROPIC_EXTRACT_MODEL: z.string().min(1).default("claude-haiku-5-5"),
     ANTHROPIC_NARRATIVE_MODEL: z.string().min(1).default("claude-haiku-5-5"),
