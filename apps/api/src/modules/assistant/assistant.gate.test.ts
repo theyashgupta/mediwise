@@ -35,6 +35,17 @@ describe("gateQuestion", () => {
     "How much vitamin B12 should I take?",
     "How many iron tablets can I take a day?",
     "Is 1000 mg of vitamin C okay?",
+    "How many mg?",
+    "How much mcg of B12 is right for me?",
+    "How many ug of folate?",
+    "How much ml of syrup for my son?",
+    "How many IU of vitamin D?",
+    "How many units of insulin?",
+    "How many tablets a day?",
+    "How many capsules of fish oil?",
+    "How much drops for the eyes?",
+    "Is 60000 IU of vitamin D okay?",
+    "Is 1500 mcg of B12 okay?",
   ])("%s is a dose question", (question) => {
     expect(gateQuestion(question)).toBe("treatment");
   });
@@ -48,6 +59,8 @@ describe("gateQuestion", () => {
     "Should I worry about my vitamin D?",
     "Which reports are in my thyroid workup?",
     "My glucose was 110 mg/dL, is that in range?",
+    "How much is my glucose in mg/dL?",
+    "How many reports show my TSH in mIU/L?",
     "There is a faint line on my test strip",
   ])("%s passes the gate", (question) => {
     expect(gateQuestion(question)).toBeUndefined();
@@ -73,9 +86,9 @@ describe("fixed copy", () => {
     },
   );
 
-  test("the emergency copy names 112 and Tele-MANAS on 14416", () => {
+  test("the emergency copy names the local emergency number first, then 112 and Tele-MANAS for India", () => {
     expect(refusalCopy.emergency).toBe(
-      "MediWise cannot help with symptoms. If you feel very unwell, call 112 now. If you think about harming yourself, call Tele-MANAS on 14416.",
+      "MediWise cannot help with symptoms. If you feel very unwell or think about harming yourself, call your local emergency number now. In India, call 112. For mental health help in India, call Tele-MANAS on 14416.",
     );
   });
 });

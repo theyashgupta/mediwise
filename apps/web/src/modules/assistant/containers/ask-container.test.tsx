@@ -127,6 +127,20 @@ describe.each(["en", "hi"] as const)("the ask page in %s", (locale) => {
     ).toBeTruthy();
   });
 
+  test("an emergency refusal shows the emergency copy in the interface language", async () => {
+    network([
+      question("3", {
+        question: "I have chest pain",
+        refusalKind: "emergency",
+        copy: "MediWise cannot help with symptoms.",
+      }),
+    ]);
+    await renderApp("/ask", { locale });
+    expect((await screen.findByTestId("assistant-refusal")).textContent).toBe(
+      t.assistant.emergency,
+    );
+  });
+
   test("a value chip opens the fact card in a bottom sheet with the value, both ranges, the status and the report link", async () => {
     network([answered]);
     await renderApp("/ask", { locale });

@@ -11,7 +11,7 @@ export const refusalCopy: Record<AssistantRefusalKind, string> = {
   other_person: "Ask about one person at a time. Open their profile, then ask again.",
   off_topic: "MediWise answers questions about your reports only.",
   emergency:
-    "MediWise cannot help with symptoms. If you feel very unwell, call 112 now. If you think about harming yourself, call Tele-MANAS on 14416.",
+    "MediWise cannot help with symptoms. If you feel very unwell or think about harming yourself, call your local emergency number now. In India, call 112. For mental health help in India, call Tele-MANAS on 14416.",
   fallback:
     "MediWise could not write a safe answer. You were not charged for this question. Open the report to see the values.",
 };

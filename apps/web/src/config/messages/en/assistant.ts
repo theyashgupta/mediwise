@@ -36,6 +36,8 @@ export const assistant = {
   wrong: "Mark as wrong",
   markedWrong: "You marked this answer as wrong.",
   englishOnly: "Answers are in English.",
+  emergency:
+    "MediWise cannot help with symptoms. If you feel very unwell or think about harming yourself, call your local emergency number now. In India, call 112. For mental health help in India, call Tele-MANAS on 14416.",
   menu: {
     label: "Chat options",
     clear: "Clear chat",
