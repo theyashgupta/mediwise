@@ -33,7 +33,7 @@ test("both consent boxes start clear, and submit with them clear shows two error
   );
   expect(
     screen.getByLabelText(
-      "I agree that MediWise stores my health reports and uses an AI service to read them, as the Privacy policy describes.",
+      "I agree MediWise stores my health reports and uses an AI service to read them, as the Privacy policy describes.",
     ),
   ).toBe(health);
 

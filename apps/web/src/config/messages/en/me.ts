@@ -16,7 +16,7 @@ export const me = {
     termsLink: "Terms",
     termsAfter: "",
     healthBefore:
-      "I agree that MediWise stores my health reports and uses an AI service to read them, as the ",
+      "I agree MediWise stores my health reports and uses an AI service to read them, as the ",
     healthLink: "Privacy policy",
     healthAfter: " describes.",
     required: "Tick this box to continue.",
