@@ -124,8 +124,10 @@ Decide the state in the container. Pass plain props to the component.
 
 ## Copy
 
-- Plain English for adults. No diagnosis language.
-- Every report and marker view shows: "MediWise is for information, not diagnosis. It does not replace a clinician."
+- Plain English for adults anywhere. No diagnosis language. No India-only phrase outside payments.
+- Say "doctor". Never write "GP" or "clinician".
+- Every report and marker view shows: "MediWise is for information, not diagnosis. It does not replace a doctor."
+- Format every date and number with `getIntlTag()`. English follows the browser's English variant (en-US when the browser is in another language). Hindi uses `hi-IN-u-nu-latn`. Never hard-code a tag such as `en-IN`.
 
 ## Before you report done
 

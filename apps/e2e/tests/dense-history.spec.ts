@@ -64,7 +64,7 @@ test("a new user gets a profile with 12 reports in 10 weeks", async () => {
 
 /** Formats the day `days` before today as Home prints it, for example "6 Oct". */
 function daysBefore(days: number) {
-  return new Date(Date.now() - days * dayMs).toLocaleDateString("en-IN", {
+  return new Date(Date.now() - days * dayMs).toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
   });

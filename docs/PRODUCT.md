@@ -6,7 +6,7 @@ Upload any lab report. MediWise extracts every marker, explains it in plain lang
 
 ## Users
 
-- Primary: an adult in India who wants every report they get in one place, at any cadence: a yearly panel, a monthly thyroid test or a weekly glucose test. They want to understand each one without a doctor visit.
+- Primary: an adult anywhere who gets a lab report as a PDF, a photo or a portal screenshot and wants every report in one place, at any cadence: a yearly panel, a monthly thyroid test or a weekly glucose test. They want to understand each one without a doctor visit. India is the first market.
 - Secondary: the same person managing reports for parents, partner and children (family profiles).
 - Not in v1: doctors, labs, employers.
 
@@ -89,4 +89,4 @@ Out of v1 (do not build, do not scaffold):
 
 ## Tone
 
-Plain English written for adults. No diagnosis language. Always show the disclaimer "MediWise is for information, not diagnosis. It does not replace a clinician."
+Plain English written for adults. No diagnosis language. Always show the disclaimer "MediWise is for information, not diagnosis. It does not replace a doctor."

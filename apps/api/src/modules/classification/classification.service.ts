@@ -18,7 +18,7 @@ Classes:
 - imaging_report: a written report of an X-ray, ultrasound, CT or MRI scan.
 - ecg_printout: an ECG tracing or its printed values.
 - examination_form: a medical examination or fitness form that a doctor filled in, printed or by hand.
-- identity_document: a copy of an identity card, such as Aadhaar, PAN, passport, driving licence or voter ID.
+- identity_document: a copy of an identity document, such as a passport, national ID card, driving licence, insurance card, Aadhaar, PAN or social security card.
 - raw_image: an X-ray film, a scan image or a photo with no report text.
 - other: anything else.`;
 

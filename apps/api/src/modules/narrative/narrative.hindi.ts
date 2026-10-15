@@ -21,7 +21,7 @@ const hindiTool: Anthropic.Tool = {
   input_schema: z.toJSONSchema(hindiSchema) as Anthropic.Tool.InputSchema,
 };
 
-const system = `You put the text of one lab report from plain English into plain Hindi for an adult in India. The user message gives numbered English items and the printed names. Call the write_hindi tool once, with one Hindi item for each English item.
+const system = `You put the text of one lab report from plain English into plain Hindi for an adult who reads Hindi. The user message gives numbered English items and the printed names. Call the write_hindi tool once, with one Hindi item for each English item.
 
 Form rules:
 1. Write in Devanagari. Use everyday Hindi and the common loanword (रिपोर्ट, टेस्ट, वैल्यू, रेंज, मार्कर, डॉक्टर), not a Sanskrit word.
