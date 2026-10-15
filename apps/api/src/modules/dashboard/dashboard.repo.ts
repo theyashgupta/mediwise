@@ -1,6 +1,6 @@
 import { and, asc, count, desc, eq, inArray, isNotNull, ne, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
-import { profiles, reportMarkers, reports } from "../../db/schema.js";
+import { findings, profiles, reportMarkers, reports } from "../../db/schema.js";
 import { reportFileNames } from "../reports/index.js";
 
 const reportDate = sql<string>`coalesce(${reports.collectedAt}, (${reports.createdAt} at time zone 'UTC')::date)::text`;
@@ -105,6 +105,61 @@ export async function listLatestAssessedByMarker(ownerUserId: string, profileId:
       desc(reports.createdAt),
       desc(reportMarkers.status),
     );
+}
+
+const doneOfProfile = (ownerUserId: string, profileId: string) =>
+  and(ofProfile(ownerUserId, profileId), eq(reports.status, "done"));
+
+/**
+ * Lists every scored value of a profile's done reports, oldest report first.
+ *
+ * @remarks
+ * Within one report the worst status comes last, because the attention list keeps the last row of each date.
+ */
+export async function listMarkerHistory(ownerUserId: string, profileId: string) {
+  const rows = await db
+    .select({
+      reportId: reports.id,
+      date: reportDate,
+      markerKey: reportMarkers.markerKey,
+      value: reportMarkers.value,
+      valueText: reportMarkers.valueText,
+      unit: reportMarkers.unit,
+      status: reportMarkers.status,
+      calibratedLow: reportMarkers.calibratedLow,
+      calibratedHigh: reportMarkers.calibratedHigh,
+    })
+    .from(reportMarkers)
+    .innerJoin(reports, eq(reports.id, reportMarkers.reportId))
+    .innerJoin(profiles, eq(profiles.id, reports.profileId))
+    .where(
+      and(
+        doneOfProfile(ownerUserId, profileId),
+        isNotNull(reportMarkers.markerKey),
+        isNotNull(reportMarkers.status),
+        isNotNull(reportMarkers.value),
+      ),
+    )
+    .orderBy(asc(reportDate), asc(reports.createdAt), asc(reportMarkers.status));
+  return rows.flatMap(({ markerKey, ...row }) => (markerKey ? [{ markerKey, ...row }] : []));
+}
+
+/** Lists the study alert findings of a profile's done reports, oldest report first. */
+export async function listAlertFindings(ownerUserId: string, profileId: string) {
+  return db
+    .select({
+      reportId: reports.id,
+      date: reportDate,
+      kind: findings.kind,
+      title: findings.title,
+      citedKeys: findings.citedKeys,
+      citedStudyIds: findings.citedStudyIds,
+    })
+    .from(findings)
+    .innerJoin(reports, eq(reports.id, findings.reportId))
+    .innerJoin(profiles, eq(profiles.id, reports.profileId))
+    .where(and(doneOfProfile(ownerUserId, profileId), eq(findings.kind, "study_alert")))
+    .orderBy(asc(reportDate), asc(reports.createdAt));
 }
 
 export async function listAssessedMarkers(reportId: string) {

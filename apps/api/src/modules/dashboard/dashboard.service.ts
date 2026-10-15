@@ -1,10 +1,13 @@
 import {
+  type AttentionVisit,
+  buildAttention,
   derived,
   deviation,
   markers,
   markerText,
   retestDueDate,
   sameScoreScale,
+  settleFinding,
   type TextLocale,
   typicalGapDays,
 } from "@mediwise/engine";
@@ -82,6 +85,50 @@ async function listReportMarkers(newer: { id: string; date: string; labName: str
   );
 }
 
+/** Groups stored marker rows into visits, keeping the oldest-first order of the rows. */
+function toVisits(rows: Awaited<ReturnType<typeof repo.listMarkerHistory>>) {
+  const visits = new Map<string, AttentionVisit>();
+  for (const { reportId, date, ...row } of rows) {
+    const visit = visits.get(reportId) ?? { reportId, date, markers: [] };
+    visit.markers.push(row);
+    visits.set(reportId, visit);
+  }
+  return [...visits.values()];
+}
+
+/**
+ * Lists the study alert findings of a profile with what later reports say about each.
+ *
+ * @remarks
+ * Only reports with an alert load their sequence, so a profile with no study pays one query.
+ */
+async function listAlerts(userId: string, profileId: string) {
+  const stored = await repo.listAlertFindings(userId, profileId);
+  const reportIds = [...new Set(stored.map(({ reportId }) => reportId))];
+  const sequences = new Map(
+    await Promise.all(reportIds.map(async (id) => [id, await loadSequence(id)] as const)),
+  );
+  return stored.map(({ reportId, date, title, ...finding }) => {
+    const sequence = sequences.get(reportId);
+    const settlement =
+      sequence && settleFinding(finding, sequence.current, sequence.later, sequence.typicalGap);
+    return { reportId, date, title, ...(settlement && { settlement }) };
+  });
+}
+
+/** Lists what needs attention across every done report of a profile, each row with a name to show. */
+async function listAttention(userId: string, profileId: string) {
+  const [rows, alerts] = await Promise.all([
+    repo.listMarkerHistory(userId, profileId),
+    listAlerts(userId, profileId),
+  ]);
+  return buildAttention(toVisits(rows), alerts).map((item) =>
+    item.kind === "alert"
+      ? { ...item, markerKey: null, name: item.title }
+      : { ...item, name: catalogByKey.get(item.markerKey)?.name ?? item.markerKey },
+  );
+}
+
 /**
  * Builds the dashboard for one profile: the report that leads Home, the narrow reports since it, what to move first,
  * and recent reports.
@@ -90,14 +137,16 @@ async function listReportMarkers(newer: { id: string; date: string; labName: str
  * The newest scored full panel (`leadMinMarkers` mapped markers or more) leads, and its score change compares with the
  * previous scored full panel only, never with a narrow report. The narrow reports after the lead come back in
  * `newSince` with their own markers. With no full panel, the newest report leads and compares with a narrow one.
+ * `attention` reads every report, not the lead one only.
  */
 export async function getDashboard(userId: string, profileId: string, locale: TextLocale = "en") {
   await getOwnedProfile(userId, profileId);
-  const [recent, done, processingCount, newestByMarker] = await Promise.all([
+  const [recent, done, processingCount, newestByMarker, attention] = await Promise.all([
     repo.listRecentReports(userId, profileId, recentLimit),
     repo.listLatestDoneReports(userId, profileId, latestLimit),
     repo.countReportsInProgress(userId, profileId),
     repo.listLatestAssessedByMarker(userId, profileId),
+    listAttention(userId, profileId),
   ]);
   const isFullPanel = (report: { mappedCount: number }) => report.mappedCount >= leadMinMarkers;
   const leadIndex = Math.max(
@@ -110,6 +159,7 @@ export async function getDashboard(userId: string, profileId: string, locale: Te
       latest: null,
       newSince: [],
       moveFirst: [],
+      attention,
       retests: [],
       newestFinding: null,
       recent,
@@ -152,6 +202,7 @@ export async function getDashboard(userId: string, profileId: string, locale: Te
     latest: { ...latest, counts, deltaSincePrevious },
     newSince,
     moveFirst,
+    attention,
     retests: listRetests(newestByMarker),
     newestFinding,
     recent,
