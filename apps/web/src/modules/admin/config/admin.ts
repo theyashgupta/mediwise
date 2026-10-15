@@ -12,31 +12,26 @@ export const errorClassLabels: Record<string, string> = {
   unexpected: "Unexpected error",
 };
 
-/**
- * Formats US cents as dollars.
- *
- * @remarks
- * One read costs a fraction of a cent, so amounts under one dollar keep four decimals.
- */
-export function formatCents(cents: number) {
-  return (cents / 100).toLocaleString(getIntlTag(), {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: cents < 100 ? 4 : 2,
-  });
-}
-
-export function formatPaise(paise: number) {
-  return (paise / 100).toLocaleString(getIntlTag(), { style: "currency", currency: "INR" });
-}
+export const kindLabels: Record<string, string> = {
+  grant: "Credit granted",
+  purchase: "Credits bought",
+  upload: "Report credit used",
+  refund: "Report credit returned",
+  purchase_refund: "Payment refunded",
+  questions: "Question pack bought",
+  question: "Question used",
+};
 
 export function formatCount(count: number) {
   return count.toLocaleString(getIntlTag());
 }
 
-/** Formats a wait in milliseconds as whole minutes, or hours and minutes past one hour. */
-export function formatWait(ms: number) {
-  const minutes = Math.floor(ms / 60_000);
-  if (minutes < 60) return `${minutes} min`;
-  return `${Math.floor(minutes / 60)} h ${minutes % 60} min`;
+/** Formats a change of credits with its sign, so a debit and a credit read apart. */
+export function formatCreditChange(delta: number) {
+  return delta.toLocaleString(getIntlTag(), { signDisplay: "exceptZero" });
+}
+
+export function formatCredits(credits: number) {
+  const count = Math.abs(credits);
+  return `${formatCount(count)} ${count === 1 ? "credit" : "credits"}`;
 }

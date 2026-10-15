@@ -6,14 +6,16 @@ import { handleError } from "../../common/problem.js";
 import { env } from "../../config/env.js";
 import { db } from "../../db/client.js";
 import {
-  denseHistoryProfile,
-  denseHistoryReports,
-  insertDenseHistory,
-} from "../../db/dense-history.js";
-import { assistantQuestions, creditsLedger, jobs, profiles, reports } from "../../db/schema.js";
+  assistantQuestions,
+  creditsLedger,
+  jobs,
+  paymentOrders,
+  profiles,
+  reports,
+} from "../../db/schema.js";
 import type { AuthEnv } from "../../middleware/auth.js";
 import { adminRoutes } from "./admin.routes.js";
-import { type getOverview, periodStarts } from "./admin.service.js";
+import type { getCreditHistory, listFailedReads } from "./admin.service.js";
 
 const app = new Hono<AuthEnv>()
   .use(async (c, next) => {
@@ -24,59 +26,41 @@ const app = new Hono<AuthEnv>()
 app.onError(handleError);
 
 const admin = { headers: { "x-user": "admin-user" } };
-const dayMs = 86_400_000;
-const now = new Date();
-const starts = periodStarts(now);
-const today = new Date(starts.day + 1000);
-const tenDaysAgo = new Date(starts.day - 10 * dayMs + 1000);
-const fortyDaysAgo = new Date(starts.day - 40 * dayMs + 1000);
 const reportTitle = "Made-up title that must stay off the admin page";
+const questionText = "Made-up question that must stay off the admin page";
+const userA = randomUUID();
+const userB = randomUUID();
 let duplicateId = "";
 
+type History = Awaited<ReturnType<typeof getCreditHistory>>;
+
 /**
- * Empties the tables the overview sums over every user.
+ * Empties the tables the admin page reads over every user.
  *
  * @remarks
- * The overview counts every user, so rows of other db test files would change its numbers. Files run one at a time.
+ * The history counts every user, so rows of other db test files would change its numbers. Files run one at a time.
  */
 async function emptyTables() {
   await db.execute(
-    sql`truncate ${jobs}, ${assistantQuestions}, ${creditsLedger}, ${profiles} cascade`,
+    sql`truncate ${jobs}, ${assistantQuestions}, ${creditsLedger}, ${paymentOrders}, ${profiles} cascade`,
   );
 }
 
-/** Inserts a job whose Claude output costs the given US cents at Sonnet 5.5 prices. */
-function spendJob(
-  cents: number,
-  status: "done" | "failed",
-  at: Date,
-  reportId: string = randomUUID(),
-) {
-  return {
-    kind: "process_report",
-    payload: { reportId },
-    status,
-    inputTokens: 0,
-    outputTokens: cents * 1000,
-    createdAt: at,
-    updatedAt: at,
-  };
+async function history(query = "") {
+  const res = await app.request(`/admin/credits${query}`, admin);
+  expect(res.status).toBe(200);
+  return (await res.json()) as History;
 }
 
 beforeAll(async () => {
   await emptyTables();
-  const userA = randomUUID();
-  const userB = randomUUID();
-  const userC = randomUUID();
-  const dense = await insertDenseHistory(
-    userA,
-    denseHistoryReports(today.toISOString().slice(0, 10)),
-  );
-  const [profileB, profileC] = await db
+  env.ADMIN_USER_ID = "admin-user";
+  const [, , profileB] = await db
     .insert(profiles)
     .values([
+      { ownerUserId: userA, name: "Made-up Self", relation: "self", ancestry: "south_asian" },
+      { ownerUserId: userA, name: "Made-up Parent", relation: "other", ancestry: "south_asian" },
       { ownerUserId: userB, name: "Made-up Member", relation: "self", ancestry: "south_asian" },
-      { ownerUserId: userC, name: "Made-up Quiet", relation: "self", ancestry: "south_asian" },
     ])
     .returning({ id: profiles.id });
   const failed = await db
@@ -88,7 +72,7 @@ beforeAll(async () => {
         status: "failed",
         title: reportTitle,
         error: "We could not read this report. Try again in a few minutes.",
-        createdAt: new Date(now.getTime() - 60_000),
+        createdAt: new Date(Date.now() - 60_000),
       },
       {
         profileId: profileB!.id,
@@ -96,116 +80,133 @@ beforeAll(async () => {
         status: "failed",
         title: reportTitle,
         error: "This file is already in your reports.",
-        createdAt: new Date(now.getTime() - 120_000),
+        createdAt: new Date(Date.now() - 120_000),
       },
-      {
-        profileId: profileC!.id,
-        sourceKind: "pdf",
-        status: "done",
-        createdAt: new Date(starts.day - 60 * dayMs),
-      },
-      { profileId: profileC!.id, sourceKind: "pdf", status: "draft" },
     ])
     .returning({ id: reports.id });
   duplicateId = failed[1]!.id;
-  await db.insert(jobs).values([
-    spendJob(1, "done", today, dense.reportIds.at(-1)),
-    spendJob(3, "done", today),
-    { ...spendJob(0.5, "failed", today, failed[0]!.id), error: "529 Overloaded" },
-    spendJob(2, "done", tenDaysAgo),
-    spendJob(5, "done", fortyDaysAgo),
-    {
-      kind: "process_report",
-      payload: { reportId: randomUUID() },
-      status: "queued",
-      createdAt: new Date(now.getTime() - 45 * 60_000),
-    },
-    {
-      kind: "process_report",
-      payload: { reportId: randomUUID() },
-      status: "paused_budget",
-      createdAt: new Date(now.getTime() - 5 * 60_000),
-    },
-  ]);
-  await db.insert(assistantQuestions).values({
-    userId: userA,
-    question: "Made-up question",
-    answer: { sentences: [] },
-    usage: {
-      model: "claude-haiku-5-5",
-      inputTokens: 0,
-      cachedInputTokens: 0,
-      cacheWriteTokens: 0,
-      outputTokens: 20_000,
-    },
-    createdAt: today,
+  await db.insert(jobs).values({
+    kind: "process_report",
+    payload: { reportId: failed[0]!.id },
+    status: "failed",
+    error: "529 Overloaded",
   });
+  const orderId = randomUUID();
+  await db.insert(paymentOrders).values({
+    id: orderId,
+    userId: userA,
+    packId: "pack_5",
+    credits: 5,
+    amount: 19900,
+    status: "paid",
+  });
+  const day = (date: string) => new Date(`${date}T10:00:00Z`);
   await db.insert(creditsLedger).values([
-    { userId: userA, delta: 5, reason: "grant" },
-    { userId: userA, delta: 10, reason: "purchase" },
-    { userId: userA, delta: -1, reason: "upload" },
-    { userId: userA, delta: -1, reason: "upload" },
-    { userId: userB, delta: -1, reason: "upload" },
-    { userId: userB, delta: 1, reason: "refund" },
-    { userId: userA, delta: -2, reason: "questions" },
+    { userId: userA, delta: 3, reason: "grant", createdAt: day("2026-10-01") },
+    {
+      userId: userA,
+      delta: 5,
+      reason: "purchase",
+      paymentOrderId: orderId,
+      paymentRef: `pay-${orderId}`,
+      createdAt: day("2026-10-02"),
+    },
+    {
+      userId: userA,
+      delta: -1,
+      reason: "upload",
+      reportId: randomUUID(),
+      createdAt: day("2026-10-03"),
+    },
+    {
+      userId: userB,
+      delta: -1,
+      reason: "upload",
+      reportId: duplicateId,
+      createdAt: day("2026-10-04"),
+    },
+    {
+      userId: userB,
+      delta: 1,
+      reason: "refund",
+      reportId: duplicateId,
+      createdAt: day("2026-10-05"),
+    },
+    {
+      userId: userA,
+      delta: -1,
+      reason: "questions",
+      note: "20 questions",
+      createdAt: day("2026-10-06"),
+    },
   ]);
+  const question = (charged: boolean, date: string) => ({
+    userId: userA,
+    question: questionText,
+    answer: { sentences: [] },
+    charged,
+    createdAt: day(date),
+  });
+  await db
+    .insert(assistantQuestions)
+    .values([
+      question(true, "2026-10-07"),
+      question(true, "2026-10-08"),
+      question(false, "2026-10-08"),
+    ]);
 });
 
 afterAll(emptyTables);
 
-test("the admin overview counts spend, reads, failed reads, queue, credits and profiles on the dense fixture", async () => {
-  env.ADMIN_USER_ID = "admin-user";
-  const res = await app.request("/admin/overview", admin);
-  expect(res.status).toBe(200);
-  const overview = (await res.json()) as Awaited<ReturnType<typeof getOverview>>;
-  const tenDaysAgoInMonth = tenDaysAgo.getTime() >= starts.month;
+test("the credit history totals each kind, prices purchases in paise, and counts the profiles of each user", async () => {
+  const { reportCredits, questionPacks } = await history();
 
-  expect(overview.spend).toEqual({
-    todayCents: 5.5,
-    weekCents: 5.5,
-    monthCents: tenDaysAgoInMonth ? 7.5 : 5.5,
-    capCents: 100,
-    hardStop: false,
-    reads: tenDaysAgoInMonth ? 3 : 2,
-    questions: 1,
-    purchases: 0,
-    revenuePaise: 0,
-  });
-  expect(overview.days).toHaveLength(30);
-  expect(overview.days.at(-1)).toEqual({
-    date: now.toISOString().slice(0, 10),
-    reads: 2,
-    costCents: 4.5,
-  });
-  expect(overview.days.at(-11)).toEqual({
-    date: tenDaysAgo.toISOString().slice(0, 10),
-    reads: 1,
-    costCents: 2,
-  });
-  expect(overview.days.reduce((sum, day) => sum + day.reads, 0)).toBe(3);
-  expect(overview.meanCostPerReadCents).toBe(2.17);
-  expect(overview.failed.map((report) => report.errorClass)).toEqual(["upstream", "duplicate"]);
-  expect(Object.keys(overview.failed[0]!).toSorted()).toEqual(["createdAt", "errorClass", "id"]);
-  expect(overview.queue.depth).toBe(2);
-  expect(Math.round((overview.queue.oldestQueuedMs ?? 0) / 60_000)).toBe(45);
-  expect(overview.credits).toEqual({
-    granted: 5,
-    purchased: 10,
-    spentOnReads: 2,
-    spentOnQuestions: 2,
-  });
-  expect(overview.people).toEqual({ profiles: 3, users: 3, activeProfiles: 2, activeUsers: 2 });
-  expect(overview.alerts).toEqual(["queue"]);
+  expect(reportCredits.totals).toEqual([
+    { kind: "grant", events: 1, credits: 3, amountPaise: 0 },
+    { kind: "purchase", events: 1, credits: 5, amountPaise: 19900 },
+    { kind: "upload", events: 2, credits: -2, amountPaise: 0 },
+    { kind: "refund", events: 1, credits: 1, amountPaise: 0 },
+    { kind: "purchase_refund", events: 0, credits: 0, amountPaise: 0 },
+  ]);
+  expect(questionPacks.totals).toEqual([
+    { kind: "questions", events: 1, credits: -1, amountPaise: 0 },
+    { kind: "question", events: 2, credits: 0, amountPaise: 0 },
+  ]);
+  expect(reportCredits.events.map((e) => [e.kind, e.profiles, e.amountPaise])).toEqual([
+    ["refund", 1, null],
+    ["upload", 1, null],
+    ["upload", 2, null],
+    ["purchase", 2, 19900],
+    ["grant", 2, null],
+  ]);
+  expect(questionPacks.events.map((e) => e.kind)).toEqual(["question", "question", "questions"]);
 
-  const text = JSON.stringify(overview);
-  expect(text).not.toContain(denseHistoryProfile.name);
+  const text = JSON.stringify({ reportCredits, questionPacks });
   expect(text).not.toContain("Made-up");
+});
+
+test("the date filter includes both days, and the user filter keeps one user", async () => {
+  const days = await history("?from=2026-10-03&to=2026-10-05");
+  expect(days.reportCredits.events.map((e) => e.kind)).toEqual(["refund", "upload", "upload"]);
+  expect(days.questionPacks.events).toEqual([]);
+
+  const one = await history(`?userId=${userB}`);
+  expect(one.reportCredits.events.every((e) => e.userId === userB)).toBe(true);
+  expect(one.reportCredits.totals.find((t) => t.kind === "upload")?.events).toBe(1);
+  expect(one.questionPacks.totals.find((t) => t.kind === "question")?.events).toBe(0);
+});
+
+test("the failed reads show an error class and no title, profile name or raw error", async () => {
+  const res = await app.request("/admin/failed-reports", admin);
+  const failed = (await res.json()) as Awaited<ReturnType<typeof listFailedReads>>;
+  expect(failed.map((report) => report.errorClass)).toEqual(["upstream", "duplicate"]);
+  expect(Object.keys(failed[0]!).toSorted()).toEqual(["createdAt", "errorClass", "id"]);
+  const text = JSON.stringify(failed);
   expect(text).not.toContain(reportTitle);
   expect(text).not.toContain("529 Overloaded");
 });
 
 test("the admin retry reads a failed report of another user again", async () => {
-  env.ADMIN_USER_ID = "admin-user";
   const res = await app.request(`/admin/reports/${duplicateId}/retry`, {
     method: "POST",
     ...admin,

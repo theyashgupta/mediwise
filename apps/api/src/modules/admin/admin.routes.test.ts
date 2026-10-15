@@ -6,12 +6,12 @@ import type { AuthEnv } from "../../middleware/auth.js";
 import { adminRoutes } from "./admin.routes.js";
 
 vi.mock("./admin.repo.js", () => ({
-  listJobsSince: async () => [],
-  listQuestionsSince: async () => [],
   findQueue: async () => ({ depth: 0, oldestAt: null }),
   listFailedReports: async () => [],
-  sumCreditsByReason: async () => [],
-  countProfiles: async () => ({ profiles: 0, users: 0, activeProfiles: 0, activeUsers: 0 }),
+  listLedgerEvents: async () => [],
+  listChargedQuestions: async () => [],
+  sumLedger: async () => [],
+  countChargedQuestions: async () => 0,
   findReportOwner: async () => undefined,
 }));
 
@@ -31,14 +31,18 @@ app.onError(handleError);
 
 const reportId = "6f1c2b9e-1d2a-4c3b-9e8f-0a1b2c3d4e5f";
 
-test("the admin overview and the admin retry return 404 to everyone but ADMIN_USER_ID", async () => {
+const adminPaths = ["/admin/credits", "/admin/failed-reports"];
+
+test("the credit history, the failed reads and the retry return 404 to everyone but ADMIN_USER_ID", async () => {
   env.ADMIN_USER_ID = undefined;
-  expect((await app.request("/admin/overview")).status).toBe(404);
+  for (const path of adminPaths) expect((await app.request(path)).status).toBe(404);
   env.ADMIN_USER_ID = "admin-user";
   const asAlice = { headers: { "x-user": "alice" } };
-  const overview = await app.request("/admin/overview", asAlice);
-  expect(overview.status).toBe(404);
-  expect(await overview.json()).toMatchObject({ title: "Not Found" });
+  for (const path of adminPaths) {
+    const res = await app.request(path, asAlice);
+    expect(res.status).toBe(404);
+    expect(await res.json()).toMatchObject({ title: "Not Found" });
+  }
   const retry = await app.request(`/admin/reports/${reportId}/retry`, {
     method: "POST",
     ...asAlice,
@@ -46,16 +50,25 @@ test("the admin overview and the admin retry return 404 to everyone but ADMIN_US
   expect(retry.status).toBe(404);
 });
 
-test("the admin passes the gate: the overview answers 200 and a retry of an unknown report 404", async () => {
+test("the admin passes the gate: the credit history answers 200 and a retry of an unknown report 404", async () => {
   env.ADMIN_USER_ID = "admin-user";
   const asAdmin = { headers: { "x-user": "admin-user" } };
-  const overview = await app.request("/admin/overview", asAdmin);
-  expect(overview.status).toBe(200);
-  expect(await overview.json()).toMatchObject({ alerts: [], meanCostPerReadCents: null });
+  const credits = await app.request("/admin/credits?from=2026-10-01&to=2026-10-14", asAdmin);
+  expect(credits.status).toBe(200);
+  expect(await credits.json()).toMatchObject({ reportCredits: { events: [] } });
+  expect((await app.request("/admin/failed-reports", asAdmin)).status).toBe(200);
   const retry = await app.request(`/admin/reports/${reportId}/retry`, {
     method: "POST",
     ...asAdmin,
   });
   expect(retry.status).toBe(404);
   expect(await retry.json()).toMatchObject({ title: "We could not find this report" });
+});
+
+test("a date filter that is not a day answers 400", async () => {
+  env.ADMIN_USER_ID = "admin-user";
+  const res = await app.request("/admin/credits?from=yesterday", {
+    headers: { "x-user": "admin-user" },
+  });
+  expect(res.status).toBe(400);
 });

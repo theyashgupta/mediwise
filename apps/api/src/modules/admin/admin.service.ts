@@ -1,32 +1,31 @@
 import { AppError } from "../../common/errors.js";
 import { log } from "../../middleware/logger.js";
 import { retryReport } from "../reports/index.js";
-import { claudeCostCents, getSpendSummary, stepCostCents } from "../spend/index.js";
+import { getSpendSummary } from "../spend/index.js";
 import * as repo from "./admin.repo.js";
+import type { CreditsQuery } from "./admin.schemas.js";
 
 const dayMs = 86_400_000;
-const chartDays = 30;
+const eventLimit = 200;
 const failedReportLimit = 50;
 const spendAlertShare = 0.8;
 const queueAlertMs = 30 * 60_000;
 const alertCheckMs = 15 * 60_000;
 let alertCheckedAt = 0;
 
-const cents = (value: number) => Math.round(value * 100) / 100;
+const reportCreditKinds = ["grant", "purchase", "upload", "refund", "purchase_refund"] as const;
+const questionPackKinds = ["questions", "question"] as const;
+type CreditKind = (typeof reportCreditKinds)[number] | (typeof questionPackKinds)[number];
 
 /**
- * Finds the start of the UTC day, ISO week (Monday) and month that hold `now`.
+ * Names the kind of a ledger row.
  *
  * @remarks
- * UTC matches `date_trunc` on the database, so the month here is the month the spend cap counts.
+ * A refund with a report gives back the credit of a failed read. A refund without one takes back the credits of a refunded payment.
  */
-export function periodStarts(now: Date) {
-  const day = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-  return {
-    day,
-    week: day - ((now.getUTCDay() + 6) % 7) * dayMs,
-    month: Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1),
-  };
+export function kindOf(row: { reason: string; fromReport: boolean }): CreditKind {
+  if (row.reason === "refund" && !row.fromReport) return "purchase_refund";
+  return row.reason as CreditKind;
 }
 
 /**
@@ -64,96 +63,77 @@ export function alertsFor(monthCents: number, capCents: number, oldestQueuedMs: 
   return alerts;
 }
 
-/**
- * Prices the jobs and questions since the earliest period on the page, and reads the queue and this month's spend summary.
- *
- * @remarks
- * The month comes from the spend summary, so the page and the alert count the same spend as the cap.
- */
-async function spendAndQueue(now: Date) {
-  const starts = periodStarts(now);
-  const firstChartDay = starts.day - (chartDays - 1) * dayMs;
-  const since = new Date(Math.min(starts.week, firstChartDay));
-  const [jobs, questions, queue, summary] = await Promise.all([
-    repo.listJobsSince(since),
-    repo.listQuestionsSince(since),
-    repo.findQueue(),
-    getSpendSummary(),
-  ]);
-  const priced = jobs.map((job) => ({
-    time: job.updatedAt.getTime(),
-    done: job.status === "done",
-    cents: claudeCostCents(job),
-  }));
-  const asked = questions.map((question) => ({
-    time: question.createdAt.getTime(),
-    cents: question.usage ? stepCostCents(question.usage) : 0,
-  }));
-  const sumSince = (start: number) =>
-    cents(
-      [...priced, ...asked]
-        .filter((row) => row.time >= start)
-        .reduce((sum, row) => sum + row.cents, 0),
-    );
-  const spend = {
-    todayCents: sumSince(starts.day),
-    weekCents: sumSince(starts.week),
-    monthCents: summary.costCents,
-    capCents: summary.capCents,
-    hardStop: summary.hardStop,
-    reads: summary.reads,
-    questions: summary.questions,
-    purchases: summary.purchases,
-    revenuePaise: summary.revenuePaise,
+/** Turns the UTC days of the query into a half-open time range, so `to` includes its whole day. */
+export function ledgerFilter(query: CreditsQuery): repo.LedgerFilter {
+  return {
+    from: query.from ? new Date(`${query.from}T00:00:00Z`) : undefined,
+    to: query.to ? new Date(Date.parse(`${query.to}T00:00:00Z`) + dayMs) : undefined,
+    userId: query.userId,
   };
-  const oldestQueuedMs = queue.oldestAt ? now.getTime() - queue.oldestAt.getTime() : null;
-  return { spend, queue: { depth: queue.depth, oldestQueuedMs }, priced, firstChartDay };
 }
 
 /**
- * Builds the operator numbers: Claude spend against the cap, reads per day, failed reads, queue, credits and profiles.
+ * Builds the credit history: totals per kind and the newest events, for report credits and for question packs apart.
  *
  * @remarks
- * Counts, costs, ids and dates only. Nothing here names a patient or carries health text.
+ * User ids, counts, credits, paise and dates only. Nothing here names a patient or carries health text.
  */
-export async function getOverview(now = new Date()) {
-  const [{ spend, queue, priced, firstChartDay }, failed, credits, people] = await Promise.all([
-    spendAndQueue(now),
-    repo.listFailedReports(failedReportLimit),
-    repo.sumCreditsByReason(),
-    repo.countProfiles(new Date(now.getTime() - chartDays * dayMs)),
+export async function getCreditHistory(query: CreditsQuery) {
+  const filter = ledgerFilter(query);
+  const [ledger, packs, questions, sums, questionsUsed] = await Promise.all([
+    repo.listLedgerEvents(filter, ["grant", "purchase", "upload", "refund"], eventLimit),
+    repo.listLedgerEvents(filter, ["questions"], eventLimit),
+    repo.listChargedQuestions(filter, eventLimit),
+    repo.sumLedger(filter),
+    repo.countChargedQuestions(filter),
   ]);
-  const days = Array.from({ length: chartDays }, (_, index) => {
-    const start = firstChartDay + index * dayMs;
-    const jobs = priced.filter((job) => job.time >= start && job.time < start + dayMs);
-    return {
-      date: new Date(start).toISOString().slice(0, 10),
-      reads: jobs.filter((job) => job.done).length,
-      costCents: cents(jobs.reduce((sum, job) => sum + job.cents, 0)),
-    };
+  const totals = (kinds: readonly CreditKind[]) =>
+    kinds.map((kind) => {
+      const rows = sums.filter((row) => kindOf(row) === kind);
+      return {
+        kind,
+        events: kind === "question" ? questionsUsed : rows.reduce((sum, r) => sum + r.events, 0),
+        credits: rows.reduce((sum, r) => sum + r.credits, 0),
+        amountPaise: rows.reduce((sum, r) => sum + r.amountPaise, 0),
+      };
+    });
+  const event = (row: (typeof ledger)[number]) => ({
+    id: row.id,
+    at: row.createdAt.toISOString(),
+    userId: row.userId,
+    profiles: row.profiles,
+    kind: kindOf(row),
+    credits: row.delta as number | null,
+    amountPaise: row.amountPaise,
   });
-  const reads = days.reduce((sum, day) => sum + day.reads, 0);
-  const cost = days.reduce((sum, day) => sum + day.costCents, 0);
-  const ledger = Object.fromEntries(credits.map((row) => [row.reason, row.total]));
+  const questionEvents = questions.map((row) => ({
+    id: row.id,
+    at: row.createdAt.toISOString(),
+    userId: row.userId,
+    profiles: row.profiles,
+    kind: "question" as CreditKind,
+    credits: null,
+    amountPaise: null,
+  }));
   return {
-    spend,
-    days,
-    meanCostPerReadCents: reads > 0 ? cents(cost / reads) : null,
-    failed: failed.map((report) => ({
-      id: report.id,
-      createdAt: report.createdAt.toISOString(),
-      errorClass: errorClass(report.reportError, report.jobError),
-    })),
-    queue,
-    credits: {
-      granted: ledger.grant ?? 0,
-      purchased: ledger.purchase ?? 0,
-      spentOnReads: 0 - ((ledger.upload ?? 0) + (ledger.refund ?? 0)),
-      spentOnQuestions: 0 - (ledger.questions ?? 0),
+    reportCredits: { totals: totals(reportCreditKinds), events: ledger.map(event) },
+    questionPacks: {
+      totals: totals(questionPackKinds),
+      events: [...packs.map(event), ...questionEvents]
+        .toSorted((a, b) => b.at.localeCompare(a.at))
+        .slice(0, eventLimit),
     },
-    people,
-    alerts: alertsFor(spend.monthCents, spend.capCents, queue.oldestQueuedMs),
+    eventLimit,
   };
+}
+
+export async function listFailedReads() {
+  const failed = await repo.listFailedReports(failedReportLimit);
+  return failed.map((report) => ({
+    id: report.id,
+    createdAt: report.createdAt.toISOString(),
+    errorClass: errorClass(report.reportError, report.jobError),
+  }));
 }
 
 /**
@@ -165,15 +145,16 @@ export async function getOverview(now = new Date()) {
 export async function logAlerts(now = new Date()) {
   if (now.getTime() - alertCheckedAt < alertCheckMs) return;
   alertCheckedAt = now.getTime();
-  const { spend, queue } = await spendAndQueue(now);
-  const alerts = alertsFor(spend.monthCents, spend.capCents, queue.oldestQueuedMs);
+  const [queue, spend] = await Promise.all([repo.findQueue(), getSpendSummary()]);
+  const oldestQueuedMs = queue.oldestAt ? now.getTime() - queue.oldestAt.getTime() : null;
+  const alerts = alertsFor(spend.costCents, spend.capCents, oldestQueuedMs);
   if (alerts.includes("spend"))
     log.warn(
-      `alert kind=spend month_cents=${spend.monthCents} cap_cents=${spend.capCents} share=${(spend.monthCents / spend.capCents).toFixed(2)}`,
+      `alert kind=spend month_cents=${spend.costCents} cap_cents=${spend.capCents} share=${(spend.costCents / spend.capCents).toFixed(2)}`,
     );
   if (alerts.includes("queue"))
     log.warn(
-      `alert kind=queue depth=${queue.depth} oldest_minutes=${Math.floor((queue.oldestQueuedMs ?? 0) / 60_000)}`,
+      `alert kind=queue depth=${queue.depth} oldest_minutes=${Math.floor((oldestQueuedMs ?? 0) / 60_000)}`,
     );
 }
 
