@@ -254,14 +254,14 @@ Lighthouse accessibility on 2026-10-13 (desktop, dev server, Lighthouse 12.8.2):
 
 ### Phone tab bar (MEDI-152)
 
-- **Shape.** The bar floats 16 px from the left and the bottom, plus the safe-area inset. It is 64 px tall and fully round. It uses `GlassSurface layer="bar"` (the bar tint and the 12 px blur), a 1 px border and `shadow-(--shadow-glass)`.
-- **Free corner.** The bar stops 80 px from the right edge. The Ask launcher (MEDI-151) goes in that corner.
-- **Items.** Icons only, with the name for screen readers. The order, the routes and the accessible names did not change. Upload is a 48 px primary circle that sits 12 px higher than the other items.
-- **Active item.** The icon gets a 15% fill and a heavier stroke, and a 4 px dot shows under it.
+- **Shape.** The bar floats 16 px from the left, the right and the bottom, plus the safe-area insets, and is at most 448 px wide, centred (MEDI-169). It is 64 px tall and fully round. It uses `GlassSurface layer="bar"` (the bar tint and the 12 px blur), a 1 px border and `shadow-(--shadow-glass)`.
+- **Ask launcher.** The launcher sits above the bar at the right edge, 92 px from the bottom plus the safe-area inset, so it never covers a tab (MEDI-169). The bar no longer keeps a free corner.
+- **Items.** Each item shows its icon and a one-word label under it, 11 px, medium weight, one line (MEDI-169). The labels are `shell.tabs` in the message files: Home, Reports, Upload, Trends, Family, Settings. The order, the routes and the accessible names did not change. Upload is a 48 px primary circle that rises 28 px out of its slot, with its label in line with the other labels. Its accessible name stays "Upload a report".
+- **Active item.** A 16 px rounded `bg-primary/10` square holds the icon and the label, both in `text-primary`. The icon keeps the 15% fill and the heavier stroke. The dot is gone (MEDI-169).
 - **Hover and press.** A `foreground/5` fill on hover (pointer devices only). The item scales to 90% while pressed. `motion-reduce` turns the transitions off.
 - **Hide on scroll.** The bar slides down when the page scrolls down and comes back when it scrolls up or reaches the top (`useScrollingDown`, steps under 8 px do not count). It stays in view while focus is in it.
 - **Dialogs and sheets.** The bar slides down while a dialog, a sheet or a menu locks the page scroll (`data-scroll-locked` on `body`).
-- **Room under the bar.** The page content has `7rem` of bottom padding plus the safe-area inset. The Ask composer sits 88 px from the bottom, above the bar.
+- **Room under the bar.** The page content has 152 px of bottom padding plus the safe-area inset, so the last row scrolls clear of the launcher (MEDI-169, was `7rem`). The Ask composer sits 88 px from the bottom, above the bar.
 
 Screenshots on 2026-10-15, web dev server on the local e2e stack, the made-up dense history fixture (`db:seed-history`), 390 x 844.
 
@@ -281,11 +281,21 @@ Measured on 2026-10-15 with `pnpm perf` on this 8 GB Mac, production build, dens
 
 The INP check now also runs at 390 px, because the tab bar and its blur render only under 768 px.
 
+Screenshots for MEDI-169 on 2026-10-15, web dev server against `mediwise-dev`, the demo account, Home with the Ask launcher on.
+
+| Width | Light | Dark |
+| - | - | - |
+| 360 x 800 | [light](design/screenshots/medi-169-tab-bar-light-360.png) | [dark](design/screenshots/medi-169-tab-bar-dark-360.png) |
+| 390 x 800 | [light](design/screenshots/medi-169-tab-bar-light-390.png) | [dark](design/screenshots/medi-169-tab-bar-dark-390.png) |
+| 360 x 800, Hindi | [light](design/screenshots/medi-169-tab-bar-hindi-light-360.png) | |
+
+Measured for MEDI-169: the bar is 328 px wide at 360 px and 358 px at 390 px. The widest label is "Settings", 43 px in a 52 px slot at 360 px. The launcher bottom is 10 px above the bar top.
+
 ### Ask chat widget (MEDI-151)
 
-- **Launcher.** A 56 px round button with the idle mascot at 48 px. It uses the bar glass, a 1 px border and `shadow-(--shadow-glass)`, as the tab bar does. On a phone it sits in the free corner, 16 px from the right edge and centred on the tab bar. From `md` it is 16 px from the right and the bottom. Its accessible name is "Open the chat".
+- **Launcher.** A 56 px round button with the idle mascot at 48 px. It uses the bar glass, a 1 px border and `shadow-(--shadow-glass)`, as the tab bar does. On a phone it sits above the tab bar, 16 px from the right edge (MEDI-169). From `md` it is 16 px from the right and the bottom. Its accessible name is "Open the chat".
 - **When it shows.** On every app page when `GET /me` has the assistant on. It does not show when the assistant is off, on `/ask` (the page has its own mascot) or offline.
-- **Room for the launcher.** Phone pages keep `7rem` of bottom padding. Desktop pages now have 96 px (was 48 px), so the last row of a page can scroll clear of the launcher.
+- **Room for the launcher.** Phone pages have 152 px of bottom padding. Desktop pages now have 96 px (was 48 px), so the last row of a page can scroll clear of the launcher.
 - **Panel.** From `md`, a 400 x 600 px glass surface (`GlassSurface layer="surface"`, 24 px radius) at the launcher corner. It grows from the bottom-right corner. Under `md`, a bottom sheet with the full height of the screen and round top corners. The scrim dims the page on a phone and is clear on desktop.
 - **Keyboard and screen readers.** The panel is a modal dialog. Focus stays in the panel, Escape closes it and focus goes back to the launcher. The input gets focus when the panel opens. The thread is a `log` region named "Questions and answers". The mascot stays hidden from screen readers, and "MediWise is writing the answer." is the text status.
 - **Scroll.** The page does not scroll under the panel. The thread scrolls inside the panel, and the tab bar slides down while the panel is open.
