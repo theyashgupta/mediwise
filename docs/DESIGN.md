@@ -96,6 +96,15 @@ Why these choices:
 
 **Action rule (MEDI-170).** Secondary actions with a clear icon are icon buttons with a tooltip. Destructive actions live in an overflow menu. Primary actions keep their label. `IconAction` and `OverflowMenu` in `common/components/icon-action.tsx` carry the rule: 44 px targets under `md`, 36 px from `md`, and the tooltip label is the `aria-label`. Touch does not open a tooltip, so a phone reads the `aria-label`. `PageHeader tools` puts the group at the top right. The kitchen sink shows the pattern.
 
+Screenshots on 2026-10-15, web dev server on `mediwise-dev`, the demo account. A script checked 88 combinations of report and trend pages at 390 and 1280 px, in both themes for the reports. No crumb wrapped and no page scrolled sideways.
+
+| Report header | Light | Dark |
+| - | - | - |
+| 1280 px | [light](design/screenshots/medi-170-report-header-1280-light.png) | [dark](design/screenshots/medi-170-report-header-1280-dark.png) |
+| 390 px | [light](design/screenshots/medi-170-report-header-390-light.png) | [dark](design/screenshots/medi-170-report-header-390-dark.png) |
+| 1280 px, tooltip and menu | [tooltip](design/screenshots/medi-170-report-header-1280-light-tooltip.png) | [menu](design/screenshots/medi-170-report-header-1280-light-menu.png) |
+| Marker crumb, three levels | [1280 px](design/screenshots/medi-170-marker-crumb-1280-light.png) | [390 px](design/screenshots/medi-170-marker-crumb-390-light.png) |
+
 ## Brand
 
 The mark is a drop with a reading line: a blood sample and the value read from it. The maintainer chose it on 2026-10-13 from three candidates, see the [renders](design/logo/candidates/).
@@ -239,7 +248,7 @@ The app shell lives in `src/layouts`. The five destinations are Home, Reports, T
 - **Sidebar.** 240 px wide, 56 px collapsed to icons. A collapsed row shows its label in a tooltip. Rows are 32 px tall with a 16 px icon. The active row has `bg-primary/10` and `text-primary`. A "Menu" label sits above the list. The logo is at the top. Collapsed, the sidebar shows the mark only.
 - **Collapse.** The button in the sidebar footer or the `[` key. The browser keeps the choice in `localStorage` under `sidebar`.
 - **Profile switcher.** In the sidebar footer: the initial, the name and the relation. The menu lists every profile and links to Manage profiles. Below `md`, the switcher is in the header.
-- **Header.** 48 px. It shows the page title, and the breadcrumb on inner pages. The current page is `text-base font-semibold` on phones and `text-lg` from `md`, on one line with a `title` for the full text. Parent crumbs stay `text-sm` muted. A border shows only after the page scrolls. On the right: the upload button (Home and Reports only), the theme toggle and the user menu.
+- **Header.** 48 px. It shows the page title, and the breadcrumb on inner pages. The current page is `text-base font-semibold` on phones and `text-lg` from `md`, on one line with a `title` for the full text. Parent crumbs stay `text-sm` muted. A page name from `nav.ts` never shrinks. A name that a page sets, such as a report title, truncates first, and the current page keeps at least 40% of the row. A border shows only after the page scrolls. On the right: the upload button (Home and Reports only), the theme toggle and the user menu.
 - **Breadcrumb names.** A page names its own crumb with `useCrumbLabel(path, label)`, for example the lab name of a report. Without a label, the crumb uses the title in `nav.ts`.
 - **Phone, under 768 px.** A floating tab bar with the five destinations and the upload action in the middle. The breadcrumb of an inner page moves above the page title. See [Phone tab bar](#phone-tab-bar-medi-152).
 - **Keyboard.** `G` then `H`, `R`, `T`, `P` or `S` goes to a destination. `[` collapses or expands the sidebar. `?` opens the shortcuts dialog. Shortcuts do not fire while focus is in a text field. Focus rings use `ring-ring/50` at 3 px.
