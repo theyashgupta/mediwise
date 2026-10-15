@@ -1,6 +1,7 @@
 import { cleanQuestion } from "@mediwise/shared";
 import { SendHorizontal } from "lucide-react";
 import { useState } from "react";
+import { useInFlight } from "@/common/hooks/use-in-flight";
 import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,17 +12,19 @@ type AskInputProps = {
   disabled: boolean;
   autoFocus?: boolean;
   onChange: (value: string) => void;
-  onSubmit: (question: string) => void;
+  onSubmit: (question: string) => Promise<unknown>;
 };
 
 export function AskInput({ value, busy, disabled, autoFocus, onChange, onSubmit }: AskInputProps) {
   const t = useT().assistant;
   const [empty, setEmpty] = useState(false);
+  const submit = useInFlight(onSubmit);
+  const sending = busy || submit.pending;
   const send = () => {
-    if (disabled || busy || !value) return;
+    if (disabled || sending || !value) return;
     const question = cleanQuestion(value);
     setEmpty(question === "");
-    if (question) onSubmit(question);
+    if (question) void submit.run(question);
   };
   return (
     <form
@@ -41,8 +44,8 @@ export function AskInput({ value, busy, disabled, autoFocus, onChange, onSubmit 
           value={value}
           disabled={disabled}
           autoFocus={autoFocus}
-          readOnly={busy}
-          aria-disabled={busy || undefined}
+          readOnly={sending}
+          aria-disabled={sending || undefined}
           className="max-h-40 min-h-11 resize-none bg-background"
           onChange={(event) => {
             setEmpty(false);
@@ -59,7 +62,7 @@ export function AskInput({ value, busy, disabled, autoFocus, onChange, onSubmit 
           type="submit"
           data-testid="assistant-send"
           className="min-h-11"
-          disabled={disabled || busy || !value}
+          disabled={disabled || sending || !value}
         >
           <SendHorizontal aria-hidden />
           {t.send}

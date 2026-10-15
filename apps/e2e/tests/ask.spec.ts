@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Locator, type Page, type Request, test } from "@playwright/test";
 import { apiEnv } from "../local-env";
 
 const labPanel = new URL("../../api/fixtures/golden/sample-2025.pdf", import.meta.url).pathname;
@@ -90,8 +90,40 @@ test("asking from the report page gives an answer with a chip, and back from the
   ).toBeVisible();
 });
 
+/** Sends one question with a double click on Send and two Enter presses, and returns how many requests went out. */
+async function doubleSend(scope: Page | Locator, question: string) {
+  const sent: string[] = [];
+  const count = (request: Request) => {
+    if (request.method() === "POST" && request.url().endsWith("/questions")) sent.push(question);
+  };
+  const items = scope.getByTestId("assistant-item");
+  const before = await items.count();
+  const input = scope.getByTestId("assistant-input");
+  await input.fill(question);
+  page.on("request", count);
+  await scope.getByTestId("assistant-send").dblclick();
+  await input.press("Enter");
+  await input.press("Enter");
+  await expect(items).toHaveCount(before + 1, { timeout: 30_000 });
+  page.off("request", count);
+  return sent.length;
+}
+
+test("a double click on Send and two Enter presses send one question, on the Ask page and in the widget", async () => {
+  expect(await doubleSend(page, "Which reports do I have now?")).toBe(1);
+
+  await page.goto(`/reports/${reportId}`);
+  await page.getByTestId("ask-launcher").click();
+  const panel = page.getByTestId("ask-panel");
+  await expect(panel.getByTestId("assistant-item")).toHaveCount(2);
+  expect(await doubleSend(panel, "How many reports do I have?")).toBe(1);
+
+  await page.goto("/ask");
+  await expect(page.getByTestId("assistant-item")).toHaveCount(3);
+});
+
 test("with no questions left, one tap on Use 1 credit debits exactly one credit", async () => {
-  for (let left = 4; left > 0; left--) await ask(`Question ${left}?`);
+  for (let left = 2; left > 0; left--) await ask(`Question ${left}?`);
   await expect(page.getByTestId("assistant-use-credit")).toBeVisible();
 
   await page.goto("/credits");

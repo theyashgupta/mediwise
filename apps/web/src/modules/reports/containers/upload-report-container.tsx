@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { CircleAlert, LoaderCircle } from "lucide-react";
+import { useState } from "react";
 import { useT } from "@/common/hooks/use-locale";
 import { PageHeader } from "@/common/components/page-header";
 import { ProblemError } from "@/common/utils/problem-error";
@@ -29,6 +30,7 @@ export function UploadReportContainer() {
   const { upload, progress } = useUploadReport();
   const uploading = upload.isPending;
   const messages = upload.error ? [...selected.errors, upload.error.message] : selected.errors;
+  const [retryAfterConsent, setRetryAfterConsent] = useState(false);
 
   function submit() {
     if (!profile) return;
@@ -39,7 +41,10 @@ export function UploadReportContainer() {
         onError: (error) => {
           if (error instanceof ProblemError && error.status === 402)
             void navigate({ to: "/credits" });
-          if (error instanceof ProblemError && error.status === 403) void refreshConsents();
+          if (error instanceof ProblemError && error.status === 403) {
+            setRetryAfterConsent(true);
+            void refreshConsents();
+          }
         },
       },
     );
@@ -59,6 +64,11 @@ export function UploadReportContainer() {
               ? undefined
               : (session?.user.user_metadata.consent_version ?? null)
           }
+          onGiven={() => {
+            if (!retryAfterConsent) return;
+            setRetryAfterConsent(false);
+            submit();
+          }}
         >
           <DropZone
             disabled={uploading}

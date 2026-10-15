@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Page, type Request, test } from "@playwright/test";
 import { apiEnv, apiPort } from "../local-env";
 
 const sample = new URL("../../api/fixtures/golden/sample-2025.pdf", import.meta.url);
@@ -45,19 +45,37 @@ test("sign-up with both consent boxes clear makes no account", async () => {
   await expect(page).toHaveURL(/\/signup$/);
 });
 
-test("a new user signs up with email and gets one report credit", async () => {
+test("a new user signs up with one request after a double click and two Enter presses, and gets one report credit", async () => {
+  const signUps: string[] = [];
+  const count = (request: Request) => {
+    if (request.url().includes("/auth/v1/signup")) signUps.push(request.url());
+  };
+  page.on("request", count);
   await page.goto("/signup");
   await page.getByTestId("auth-email").fill(email);
   await page.getByTestId("auth-password").fill(password);
   await page.getByTestId("auth-consent-terms").check();
   await page.getByTestId("auth-consent-health_data").check();
-  await page.getByTestId("auth-submit").click();
+  await page.getByTestId("auth-submit").dblclick();
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Enter");
   await expect(page.getByTestId("user-menu")).toBeVisible();
+  page.off("request", count);
+  expect(signUps).toHaveLength(1);
 
   execFileSync("pnpm", ["--filter", "@mediwise/api", "credits:grant", email, "1", "e2e"], {
     env: { ...process.env, ...apiEnv },
     stdio: "ignore",
   });
+});
+
+test("both consents are stored with the policy version right after the sign-up", async () => {
+  const { status, body } = await callApi("GET", "/me/consents");
+  const consents = body.consents as { kind: string; policyVersion: string }[];
+  expect(status).toBe(200);
+  expect(consents.map(({ kind }) => kind).toSorted()).toEqual(["health_data", "terms"]);
+  for (const consent of consents) expect(consent.policyVersion).toBe(body.policyVersion);
+  expect(body.missing).toEqual([]);
 });
 
 test("the user adds a family member profile", async () => {
@@ -75,16 +93,6 @@ test("the user adds a family member profile", async () => {
   await page.getByTestId("profile-submit").click();
 
   await expect(page.getByTestId("profile-card").filter({ hasText: member })).toBeVisible();
-});
-
-test("the API refuses an upload before the consents are stored", async () => {
-  const profiles = (await callApi("GET", "/profiles")).body as unknown as { id: string }[];
-  const res = await callApi("POST", "/reports", {
-    profileId: profiles[0]?.id,
-    files: [{ name: "report.pdf", mime: "application/pdf", size: 1000 }],
-  });
-  expect(res.status).toBe(403);
-  expect(res.body.missingConsent).toBe("health_data");
 });
 
 test("the user uploads the 2025 sample and the read reaches done", async () => {

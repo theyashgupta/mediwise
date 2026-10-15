@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { requiredConsentKinds } from "@mediwise/shared";
 import { Link } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
+import { useInFlight } from "@/common/hooks/use-in-flight";
 import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,13 +21,14 @@ import { FormError } from "./form-error";
 
 type CredentialsFormProps = {
   mode: "sign-in" | "sign-up";
-  submitting: boolean;
   error?: string;
-  onSubmit: (values: SignUpValues) => void;
+  onSubmit: (values: SignUpValues) => Promise<unknown>;
 };
 
-export function CredentialsForm({ mode, submitting, error, onSubmit }: CredentialsFormProps) {
+export function CredentialsForm({ mode, error, onSubmit }: CredentialsFormProps) {
   const t = useT();
+  const submit = useInFlight(onSubmit);
+  const submitting = submit.pending;
   const signIn = mode === "sign-in";
   const form = useForm<SignUpValues>({
     resolver: zodResolver<SignUpValues, unknown, SignUpValues>(
@@ -39,7 +41,7 @@ export function CredentialsForm({ mode, submitting, error, onSubmit }: Credentia
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5" noValidate>
+      <form onSubmit={form.handleSubmit(submit.run)} className="space-y-5" noValidate>
         <FormField
           control={form.control}
           name="email"

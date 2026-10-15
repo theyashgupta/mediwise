@@ -1,3 +1,4 @@
+export { giveConsents } from "./api/give-consents";
 export { ConsentLabel } from "./components/consent-label";
 export { ConsentGateContainer } from "./containers/consent-gate-container";
 export { UserMenuContainer } from "./containers/user-menu-container";

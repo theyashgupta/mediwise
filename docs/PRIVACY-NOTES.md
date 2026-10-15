@@ -13,9 +13,11 @@ This file records what MediWise does with consent, with the data of family membe
 - Each consent is one row in `consent_records`: user id, kind, policy version, accepted time, withdrawn time, and the SHA-256 of the browser user agent. Row level security is on, with no policies.
 - The third kind, `assistant_review`, is the review-month consent of the Ask page. Migration 0029 moved the rows of the old `assistant_consents` table here and dropped that table.
 - The API sets the policy version (`policyVersion` in `packages/shared`). The client sends only the kinds, so no row has a version that the API did not set. A database check refuses an empty version.
-- An email sign-up stores `consent_version` in the Supabase user metadata. The first visit to the upload page turns it into the two rows, with no second prompt. The accepted time is the time of that visit.
+- An email sign-up that starts a session stores the two rows right after the sign-up. The accepted time is the sign-up time.
+- An email sign-up also stores `consent_version` in the Supabase user metadata. When the sign-up waits for email confirmation, or the store fails, the first visit to the upload page turns it into the two rows, with no second prompt. The metadata counts only while the user has no `terms` or `health_data` row.
 - A Google or magic-link user has no metadata. The upload page shows the same two boxes before the first upload.
 - `POST /reports`, `POST /reports/:id/uploaded` and `POST /reports/:id/retry` answer 403 with `missingConsent: "health_data"` when the user has no health data consent for the current version. The admin retry goes through the same check for the report owner.
+- After a 403 on upload, the upload page shows the consent gate with the box clear. When the user agrees, the page sends the upload again with the same files.
 - The JSON data download has every consent row. Account deletion deletes the rows, and the deletion log keeps their count (`consents`).
 - The second box has 20 words, the limit of the copy rule.
 - Withdrawal is account deletion. No code sets `withdrawn_at` yet. A row with a withdrawn time does not count.

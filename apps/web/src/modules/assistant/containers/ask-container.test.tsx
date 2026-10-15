@@ -1,9 +1,17 @@
 /** @vitest-environment jsdom */
-import { screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { messages } from "@/config/messages";
-import { fakeNetwork, me, problem, renderApp, resetApp, selfProfile } from "@/test/render-app";
+import {
+  fakeNetwork,
+  me,
+  never,
+  problem,
+  renderApp,
+  resetApp,
+  selfProfile,
+} from "@/test/render-app";
 import type { Question } from "../types";
 
 /** Each test renders the whole app, and the first one loads its route, which can pass 5 s on a loaded 8 GB Mac. */
@@ -247,6 +255,22 @@ test("a question goes out with the open report, and its answer joins the end of 
   await waitFor(() =>
     expect(requests.filter(({ path }) => path === "/me").length).toBeGreaterThan(1),
   );
+});
+
+test("a double click on Send and two Enter presses send one question", async () => {
+  const requests = network([], { [`POST /profiles/${selfProfile.id}/questions`]: never });
+  await renderApp("/ask");
+
+  const input = await screen.findByRole("textbox", { name: messages.en.assistant.inputLabel });
+  await userEvent.type(input, "How many mg?");
+  const send = screen.getByTestId("assistant-send");
+  fireEvent.click(send);
+  fireEvent.click(send);
+  fireEvent.keyDown(input, { key: "Enter" });
+  fireEvent.keyDown(input, { key: "Enter" });
+
+  await waitFor(() => expect((send as HTMLButtonElement).disabled).toBe(true));
+  expect(requests.filter(({ method }) => method === "POST")).toHaveLength(1);
 });
 
 test("a refused question shows the problem title, stays out of the chat and keeps the typed text", async () => {

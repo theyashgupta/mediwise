@@ -51,13 +51,10 @@ export function SignupContainer() {
       />
       <CredentialsForm
         mode="sign-up"
-        submitting={signUp.isPending}
         error={signUp.error?.message}
         onSubmit={(values) =>
-          signUp.mutate(values, {
-            onSuccess: ({ data }) => {
-              if (data.session) void navigate({ to: "/" });
-            },
+          signUp.mutateAsync(values).then(({ data }) => {
+            if (data.session) void navigate({ to: "/" });
           })
         }
       />
