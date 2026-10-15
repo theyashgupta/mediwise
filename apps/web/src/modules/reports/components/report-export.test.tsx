@@ -1,5 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { expect, test } from "vitest";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import type { EarlierValue, ExportReport, MarkerRow } from "../types";
 import { ReportExport } from "./report-export";
 
@@ -26,13 +27,15 @@ const report: ExportReport = {
 
 function render(exported: ExportReport, earlier?: EarlierValue[]) {
   return renderToStaticMarkup(
-    <ReportExport
-      report={exported}
-      earlier={earlier}
-      person={[]}
-      generatedOn="1 Mar 2025"
-      onPrint={() => {}}
-    />,
+    <TooltipProvider>
+      <ReportExport
+        report={exported}
+        earlier={earlier}
+        person={[]}
+        generatedOn="1 Mar 2025"
+        onPrint={() => {}}
+      />
+    </TooltipProvider>,
   );
 }
 

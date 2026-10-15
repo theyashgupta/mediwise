@@ -2,15 +2,14 @@ import { Share2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useT } from "@/common/hooks/use-locale";
-import { GlassButton } from "@/common/components/surface/glass";
-import { Button } from "@/components/ui/button";
+import { IconAction } from "@/common/components/icon-action";
 import { ShareDialog } from "../components/share-dialog";
 import { shareDate, shareUrl } from "../config/share";
 import { useCreateShare, useEndShare } from "../hooks/use-shares";
 
-type ShareReportContainerProps = { reportId: string; glass?: boolean };
+type ShareReportContainerProps = { reportId: string };
 
-export function ShareReportContainer({ reportId, glass = false }: ShareReportContainerProps) {
+export function ShareReportContainer({ reportId }: ShareReportContainerProps) {
   const t = useT();
   const create = useCreateShare();
   const end = useEndShare();
@@ -21,13 +20,6 @@ export function ShareReportContainer({ reportId, glass = false }: ShareReportCon
     url: shareUrl(window.location.origin, share.token),
     endsOn: shareDate(share.expiresAt),
   };
-
-  const label = (
-    <>
-      <Share2 aria-hidden />
-      {t.reports.share.button}
-    </>
-  );
 
   function start() {
     end.reset();
@@ -59,15 +51,9 @@ export function ShareReportContainer({ reportId, glass = false }: ShareReportCon
 
   return (
     <>
-      {glass ? (
-        <GlassButton onClick={start} data-testid="report-share">
-          {label}
-        </GlassButton>
-      ) : (
-        <Button variant="outline" onClick={start} data-testid="report-share">
-          {label}
-        </Button>
-      )}
+      <IconAction label={t.reports.share.button} onClick={start} data-testid="report-share">
+        <Share2 aria-hidden />
+      </IconAction>
       <ShareDialog
         open={open}
         link={create.isSuccess ? link : undefined}

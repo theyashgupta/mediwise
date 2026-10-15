@@ -31,6 +31,7 @@ export const shell = {
   skipToContent: "Skip to content",
   mainNav: "Main",
   menu: "Menu",
+  moreActions: "More actions",
   expandSidebar: "Expand the sidebar",
   collapseSidebar: "Collapse the sidebar",
   collapse: "Collapse",

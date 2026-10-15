@@ -2,6 +2,7 @@ import { FileDown, Printer } from "lucide-react";
 import { type ReactNode, useEffect, useId } from "react";
 import { Logo } from "@/common/components/brand/logo";
 import { Disclaimer } from "@/common/components/disclaimer";
+import { IconAction } from "@/common/components/icon-action";
 import { useT } from "@/common/hooks/use-locale";
 import { formatPlainDate } from "@/common/utils/date";
 import { Button } from "@/components/ui/button";
@@ -201,10 +202,9 @@ function ExportBody({ report, earlier = [], person, actions, onPrint }: ExportBo
           <div className="space-y-1">
             <div className="flex flex-wrap justify-end gap-2">
               {actions}
-              <Button variant="outline" onClick={onPrint}>
+              <IconAction label={text.print} onClick={onPrint} data-testid="export-print">
                 <Printer aria-hidden />
-                {text.print}
-              </Button>
+              </IconAction>
               <Button onClick={onPrint} data-testid="export-download-pdf">
                 <FileDown aria-hidden />
                 {text.downloadPdf}
