@@ -9,7 +9,12 @@ import { handleError, problem } from "./common/problem.js";
 import { env } from "./config/env.js";
 import { auth } from "./middleware/auth.js";
 import { requestLogger } from "./middleware/logger.js";
-import { reportCreateLimit } from "./middleware/rate-limit.js";
+import {
+  accountDeleteLimit,
+  accountExportLimit,
+  reportCreateLimit,
+  shareViewLimit,
+} from "./middleware/rate-limit.js";
 import { adminRoutes } from "./modules/admin/index.js";
 import { profileQuestionsRoutes, questionsRoutes } from "./modules/assistant/index.js";
 import { dashboardRoutes } from "./modules/dashboard/index.js";
@@ -40,7 +45,12 @@ export const app = new Hono()
   .use(contextStorage())
   .use(requestId())
   .use(requestLogger)
-  .use(secureHeaders())
+  .use(
+    secureHeaders({
+      contentSecurityPolicy: { defaultSrc: ["'none'"], frameAncestors: ["'none'"] },
+      strictTransportSecurity: "max-age=31536000; includeSubDomains",
+    }),
+  )
   .use(cors({ origin: env.CORS_ORIGINS, maxAge: 600 }))
   .use(compress())
   .use(
@@ -51,9 +61,12 @@ export const app = new Hono()
   )
   .route("/health", healthRoutes)
   .route("/payments", paymentsWebhookRoutes)
+  .use("/share/:token", shareViewLimit)
   .route("/share", sharedExportRoutes)
   .use(auth)
   .use("/reports", reportCreateLimit)
+  .use("/me", accountDeleteLimit)
+  .use("/me/export", accountExportLimit)
   .route("/dashboard", dashboardRoutes)
   .route("/me", meRoutes)
   .route("/profiles", profilesRoutes)
