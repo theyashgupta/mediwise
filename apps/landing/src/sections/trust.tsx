@@ -13,22 +13,28 @@ export function Trust({ locale }: { locale: Locale }) {
   ];
   return (
     <section aria-labelledby="trust-title" className="border-y bg-card">
-      <div className="mx-auto max-w-content px-4 py-12 md:px-8 md:py-16">
-        <h2 id="trust-title" className="sr-only">
+      <div className="mx-auto max-w-2xl px-4 py-14 md:py-20">
+        <h2
+          id="trust-title"
+          data-reveal=""
+          className="text-2xl font-semibold tracking-tight text-balance md:text-3xl"
+        >
           {t.title}
         </h2>
-        <ul className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5 lg:gap-6">
+        <ul className="mt-8 divide-y border-y">
           {items.map(({ icon: Icon, title, body }) => (
-            <li key={title}>
-              <Icon aria-hidden className="size-5 text-primary" />
-              <h3 className="mt-3 text-sm font-semibold">{title}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{body}</p>
+            <li key={title} className="flex gap-4 py-5">
+              <Icon aria-hidden className="mt-0.5 size-5 shrink-0 text-primary" />
+              <div>
+                <h3 className="font-semibold">{title}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{body}</p>
+              </div>
             </li>
           ))}
         </ul>
         <a
           href={securityPath(locale)}
-          className="mt-8 inline-block text-sm font-medium underline underline-offset-4"
+          className="mt-6 inline-block text-sm font-medium underline underline-offset-4"
         >
           {t.securityLink}
         </a>
