@@ -15,6 +15,8 @@ It tracks every marker across reports for your whole family.
 
 ![MediWise: your lab report, explained marker by marker. Every marker in plain words, scored for your age, sex and ancestry, tracked across every report](docs/assets/ad-hook.gif)
 
+Forty feature walkthroughs, the doctor pitch film and the 30-second ad: [release demos-2026-10](https://github.com/theyashgupta/mediwise/releases/tag/demos-2026-10), index in [docs/demos](docs/demos/README.md).
+
 </div>
 
 The demo uses a made-up person and made-up reports. The four earlier reports and the repeat scan are in `apps/api/fixtures/episode`. You can upload the same files.
