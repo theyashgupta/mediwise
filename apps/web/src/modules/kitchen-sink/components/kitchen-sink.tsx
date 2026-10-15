@@ -108,7 +108,7 @@ const statusSwatches = [
 const chartSwatches = ["bg-chart-1", "bg-chart-2", "bg-chart-3", "bg-chart-4", "bg-chart-5"];
 
 const sources = [
-  { id: "a", title: "ICMR guidelines for lipid testing", year: 2024, url: "https://icmr.gov.in" },
+  { id: "a", title: "Guideline for lipid testing", year: 2024, url: "https://example.org" },
   { id: "b", title: "Lab reference ranges", year: 2023 },
 ];
 
