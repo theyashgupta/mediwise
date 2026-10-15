@@ -93,6 +93,43 @@ test("Home lists what needs attention across every report, and the risk chip kee
   await expect(rows).toHaveCount(all);
 });
 
+test("Trends keeps an eye on B12, filters by direction and status through the URL and ends each suggestion with the doctor line", async () => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/trends");
+  await expect(page.getByTestId("watch-row").filter({ hasText: "Vitamin B12" })).toHaveCount(1);
+  const suggestions = page.getByTestId("trend-suggestion");
+  await expect(suggestions.first()).toBeVisible();
+  const all = await suggestions.count();
+  for (const text of await suggestions.allTextContents()) {
+    expect(text).toMatch(/Ask your doctor before you act on this\.$/);
+  }
+
+  await page.getByTestId("trend-direction-worsening").click();
+  await expect(page).toHaveURL(/direction=worsening/);
+  await page.getByTestId("trend-status-watch").click();
+  await expect(page).toHaveURL(/status=watch/);
+  await page.reload();
+  await expect(page.getByTestId("trend-direction-worsening")).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await expect(page.getByTestId("trend-status-watch")).toHaveAttribute("aria-pressed", "true");
+  expect(await suggestions.count()).toBeLessThan(all);
+
+  await page.goto("/trends?category=none&direction=stable");
+  await expect(suggestions).toHaveCount(0);
+  await page.getByTestId("trend-clear-filters").click();
+  await expect(suggestions).toHaveCount(all);
+  await expect(page).not.toHaveURL(/direction=/);
+});
+
+test("a trend page shows the suggestion with the doctor line", async () => {
+  await page.goto("/trends/glucose_fasting");
+  await expect(page.getByTestId("trend-detail-suggestion")).toContainText(
+    "Ask your doctor before you act on this.",
+  );
+});
+
 test("a report opened low on Home starts at the top, and back restores the Home scroll offset", async () => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");

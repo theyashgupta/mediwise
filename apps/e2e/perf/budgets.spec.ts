@@ -182,7 +182,8 @@ for (const { name, url, budget } of [
 type Interaction = { duration: number; event: string; target: string };
 
 /**
- * Loads trends, clicks every category chip and both sort buttons twice, and returns the slowest interaction.
+ * Loads trends, clicks every category, direction and status chip and both sort buttons twice, and returns the slowest
+ * interaction.
  *
  * @remarks
  * With fewer than 50 interactions on a page, INP is the slowest one. Each click waits for the paint of the one before, as a person does.
@@ -193,6 +194,9 @@ async function slowestInteraction() {
   await expect(chips.first()).toBeVisible();
   const controls = [
     ...(await chips.all()),
+    ...(await page
+      .locator('[data-testid^="trend-direction-"], [data-testid^="trend-status-"]')
+      .all()),
     page.getByTestId("trend-sort-name"),
     page.getByTestId("trend-sort-change"),
   ];
