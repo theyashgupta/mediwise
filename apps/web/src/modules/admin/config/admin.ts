@@ -7,7 +7,7 @@ export const errorClassLabels: Record<string, string> = {
   too_large: "Files too large",
   missing_birth_date: "No date of birth",
   no_credits: "No credits left",
-  upstream: "Claude or network error",
+  upstream: "Upstream or network error",
   worker_stopped: "Worker stopped",
   unexpected: "Unexpected error",
 };

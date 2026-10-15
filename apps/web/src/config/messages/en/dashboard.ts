@@ -31,7 +31,7 @@ export const dashboard = {
     title: "Install MediWise",
     body: "Add MediWise to your home screen. Then it opens like an app.",
     action: "Install",
-    dismiss: "Not now",
+    dismiss: "Close",
     ios: {
       title: "Add MediWise to your home screen",
       body: "Then MediWise opens like an app.",

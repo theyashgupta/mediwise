@@ -26,11 +26,12 @@ test("the privacy policy explains family consent, child profiles and deletion re
   expect(JSON.stringify(policies).toLowerCase()).not.toContain("compliant");
 });
 
-test("every policy page shows the company, proprietor, email, phone, address and GSTIN", () => {
+test("every policy page shows the company, proprietor, email and phone, and no address or GSTIN", () => {
   for (const policy of Object.values(policies)) {
     const text = policy.sections.flatMap((section) => section.body).join(" ");
     expect(text).toContain("MediWise is a brand of Codegenix.");
     for (const value of Object.values(contact)) expect(text, policy.title).toContain(value);
     expect(text, policy.title).not.toMatch(/\[[a-z ]+\]/);
+    expect(text, policy.title).not.toMatch(/Address:|GSTIN/);
   }
 });

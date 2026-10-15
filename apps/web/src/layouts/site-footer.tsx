@@ -3,23 +3,31 @@ import { useT } from "@/common/hooks/use-locale";
 import { Disclaimer } from "@/common/components/disclaimer";
 import { env } from "@/config/env";
 import { cn } from "@/lib/utils";
-import { contact, policyLinks } from "@/modules/payments";
+import { policyLinks } from "@/modules/payments";
 
 const linkClass =
   "inline-block rounded-sm px-1 py-1 underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
-export function SiteFooter({ className }: { className?: string }) {
+type SiteFooterProps = {
+  centered?: boolean;
+  className?: string;
+};
+
+export function SiteFooter({ centered, className }: SiteFooterProps) {
   const t = useT();
   return (
-    <footer className={cn("flex flex-col gap-3 border-t pt-6", className)}>
-      <div className="space-y-2">
-        <Disclaimer />
-        <p className="text-xs text-muted-foreground">
-          {t.shell.footer.legal(new Date().getFullYear(), contact.businessName)}
-        </p>
-      </div>
+    <footer
+      data-testid="site-footer"
+      className={cn("flex flex-col gap-3 border-t pt-6", centered && "items-center", className)}
+    >
+      <Disclaimer centered={centered} />
       <nav aria-label={t.shell.footer.nav}>
-        <ul className="-mx-1 text-sm text-balance text-muted-foreground md:whitespace-nowrap">
+        <ul
+          className={cn(
+            "text-sm text-balance text-muted-foreground md:whitespace-nowrap",
+            centered ? "text-center sm:text-xs" : "-mx-1",
+          )}
+        >
           <li className="inline">
             <a href={env.landingUrl} className={linkClass}>
               {t.shell.footer.about}

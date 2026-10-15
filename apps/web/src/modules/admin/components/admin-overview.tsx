@@ -50,7 +50,7 @@ export function AdminOverview({ overview, retryingId, onRetry }: AdminOverviewPr
             >
               <AlertTriangle aria-hidden className="size-4 shrink-0" />
               {alert === "spend"
-                ? `Claude spend is at ${share}% of the monthly cap. At 100%, reading stops.`
+                ? `AI spend is at ${share}% of the monthly cap. At 100%, reading stops.`
                 : `A job is in the queue for ${formatWait(queue.oldestQueuedMs ?? 0)}. Examine the worker.`}
             </p>
           ))}
@@ -59,7 +59,7 @@ export function AdminOverview({ overview, retryingId, onRetry }: AdminOverviewPr
 
       <Section
         id="admin-spend"
-        title="Claude spend"
+        title="AI spend"
         description="UTC days. A week starts on Monday."
       >
         <div className="space-y-2">

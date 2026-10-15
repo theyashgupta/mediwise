@@ -13,7 +13,7 @@ export const assistant: Messages["assistant"] = {
   inputLabel: "आपका सवाल",
   emptyQuestion: "एक सवाल लिखें।",
   placeholder: "अपनी रिपोर्ट के बारे में सवाल पूछें",
-  send: "पूछें",
+  send: "भेजें",
   writing: "MediWise उत्तर लिख रहा है।",
   you: "आप",
   empty: {
@@ -33,7 +33,7 @@ export const assistant: Messages["assistant"] = {
     buyCredits: "क्रेडिट खरीदें",
     addReport: "रिपोर्ट जोड़ें",
   },
-  wrong: "यह उत्तर गलत है",
+  wrong: "गलत चिह्नित करें",
   markedWrong: "आपने इस उत्तर को गलत चिह्नित किया।",
   englishOnly: "उत्तर अंग्रेज़ी में आते हैं।",
   menu: {

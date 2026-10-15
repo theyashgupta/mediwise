@@ -272,7 +272,7 @@ test("the spend line shows at 80 percent of the cap and the queue line shows for
   expect(overview.alerts).toEqual(["spend", "queue"]);
 
   await expect(adminPage.getByTestId("admin-alert-spend")).toContainText(
-    `Claude spend is at ${share}% of the monthly cap`,
+    `AI spend is at ${share}% of the monthly cap`,
   );
   await expect(adminPage.getByTestId("admin-alert-queue")).toContainText(
     `A job is in the queue for ${await adminPage.getByTestId("admin-queue-oldest").textContent()}`,

@@ -28,7 +28,6 @@ const organization = JSON.stringify({
   logo: `${siteUrl}/apple-touch-icon.png`,
   email: contact.email,
   telephone: contact.phone,
-  address: contact.address,
 });
 
 const restoreMotion = `try{if(localStorage.getItem("motion")==="paused")document.documentElement.dataset.motion="paused"}catch(e){}`;

@@ -19,7 +19,7 @@ export const episodes = {
       `${count} reports arrived from ${from} to ${to}. Give them a name to see them as one episode.`,
     save: "Save as an episode",
     saving: "Saving",
-    dismiss: "Not now",
+    dismiss: "Close",
     failed: "We could not save the episode. Try again.",
   },
   fields: {

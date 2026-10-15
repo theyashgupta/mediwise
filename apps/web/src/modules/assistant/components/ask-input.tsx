@@ -1,4 +1,5 @@
 import { cleanQuestion } from "@mediwise/shared";
+import { SendHorizontal } from "lucide-react";
 import { useState } from "react";
 import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
@@ -40,7 +41,7 @@ export function AskInput({ value, busy, disabled, onChange, onSubmit }: AskInput
           disabled={disabled}
           readOnly={busy}
           aria-disabled={busy || undefined}
-          className="max-h-40 min-h-11 bg-background"
+          className="max-h-40 min-h-11 resize-none bg-background"
           onChange={(event) => {
             setEmpty(false);
             onChange(event.target.value);
@@ -58,6 +59,7 @@ export function AskInput({ value, busy, disabled, onChange, onSubmit }: AskInput
           className="min-h-11"
           disabled={disabled || busy || !value}
         >
+          <SendHorizontal aria-hidden />
           {t.send}
         </Button>
       </div>
