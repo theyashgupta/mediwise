@@ -49,6 +49,12 @@ export const assistant = {
     repeatStudy: "Repeat study",
     report: "Report",
   },
+  widget: {
+    open: "Open the chat",
+    close: "Close the chat",
+    fullPage: "Open the chat in a full page",
+    thread: "Questions and answers",
+  },
   fact: {
     title: "Cited value",
     hint: "Select a cited value to see it here.",

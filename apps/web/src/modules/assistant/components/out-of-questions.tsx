@@ -26,6 +26,7 @@ export function OutOfQuestions({ step, pending, error, onUseCredit }: OutOfQuest
       {step === "use_credit" && (
         <Button
           data-testid="assistant-use-credit"
+          variant="secondary"
           className="min-h-11"
           disabled={pending}
           onClick={onUseCredit}

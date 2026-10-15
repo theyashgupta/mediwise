@@ -1,14 +1,13 @@
-import { Link } from "@tanstack/react-router";
 import { MessagesSquare } from "lucide-react";
 import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 
 type AskCardProps = {
-  reportId: string;
   suggestions: string[];
+  onAsk: (question?: string) => void;
 };
 
-export function AskCard({ reportId, suggestions }: AskCardProps) {
+export function AskCard({ suggestions, onAsk }: AskCardProps) {
   const t = useT().dashboard.ask;
   return (
     <section
@@ -27,25 +26,18 @@ export function AskCard({ reportId, suggestions }: AskCardProps) {
         {suggestions.map((question) => (
           <li key={question}>
             <Button
-              asChild
+              data-testid="ask-suggestion"
               variant="outline"
               className="h-auto min-h-11 max-w-full justify-start text-left whitespace-normal"
+              onClick={() => onAsk(question)}
             >
-              <Link
-                data-testid="ask-suggestion"
-                to="/ask"
-                search={{ report: reportId, q: question }}
-              >
-                {question}
-              </Link>
+              {question}
             </Button>
           </li>
         ))}
         <li>
-          <Button asChild variant="ghost" className="min-h-11">
-            <Link to="/ask" search={{ report: reportId }}>
-              {t.open}
-            </Link>
+          <Button variant="ghost" className="min-h-11" onClick={() => onAsk()}>
+            {t.open}
           </Button>
         </li>
       </ul>

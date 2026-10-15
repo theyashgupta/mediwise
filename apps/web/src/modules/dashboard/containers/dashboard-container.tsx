@@ -6,6 +6,7 @@ import { LoadingState } from "@/common/components/loading-state";
 import { useT } from "@/common/hooks/use-locale";
 import { downloadFile } from "@/common/utils/download";
 import { Button } from "@/components/ui/button";
+import { useOpenAsk } from "@/modules/assistant";
 import { EpisodeCardContainer } from "@/modules/episodes";
 import { useMe } from "@/modules/me";
 import { ConsentPromptContainer, useActiveProfile } from "@/modules/profiles";
@@ -49,6 +50,7 @@ export function DashboardContainer() {
   const { profile, setActiveProfileId } = useActiveProfile();
   const dashboard = useDashboard(profile?.id);
   const me = useMe();
+  const openAsk = useOpenAsk();
   const family = useFamily();
   const retry = useRetryReport();
   const install = useInstallOffer();
@@ -116,7 +118,10 @@ export function DashboardContainer() {
         )}
         {data?.latest && <LatestReportCard report={data.latest} />}
         {data?.latest && me.data?.assistant.enabled && (
-          <AskCard reportId={data.latest.id} suggestions={askSuggestions(data, retests ?? [])} />
+          <AskCard
+            suggestions={askSuggestions(data, retests ?? [])}
+            onAsk={(q) => openAsk({ q, report: data.latest.id })}
+          />
         )}
         {data?.latest && <EpisodeCardContainer profileId={profile?.id} />}
         {data?.latest && <YearReviewCardContainer profileId={profile?.id} />}

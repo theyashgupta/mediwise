@@ -5,6 +5,7 @@ import { useOnline } from "@/common/hooks/use-online";
 import { Logo } from "@/common/components/brand/logo";
 import { OfflineState } from "@/common/components/offline-state";
 import { cn } from "@/lib/utils";
+import { AskWidgetContainer } from "@/modules/assistant";
 import { AppBreadcrumb } from "./app-breadcrumb";
 import { AppHeader } from "./app-header";
 import { AppSidebar } from "./app-sidebar";
@@ -125,7 +126,9 @@ export function AppShell() {
           <UpdateLine />
           {!online && <OfflineState />}
           <div hidden={!online} className="min-h-svh">
-            <Outlet />
+            <AskWidgetContainer>
+              <Outlet />
+            </AskWidgetContainer>
           </div>
           <SiteFooter className="mt-16" />
         </main>

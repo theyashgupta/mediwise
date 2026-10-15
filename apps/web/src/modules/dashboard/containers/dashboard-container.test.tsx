@@ -1,5 +1,5 @@
 /** @vitest-environment jsdom */
-import { screen, waitFor, within } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { messages } from "@/config/messages";
@@ -66,11 +66,11 @@ describe.each(["en", "hi"] as const)("the ask card on Home in %s", (locale) => {
     await renderApp("/", { locale });
 
     const card = await screen.findByRole("region", { name: t.title });
-    expect(within(card).getByRole("link", { name: t.changed("LDL cholesterol") })).toBeTruthy();
+    expect(within(card).getByRole("button", { name: t.changed("LDL cholesterol") })).toBeTruthy();
     expect(
-      within(card).getByRole("link", { name: t.finding("HbA1c is in the watch range") }),
+      within(card).getByRole("button", { name: t.finding("HbA1c is in the watch range") }),
     ).toBeTruthy();
-    expect(within(card).getByRole("link", { name: t.retest("HbA1c") })).toBeTruthy();
+    expect(within(card).getByRole("button", { name: t.retest("HbA1c") })).toBeTruthy();
   });
 
   test("while the assistant is off Home shows no ask card", async () => {
@@ -82,7 +82,7 @@ describe.each(["en", "hi"] as const)("the ask card on Home in %s", (locale) => {
   });
 });
 
-test("a suggestion opens the ask page with the question in the input and sends nothing", async () => {
+test("a suggestion opens the chat widget on Home with the question in the input and sends nothing", async () => {
   vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
   const requests = network(meOn);
   await renderApp("/");
@@ -90,20 +90,19 @@ test("a suggestion opens the ask page with the question in the input and sends n
 
   await userEvent.click(
     await screen.findByRole(
-      "link",
+      "button",
       { name: t.dashboard.ask.changed("LDL cholesterol") },
       { timeout: 10_000 },
     ),
   );
 
-  const input = await screen.findByRole(
+  const panel = await screen.findByRole("dialog");
+  const input = await within(panel).findByRole(
     "textbox",
     { name: t.assistant.inputLabel },
     { timeout: 10_000 },
   );
-  await waitFor(() =>
-    expect((input as HTMLTextAreaElement).value).toBe(t.dashboard.ask.changed("LDL cholesterol")),
-  );
-  expect(window.location.search).toContain(`report=${reportId}`);
+  expect((input as HTMLTextAreaElement).value).toBe(t.dashboard.ask.changed("LDL cholesterol"));
+  expect(window.location.pathname).toBe("/");
   expect(requests.some(({ method }) => method === "POST")).toBe(false);
 });
