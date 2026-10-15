@@ -4,7 +4,10 @@ import { sources } from "../sources.js";
 
 const { endoVitD2011, kost1990, tietz2022 } = sources;
 
-const calciumConversions = [{ from: "mmol/L", factor: 4.008 }];
+const calciumConversions = [
+  { from: "mmol/L", factor: 4.008 },
+  { from: "mg/L", factor: 0.1 },
+];
 
 export const boneMarkers: Marker[] = [
   {

@@ -60,6 +60,18 @@ Three markers have a South Asian range, because a published source gives a diffe
 ## Units
 
 - Each marker has one canonical unit. `conversions` maps other units to it: `canonical = value * factor + (offset ?? 0)`. Only HbA1c (IFCC mmol/mol) uses `offset`.
+
+### Canonical unit rule
+
+- A report stores each value in the unit the lab printed. The canonical value is derived from it with `conversions` and stored beside it.
+- Scores, statuses, trends and comparisons use the canonical value, so two reports in different units line up.
+- The report page and the marker page show the printed value and unit, and the canonical value on a second line when the number differs. Other views and the doctor export show the canonical value.
+- A repeat of a scored marker in another unit, such as HbA1c in mmol/mol after %, is also stored in the canonical unit, so every row of a marker shares one unit.
+- A unit that `conversions` does not list is never converted. The value keeps its printed unit and gets no status. A guessed conversion is worse than no status.
+- Every unit in the unit table of `docs/research/international-lab-reports.md` converts. `normalise.test.ts` checks this with the verified factors.
+- HbA1c is one marker. Percent is canonical, and mmol/mol converts with the NGSP equation (percent = 0.09148 x mmol/mol + 2.152). No glucose factor ever applies to it.
+- Urea and BUN are two markers. Urea mmol/L x 6.006 = mg/dL, BUN mmol/L x 2.801 = mg/dL. No BUN name is an alias of urea.
+- Panel names (FBC, CBC, U&E, LFT, Blutbild, NFS) are never marker aliases. The extraction prompt uses them as panel headings.
 - Qualitative urine results use the unit `grade`: 0 negative or absent, 1 trace, 2 for 1+, 3 for 2+, 4 for 3+, 5 for 4+. Extraction maps the lab text to this number.
 - Text-only markers (urine colour, peripheral smear lines, HBsAg) use the unit `text` and have no ranges. A text result is `unknown` and adds nothing to the score, unless one of the marker's `textRules` matches. A rule is a case-insensitive regex on the printed text, for example HBsAg and HCV "Reactive" are risk, "Non Reactive" is optimal, and anti-HBs "<2.0" is watch. A rule can carry a `followUp` at any status, and a risk rule must. The engine uses it for a text result in place of the numeric retest template.
 - `lipoprotein_a` has no nmol/L conversion. The mg/dL to nmol/L factor depends on the isoform, so a fixed factor gives wrong values.

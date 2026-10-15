@@ -102,7 +102,10 @@ export const derived: Derived[] = [
     ],
     category: "lipids",
     unit: "mg/dL",
-    conversions: [{ from: "mmol/L", factor: 38.67 }],
+    conversions: [
+      { from: "mmol/L", factor: 38.67 },
+      { from: "g/L", factor: 100 },
+    ],
     precision: 0,
     description: "All the cholesterol in particles that can clog arteries.",
     whatItIs:

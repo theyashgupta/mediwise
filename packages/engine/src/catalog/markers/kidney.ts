@@ -16,10 +16,14 @@ export const kidneyMarkers: Marker[] = [
       "creat",
       "creatinine blood",
       "plasma creatinine",
+      "kreatinin",
     ],
     category: "kidney",
     unit: "mg/dL",
-    conversions: [{ from: "µmol/L", factor: 0.01131 }],
+    conversions: [
+      { from: "µmol/L", factor: 0.01131 },
+      { from: "mg/L", factor: 0.1 },
+    ],
     precision: 2,
     description: "A muscle waste product that shows how well kidneys filter.",
     whatItIs:
@@ -39,14 +43,27 @@ export const kidneyMarkers: Marker[] = [
   {
     key: "blood_urea",
     name: "Urea",
-    aliases: ["urea", "serum urea", "s urea", "urea serum", "blood urea serum", "plasma urea"],
+    aliases: [
+      "urea",
+      "serum urea",
+      "s urea",
+      "urea serum",
+      "blood urea serum",
+      "plasma urea",
+      "harnstoff",
+      "uree",
+      "ureum",
+    ],
     category: "kidney",
     unit: "mg/dL",
-    conversions: [{ from: "mmol/L", factor: 6.006 }],
+    conversions: [
+      { from: "mmol/L", factor: 6.006 },
+      { from: "g/L", factor: 100 },
+    ],
     precision: 0,
     description: "A protein waste product that the kidneys clear.",
     whatItIs:
-      "The liver makes urea from protein breakdown, and the kidneys remove it. Indian labs usually report urea, while US labs report urea nitrogen.",
+      "The liver makes urea from protein breakdown, and the kidneys remove it. Many labs report urea. Other labs report blood urea nitrogen (BUN), which is a different number.",
     whyItMatters:
       "A high urea can reflect lower kidney function, dehydration or a high protein intake. It is less specific than creatinine, so doctors interpret the two together.",
     whatMovesIt:

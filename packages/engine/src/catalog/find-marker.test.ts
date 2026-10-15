@@ -6,6 +6,69 @@ test("normalizeName lower-cases, strips punctuation and unit parentheses, and co
   expect(normalizeName("  S. CREATININE (mg/dL) ")).toBe("s creatinine");
   expect(normalizeName("Glucose (Fasting)")).toBe("glucose fasting");
   expect(normalizeName("IG%")).toBe("ig percent");
+  expect(normalizeName("Glycémie à jeun")).toBe("glycemie a jeun");
+});
+
+test.each([
+  ["Glycémie à jeun", "glucose_fasting"],
+  ["Glukose nüchtern", "glucose_fasting"],
+  ["Glucosa en ayunas", "glucose_fasting"],
+  ["Urée", "blood_urea"],
+  ["Harnstoff", "blood_urea"],
+  ["Ureum", "blood_urea"],
+  ["Urea", "blood_urea"],
+  ["BUN", "bun"],
+  ["Urea Nitrogen", "bun"],
+  ["Urea Nitrogen (BUN)", "bun"],
+  ["Blood Urea Nitrogen", "bun"],
+  ["Natrium", "sodium"],
+  ["Kalium", "potassium"],
+  ["ALAT", "alt"],
+  ["GPT", "alt"],
+  ["TGP", "alt"],
+  ["SGPT", "alt"],
+  ["ASAT", "ast"],
+  ["GOT", "ast"],
+  ["TGO", "ast"],
+  ["SGOT", "ast"],
+  ["Hemoglobin A1c", "hba1c"],
+  ["A1c", "hba1c"],
+  ["Glycated hemoglobin", "hba1c"],
+  ["Glycohemoglobin", "hba1c"],
+  ["HbA1c (IFCC)", "hba1c"],
+  ["Hemoglobin", "hemoglobin"],
+  ["Haemoglobin", "hemoglobin"],
+  ["Hämoglobin", "hemoglobin"],
+  ["Hémoglobine", "hemoglobin"],
+  ["25-Hydroxy vitamin D", "vitamin_d"],
+  ["VITAMIN D, 25-OH, TOTAL", "vitamin_d"],
+  ["TSH 3rd generation", "tsh"],
+  ["Kreatinin", "creatinine"],
+  ["White cell count", "wbc_count"],
+])("international name %j resolves to %s", (raw, key) => {
+  expect(findMarker(raw)?.key).toBe(key);
+});
+
+test.each([
+  "CBC",
+  "FBC",
+  "Blutbild",
+  "NFS",
+  "Hemograma",
+  "Emocromo",
+  "U&E",
+  "BMP",
+  "CMP",
+  "LFT",
+  "Hepatic function panel",
+  "Lipid panel",
+  "Glucose",
+  "Glukose",
+  "Glycemie",
+  "Glucosa",
+  "Glicemia",
+])("panel name or bare glucose word %j maps to no marker", (raw) => {
+  expect(findMarker(raw)).toBeUndefined();
 });
 
 test.each([

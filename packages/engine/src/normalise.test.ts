@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { findMarker } from "./catalog/index.js";
-import { normaliseValues, toCanonical } from "./normalise.js";
+import { findMarker, markers } from "./catalog/index.js";
+import { normaliseUnit, normaliseValues, toCanonical } from "./normalise.js";
 
 const glucose = findMarker("glucose fasting")!;
 const ratio = findMarker("tg hdl ratio")!;
@@ -32,6 +32,70 @@ describe("toCanonical", () => {
   test("a missing unit is canonical only for a unitless marker", () => {
     expect(toCanonical(glucose, 92)).toBeUndefined();
     expect(toCanonical(ratio, 2.4)).toBe(2.4);
+  });
+});
+
+describe("international units", () => {
+  test.each([
+    ["Glucose fasting", 5.5, "mmol/L", 99, 0],
+    ["Glucose fasting", 0.99, "g/L", 99, 0],
+    ["Total cholesterol", 5.2, "mmol/L", 201, 0],
+    ["Total cholesterol", 2.01, "g/L", 201, 0],
+    ["Triglycerides", 1.5, "g/L", 150, 0],
+    ["Creatinine", 88.4, "umol/L", 1, 1],
+    ["Creatinine", 10, "mg/L", 1, 1],
+    ["BUN", 5, "mmol/L", 14, 0],
+    ["Urea", 5, "mmol/L", 30, 0],
+    ["Urea", 0.3, "g/L", 30, 0],
+    ["Uric acid", 357, "µmol/L", 6, 1],
+    ["Uric acid", 0.36, "mmol/L", 6, 1],
+    ["Uric acid", 60, "mg/L", 6, 1],
+    ["Bilirubin", 17.1, "umol/L", 1, 1],
+    ["Bilirubin", 10, "mg/L", 1, 1],
+    ["Calcium", 2.5, "mmol/L", 10, 1],
+    ["Calcium", 100, "mg/L", 10, 1],
+    ["Haemoglobin", 140, "g/L", 14, 1],
+    ["Haemoglobin", 8.7, "mmol/L", 14, 1],
+    ["TSH", 2.1, "mU/L", 2.1, 1],
+    ["TSH", 2.1, "mIU/L", 2.1, 1],
+    ["Free T4", 15, "pmol/L", 1.16, 1],
+    ["Vitamin D", 75, "nmol/L", 30, 0],
+    ["Vitamin B12", 300, "ng/L", 300, 0],
+    ["Vitamin B12", 300, "pmol/L", 407, 0],
+    ["Ferritin", 80, "ug/L", 80, 0],
+    ["ALT", 0.5, "ukat/L", 30, 0],
+    ["Iron", 18, "umol/L", 101, 0],
+    ["HbA1c", 48, "mmol/mol", 6.5, 1],
+    ["HbA1c", 53, "mmol/mol", 7, 1],
+    ["HbA1c", 5.9, "% of total Hgb", 5.9, 1],
+  ] as const)(
+    "%s %d %s converts to %d in the canonical unit",
+    (name, value, unit, expected, digits) => {
+      expect(toCanonical(findMarker(name)!, value, unit)).toBeCloseTo(expected, digits);
+    },
+  );
+
+  test("HbA1c converts only from mmol/mol and percent, never with a glucose factor", () => {
+    const hba1c = findMarker("HbA1c")!;
+    expect(hba1c.conversions.map((c) => c.from)).toEqual(["mmol/mol", "% of total Hgb"]);
+    expect(toCanonical(hba1c, 48, "mmol/L")).toBeUndefined();
+    expect(toCanonical(hba1c, 48, "mg/dL")).toBeUndefined();
+  });
+
+  test("an ambiguous unit stays unconverted", () => {
+    expect(toCanonical(findMarker("Vitamin D")!, 50, "IU")).toBeUndefined();
+    expect(toCanonical(findMarker("Creatinine")!, 1, "mmol/mol")).toBeUndefined();
+  });
+
+  test("no unit converts two ways on one marker", () => {
+    for (const marker of markers) {
+      const rules = new Map([[normaliseUnit(marker.unit), "1+0"]]);
+      for (const { from, factor, offset } of marker.conversions) {
+        const rule = `${factor}+${offset ?? 0}`;
+        expect(rules.get(normaliseUnit(from)) ?? rule, `${marker.key} ${from}`).toBe(rule);
+        rules.set(normaliseUnit(from), rule);
+      }
+    }
   });
 });
 
