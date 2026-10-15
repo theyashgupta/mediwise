@@ -118,6 +118,11 @@ const store = vi.hoisted(() => {
 });
 
 const findings = vi.hoisted(() => new Map<string, { title: string }[]>());
+const claude = vi.hoisted(() => ({
+  create: vi.fn(() => {
+    throw new Error("Home must not call Claude");
+  }),
+}));
 
 vi.mock("./dashboard.repo.js", () => store.repo);
 vi.mock("../findings/findings.repo.js", async (importOriginal) => ({
@@ -126,6 +131,7 @@ vi.mock("../findings/findings.repo.js", async (importOriginal) => ({
   findVisit: async () => undefined,
 }));
 vi.mock("../profiles/profiles.repo.js", () => store.profilesRepo);
+vi.mock("../../lib/anthropic.js", () => ({ anthropic: { messages: { create: claude.create } } }));
 
 const app = new Hono<AuthEnv>()
   .use(async (c, next) => {
@@ -168,12 +174,15 @@ function marker(markerKey: string, value: number, status: "optimal" | "watch" | 
 
 const client = testClient(app);
 
-async function dashboard(user = "alice") {
-  return client.dashboard.$get({ query: { profileId } }, { headers: { "x-user": user } });
+async function dashboard(user = "alice", locale = "en") {
+  return client.dashboard.$get(
+    { query: { profileId } },
+    { headers: { "x-user": user, "accept-language": locale } },
+  );
 }
 
-async function body() {
-  const res = await dashboard();
+async function body(locale = "en") {
+  const res = await dashboard("alice", locale);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
@@ -194,6 +203,8 @@ test("a profile with no reports gets an empty dashboard", async () => {
     newSince: [],
     moveFirst: [],
     attention: [],
+    suggestions: [],
+    patterns: [],
     retests: [],
     newestFinding: null,
     recent: [],
@@ -507,8 +518,78 @@ test("reports still being read are counted", async () => {
   expect(data.latest).toBeNull();
 });
 
+/** Writes an older full panel with high homocysteine and low B12, and a newer report where homocysteine rose. */
+function b12History() {
+  store.reports.push(done("old", "2026-03-01", 70), done("new", "2026-09-01", 72));
+  store.markers.set("old", [
+    { ...marker("homocysteine", 15, "risk"), unit: "µmol/L", calibratedLow: 5, calibratedHigh: 10 },
+    {
+      ...marker("vitamin_b12", 300, "watch"),
+      unit: "pg/mL",
+      calibratedLow: 400,
+      calibratedHigh: 900,
+    },
+  ]);
+  store.markers.set("new", [
+    { ...marker("homocysteine", 20, "risk"), unit: "µmol/L", calibratedLow: 5, calibratedHigh: 10 },
+  ]);
+}
+
+test("suggestions carry the disclaimer and the value and report of each marker behind them", async () => {
+  b12History();
+  const { suggestions } = await body();
+  expect(suggestions.length).toBeGreaterThan(0);
+  for (const suggestion of suggestions) {
+    expect(suggestion.disclaimer).toMatch(/^MediWise is for information\./);
+  }
+  expect(suggestions.flatMap(({ markers }) => markers)).toContainEqual(
+    expect.objectContaining({ markerKey: "homocysteine", value: 20, reportId: "new" }),
+  );
+  expect(suggestions.flatMap(({ markers }) => markers)).toContainEqual(
+    expect.objectContaining({ markerKey: "vitamin_b12", value: 300, reportId: "old" }),
+  );
+});
+
+test("patterns match on the latest value of each marker across reports and say how they changed", async () => {
+  b12History();
+  const { patterns } = await body();
+  expect(patterns).toContainEqual(
+    expect.objectContaining({
+      key: "b12_deficiency",
+      name: "B12 deficiency pattern",
+      change: "worsening",
+      matched: [
+        expect.objectContaining({ markerKey: "homocysteine", value: 20, reportId: "new" }),
+        expect.objectContaining({ markerKey: "vitamin_b12", value: 300, reportId: "old" }),
+      ],
+    }),
+  );
+});
+
+test("Accept-Language hi gives the suggestions and the pattern text in Hindi", async () => {
+  b12History();
+  const { suggestions, patterns } = await body("hi");
+  const devanagari = /\p{Script=Devanagari}/u;
+  expect(suggestions.every(({ title, disclaimer }) => devanagari.test(title + disclaimer))).toBe(
+    true,
+  );
+  const b12 = patterns.find(({ key }) => key === "b12_deficiency");
+  expect(b12?.name).toMatch(devanagari);
+  expect(b12?.description).toMatch(devanagari);
+});
+
+test("the dashboard read never calls Claude", async () => {
+  b12History();
+  claude.create.mockClear();
+  expect((await dashboard()).status).toBe(200);
+  expect(claude.create).not.toHaveBeenCalled();
+});
+
 test("another user's profile answers 404", async () => {
-  expect((await dashboard("mallory")).status).toBe(404);
+  b12History();
+  const res = await dashboard("mallory");
+  expect(res.status).toBe(404);
+  expect(JSON.stringify(await res.json())).not.toContain("b12_deficiency");
 });
 
 test("a missing profile id answers 400", async () => {

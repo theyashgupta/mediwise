@@ -1,10 +1,14 @@
 import {
+  type AttentionAlert,
   type AttentionVisit,
   buildAttention,
+  buildPatternTrends,
+  buildSuggestions,
   derived,
   deviation,
   markers,
   markerText,
+  patternText,
   retestDueDate,
   sameScoreScale,
   settleFinding,
@@ -125,6 +129,15 @@ export async function loadAttentionInput(userId: string, profileId: string, with
   return { visits: toVisits(rows), alerts };
 }
 
+/** Names each attention row: a marker by its catalog name, a study alert by its title. */
+function nameAttention(visits: AttentionVisit[], alerts: AttentionAlert[]) {
+  return buildAttention(visits, alerts).map((item) =>
+    item.kind === "alert"
+      ? { ...item, markerKey: null, name: item.title }
+      : { ...item, name: catalogByKey.get(item.markerKey)?.name ?? item.markerKey },
+  );
+}
+
 /**
  * Lists what needs attention across every done report of a profile, each row with a name to show.
  *
@@ -133,11 +146,36 @@ export async function loadAttentionInput(userId: string, profileId: string, with
  */
 export async function listAttention(userId: string, profileId: string, withAlerts = true) {
   const { visits, alerts } = await loadAttentionInput(userId, profileId, withAlerts);
-  return buildAttention(visits, alerts).map((item) =>
-    item.kind === "alert"
-      ? { ...item, markerKey: null, name: item.title }
-      : { ...item, name: catalogByKey.get(item.markerKey)?.name ?? item.markerKey },
+  return nameAttention(visits, alerts);
+}
+
+/**
+ * Builds the health overview of a profile from one load of its history: attention, suggestions and pattern trends.
+ *
+ * @remarks
+ * Each suggestion marker is an attention row by construction, so its value and report come from that row.
+ */
+async function buildOverview(userId: string, profileId: string, locale: TextLocale) {
+  const { visits, alerts } = await loadAttentionInput(userId, profileId);
+  const attention = nameAttention(visits, alerts);
+  const flagged = new Map(
+    attention.flatMap((item) => (item.kind === "marker" ? [[item.markerKey, item] as const] : [])),
   );
+  const suggestions = buildSuggestions(visits, alerts, locale).map((suggestion) => ({
+    ...suggestion,
+    markers: suggestion.markerKeys.flatMap((key) => {
+      const item = flagged.get(key);
+      if (!item) return [];
+      const { markerKey, name, value, unit, reportId } = item;
+      return [{ markerKey, name, value, unit, reportId }];
+    }),
+  }));
+  const patterns = buildPatternTrends(visits).map((trend) => {
+    const { name, description } = patternText(trend, locale);
+    const { key, severity, change, matched } = trend;
+    return { key, severity, change, matched, name, description };
+  });
+  return { attention, suggestions, patterns };
 }
 
 /**
@@ -148,16 +186,16 @@ export async function listAttention(userId: string, profileId: string, withAlert
  * The newest scored full panel (`leadMinMarkers` mapped markers or more) leads, and its score change compares with the
  * previous scored full panel only, never with a narrow report. The narrow reports after the lead come back in
  * `newSince` with their own markers. With no full panel, the newest report leads and compares with a narrow one.
- * `attention` reads every report, not the lead one only.
+ * `attention`, `suggestions` and `patterns` read every report, not the lead one only.
  */
 export async function getDashboard(userId: string, profileId: string, locale: TextLocale = "en") {
   await getOwnedProfile(userId, profileId);
-  const [recent, done, processingCount, newestByMarker, attention] = await Promise.all([
+  const [recent, done, processingCount, newestByMarker, overview] = await Promise.all([
     repo.listRecentReports(userId, profileId, recentLimit),
     repo.listLatestDoneReports(userId, profileId, latestLimit),
     repo.countReportsInProgress(userId, profileId),
     repo.listLatestAssessedByMarker(userId, profileId),
-    listAttention(userId, profileId),
+    buildOverview(userId, profileId, locale),
   ]);
   const isFullPanel = (report: { mappedCount: number }) => report.mappedCount >= leadMinMarkers;
   const leadIndex = Math.max(
@@ -170,7 +208,7 @@ export async function getDashboard(userId: string, profileId: string, locale: Te
       latest: null,
       newSince: [],
       moveFirst: [],
-      attention,
+      ...overview,
       retests: [],
       newestFinding: null,
       recent,
@@ -213,7 +251,7 @@ export async function getDashboard(userId: string, profileId: string, locale: Te
     latest: { ...latest, counts, deltaSincePrevious },
     newSince,
     moveFirst,
-    attention,
+    ...overview,
     retests: listRetests(newestByMarker),
     newestFinding,
     recent,
