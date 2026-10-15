@@ -77,7 +77,7 @@
   "web src/routes/_app/design.tsx?tsr-split=component": 2892,
   "web src/routes/_app/dev/kitchen-sink.tsx?tsr-split=component": 5682,
   "web src/routes/_app/episodes/$episodeId.tsx?tsr-split=component": 3002,
-  "web src/routes/_app/index.tsx?tsr-split=component": 7574,
+  "web src/routes/_app/index.tsx?tsr-split=component": 8995,
   "web src/routes/_app/profiles.tsx?tsr-split=component": 2722,
   "web src/routes/_app/reports/$reportId_/markers/$markerKey.tsx?tsr-split=component": 3208,
   "web src/routes/_app/reports/$reportId.tsx?tsr-split=component": 11254,
