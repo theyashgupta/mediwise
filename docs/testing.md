@@ -10,6 +10,7 @@ MediWise has these test layers. CI runs each of them on every push and every pul
 | End-to-end | `pnpm e2e` | The main flow in a real browser, against a local Supabase and the real API and web. |
 | Bundle size | `pnpm size` | The gzip size of each web chunk and of the landing first load, against a committed baseline. |
 | Performance | `pnpm perf` | Lighthouse budgets and INP on production builds, with the dense history fixture. |
+| Supply chain | CI only | Tripwires for a trojanized dependency, in `.github/workflows/supply-chain-scan.yml`. It runs on a push to `main`, on each pull request and every day at 03:30 UTC. |
 
 ## Timeouts and workers
 
@@ -244,3 +245,29 @@ Update the baseline only when the growth is necessary, or when a chunk is new, r
 - Raise a budget when the scores stay higher in CI. Set a performance budget 10 points under the lowest CI median of at least two runs, because one run moves by about 7 points. Record the numbers in DESIGN.md. Do not use numbers from a laptop.
 - Never lower a budget to make a change pass. When a change must make a page slower, write the reason in the pull request and in DESIGN.md, in the same commit as the new budget.
 - On a machine with 8 GB of RAM, do not run `pnpm perf` together with `pnpm check`, `pnpm dev` or `pnpm e2e`. Other work on the machine makes the scores lower.
+
+## Supply-chain scan
+
+`.github/workflows/supply-chain-scan.yml` looks for the signs of a self-spreading npm worm. Such a worm adds an install hook to a package, writes loader or exfil files, and publishes stolen credentials. The workflow runs on a push to `main`, on each pull request, every day at 03:30 UTC, and by hand from the Actions tab. It uses no secrets. Each action is pinned to a commit SHA.
+
+| Step | What it catches |
+| --- | --- |
+| IOC filenames | A known worm file in the repo, for example `setup_bun.js`, `bun_environment.js` or `truffleSecrets.json`. It does not look in `node_modules` or `.git`. |
+| IOC strings | A known exfil host or secret scanner name in a file of the repo. The list is in the workflow. It does not look in `node_modules`, `.git` or the workflow file, so do not copy a pattern into another file. |
+| Lockfile | A package in `pnpm-lock.yaml` that comes from a host other than `registry.npmjs.org`: a tarball URL, a git repo, a directory or a `file:` version. It also fails when `.npmrc` or `pnpm-workspace.yaml` sets a different registry. |
+| Install-hook allowlist | A package with a `preinstall`, `install` or `postinstall` script, or a `binding.gyp` file, that is not in the allowlist. The step reads each package in `node_modules/.pnpm`, each hoisted package and each workspace package. |
+| pnpm audit | A known advisory. A high advisory shows in the log. A critical advisory fails the job. |
+
+The install runs with `pnpm install --frozen-lockfile --ignore-scripts`, so no install script runs before the allowlist step.
+
+### Add a package to the allowlist
+
+The allowlist is the `ALLOW` value of the install-hook step. Each name has a one-line reason in the comment above the step.
+
+1. Read the failure line in the job log. It names the package, the version and the hook.
+2. Run `pnpm why <name>` to find the dependency that brings in the package.
+3. Read the hook script in `node_modules/.pnpm/<name>@<version>/node_modules/<name>/`. Make sure that it does only what the package needs, for example a download of its own binary from `registry.npmjs.org`. Make sure that the repository field points to the upstream project.
+4. Add the name to `ALLOW`. Add a line with the reason to the comment above the step.
+5. When the hook must run on install, also add the name to `allowBuilds` in `pnpm-workspace.yaml`.
+
+Do not add a package that you did not read. When the hook sends data to an unknown host or reads tokens or credentials, remove the dependency and tell the maintainer.

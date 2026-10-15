@@ -1,0 +1,114 @@
+name: Supply-chain scan
+
+# Tripwires for npm supply-chain worms (Shai-Hulud pattern: trojanized deps that add
+# install-time hooks, drop loader or exfil files, and publish stolen credentials). Each
+# step fails on its indicator, so a compromise is caught on push, on PR, and on a daily
+# schedule when nothing is committed. Ported from the Dispatch repo for pnpm.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "30 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    name: scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: IOC filenames (worm droppers and stolen-secret dumps)
+        run: |
+          hits=$(find . \( -name node_modules -o -path ./.git \) -prune -o -type f \( \
+            -name "setup_bun.js" -o -name "bun_environment.js" \
+            -o -iname "*shai*hulud*" -o -iname "*sha1*hulud*" \
+            -o -name "processor.sh" -o -name "migrate-repos.sh" \
+            -o -name "truffleSecrets.json" -o -name "actionsSecrets.json" \
+            -o -name "cloud.json" -o -name "environment.json" \
+            -o -name "Math_Symbol.js" -o -name "math_init.js" \
+          \) -print)
+          if [ -n "$hits" ]; then echo "::error::IOC filenames found:"; echo "$hits"; exit 1; fi
+
+      - name: IOC strings (exfil endpoints, credential harvesting)
+        run: |
+          hits=$(grep -rEli "webhook\.site|shai.?hulud|sha1.?hulud|trufflehog|npm-cache\.com|pypi-get\.com|js-mirror\.com" . \
+            --exclude-dir=node_modules --exclude-dir=.git \
+            --exclude=supply-chain-scan.yml || true)
+          if [ -n "$hits" ]; then echo "::error::IOC strings found in:"; echo "$hits"; exit 1; fi
+
+      # pnpm writes only the integrity hash for a package from the configured registry. It
+      # writes a tarball URL, a git repo or a directory for any other source, and a file:,
+      # git or URL version for a non-registry specifier. The registry override check makes
+      # sure the configured registry is registry.npmjs.org.
+      - name: Lockfile resolves only to registry.npmjs.org
+        run: |
+          bad=$( { grep -nE '^\s+resolution:' pnpm-lock.yaml \
+              | grep -vE 'resolution: \{integrity: [^,}]+\}$' \
+              | grep -vE '\{integrity: [^,}]+, tarball: https://registry\.npmjs\.org/[^,}]+\}$'
+            grep -nE "https?://|git\+|git://|[@ '](github|gitlab|bitbucket|file):" pnpm-lock.yaml \
+              | grep -vE '^[0-9]+:\s+deprecated:' \
+              | grep -vE 'tarball: https://registry\.npmjs\.org/'
+            grep -HnE 'registry' .npmrc pnpm-workspace.yaml 2>/dev/null \
+              | grep -vE 'https://registry\.npmjs\.org/?\s*$'; } || true)
+          if [ -n "$bad" ]; then echo "::error::Sources outside registry.npmjs.org:"; echo "$bad"; exit 1; fi
+          echo "All $(grep -cE '^\s+resolution:' pnpm-lock.yaml) resolutions use registry.npmjs.org."
+
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+
+      # Allowlist, one reason per name. Vetted on 2026-10-15 against the installed tree.
+      #   esbuild: postinstall "node install.js" checks the platform binary and fetches it
+      #     from registry.npmjs.org if missing. Upstream evanw/esbuild. Used by vite, tsx,
+      #     drizzle-kit and @esbuild-kit/core-utils. allowBuilds: true.
+      #   unrs-resolver: postinstall "node postinstall.js" calls napi-postinstall to fetch
+      #     the native binding if the optional platform package is missing. Upstream
+      #     unrs/unrs-resolver. Used by eslint-import-resolver-typescript. allowBuilds: false.
+      - name: Install-hook allowlist (new lifecycle hooks are the worm's entry point)
+        env:
+          ALLOW: esbuild unrs-resolver
+        run: |
+          node -e '
+            const fs = require("fs"), path = require("path");
+            const allow = new Set(process.env.ALLOW.split(/\s+/).filter(Boolean));
+            const files = fs.globSync([
+              "node_modules/.pnpm/*/node_modules/{*,@*/*}/package.json",
+              "node_modules/{*,@*/*}/package.json",
+              "{apps,packages}/*/node_modules/{*,@*/*}/package.json",
+              "{apps,packages}/*/package.json",
+            ]);
+            const seen = new Set();
+            let fail = 0;
+            for (const f of files) {
+              let real;
+              try { real = fs.realpathSync(f); } catch { continue; }
+              if (seen.has(real)) continue;
+              seen.add(real);
+              let pkg;
+              try { pkg = JSON.parse(fs.readFileSync(real, "utf8")); } catch { continue; }
+              const s = pkg.scripts || {};
+              const hooks = ["preinstall", "install", "postinstall"].filter((k) => s[k]);
+              if (!s.install && fs.existsSync(path.join(path.dirname(real), "binding.gyp"))) hooks.push("install (implicit node-gyp, binding.gyp)");
+              if (!hooks.length) continue;
+              if (allow.has(pkg.name)) { console.log(`allowed ${pkg.name}@${pkg.version}: ${hooks.join(", ")}`); continue; }
+              console.log(`::error::Unexpected install hook in ${pkg.name}@${pkg.version} (${hooks.join(", ")}). Vet the package, then add it to the allowlist.`);
+              fail = 1;
+            }
+            console.log(`Scanned ${seen.size} package.json files.`);
+            process.exit(fail);
+          '
+
+      - name: pnpm audit (critical blocks; high reported)
+        run: |
+          pnpm audit --audit-level high || true
+          pnpm audit --audit-level critical
