@@ -19,10 +19,10 @@ export const me: Messages["me"] = {
     termsLink: review("शर्तें"),
     termsAfter: review(" स्वीकार हैं"),
     healthBefore: review(
-      "मेरी सहमति है कि MediWise मेरी हेल्थ रिपोर्ट स्टोर करे और उन्हें पढ़ने के लिए उनका कंटेंट अमेरिका में Anthropic को भेजे। ",
+      "मेरी सहमति है कि MediWise मेरी हेल्थ रिपोर्ट स्टोर करे और उन्हें पढ़ने के लिए एक AI सेवा का इस्तेमाल करे, जैसा ",
     ),
     healthLink: review("निजता नीति"),
-    healthAfter: review(" देखें।"),
+    healthAfter: review(" में बताया गया है।"),
     required: review("आगे बढ़ने के लिए इस बॉक्स पर टिक करें।"),
     gateTitle: review("रिपोर्ट अपलोड करने से पहले अपनी सहमति दें"),
     gateDescription: review("कोई रिपोर्ट पढ़ने से पहले MediWise को आपकी सहमति चाहिए।"),

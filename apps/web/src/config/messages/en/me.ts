@@ -16,9 +16,9 @@ export const me = {
     termsLink: "Terms",
     termsAfter: "",
     healthBefore:
-      "I agree that MediWise stores my health reports and sends their content to Anthropic in the United States to read them. See the ",
+      "I agree MediWise stores my health reports and uses an AI service to read them, as the ",
     healthLink: "Privacy policy",
-    healthAfter: ".",
+    healthAfter: " describes.",
     required: "Tick this box to continue.",
     gateTitle: "Give your consent before you upload a report",
     gateDescription: "MediWise needs your consent before it reads a report.",

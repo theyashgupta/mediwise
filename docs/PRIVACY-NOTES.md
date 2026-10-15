@@ -8,7 +8,8 @@ This file records what MediWise does with consent, with the data of family membe
 
 - Sign-up shows two separate boxes. Both are clear at the start, and the form does not submit until both are ticked.
   - `terms`: "I am 18 or older and I accept the Terms".
-  - `health_data`: "I agree that MediWise stores my health reports and sends their content to Anthropic in the United States to read them. See the Privacy policy." This is the explicit health data consent.
+  - `health_data`: "I agree MediWise stores my health reports and uses an AI service to read them, as the Privacy policy describes." This is the explicit health data consent.
+- The `health_data` box names no vendor and no country on purpose (MEDI-172). Only the privacy policy names the vendor. A provider change needs a policy edit and a new policy version, not a checkbox change.
 - Each consent is one row in `consent_records`: user id, kind, policy version, accepted time, withdrawn time, and the SHA-256 of the browser user agent. Row level security is on, with no policies.
 - The third kind, `assistant_review`, is the review-month consent of the Ask page. Migration 0029 moved the rows of the old `assistant_consents` table here and dropped that table.
 - The API sets the policy version (`policyVersion` in `packages/shared`). The client sends only the kinds, so no row has a version that the API did not set. A database check refuses an empty version.
@@ -16,7 +17,7 @@ This file records what MediWise does with consent, with the data of family membe
 - A Google or magic-link user has no metadata. The upload page shows the same two boxes before the first upload.
 - `POST /reports`, `POST /reports/:id/uploaded` and `POST /reports/:id/retry` answer 403 with `missingConsent: "health_data"` when the user has no health data consent for the current version. The admin retry goes through the same check for the report owner.
 - The JSON data download has every consent row. Account deletion deletes the rows, and the deletion log keeps their count (`consents`).
-- The second box has 21 words, one more than the copy rule allows. The ticket gives the text word for word, so the text stays.
+- The second box has 20 words, the limit of the copy rule.
 - Withdrawal is account deletion. No code sets `withdrawn_at` yet. A row with a withdrawn time does not count.
 
 ### Policy version rule
