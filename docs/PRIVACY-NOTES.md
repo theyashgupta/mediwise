@@ -1,8 +1,30 @@
 # Privacy notes
 
-This file records what MediWise does with the data of family members and children, and what still needs a decision. MediWise is built to follow the DPDP Act 2023 and its rules. This file gives no legal advice. Source: `docs/research/features-2026-10.md`, Open items outside the ranking.
+This file records what MediWise does with consent, with the data of family members and children, and what still needs a decision. MediWise is built to follow the DPDP Act 2023 and its rules, GDPR Article 9 for users in the EU and the UK, and the Washington My Health My Data Act. This file gives no legal advice. Source: `docs/research/features-2026-10.md`, Open items outside the ranking.
 
 ## What the app does
+
+### Consent records (MEDI-165)
+
+- Sign-up shows two separate boxes. Both are clear at the start, and the form does not submit until both are ticked.
+  - `terms`: "I am 18 or older and I accept the Terms".
+  - `health_data`: "I agree that MediWise stores my health reports and sends their content to Anthropic in the United States to read them. See the Privacy policy." This is the explicit health data consent.
+- Each consent is one row in `consent_records`: user id, kind, policy version, accepted time, withdrawn time, and the SHA-256 of the browser user agent. Row level security is on, with no policies.
+- The third kind, `assistant_review`, is the review-month consent of the Ask page. Migration 0029 moved the rows of the old `assistant_consents` table here and dropped that table.
+- The API sets the policy version (`policyVersion` in `packages/shared`). The client sends only the kinds, so no row has a version that the API did not set. A database check refuses an empty version.
+- An email sign-up stores `consent_version` in the Supabase user metadata. The first visit to the upload page turns it into the two rows, with no second prompt. The accepted time is the time of that visit.
+- A Google or magic-link user has no metadata. The upload page shows the same two boxes before the first upload.
+- `POST /reports`, `POST /reports/:id/uploaded` and `POST /reports/:id/retry` answer 403 with `missingConsent: "health_data"` when the user has no health data consent for the current version. The admin retry goes through the same check for the report owner.
+- The JSON data download has every consent row. Account deletion deletes the rows, and the deletion log keeps their count (`consents`).
+- The second box has 21 words, one more than the copy rule allows. The ticket gives the text word for word, so the text stays.
+- Withdrawal is account deletion. No code sets `withdrawn_at` yet. A row with a withdrawn time does not count.
+
+### Policy version rule
+
+- The policy version is the date of the last change to the privacy policy or the Terms, in the form `YYYY-MM-DD`.
+- Change the date on every policy change. The policy pages show it at the top.
+- When the version changes, only the `health_data` consent is asked again, before the next upload. A `terms` or `assistant_review` row counts for every later version.
+- The policy text stays in English. Legal text needs a legal review before a translation (`docs/i18n.md`).
 
 ### Family member permission
 
@@ -45,7 +67,7 @@ This file records what MediWise does with the data of family members and childre
 - "Clear chat", profile deletion and account deletion remove the question text, the answer text and the refusal kind.
 - The row stays with the user id, the model, the token counts, the cost, the charged flag and the time. Profile and account deletion also remove the profile from the row.
 - These counts keep the question quota, the daily limit and the monthly Claude spend correct. The kept row holds no text.
-- In the review month (`ASSISTANT_REVIEW=true`), an account asks only after it agrees to the review on the Ask page. `assistant_consents` keeps the user id and the time it agreed.
+- In the review month (`ASSISTANT_REVIEW=true`), an account asks only after it agrees to the review on the Ask page. `consent_records` keeps an `assistant_review` row with the time and the policy version.
 - The maintainer reads a sample of questions and answers with `pnpm --filter @mediwise/api assistant:review`. The sample holds only questions asked after the account agreed. The command never shows a profile name or an email.
 - Each verdict is a row in `assistant_reviews` with the question id, the verdict and the time. Account deletion removes the consent and keeps the verdict, which holds no text. The data download includes the consent.
 - Questions go to Anthropic, the same as report text. MediWise is built to follow the DPDP Act 2023 and Rules 2025. This note gives no legal advice.
@@ -63,9 +85,14 @@ The checkbox above is the first step. It does not verify who the parent or guard
 
 1. **Which timeline applies.** Check whether MeitY's shorter timeline is in force. That date sets the deadline for every item below.
 2. **Verifiable consent for a child.** Today a parent or guardian confirms with a tick. Decide whether a tick is enough, or which check of the adult the app needs.
-3. **An account owner under 18.** The terms ask for an age of 18 or more, but sign-up does not ask for an age. The self profile shows no guardian line. Decide whether sign-up asks for an age.
+3. **An account owner under 18.** Since MEDI-165, sign-up asks the user to confirm an age of 18 or older. The app does not check the age. Decide whether a self-declared age is enough.
 4. **A child who turns 18.** The guardian record stays on the profile. Decide whether the app asks the owner to confirm the person's own permission at 18.
 5. **Unconfirmed profiles.** A profile without a permission time can still get new reports. Decide whether uploads stop until the owner confirms.
 6. **How long the deletion log stays.** The minimum is one year and the app keeps rows with no end date. Decide on a maximum and add a job that deletes older rows.
 7. **The hash in the deletion log.** A plain SHA-256 lets anyone with a user id find that user's row. Decide whether a keyed hash (a new secret) is needed.
 8. **Removing one family profile.** Only account deletion writes a log row. Decide whether removing one profile also writes a row.
+9. **EU and UK representatives.** GDPR Article 27 and the UK GDPR need a representative for a controller outside the EU and the UK. None is appointed. The policy names none.
+10. **DPIA.** Health data processed at scale with an LLM needs a data protection impact assessment. None is written.
+11. **SCCs with Anthropic and Render.** The policy says transfers use the standard contractual clauses. Sign the data processing agreements with the SCCs (and the UK Addendum) with Anthropic and Render, and add a transfer impact assessment for India.
+12. **Zero data retention.** Ask Anthropic for zero data retention on the MediWise organisation. Today the default commercial retention applies.
+13. **Other Claude calls without the health data consent.** Only a new report, its upload confirmation and a retry check the consent. The Ask page, the year in review and the episode summary still send stored values to Anthropic for an account with no consent record, for example an account made before MEDI-165. Decide whether these calls also need the consent and a gate on their pages.
