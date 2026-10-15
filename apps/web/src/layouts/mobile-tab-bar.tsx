@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { focusRing, navItems } from "./nav";
 
 const press =
-  "transition duration-(--duration-fast) ease-standard active:scale-90 motion-reduce:transition-none";
+  "transition duration-(--duration-fast) ease-standard motion-safe:active:scale-90 motion-reduce:transition-none";
 
 const tabClass = cn(
   "group/tab flex h-12 w-full max-w-14 flex-col items-center justify-center gap-0.5 rounded-2xl text-muted-foreground not-data-[status=active]:hover:bg-foreground/5 not-data-[status=active]:hover:text-foreground data-[status=active]:bg-primary/10 data-[status=active]:text-primary",
