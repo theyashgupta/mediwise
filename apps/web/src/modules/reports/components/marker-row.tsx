@@ -35,6 +35,8 @@ export function MarkerRow({ reportId, marker }: MarkerRowProps) {
         valueText={marker.valueText}
         unit={marker.unit}
         precision={marker.precision}
+        printed={marker.printed}
+        equation={marker.equation}
         className="text-right"
       />
       {showBar && marker.value !== null && (

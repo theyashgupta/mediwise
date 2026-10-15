@@ -43,6 +43,8 @@ const marker = (markerKey: string, name: string, value: number): MarkerRow => ({
   description: "",
   value,
   valueText: null,
+  printed: null,
+  equation: null,
   unit: "mg/dL",
   precision: 0,
   status: "optimal",

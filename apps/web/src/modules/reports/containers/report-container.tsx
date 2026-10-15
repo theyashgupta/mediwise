@@ -1,5 +1,6 @@
 import { getRouteApi, Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
+  CalendarClock,
   CirclePause,
   FileDown,
   GitCompareArrows,
@@ -340,6 +341,15 @@ export function ReportContainer() {
           </>
         }
       />
+      {header.dateAmbiguous && (
+        <p
+          className="flex items-start gap-3 text-sm text-muted-foreground"
+          data-testid="report-date-ambiguous"
+        >
+          <CalendarClock className="mt-0.5 size-4 shrink-0" aria-hidden />
+          {t.report.dateAmbiguous}
+        </p>
+      )}
       {status === "paused" && (
         <p className="flex items-center gap-3 text-muted-foreground">
           <CirclePause className="size-5" aria-hidden />
