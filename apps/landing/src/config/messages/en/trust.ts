@@ -17,4 +17,5 @@ export const trust = {
     body: "When MediWise reads your files, it removes pages with identity documents, such as passports or national ID cards.",
   },
   payments: { title: "Cards and UPI", body: "Payments go through Cashfree." },
+  securityLink: "How MediWise protects your data",
 };

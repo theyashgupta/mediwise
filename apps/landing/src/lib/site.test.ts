@@ -13,7 +13,7 @@ test("every link to the app uses NEXT_PUBLIC_APP_URL without a trailing slash, a
   expect(appLinks.terms).toBe("https://app.mediwise.theyashgupta.me/terms");
 });
 
-test("the sitemap lists the English and Hindi pages with hreflang and x-default links under NEXT_PUBLIC_SITE_URL", async () => {
+test("the sitemap lists the English and Hindi pages and security pages, with hreflang and x-default links under NEXT_PUBLIC_SITE_URL", async () => {
   vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://mediwise.theyashgupta.me");
   const { default: sitemap } = await import("../app/sitemap");
   const { default: robots } = await import("../app/robots");
@@ -22,9 +22,16 @@ test("the sitemap lists the English and Hindi pages with hreflang and x-default 
     "hi-IN": "https://mediwise.theyashgupta.me/hi",
     "x-default": "https://mediwise.theyashgupta.me/",
   };
+  const security = {
+    en: "https://mediwise.theyashgupta.me/security",
+    "hi-IN": "https://mediwise.theyashgupta.me/hi/security",
+    "x-default": "https://mediwise.theyashgupta.me/security",
+  };
   expect(sitemap()).toEqual([
     { url: "https://mediwise.theyashgupta.me/", alternates: { languages } },
     { url: "https://mediwise.theyashgupta.me/hi", alternates: { languages } },
+    { url: "https://mediwise.theyashgupta.me/security", alternates: { languages: security } },
+    { url: "https://mediwise.theyashgupta.me/hi/security", alternates: { languages: security } },
   ]);
   expect(robots().sitemap).toBe("https://mediwise.theyashgupta.me/sitemap.xml");
 });

@@ -22,4 +22,5 @@ export const trust: Messages["trust"] = {
     ),
   },
   payments: { title: "कार्ड और UPI", body: "पेमेंट Cashfree से होते हैं।" },
+  securityLink: review("MediWise आपके डेटा की सुरक्षा कैसे करता है"),
 };

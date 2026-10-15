@@ -2,7 +2,7 @@ import { Logo } from "../../../web/src/common/components/brand/logo";
 import { contact } from "../../../web/src/modules/payments/config/policies";
 import { LanguageSwitch } from "@/components/language-switch";
 import { messages, type Locale } from "@/config/messages";
-import { appLinks, buttonStyles } from "@/lib/site";
+import { appLinks, buttonStyles, securityPath } from "@/lib/site";
 
 const socialLinks: { href: string; label: string }[] = [];
 
@@ -41,6 +41,7 @@ export function Footer({ locale }: { locale: Locale }) {
     { href: appLinks.privacy, label: t.footer.privacy },
     { href: appLinks.refunds, label: t.footer.refunds },
     { href: appLinks.contact, label: t.footer.contact },
+    { href: securityPath(locale), label: t.footer.security },
   ];
   return (
     <footer className="border-t">

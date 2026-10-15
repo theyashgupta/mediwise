@@ -7,6 +7,7 @@ import { howItWorks } from "./how-it-works";
 import { marquee } from "./marquee";
 import { numbers } from "./numbers";
 import { pricing } from "./pricing";
+import { security } from "./security";
 import { site } from "./site";
 import { story } from "./story";
 import { trust } from "./trust";
@@ -24,4 +25,5 @@ export const hi = {
   trust,
   pricing,
   faq,
+  security,
 };
