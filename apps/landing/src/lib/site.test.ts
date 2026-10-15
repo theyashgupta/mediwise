@@ -45,3 +45,32 @@ test("without the variables the links stay on the local dev servers", async () =
     siteUrl: "http://localhost:3000",
   });
 });
+
+test("the head script flags JavaScript and restores a paused motion choice before the first paint", async () => {
+  const { restoreMotion } = await import("./site");
+  for (const [stored, motion] of [
+    ["paused", "paused"],
+    ["playing", undefined],
+  ] as const) {
+    const dataset: Record<string, string> = {};
+    new Function("document", "localStorage", restoreMotion)(
+      { documentElement: { dataset } },
+      { getItem: (key: string) => (key === "motion" ? stored : null) },
+    );
+    expect(dataset).toEqual(motion ? { js: "", motion } : { js: "" });
+  }
+});
+
+test("the head script still flags JavaScript when storage is blocked", async () => {
+  const { restoreMotion } = await import("./site");
+  const dataset: Record<string, string> = {};
+  new Function("document", "localStorage", restoreMotion)(
+    { documentElement: { dataset } },
+    {
+      getItem: () => {
+        throw new Error("blocked");
+      },
+    },
+  );
+  expect(dataset).toEqual({ js: "" });
+});

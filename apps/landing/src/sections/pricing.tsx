@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { SectionHeader } from "@/components/section-header";
 import { messages, type Locale } from "@/config/messages";
 import { facts, packs } from "@/lib/facts";
@@ -16,13 +17,15 @@ export function Pricing({ locale }: { locale: Locale }) {
         {t.body(facts.maxFiles)}
       </SectionHeader>
       <ul className="mt-12 grid gap-4 md:grid-cols-3">
-        {packs.map((pack) => {
+        {packs.map((pack, index) => {
           const best = pack.id === facts.cheapest.id;
           return (
             <li
               key={pack.id}
+              data-reveal=""
+              style={{ "--i": index } as CSSProperties}
               className={cn(
-                "reveal flex flex-col rounded-xl border bg-card p-6",
+                "flex flex-col rounded-xl border bg-card p-6",
                 best && "border-primary ring-1 ring-primary",
               )}
             >

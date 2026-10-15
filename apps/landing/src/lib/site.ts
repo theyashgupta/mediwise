@@ -6,6 +6,8 @@ export const appUrl = new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localho
 export const securityPath = (locale: Locale) =>
   locale === "en" ? "/security" : `${localePages[locale].path}/security`;
 
+export const restoreMotion = `document.documentElement.dataset.js="";try{if(localStorage.getItem("motion")==="paused")document.documentElement.dataset.motion="paused"}catch(e){}`;
+
 export const securityPolicyUrl = "https://github.com/theyashgupta/mediwise/blob/main/SECURITY.md";
 
 export const appLinks = {
