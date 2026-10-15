@@ -1,5 +1,5 @@
 import { getRouteApi, Link } from "@tanstack/react-router";
-import { ArrowLeft, TrendingUp } from "lucide-react";
+import { ArrowLeft, Lightbulb, TrendingUp } from "lucide-react";
 import { useCrumbLabel } from "@/common/hooks/use-crumb-label";
 import { EmptyState } from "@/common/components/empty-state";
 import { ErrorState } from "@/common/components/error-state";
@@ -78,6 +78,18 @@ export function TrendContainer() {
             <span className="text-muted-foreground">{t.trends.detail.sinceBefore}</span>
             <span className={cn("rounded-md px-2 py-0.5 text-sm font-medium", style.badge)}>
               {t.trends.direction[data.direction]}
+            </span>
+          </p>
+        )}
+        {data.suggestion && (
+          <p
+            data-testid="trend-detail-suggestion"
+            className="flex gap-3 rounded-xl border bg-card p-4 text-sm"
+          >
+            <Lightbulb className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+            <span>
+              <span className="sr-only">{t.trends.suggestion}: </span>
+              {data.suggestion}
             </span>
           </p>
         )}

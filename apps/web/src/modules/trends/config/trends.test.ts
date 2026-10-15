@@ -1,6 +1,14 @@
 import { expect, test } from "vitest";
 import type { ReportHeader, TrendItem } from "../types";
-import { formatChange, reportLabels, sortTrends, sparklinePoints, summaryLine } from "./trends";
+import {
+  formatChange,
+  matchesTrend,
+  reportLabels,
+  sortTrends,
+  sparklinePoints,
+  summaryLine,
+  validateTrendsSearch,
+} from "./trends";
 
 const item = (name: string, percent: number | null) =>
   ({ name, change: { absolute: 1, percent } }) as TrendItem;
@@ -50,4 +58,33 @@ test("two reports with one title get the file name, other reports keep their tit
   expect(labels.get("b")).toBe("10 Feb 2026 · blood panel (20 markers), urine.pdf");
   expect(labels.get("c")).toBe("10 Feb 2026 · ultrasound");
   expect(labels.get("d")).toBe("10 Feb 2025");
+});
+
+test("the Trends filters come from the URL, and an unknown value drops out", () => {
+  expect(
+    validateTrendsSearch({
+      category: "lipids",
+      direction: "worsening",
+      status: "watch",
+      sort: "name",
+    }),
+  ).toEqual({ category: "lipids", direction: "worsening", status: "watch", sort: "name" });
+  expect(
+    validateTrendsSearch({ direction: "down", status: "unknown", sort: "change", category: "" }),
+  ).toEqual({ category: undefined, direction: undefined, status: undefined, sort: undefined });
+});
+
+test("a trend row shows only when it passes every active filter", () => {
+  const row = {
+    category: "lipids",
+    direction: "worsening",
+    latestStatus: "watch",
+  } as TrendItem;
+  expect(matchesTrend(row, {})).toBe(true);
+  expect(matchesTrend(row, { category: "lipids", direction: "worsening", status: "watch" })).toBe(
+    true,
+  );
+  expect(matchesTrend(row, { direction: "worsening", status: "risk" })).toBe(false);
+  expect(matchesTrend(row, { category: "kidney", direction: "worsening" })).toBe(false);
+  expect(matchesTrend({ ...row, latestStatus: "unknown" }, { status: "watch" })).toBe(false);
 });

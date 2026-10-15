@@ -44,10 +44,25 @@ export const trends: Messages["trends"] = {
     noSharedTitle: "अभी कोई साझा मार्कर नहीं",
     noSharedBody:
       "ट्रेंड के लिए एक मार्कर दो रिपोर्ट में होना चाहिए। आपकी किन्हीं दो रिपोर्ट में एक ही मार्कर नहीं है।",
+    noMatchTitle: review("इन फ़िल्टर से कोई ट्रेंड नहीं मिला"),
+    noMatchBody: review("दूसरे फ़िल्टर चुनें, या सभी ट्रेंड देखने के लिए फ़िल्टर हटाएँ।"),
+    clearFilters: review("फ़िल्टर हटाएँ"),
   },
+  watch: {
+    title: review("इन पर नज़र रखें"),
+    description: review(
+      "ताज़ा मान में जोखिम या ध्यान दें वाले मार्कर, या पिछले मान से बिगड़े मार्कर।",
+    ),
+    none: review("कोई मार्कर जोखिम में, ध्यान दें में या पहले से बिगड़ा हुआ नहीं है।"),
+    more: (n: number) => review(`${n} और दिखाएँ`),
+    change: (delta: string, date: string) => `${date} से ${delta}`,
+  },
+  suggestion: review("सुझाव"),
   controls: {
     all: "सभी",
     filter: "कैटेगरी से छाँटें",
+    direction: review("दिशा"),
+    status: "स्थिति",
     sort: "क्रम",
     sortBy: "इस क्रम में:",
     sorts: { change: "सबसे बड़ा बदलाव", name: "नाम" },

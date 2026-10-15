@@ -67,6 +67,14 @@ export function TrendList({ items }: TrendListProps) {
                   unit={item.unit}
                   className={cn("justify-end whitespace-normal text-right", style.text)}
                 />
+                {item.suggestion && (
+                  <span
+                    data-testid="trend-suggestion"
+                    className="col-span-full text-sm text-muted-foreground"
+                  >
+                    {item.suggestion}
+                  </span>
+                )}
               </Link>
             </li>
           );
