@@ -71,7 +71,7 @@
   "web src/routes/_app/admin.tsx?tsr-split=component---loader": 2819,
   "web src/routes/_app/ask.tsx?tsr-split=component": 6575,
   "web src/routes/_app/compare.tsx?tsr-split=component": 2372,
-  "web src/routes/_app/credits.tsx?tsr-split=component": 805,
+  "web src/routes/_app/credits.tsx?tsr-split=component": 2057,
   "web src/routes/_app/design.tsx?tsr-split=component": 2892,
   "web src/routes/_app/dev/kitchen-sink.tsx?tsr-split=component": 4002,
   "web src/routes/_app/episodes/$episodeId.tsx?tsr-split=component": 3002,
