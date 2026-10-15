@@ -49,6 +49,8 @@ export function formatChange(change: Change, precision: number, unit: string | n
     : `${absolute} (${sign}${formatValue(Math.abs(change.percent), 1)}%)`;
 }
 
+const collator = new Intl.Collator();
+
 /**
  * Sorts trend rows by name, or by the size of the last change.
  *
@@ -56,7 +58,7 @@ export function formatChange(change: Change, precision: number, unit: string | n
  * The change is compared in percent, so markers in different units rank fairly. A change without a percent sorts last.
  */
 export function sortTrends(items: TrendItem[], sort: TrendSort) {
-  const byName = (a: TrendItem, b: TrendItem) => a.name.localeCompare(b.name);
+  const byName = (a: TrendItem, b: TrendItem) => collator.compare(a.name, b.name);
   if (sort === "name") return items.toSorted(byName);
   const size = (item: TrendItem) => Math.abs(item.change?.percent ?? -1);
   return items.toSorted((a, b) => size(b) - size(a) || byName(a, b));
