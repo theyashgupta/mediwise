@@ -81,6 +81,18 @@ test("Home compares the full panel with the previous full panel, lists the narro
   await expect(row.getByTestId("family-stale")).toHaveCount(0);
 });
 
+test("Home lists what needs attention across every report, and the risk chip keeps B12 and drops watch rows", async () => {
+  const rows = page.getByTestId("attention-row");
+  await expect(rows.filter({ hasText: "Vitamin B12" })).toHaveCount(1);
+  await expect(rows.filter({ hasText: /^HbA1c/ })).toHaveCount(0);
+  const all = await rows.count();
+  await page.getByTestId("attention-filter-risk").click();
+  await expect(rows.filter({ hasText: "Vitamin B12" })).toHaveCount(1);
+  expect(await rows.count()).toBeLessThan(all);
+  await page.getByTestId("attention-filter-all").click();
+  await expect(rows).toHaveCount(all);
+});
+
 test("a report opened low on Home starts at the top, and back restores the Home scroll offset", async () => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");

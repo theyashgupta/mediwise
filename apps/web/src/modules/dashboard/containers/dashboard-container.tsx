@@ -141,13 +141,7 @@ export function DashboardContainer() {
         )}
         {data && data.recent.length > 0 && (
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-            {data.latest && (
-              <AttentionList
-                reportId={data.latest.id}
-                markers={data.moveFirst}
-                flaggedCount={data.latest.counts.watch + data.latest.counts.risk}
-              />
-            )}
+            {data.latest && <AttentionList items={data.attention} />}
             <RecentReports reports={data.recent} />
           </div>
         )}

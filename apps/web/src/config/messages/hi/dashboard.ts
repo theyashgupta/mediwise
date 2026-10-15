@@ -76,8 +76,18 @@ export const dashboard: Messages["dashboard"] = {
   },
   attention: {
     title: review("इन पर ध्यान दें"),
-    seeAll: (n: number) => `सभी ${n} देखें`,
     none: review("स्कोर किए गए सभी मार्कर अपनी सबसे अच्छी रेंज में हैं।"),
+    filter: review("सूची छाँटें"),
+    filters: {
+      all: "सभी",
+      worsening: review("बिगड़ रहा है"),
+      risk: review("जोखिम"),
+      watch: review("ध्यान दें"),
+    },
+    noneInFilter: review("इस समूह में कुछ नहीं है।"),
+    worsening: review("बिगड़ रहा है"),
+    change: (delta: string, date: string) => review(`${date} से ${delta}`),
+    study: review("स्टडी रिपोर्ट"),
   },
   recent: {
     title: "हाल की रिपोर्ट",
