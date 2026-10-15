@@ -581,4 +581,10 @@ export const sources = {
     title: "Dietary Guidelines for Indians. ICMR-National Institute of Nutrition, Hyderabad",
     year: 2024,
   },
+  nhsIronAnaemia2024: {
+    id: "nhsIronAnaemia2024",
+    title: "Iron deficiency anaemia. NHS, UK National Health Service",
+    year: 2024,
+    url: "https://www.nhs.uk/conditions/iron-deficiency-anaemia/",
+  },
 } satisfies Record<string, Source>;

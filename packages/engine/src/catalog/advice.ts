@@ -16,7 +16,8 @@ const {
 } = sources;
 
 const activity = "Walk briskly or do other activity on most days of the week.";
-const lessSalt = "Use less salt. Eat fewer pickles, papad and packaged snacks.";
+const lessSalt =
+  "Use less salt. Eat fewer salty foods, such as chips, processed meat, pickles and papad.";
 const weightLoss = "Weight loss when you are overweight";
 
 const bloodSugar: Lifestyle = {
@@ -24,33 +25,37 @@ const bloodSugar: Lifestyle = {
   habits: [
     "Walk or do other activity for at least 150 minutes each week.",
     "Drink water in place of sweet drinks and packaged juice.",
-    "Fill half your plate with vegetables. Eat less white rice and maida.",
+    "Fill half your plate with vegetables. Eat less white rice, white bread and refined flour (maida).",
   ],
   raises: ["Sweet drinks and sweets", "Long hours of sitting", "Weight gain around the waist"],
-  lowers: ["Regular activity", weightLoss, "Vegetables, dal and whole grains"],
+  lowers: ["Regular activity", weightLoss, "Vegetables, whole grains, and lentils or beans (dal)"],
   source: ada2025.id,
 };
 
 const cholesterol: Lifestyle = {
   side: "high",
   habits: [
-    "Cook with small amounts of vegetable oil in place of ghee, butter or vanaspati.",
-    "Eat more fibre from oats, dal, beans, fruit and vegetables.",
+    "Cook with a little olive, mustard or canola oil in place of butter, ghee or hydrogenated fat (vanaspati).",
+    "Eat more fibre from oats, lentils and beans (dal, rajma, chana), fruit and vegetables.",
     activity,
   ],
-  raises: ["Ghee, butter and fried snacks", "Fatty red meat and full-fat dairy", "Weight gain"],
-  lowers: ["Fibre from oats, dal and beans", "Regular activity", weightLoss],
+  raises: [
+    "Butter, clarified butter (ghee) and fried snacks",
+    "Fatty red meat and full-fat dairy",
+    "Weight gain",
+  ],
+  lowers: ["Fibre from oats, lentils and beans (dal)", "Regular activity", weightLoss],
   source: ahaAcc2018.id,
 };
 
 const triglycerides: Lifestyle = {
   side: "high",
   habits: [
-    "Eat fewer sweets and sweet drinks, and less white rice and maida.",
+    "Eat fewer sweets and sweet drinks, and less white rice, white bread and refined flour (maida).",
     "Drink less alcohol, or stop.",
     activity,
   ],
-  raises: ["Sugar, white rice and maida", "Alcohol", "Weight gain"],
+  raises: ["Sugar, white rice and refined flour (maida)", "Alcohol", "Weight gain"],
   lowers: ["Regular activity", "Less sugar and alcohol", weightLoss],
   source: ahaAcc2018.id,
 };
@@ -78,8 +83,8 @@ const bloodPressure: Lifestyle = {
 const iron: Lifestyle = {
   side: "low",
   habits: [
-    "Eat iron-rich foods, such as green leafy vegetables, dal, eggs or meat.",
-    "Eat fruit with vitamin C, such as amla or orange, with your meals.",
+    "Eat iron-rich foods, such as leafy greens, lentils and beans (dal), eggs, meat or fish.",
+    "Eat fruit with vitamin C, such as oranges, guava or Indian gooseberry (amla), with your meals.",
     "Do not drink tea or coffee for one hour before or after a meal.",
   ],
   raises: ["Iron-rich foods", "Fruit with vitamin C at meals"],
@@ -126,7 +131,7 @@ export const lifestyle: Record<string, Lifestyle> = {
     side: "high",
     habits: [
       activity,
-      "Eat smaller portions of sweets, fried snacks, white rice and maida.",
+      "Eat smaller portions of sweets, fried snacks, white rice, white bread and refined flour (maida).",
       "Drink water in place of sweet drinks.",
     ],
     raises: ["Sweet drinks and fried snacks", "Long hours of sitting", "Large portions"],
@@ -153,22 +158,22 @@ export const lifestyle: Record<string, Lifestyle> = {
   vitamin_b12: {
     side: "low",
     habits: [
-      "Include milk, curd or paneer every day.",
+      "Include milk, yogurt (curd) or cheese (paneer) every day.",
       "If you eat eggs, fish or meat, include them a few times a week.",
       "If you eat no animal foods, ask your doctor about fortified foods.",
     ],
-    raises: ["Milk, curd and paneer", "Eggs, fish and meat", "Fortified foods"],
+    raises: ["Milk, yogurt (curd) and cheese (paneer)", "Eggs, fish and meat", "Fortified foods"],
     lowers: ["Little or no milk, eggs, fish or meat"],
     source: iomBVitamins1998.id,
   },
   folate: {
     side: "low",
     habits: [
-      "Eat green leafy vegetables, such as spinach and methi, on most days.",
-      "Include dal, chana, rajma or other beans.",
+      "Eat leafy greens, such as spinach, kale or fenugreek leaves (methi), on most days.",
+      "Include lentils, beans and chickpeas (dal, rajma, chana).",
       "Eat fresh fruit, such as oranges.",
     ],
-    raises: ["Green leafy vegetables", "Dal and beans", "Fresh fruit"],
+    raises: ["Green leafy vegetables", "Lentils and beans (dal, rajma)", "Fresh fruit"],
     lowers: ["Few vegetables and fruit", "Heavy alcohol use", "Vegetables cooked for a long time"],
     source: iomBVitamins1998.id,
   },

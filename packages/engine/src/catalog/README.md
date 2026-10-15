@@ -129,6 +129,8 @@ Left out on purpose: `total_cholesterol` (LDL, HDL and ApoB cover it), `uric_aci
 
 Standard Indian panels skip `insulin_fasting`, `apolipoprotein_b`, `lipoprotein_a` and `hs_crp`. A report without them cannot be fully comprehensive. That is the intent: the unmeasured list tells the user what to add.
 
+US and UK panels have the same gaps. A US routine check usually orders a CMP (comprehensive metabolic panel) or a BMP (basic metabolic panel), a CBC (complete blood count) and a lipid panel. The CMP gives glucose, electrolytes, calcium, BUN, creatinine, proteins and the liver enzymes. The BMP leaves out the liver part. A UK GP usually orders an FBC (full blood count), U&E (urea, electrolytes and creatinine, with eGFR) and LFT (liver function tests), and adds HbA1c and lipids when needed. These panels give `hemoglobin`, glucose, `creatinine`, `alt` and the standard lipids. They skip `insulin_fasting`, `apolipoprotein_b`, `lipoprotein_a` and `hs_crp`, and include `tsh`, `vitamin_d`, `vitamin_b12` and `ferritin` only when a doctor asks. US labs print BUN and UK labs print urea, so the catalog keeps both as separate markers.
+
 ## Known limits
 
 - LH, FSH and estradiol have male ranges only. Female values depend on the cycle day, and the range schema has no cycle phase.

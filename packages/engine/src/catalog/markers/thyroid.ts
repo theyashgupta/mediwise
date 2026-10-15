@@ -107,7 +107,7 @@ export const thyroidMarkers: Marker[] = [
     precision: 1,
     description: "All the T4 thyroid hormone in blood, bound and free.",
     whatItIs:
-      "Total T4 includes the hormone bound to carrier proteins and the small free part. Many Indian full body panels report total T3 and T4 with TSH.",
+      "Total T4 includes the hormone bound to carrier proteins and the small free part. Many health check and thyroid panels report total T3 and T4 with TSH.",
     whyItMatters:
       "It helps confirm a thyroid problem that TSH flags. Changes in carrier proteins can shift it without any thyroid issue, so free T4 is more precise.",
     whatMovesIt:
@@ -135,7 +135,7 @@ export const thyroidMarkers: Marker[] = [
     precision: 0,
     description: "All the T3 thyroid hormone in blood, bound and free.",
     whatItIs:
-      "Total T3 includes the T3 bound to carrier proteins and the free part. Most Indian thyroid profiles report it.",
+      "Total T3 includes the T3 bound to carrier proteins and the free part. Many thyroid panels report it.",
     whyItMatters:
       "A high value supports an overactive thyroid. A low value is common during illness or dieting and does not by itself mean thyroid disease.",
     whatMovesIt:

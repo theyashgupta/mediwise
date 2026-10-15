@@ -75,7 +75,7 @@ export const derived: Derived[] = [
     precision: 1,
     description: "Harmful LDL cholesterol for each unit of protective HDL.",
     whatItIs:
-      "This ratio divides LDL cholesterol by HDL cholesterol. Many Indian lipid panels print it beside the main values.",
+      "This ratio divides LDL cholesterol by HDL cholesterol. Many lipid panels print it beside the main values.",
     whyItMatters:
       "A higher ratio means more plaque-building cholesterol relative to the clean-up kind. Millan and colleagues treat above 3.5 in men and above 3 in women as high.",
     whatMovesIt:
@@ -250,7 +250,7 @@ export const derived: Derived[] = [
     precision: 1,
     description: "The urea version of the BUN to creatinine ratio.",
     whatItIs:
-      "This ratio divides urea by creatinine, both in mg/dL. Indian labs report it because they measure urea rather than BUN.",
+      "This ratio divides urea by creatinine, both in mg/dL. Some labs print urea and others print urea nitrogen (BUN). They are different markers, so this is not the BUN ratio.",
     whyItMatters:
       "It works the same way as the BUN ratio. A high value suggests dehydration or high protein intake, and a low value suggests low protein intake or liver disease. Its range is the BUN range multiplied by 2.14.",
     whatMovesIt:
@@ -398,7 +398,7 @@ export const derived: Derived[] = [
     conversions: [],
     precision: 2,
     description: "The balance between albumin and the other blood proteins.",
-    whatItIs: "This ratio divides albumin by globulin. Most Indian liver panels print it.",
+    whatItIs: "This ratio divides albumin by globulin. Many liver panels print it.",
     whyItMatters:
       "A low ratio means low albumin or high globulin, which can reflect liver disease, inflammation or kidney protein loss. A high ratio is rarely a concern.",
     whatMovesIt:
@@ -430,7 +430,7 @@ export const derived: Derived[] = [
     precision: 0,
     description: "Your HbA1c translated into an everyday sugar number.",
     whatItIs:
-      "eAG converts HbA1c into the average glucose level it represents, using the ADA formula of 28.7 times HbA1c minus 46.7. Many Indian labs print it under HbA1c.",
+      "eAG converts HbA1c into the average glucose level it represents, using the ADA formula of 28.7 times HbA1c minus 46.7. Many labs print it under HbA1c.",
     whyItMatters:
       "It carries the same information as HbA1c in units people see on a glucose meter. An HbA1c of 5.7% matches about 117 mg/dL, and 6.5% matches about 140.",
     whatMovesIt:
