@@ -15,23 +15,26 @@ import { YearReviewCardContainer } from "@/modules/year-review";
 import { AskCard } from "../components/ask-card";
 import { AttentionList } from "../components/attention-list";
 import { DashboardGreeting } from "../components/dashboard-greeting";
+import { DoctorList } from "../components/doctor-list";
 import { FamilyList } from "../components/family-list";
+import { HabitList } from "../components/habit-list";
 import { InstallBanner } from "../components/install-banner";
 import { InstallHintSheet } from "../components/install-hint-sheet";
 import { LatestReportCard } from "../components/latest-report-card";
 import { NewSinceStrip } from "../components/new-since-strip";
+import { PatternTrendList } from "../components/pattern-trend-list";
 import { ProcessingCard } from "../components/processing-card";
 import { ProfilePrompt } from "../components/profile-prompt";
 import { RecentReports } from "../components/recent-reports";
 import { RetestList } from "../components/retest-list";
 import { askSuggestions } from "../config/ask-suggestions";
 import { buildRetestCalendarFile } from "../config/calendar-file";
-import { isMeasuredRecently } from "../config/report-age";
+import { mergeRetests } from "../config/merge-retests";
 import { useDashboard } from "../hooks/use-dashboard";
 import { useDismissedForSession } from "../hooks/use-dismissed-for-session";
 import { useFamily } from "../hooks/use-family";
 import { useInstallOffer } from "@/common/hooks/use-install-prompt";
-import type { RetestDate } from "../types";
+import type { RetestDate, Suggestion } from "../types";
 
 function UploadButton() {
   const t = useT();
@@ -46,7 +49,8 @@ function UploadButton() {
 }
 
 export function DashboardContainer() {
-  const text = useT().dashboard;
+  const t = useT();
+  const text = t.dashboard;
   const { profile, setActiveProfileId } = useActiveProfile();
   const dashboard = useDashboard(profile?.id);
   const me = useMe();
@@ -62,9 +66,13 @@ export function DashboardContainer() {
   );
   const incomplete = profile && (!profile.dateOfBirth || !profile.sex);
 
-  const retests = data?.retests.filter(
-    (retest) => !isMeasuredRecently(retest.measuredOn, new Date()),
-  );
+  const suggestions = data?.suggestions ?? [];
+  const ofKind = (...kinds: Suggestion["kind"][]) =>
+    suggestions.filter(({ kind }) => kinds.includes(kind));
+  const retests = data && mergeRetests(data.retests, suggestions, new Date());
+  const retestDisclaimer = retests?.some(({ why }) => why)
+    ? ofKind("retest")[0]?.disclaimer
+    : undefined;
   const addToCalendar = (marker: RetestDate) => {
     if (!profile) return;
     const file = buildRetestCalendarFile({ profile, marker }, new Date());
@@ -116,6 +124,25 @@ export function DashboardContainer() {
         {data?.latest && data.newSince.length > 0 && (
           <NewSinceStrip since={data.latest.date} reports={data.newSince} />
         )}
+        {data?.latest && <AttentionList items={data.attention} />}
+        {data?.latest && (
+          <div className="grid grid-cols-1 gap-10 empty:hidden lg:grid-cols-2">
+            <DoctorList suggestions={ofKind("doctor_now", "doctor_soon")} />
+            <PatternTrendList
+              patterns={data.patterns}
+              disclaimer={suggestions[0]?.disclaimer ?? t.common.disclaimer}
+            />
+            {retests && retests.length > 0 && (
+              <RetestList
+                retests={retests}
+                disclaimer={retestDisclaimer}
+                today={new Date()}
+                onAddToCalendar={addToCalendar}
+              />
+            )}
+            <HabitList habits={ofKind("habit")} questions={ofKind("supplement_ask")} />
+          </div>
+        )}
         {data?.latest && <LatestReportCard report={data.latest} />}
         {data?.latest && me.data?.assistant.enabled && (
           <AskCard
@@ -125,9 +152,6 @@ export function DashboardContainer() {
         )}
         {data?.latest && <EpisodeCardContainer profileId={profile?.id} />}
         {data?.latest && <YearReviewCardContainer profileId={profile?.id} />}
-        {retests && retests.length > 0 && (
-          <RetestList retests={retests} today={new Date()} onAddToCalendar={addToCalendar} />
-        )}
         {isEmpty && (
           <EmptyState
             icon={FileText}
@@ -144,12 +168,7 @@ export function DashboardContainer() {
             onSelect={setActiveProfileId}
           />
         )}
-        {data && data.recent.length > 0 && (
-          <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-            {data.latest && <AttentionList items={data.attention} />}
-            <RecentReports reports={data.recent} />
-          </div>
-        )}
+        {data && data.recent.length > 0 && <RecentReports reports={data.recent} />}
       </div>
     </>
   );

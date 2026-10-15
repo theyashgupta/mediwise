@@ -88,6 +88,40 @@ export const dashboard: Messages["dashboard"] = {
     worsening: review("बिगड़ रहा है"),
     change: (delta: string, date: string) => review(`${date} से ${delta}`),
     study: review("स्टडी रिपोर्ट"),
+    source: review("आपकी सभी रिपोर्ट में हर मार्कर की सबसे नई वैल्यू से।"),
+  },
+  trendsLink: review("ट्रेंड खोलें"),
+  doctor: {
+    title: review("डॉक्टर से मिलें"),
+    source: review(
+      "आपकी कैलिब्रेटेड रेंज से काफ़ी बाहर के नतीजों और आपकी स्टडी रिपोर्ट की लाइनों से।",
+    ),
+    now: review("आज"),
+    soon: review("जल्द"),
+  },
+  suggestion: {
+    markers: review("इस सुझाव के पीछे के मार्कर"),
+    openStudy: review("स्टडी रिपोर्ट खोलें"),
+  },
+  patterns: {
+    title: review("सभी रिपोर्ट के पैटर्न"),
+    source: review(
+      "हम आपकी सभी रिपोर्ट में हर मार्कर की सबसे नई वैल्यू पर मार्कर के समूह जाँचते हैं।",
+    ),
+    markers: review("इस पैटर्न के मार्कर"),
+    change: {
+      new: review("नया"),
+      worsening: review("बिगड़ रहा है"),
+      improving: review("सुधर रहा है"),
+      stable: review("कोई बदलाव नहीं"),
+      cleared: review("अब नहीं है"),
+    },
+  },
+  habits: {
+    title: review("आदतें और डॉक्टर के लिए सवाल"),
+    source: review("आपकी सभी रिपोर्ट में कैलिब्रेटेड रेंज से बाहर के मार्कर से।"),
+    habits: review("आदतें"),
+    questions: review("डॉक्टर के लिए सवाल"),
   },
   recent: {
     title: "हाल की रिपोर्ट",
@@ -102,6 +136,7 @@ export const dashboard: Messages["dashboard"] = {
     addLabel: (marker: string) => `${marker} का दोबारा टेस्ट अपने कैलेंडर में जोड़ें`,
     add: "कैलेंडर में जोड़ें",
     askDoctor: review("दोबारा टेस्ट बुक करने से पहले अपने डॉक्टर से पूछें।"),
+    source: review("आपके पिछले टेस्ट की तारीख और हर मार्कर के दोबारा टेस्ट के आम समय से।"),
   },
   calendar: {
     summary: (marker: string, name: string) => `${name} का ${marker} दोबारा टेस्ट`,
