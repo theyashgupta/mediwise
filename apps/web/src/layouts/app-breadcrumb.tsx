@@ -18,20 +18,29 @@ export function AppBreadcrumb({ className, innerOnly }: AppBreadcrumbProps) {
   if (!match || match.status === "notFound") return null;
   const trail = pageTrail(match.routeId).map(({ id, page }) => {
     const href = fillPath(router.routesById[id].fullPath, match.params);
-    return { href, label: labels.get(href) ?? t.shell.pages[page.name] };
+    const named = labels.get(href);
+    return { href, label: named ?? t.shell.pages[page.name], fixed: named === undefined };
   });
   if (trail.length < (innerOnly ? 2 : 1)) return null;
 
   return (
     <nav aria-label={t.shell.breadcrumb} className={cn("min-w-0", className)}>
       <ol className="flex min-w-0 items-center gap-1.5 text-sm">
-        {trail.map(({ href, label }, index) =>
+        {trail.map(({ href, label, fixed }, index) =>
           index === trail.length - 1 ? (
-            <li key={href} aria-current="page" className="truncate font-medium">
+            <li
+              key={href}
+              aria-current="page"
+              title={label}
+              className="min-w-[40%] grow basis-0 truncate text-base font-semibold md:text-lg"
+            >
               {label}
             </li>
           ) : (
-            <li key={href} className="flex min-w-0 shrink items-center gap-1.5">
+            <li
+              key={href}
+              className={cn("flex items-center gap-1.5", fixed ? "shrink-0" : "min-w-0 shrink")}
+            >
               <Link
                 to={href}
                 className="truncate rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50"

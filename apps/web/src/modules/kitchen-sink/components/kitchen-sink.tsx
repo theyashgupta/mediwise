@@ -1,10 +1,19 @@
-import { Inbox, MoreHorizontal, Plus, Trash2 } from "lucide-react";
+import {
+  FileDown,
+  GitCompareArrows,
+  Inbox,
+  MoreHorizontal,
+  Plus,
+  Share2,
+  Trash2,
+} from "lucide-react";
 import { type ReactNode, useId } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Disclaimer } from "@/common/components/disclaimer";
 import { EmptyState } from "@/common/components/empty-state";
 import { ErrorState } from "@/common/components/error-state";
+import { IconAction, OverflowMenu } from "@/common/components/icon-action";
 import { LoadingState } from "@/common/components/loading-state";
 import { PageHeader } from "@/common/components/page-header";
 import { RangeBar } from "@/common/components/range-bar";
@@ -380,6 +389,33 @@ function Specimens() {
             Error toast
           </Button>
         </div>
+      </Specimen>
+
+      <Specimen title="Secondary actions: icon buttons, delete in the overflow menu">
+        <PageHeader
+          title="Blood panel"
+          description="1 Feb 2025 · Made-up Labs"
+          tools={
+            <>
+              <IconAction label="Compare reports">
+                <GitCompareArrows aria-hidden />
+              </IconAction>
+              <IconAction label="Export for doctor">
+                <FileDown aria-hidden />
+              </IconAction>
+              <IconAction label="Share with your doctor">
+                <Share2 aria-hidden />
+              </IconAction>
+              <OverflowMenu>
+                <DropdownMenuItem variant="destructive">
+                  <Trash2 aria-hidden />
+                  Delete report
+                </DropdownMenuItem>
+              </OverflowMenu>
+            </>
+          }
+          actions={<Button>Read my report</Button>}
+        />
       </Specimen>
 
       <Specimen title="PageHeader">

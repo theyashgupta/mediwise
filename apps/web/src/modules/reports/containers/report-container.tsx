@@ -18,8 +18,9 @@ import { LoadingState } from "@/common/components/loading-state";
 import { PageHeader } from "@/common/components/page-header";
 import { StatusBadge } from "@/common/components/status-badge";
 import { GlassButton } from "@/common/components/surface/glass";
+import { IconAction, OverflowMenu } from "@/common/components/icon-action";
 import type { Status } from "@/common/utils/status";
-import { Button } from "@/components/ui/button";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { ReportEpisodeContainer } from "@/modules/episodes";
 import { useMe } from "@/modules/me";
 import { useActiveProfile } from "@/modules/profiles";
@@ -283,6 +284,46 @@ export function ReportContainer() {
         }
         description={description}
         glass
+        tools={
+          <>
+            {status === "done" && (
+              <IconAction label={t.report.compare} asChild>
+                <Link to="/compare" search={{ b: reportId }} data-testid="report-compare-link">
+                  <GitCompareArrows aria-hidden />
+                </Link>
+              </IconAction>
+            )}
+            {status === "done" && (
+              <IconAction label={t.report.export} asChild>
+                <Link
+                  to="/reports/$reportId/export"
+                  params={{ reportId }}
+                  target="_blank"
+                  data-testid="report-export-link"
+                >
+                  <FileDown aria-hidden />
+                </Link>
+              </IconAction>
+            )}
+            {status === "done" && <ShareReportContainer reportId={reportId} />}
+            {status !== "processing" && (
+              <OverflowMenu>
+                <DropdownMenuItem
+                  variant="destructive"
+                  className="min-h-11 md:min-h-8"
+                  data-testid="report-delete"
+                  onSelect={() => {
+                    remove.reset();
+                    setConfirmingDelete(true);
+                  }}
+                >
+                  <Trash2 aria-hidden />
+                  {t.report.delete}
+                </DropdownMenuItem>
+              </OverflowMenu>
+            )}
+          </>
+        }
         actions={
           <>
             {status !== "done" && (
@@ -302,41 +343,6 @@ export function ReportContainer() {
                   {t.assistant.askReport}
                 </Link>
               </GlassButton>
-            )}
-            {status === "done" && (
-              <GlassButton asChild>
-                <Link to="/compare" search={{ b: reportId }}>
-                  <GitCompareArrows aria-hidden />
-                  {t.report.compare}
-                </Link>
-              </GlassButton>
-            )}
-            {status === "done" && (
-              <GlassButton asChild>
-                <Link
-                  to="/reports/$reportId/export"
-                  params={{ reportId }}
-                  target="_blank"
-                  data-testid="report-export-link"
-                >
-                  <FileDown aria-hidden />
-                  {t.report.export}
-                </Link>
-              </GlassButton>
-            )}
-            {status === "done" && <ShareReportContainer reportId={reportId} glass />}
-            {status !== "processing" && (
-              <Button
-                variant="destructive"
-                className="xl:ml-4"
-                onClick={() => {
-                  remove.reset();
-                  setConfirmingDelete(true);
-                }}
-              >
-                <Trash2 aria-hidden />
-                {t.report.delete}
-              </Button>
             )}
           </>
         }

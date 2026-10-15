@@ -42,6 +42,7 @@ export const shell: Messages["shell"] = {
   skipToContent: "सीधे सामग्री पर जाएँ",
   mainNav: "मुख्य",
   menu: "मेन्यू",
+  moreActions: "और विकल्प",
   expandSidebar: "साइडबार खोलें",
   collapseSidebar: "साइडबार छोटा करें",
   collapse: "छोटा करें",

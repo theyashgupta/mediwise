@@ -99,6 +99,24 @@ describe.each(["en", "hi"] as const)("the report header in %s", (locale) => {
     expect(await screen.findByRole("link", { name: messages[locale].report.compare })).toBeTruthy();
     expect(screen.queryByRole("link", { name: t.askReport })).toBeNull();
   });
+
+  test("delete is only in the more actions menu, and opens the confirm dialog", async () => {
+    network(me);
+    await renderApp(`/reports/${report.id}`, { locale });
+    const text = messages[locale];
+
+    const more = await screen.findByRole("button", { name: text.shell.moreActions });
+    expect(screen.getByRole("button", { name: text.reports.share.button })).toBeTruthy();
+    expect(screen.getByRole("link", { name: text.report.export })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: text.report.delete })).toBeNull();
+
+    await userEvent.click(more);
+    await userEvent.click(await screen.findByRole("menuitem", { name: text.report.delete }));
+
+    expect(
+      await screen.findByRole("dialog", { name: text.report.deleteDialog.title }),
+    ).toBeTruthy();
+  });
 });
 
 test("asking about a family member's report switches to that profile and opens its chat", async () => {
