@@ -56,6 +56,11 @@ export const shell = {
     legal: (year: number, company: string) =>
       `© ${year} MediWise. MediWise is a brand of ${company}.`,
   },
+  notFound: {
+    title: "We could not find this page",
+    body: "The page does not exist, or your account cannot open it.",
+    home: "Go to Home",
+  },
   offline: {
     title: "You are offline",
     body: "Connect to the internet to see your reports. MediWise keeps no report on this device.",

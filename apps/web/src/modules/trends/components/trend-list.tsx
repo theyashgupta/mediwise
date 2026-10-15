@@ -38,7 +38,12 @@ export const TrendList = memo(function TrendList({ items }: TrendListProps) {
           return (
             <li
               key={item.markerKey}
-              className="[contain-intrinsic-size:auto_5rem] [content-visibility:auto]"
+              className={cn(
+                "[content-visibility:auto] sm:[contain-intrinsic-size:auto_5rem]",
+                item.suggestion
+                  ? "[contain-intrinsic-size:auto_10rem]"
+                  : "[contain-intrinsic-size:auto_6rem]",
+              )}
             >
               <Link
                 to="/trends/$markerKey"

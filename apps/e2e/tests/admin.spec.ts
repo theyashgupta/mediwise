@@ -115,7 +115,7 @@ test("without a session the admin routes return 401", async () => {
   }
 });
 
-test("a user who is not the admin gets Not Found on /admin with no breadcrumb or link, and 404 from the admin routes", async () => {
+test("a user who is not the admin gets not found with a link home on /admin, no breadcrumb or admin link, and 404 from the admin routes", async () => {
   await ownerPage.goto("/signup");
   await ownerPage.getByTestId("auth-email").fill(ownerEmail);
   await ownerPage.getByTestId("auth-password").fill(password);
@@ -127,7 +127,10 @@ test("a user who is not the admin gets Not Found on /admin with no breadcrumb or
   ownerId = (JSON.parse(atob(ownerToken.split(".")[1] ?? "")) as { sub: string }).sub;
 
   await ownerPage.goto("/admin");
-  await expect(ownerPage.getByText("Not Found")).toBeVisible();
+  await expect(
+    ownerPage.getByRole("heading", { name: "We could not find this page" }),
+  ).toBeVisible();
+  await expect(ownerPage.getByRole("link", { name: "Go to Home" })).toHaveAttribute("href", "/");
   await expect(ownerPage.getByRole("heading", { name: "Operator" })).toHaveCount(0);
   await expect(ownerPage.getByRole("navigation", { name: "Breadcrumb" })).toHaveCount(0);
   await expect(ownerPage.locator('a[href="/admin"]')).toHaveCount(0);

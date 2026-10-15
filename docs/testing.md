@@ -231,6 +231,7 @@ Update the baseline only when the growth is necessary, or when a chunk is new, r
 - The CPU slowdown is 4x on a machine with a Lighthouse benchmark index of 2000, and scales with the index of the machine. The log shows the index and the slowdown. The reason is in [DESIGN.md](DESIGN.md#performance-budgets-medi-88).
 - The budgets are in the list of pages in the spec. The numbers and the reason for each are in [DESIGN.md](DESIGN.md#performance-budgets-medi-88).
 - INP: with a 4x CPU throttle, the test clicks every category, direction and status chip and both sort buttons on `/trends` two times, at 1440 by 900 and again at 390 by 844, where the phone tab bar renders. It waits for the paint after each click, as a person does. INP is the slowest interaction (Event Timing). The test does this on 3 page loads and fails when the median is 250 ms or more. The ticket limit is 200 ms. The reason for 250 ms is in [DESIGN.md](DESIGN.md#performance-budgets-medi-88).
+- Tab taps: with the same throttle at 390 by 844, the test opens Home and taps the Reports, Trends and Home tabs. Each tap waits for its page and the paint. It fails when the median of the slowest tap of 3 page loads is 250 ms or more.
 
 ### Read a failing budget
 

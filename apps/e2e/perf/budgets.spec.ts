@@ -237,3 +237,49 @@ for (const viewport of [
     );
   });
 }
+
+/**
+ * Loads Home at 390 px, taps the Reports, Trends and Home tabs, and returns the slowest tap.
+ *
+ * @remarks
+ * Each tap waits for the page it opens and its paint, as a person does before the next tap.
+ */
+async function slowestTabTap() {
+  await page.goto(webOrigin);
+  await expect(page.getByTestId("latest-report-link")).toBeVisible();
+  const bar = page.getByTestId("mobile-tab-bar");
+  for (const [tab, ready] of [
+    ["Reports", page.locator('main li a[href^="/reports/"]').first()],
+    ["Trends", page.locator('[data-testid^="trend-category-"]').first()],
+    ["Home", page.getByTestId("latest-report-link")],
+  ] as const) {
+    await bar.getByRole("link", { name: tab, exact: true }).click();
+    await expect(ready).toBeVisible();
+    await afterNextPaint(page);
+  }
+  const slow = await page.evaluate(
+    () => (window as unknown as { slowInteractions: Interaction[] }).slowInteractions,
+  );
+  return slow.reduce((a, b) => (b.duration > a.duration ? b : a), {
+    duration: 0,
+    event: "none",
+    target: "none",
+  });
+}
+
+test(`a tab tap at 390 px stays under ${maxInpMs} ms with a 4x CPU throttle`, async () => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const cdp = await context.newCDPSession(page);
+  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
+  const all: Interaction[] = [];
+  for (let run = 0; run < runs; run++) all.push(await slowestTabTap());
+  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
+
+  const inp = all.toSorted((a, b) => a.duration - b.duration)[Math.floor(runs / 2)]!;
+  process.stdout.write(
+    `inp tab tap 390 px: ${inp.duration} ms, runs ${all.map((i) => `${i.duration} (${i.target})`).join(" ")}\n`,
+  );
+  expect(inp.duration, `INP ${inp.duration} ms, ${inp.event} on ${inp.target}`).toBeLessThan(
+    maxInpMs,
+  );
+});

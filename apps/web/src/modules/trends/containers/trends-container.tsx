@@ -26,11 +26,12 @@ function Content() {
   const t = useT();
   const setSearch = (patch: TrendSearch) =>
     void navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
-  const markers = trends.data?.markers;
+  const markers = useDeferredValue(trends.data?.markers ?? null, null);
   const visible = useMemo(
     () =>
+      markers &&
       sortTrends(
-        (markers ?? []).filter((item) => matchesTrend(item, listSearch)),
+        markers.filter((item) => matchesTrend(item, listSearch)),
         listSearch.sort ?? "change",
       ),
     [markers, listSearch],
@@ -76,7 +77,9 @@ function Content() {
           search={search}
           onSearchChange={setSearch}
         />
-        {visible.length === 0 ? (
+        {!visible ? (
+          <LoadingState variant="list" />
+        ) : visible.length === 0 ? (
           <EmptyState
             icon={ListFilter}
             title={t.trends.list.noMatchTitle}

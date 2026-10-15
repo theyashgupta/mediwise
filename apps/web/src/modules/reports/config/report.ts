@@ -1,5 +1,6 @@
 import { FlaskConical, type LucideIcon, Pill, RotateCw } from "lucide-react";
 import { getIntlTag, getT } from "@/common/hooks/use-locale";
+import { formatPlainDate } from "@/common/utils/date";
 import type { Status } from "@/common/utils/status";
 import type { FollowUp, MarkerFilter } from "../types";
 
@@ -52,7 +53,7 @@ export function conditionValue(value: number | string, unit: string) {
 export function formatReportDate(collectedAt: string | null, createdAt: string) {
   const options = { day: "numeric", month: "short", year: "numeric" } as const;
   return collectedAt
-    ? new Date(collectedAt).toLocaleDateString(getIntlTag(), { ...options, timeZone: "UTC" })
+    ? formatPlainDate(collectedAt, options)
     : new Date(createdAt).toLocaleDateString(getIntlTag(), options);
 }
 

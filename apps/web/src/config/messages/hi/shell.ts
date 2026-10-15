@@ -59,6 +59,11 @@ export const shell: Messages["shell"] = {
     legal: (year: number, company: string) =>
       review(`© ${year} MediWise. MediWise, ${company} का एक ब्रांड है।`),
   },
+  notFound: {
+    title: review("हमें यह पेज नहीं मिला"),
+    body: review("यह पेज मौजूद नहीं है, या आपका अकाउंट इसे नहीं खोल सकता।"),
+    home: review("होम पर जाएँ"),
+  },
   offline: {
     title: "आप ऑफ़लाइन हैं",
     body: "अपनी रिपोर्ट देखने के लिए इंटरनेट से जुड़ें। MediWise इस डिवाइस पर कोई रिपोर्ट नहीं रखता।",

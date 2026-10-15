@@ -68,7 +68,8 @@ test("a user who is not the admin gets not found on /admin", async () => {
   });
   await renderApp("/admin");
 
-  expect(await screen.findByText("Not Found")).toBeTruthy();
+  expect(await screen.findByRole("heading", { name: "We could not find this page" })).toBeTruthy();
+  expect(screen.getByRole("link", { name: "Go to Home" }).getAttribute("href")).toBe("/");
   expect(screen.queryByText("Operator")).toBeNull();
 });
 
@@ -126,4 +127,21 @@ test("re-read on a failed report calls the admin retry and loads the failed read
   expect(await screen.findByText("The report is in the queue again.")).toBeTruthy();
   expect(requests.filter((r) => r.path === `/admin/reports/${failedId}/retry`)).toHaveLength(1);
   expect(requests.filter((r) => r.path === "/admin/failed-reports").length).toBeGreaterThan(1);
+});
+
+test("a 404 on a refetch after the admin right goes away shows not found with a link home", async () => {
+  let isAdmin = true;
+  fakeNetwork({
+    ...admin,
+    "GET /admin/credits": () => (isAdmin ? history : problem(404, "Not Found")),
+  });
+  await renderApp("/admin");
+
+  await screen.findByRole("heading", { name: "Operator" });
+  isAdmin = false;
+  fireEvent.change(screen.getByLabelText("From"), { target: { value: "2026-10-01" } });
+
+  expect(await screen.findByRole("heading", { name: "We could not find this page" })).toBeTruthy();
+  expect(screen.getByRole("link", { name: "Go to Home" }).getAttribute("href")).toBe("/");
+  expect(screen.queryByRole("heading", { name: "Operator" })).toBeNull();
 });

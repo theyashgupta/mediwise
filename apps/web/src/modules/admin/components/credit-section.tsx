@@ -24,7 +24,7 @@ export function CreditSection({ id, title, description, group, onUser }: CreditS
               {kindLabels[total.kind] ?? total.kind}
             </dt>
             <dd
-              className="mt-1 font-mono text-2xl font-semibold"
+              className="mt-1 font-mono text-xl font-semibold wrap-anywhere sm:text-2xl"
               data-testid={`admin-total-${total.kind}`}
             >
               {formatCount(total.events)}
