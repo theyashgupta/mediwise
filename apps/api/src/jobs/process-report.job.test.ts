@@ -345,15 +345,18 @@ test("a report is extracted, mapped, scored, narrated and written in one save", 
     ["TSH Ultra 3rd Gen", null],
     ["Mystery Factor", null],
     ["Urine Glucose", "urine_glucose"],
-    ["Hemoglobin", "hemoglobin"],
     ["Total Cholesterol", "total_cholesterol"],
     ["Protein", "urine_protein"],
   ]);
-  expect(markers[0]).toMatchObject({ value: 13.47, labRangeLow: 12, labRangeHigh: 15 });
+  expect(markers[0]).toMatchObject({
+    value: 13.47,
+    labRangeLow: 12,
+    labRangeHigh: 15,
+    note: "13.47 g/dL",
+  });
   expect(markers[0]?.status).not.toBeNull();
   expect(markers[4]).toMatchObject({ value: null, valueText: "Negative", status: null });
-  expect(markers[5]).toMatchObject({ value: 13.47, status: null });
-  expect(markers[6]).toMatchObject({ value: 201, unit: "mg/dL" });
+  expect(markers[5]).toMatchObject({ value: 201, unit: "mg/dL" });
   expect(suggestions).toEqual([
     {
       reportMarkerId: markers[1]?.id,
@@ -362,7 +365,7 @@ test("a report is extracted, mapped, scored, narrated and written in one save", 
       suggestedMarkerKey: "glucose_fasting",
     },
     {
-      reportMarkerId: markers[7]?.id,
+      reportMarkerId: markers[6]?.id,
       rawName: "Protein",
       unit: null,
       suggestedMarkerKey: "urine_protein",

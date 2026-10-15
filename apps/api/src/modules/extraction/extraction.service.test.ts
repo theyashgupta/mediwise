@@ -184,6 +184,21 @@ test.each([
 });
 
 test.each([
+  ["> OR = 60 mL/min/1.73m2", { referenceLow: 60 }],
+  ["> OR = 50 mg/dL", { referenceLow: 50 }],
+  ["<5.7 % of total Hgb", { referenceHigh: 5.7 }],
+  ["<100 mg/dL (calc)", { referenceHigh: 100 }],
+  ["65-99 mg/dL", { referenceLow: 65, referenceHigh: 99 }],
+  ["0.40-4.50 mIU/L", { referenceLow: 0.4, referenceHigh: 4.5 }],
+  ["< OR = 5.6 %", { referenceHigh: 5.6 }],
+  [">=60 mL/min/1.73m²", { referenceLow: 60 }],
+  ["<= 200", { referenceHigh: 200 }],
+  ["4.0-11.0 x10^3/uL", { referenceLow: 4, referenceHigh: 11 }],
+])("the US fixture range %j gives %j past the numbers in its unit", (range, bounds) => {
+  expect(printedRange(range)).toEqual(bounds);
+});
+
+test.each([
   ["115 H", 115],
   ["88 L", 88],
   ["5.2 *", 5.2],
