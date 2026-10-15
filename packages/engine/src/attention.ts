@@ -46,7 +46,7 @@ const groupOrder: AttentionGroup[] = ["risk", "worsening", "watch"];
  * @remarks
  * A later row of the same date replaces the earlier one, so the caller orders rows by upload, then by worst status.
  */
-function seriesOf(visits: AttentionVisit[]) {
+export function seriesOf(visits: AttentionVisit[]) {
   const series = new Map<string, Point[]>();
   for (const { reportId, date, markers: rows } of visits) {
     for (const row of rows) {
