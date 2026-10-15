@@ -1,6 +1,7 @@
 import type { Messages } from "..";
 import { plural } from "../plural";
 import { review } from "../review";
+import { formatCount } from "../locales";
 
 export const payments: Messages["payments"] = {
   policyLinks: {
@@ -28,8 +29,8 @@ export const payments: Messages["payments"] = {
     paid: (n: number) =>
       review(
         plural("hi", n, {
-          one: `पेमेंट मिल गया। हमने आपके खाते में ${n} रिपोर्ट क्रेडिट जोड़ दिया।`,
-          other: `पेमेंट मिल गया। हमने आपके खाते में ${n} रिपोर्ट क्रेडिट जोड़ दिए।`,
+          one: `पेमेंट मिल गया। हमने आपके खाते में ${formatCount("hi", n)} रिपोर्ट क्रेडिट जोड़ दिया।`,
+          other: `पेमेंट मिल गया। हमने आपके खाते में ${formatCount("hi", n)} रिपोर्ट क्रेडिट जोड़ दिए।`,
         }),
       ),
     late: review(

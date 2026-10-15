@@ -1,4 +1,5 @@
 import { plural } from "../plural";
+import { formatCount } from "../locales";
 
 export const trends = {
   direction: { improving: "Improving", worsening: "Worsening", stable: "Stable" },
@@ -10,11 +11,11 @@ export const trends = {
     gone: "Not retested",
   },
   summary: {
-    improved: (n: number) => `${n} improved`,
-    worsened: (n: number) => `${n} worsened`,
-    same: (n: number) => `${n} same`,
-    new: (n: number) => `${n} new`,
-    gone: (n: number) => `${n} not retested`,
+    improved: (n: number) => `${formatCount("en", n)} improved`,
+    worsened: (n: number) => `${formatCount("en", n)} worsened`,
+    same: (n: number) => `${formatCount("en", n)} same`,
+    new: (n: number) => `${formatCount("en", n)} new`,
+    gone: (n: number) => `${formatCount("en", n)} not retested`,
   },
   upload: "Upload a report",
   columns: {
@@ -45,7 +46,7 @@ export const trends = {
     title: "Keep an eye on",
     description: "Markers at risk or watch on the latest value, or worse than the value before.",
     none: "No marker is at risk, at watch or worse than before.",
-    more: (n: number) => `Show ${n} more`,
+    more: (n: number) => `Show ${formatCount("en", n)} more`,
     change: (delta: string, date: string) => `${delta} since ${date}`,
   },
   suggestion: "Suggestion",
@@ -64,10 +65,14 @@ export const trends = {
     emptyTitle: "No values for this marker",
     emptyBody: "This profile has no report with this marker.",
     values: (n: number, name: string) =>
-      plural("en", n, { one: `${n} value for ${name}`, other: `${n} values for ${name}` }),
+      plural("en", n, {
+        one: `${formatCount("en", n)} value for ${name}`,
+        other: `${formatCount("en", n)} values for ${name}`,
+      }),
     sinceBefore: "since the report before.",
     band: "Optimal range for your profile",
-    labNote: (n: number) => `This chart has results from ${n} labs. Ranges can differ by lab.`,
+    labNote: (n: number) =>
+      `This chart has results from ${formatCount("en", n)} labs. Ranges can differ by lab.`,
   },
   compare: {
     title: "Compare reports",

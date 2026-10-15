@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { Profile } from "../types";
+import { initial } from "@/common/utils/initial";
 
 export type ProfileSwitcherPlacement = "sidebar" | "sidebar-collapsed" | "inline";
 
@@ -33,7 +34,7 @@ function Initial({ name, className }: { name?: string; className?: string }) {
       )}
       aria-hidden
     >
-      {name?.charAt(0)}
+      {name && initial(name)}
     </span>
   );
 }
@@ -50,7 +51,7 @@ export function ProfileSwitcher({ profiles, active, placement, onSelect }: Profi
         "flex items-center gap-2 rounded-md text-left outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 data-[state=open]:bg-accent",
         placement === "sidebar" && "h-11 w-full px-2",
         placement === "sidebar-collapsed" && "size-10 justify-center",
-        placement === "inline" && "h-8 max-w-48 min-w-0 px-1.5",
+        placement === "inline" && "h-8 max-w-full min-w-0 px-1.5",
       )}
     >
       <Initial

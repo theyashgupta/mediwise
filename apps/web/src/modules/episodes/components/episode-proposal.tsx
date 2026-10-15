@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { formatEpisodeDate } from "../config/episodes";
 import type { Proposal } from "../types";
 import { EpisodeFields } from "./episode-fields";
+import { wrapLabel } from "@/common/utils/wrap-label";
 
 type EpisodeProposalProps = {
   proposal: Proposal;
@@ -57,10 +58,21 @@ export function EpisodeProposal({
         onNoteChange={setNote}
       />
       <div className="flex flex-wrap gap-2">
-        <Button type="submit" disabled={busy || !name.trim()} data-testid="episode-proposal-save">
+        <Button
+          type="submit"
+          className={wrapLabel}
+          disabled={busy || !name.trim()}
+          data-testid="episode-proposal-save"
+        >
           {busy ? t.saving : t.save}
         </Button>
-        <Button type="button" variant="outline" disabled={busy} onClick={onDismiss}>
+        <Button
+          type="button"
+          variant="outline"
+          className={wrapLabel}
+          disabled={busy}
+          onClick={onDismiss}
+        >
           {t.dismiss}
         </Button>
       </div>

@@ -3,7 +3,8 @@ import { getIntlTag, getT } from "@/common/hooks/use-locale";
 import type { Status } from "@/common/utils/status";
 import type { FollowUp, MarkerFilter } from "../types";
 
-export const chipClass = "gap-1.5 rounded-md bg-card font-normal hover:bg-accent";
+export const chipClass =
+  "h-auto min-h-5 max-w-full flex-wrap justify-start gap-x-1.5 rounded-md bg-card font-normal whitespace-normal hover:bg-accent";
 
 export const followUpIcons: Record<FollowUp["kind"], LucideIcon> = {
   retest: RotateCw,

@@ -3,7 +3,8 @@ import { ArrowRight } from "lucide-react";
 import { Section } from "@/common/components/section";
 import { StatusBadge } from "@/common/components/status-badge";
 import { StatTile } from "@/common/components/surface/stat-tile";
-import { useT } from "@/common/hooks/use-locale";
+import { getIntlTag, useT } from "@/common/hooks/use-locale";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { MarkerValue } from "@/modules/reports";
 import { formatReviewDate } from "../config/year-review";
@@ -11,6 +12,9 @@ import type { Reading, YearReview } from "../types";
 
 type YearReviewViewProps = {
   review: YearReview;
+  writingIntro: boolean;
+  introError: boolean;
+  onWriteIntro: () => void;
 };
 
 type MarkerInfo = {
@@ -87,7 +91,12 @@ function ChangeList({
   );
 }
 
-export function YearReviewView({ review }: YearReviewViewProps) {
+export function YearReviewView({
+  review,
+  writingIntro,
+  introError,
+  onWriteIntro,
+}: YearReviewViewProps) {
   const t = useT();
   const { score, moved, stillAtRisk, measuredOnce } = review;
   const scoreText = (
@@ -100,15 +109,32 @@ export function YearReviewView({ review }: YearReviewViewProps) {
   return (
     <div className="space-y-10 print:space-y-6">
       <div className="space-y-6">
-        <p className="max-w-measure text-lg text-pretty">{review.intro.join(" ")}</p>
+        {review.intro ? (
+          <p className="max-w-measure text-lg text-pretty">{review.intro.join(" ")}</p>
+        ) : (
+          <div className="space-y-2 print:hidden">
+            <Button variant="outline" size="sm" disabled={writingIntro} onClick={onWriteIntro}>
+              {t.yearReview.page.writeIntro}
+            </Button>
+            {introError && (
+              <p role="alert" className="text-sm text-destructive">
+                {t.yearReview.page.introError}
+              </p>
+            )}
+          </div>
+        )}
         <dl className="grid grid-cols-3 gap-2 sm:max-w-xl">
           <StatTile label={t.yearReview.stats.score} value={scoreText} className="px-3 py-2" />
           <StatTile
             label={t.yearReview.stats.reports}
-            value={review.reportCount}
+            value={review.reportCount.toLocaleString(getIntlTag())}
             className="px-3 py-2"
           />
-          <StatTile label={t.yearReview.stats.labs} value={review.labCount} className="px-3 py-2" />
+          <StatTile
+            label={t.yearReview.stats.labs}
+            value={review.labCount.toLocaleString(getIntlTag())}
+            className="px-3 py-2"
+          />
         </dl>
       </div>
 

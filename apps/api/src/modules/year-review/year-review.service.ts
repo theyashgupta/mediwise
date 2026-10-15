@@ -7,7 +7,7 @@ import { env } from "../../config/env.js";
 import { log } from "../../middleware/logger.js";
 import { callTool, type StepUsage, stepUsage } from "../extraction/index.js";
 import { type NarrativeProblem, validateNarrative } from "../narrative/index.js";
-import { stepCostCents } from "../spend/index.js";
+import { isOverBudget, stepCostCents } from "../spend/index.js";
 import { listSeries, verdictChange, visitDate } from "../trends/index.js";
 import * as repo from "./year-review.repo.js";
 
@@ -250,19 +250,58 @@ async function writeIntro(facts: string, keys: string[], usage: StepUsage) {
   return null;
 }
 
+function introHash(model: string, facts: string) {
+  return createHash("sha256").update(`${model}\n${system}\n${facts}`).digest("hex");
+}
+
+async function loadReview(userId: string, profileId: string) {
+  const { reports, series } = await listSeries(userId, profileId);
+  const review = buildYearReview(reports, series);
+  if (!review) {
+    throw new AppError(404, "A year in review needs two reports from one year");
+  }
+  return review;
+}
+
 /**
- * Returns the intro sentences for a review: the cached ones when the review facts did not change, else a new Claude intro.
+ * Returns the stored intro of a review, or null when none matches the current review facts.
  *
  * @remarks
- * The cache key hashes the model, the system prompt and the facts, so a new report or a prompt change writes a new intro.
- * A rejected intro is cached as null too, so a second open never pays for a call the validator already refused.
+ * The hash covers the model, the system prompt and the facts, so a new report or a prompt change reads as no intro.
  */
-async function introFor(profileId: string, review: YearReview) {
+async function cachedIntro(profileId: string, review: YearReview, hash: string) {
+  const cached = await repo.findIntro(profileId);
+  if (cached?.hash !== hash) return null;
+  return cached.sentences ?? engineIntro(review);
+}
+
+/**
+ * Loads the year in review of one profile with its stored intro, and never calls Claude.
+ *
+ * @remarks
+ * Home loads this on every visit, and a Claude call on Home load is not allowed. The intro is null until the user asks for it.
+ */
+export async function getYearReview(userId: string, profileId: string) {
+  const review = await loadReview(userId, profileId);
+  const hash = introHash(env.ANTHROPIC_NARRATIVE_MODEL, reviewFacts(review));
+  return { ...review, intro: await cachedIntro(profileId, review, hash) };
+}
+
+/**
+ * Writes the intro of a year in review with Claude when no stored intro matches, and returns the review with it.
+ *
+ * @remarks
+ * A rejected intro is stored as null too, so the next request never pays for a call the validator already refused. Over
+ * the monthly cap the engine text answers and nothing is stored, so a later request can still write the Claude intro.
+ */
+export async function writeYearReviewIntro(userId: string, profileId: string) {
+  const review = await loadReview(userId, profileId);
   const facts = reviewFacts(review);
   const model = env.ANTHROPIC_NARRATIVE_MODEL;
-  const hash = createHash("sha256").update(`${model}\n${system}\n${facts}`).digest("hex");
-  const cached = await repo.findIntro(profileId);
-  if (cached?.hash === hash) return cached.sentences ?? engineIntro(review);
+  const hash = introHash(model, facts);
+  const cached = await cachedIntro(profileId, review, hash);
+  if (cached) return { ...review, intro: cached };
+  if (await isOverBudget()) return { ...review, intro: engineIntro(review) };
 
   const keys = [...review.moved, ...review.stillAtRisk, ...review.measuredOnce].map(
     ({ markerKey }) => markerKey,
@@ -271,21 +310,11 @@ async function introFor(profileId: string, review: YearReview) {
   try {
     const sentences = await writeIntro(facts, keys, usage);
     await repo.saveIntro(profileId, { hash, sentences });
-    return sentences ?? engineIntro(review);
+    return { ...review, intro: sentences ?? engineIntro(review) };
   } catch (error) {
     log.warn("Year review intro failed", error);
-    return engineIntro(review);
+    return { ...review, intro: engineIntro(review) };
   } finally {
     log.info(`Year review intro cost ${stepCostCents(usage).toFixed(4)} cents`, usage);
   }
-}
-
-/** Loads the year in review of one profile, with its intro. */
-export async function getYearReview(userId: string, profileId: string) {
-  const { reports, series } = await listSeries(userId, profileId);
-  const review = buildYearReview(reports, series);
-  if (!review) {
-    throw new AppError(404, "A year in review needs two reports from one year");
-  }
-  return { ...review, intro: await introFor(profileId, review) };
 }

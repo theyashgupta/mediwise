@@ -3,6 +3,7 @@ import { LogOut, Monitor, Moon, Settings, Sun, User } from "lucide-react";
 import { useT } from "@/common/hooks/use-locale";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { initial } from "@/common/utils/initial";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,7 +45,7 @@ export function UserMenu({
         >
           <Avatar className="size-8">
             <AvatarFallback className="bg-secondary text-sm font-medium uppercase">
-              {account ? account.charAt(0) : <User className="size-4" aria-hidden />}
+              {account ? initial(account) : <User className="size-4" aria-hidden />}
             </AvatarFallback>
           </Avatar>
         </Button>

@@ -1,4 +1,5 @@
 import { plural } from "../plural";
+import { formatCount } from "../locales";
 
 export const episodes = {
   title: "Episodes",
@@ -7,7 +8,11 @@ export const episodes = {
     "An episode groups the reports of one set of tests, for example many tests in a few weeks.",
   empty: "No episodes yet. MediWise suggests one when three reports arrive within 45 days.",
   loadError: "We could not load the episodes.",
-  reports: (n: number) => plural("en", n, { one: `${n} report`, other: `${n} reports` }),
+  reports: (n: number) =>
+    plural("en", n, {
+      one: `${formatCount("en", n)} report`,
+      other: `${formatCount("en", n)} reports`,
+    }),
   period: (from: string, to: string) => `${from} to ${to}`,
   openSince: (from: string) => `Open since ${from}`,
   open: "Open",
@@ -16,7 +21,7 @@ export const episodes = {
   proposal: {
     title: "These reports may belong together",
     body: (count: number, from: string, to: string) =>
-      `${count} reports arrived from ${from} to ${to}. Give them a name to see them as one episode.`,
+      `${formatCount("en", count)} reports arrived from ${from} to ${to}. Give them a name to see them as one episode.`,
     save: "Save as an episode",
     saving: "Saving",
     dismiss: "Close",
@@ -41,14 +46,14 @@ export const episodes = {
       description: "Every report of the episode, oldest first.",
       empty: "This episode has no reports. Add a report from its report page.",
       markers: (n: number, flagged: number) =>
-        `${plural("en", n, { one: `${n} marker`, other: `${n} markers` })}, ${flagged} with watch or risk status`,
+        `${plural("en", n, { one: `${formatCount("en", n)} marker`, other: `${formatCount("en", n)} markers` })}, ${formatCount("en", flagged)} with watch or risk status`,
       unnamedReport: "Report",
     },
     repeated: {
       title: "Repeated markers",
       description: "Markers with two values or more in this episode.",
       empty: "No marker has two values in this episode.",
-      values: (n: number) => `${n} values`,
+      values: (n: number) => `${formatCount("en", n)} values`,
     },
     since: {
       title: "Since the episode started",

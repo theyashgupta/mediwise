@@ -25,6 +25,7 @@ const store = vi.hoisted(() => {
   const reports: Report[] = [];
   const rows: Row[] = [];
   const intros = new Map<string, { hash: string; sentences: string[] | null }>();
+  const spend = { overBudget: false };
   const owned = (owner: string, id: string) => owner === "alice" && id === profileId;
   const done = (owner: string, id: string) =>
     owned(owner, id) ? [...reports].sort((a, b) => a.collectedAt.localeCompare(b.collectedAt)) : [];
@@ -32,6 +33,7 @@ const store = vi.hoisted(() => {
     reports,
     rows,
     intros,
+    spend,
     create: vi.fn(),
     profilesRepo: {
       findProfileById: async (owner: string, id: string) =>
@@ -77,6 +79,10 @@ vi.mock("../links/links.repo.js", () => ({
   listVisitDates: async () => [],
 }));
 vi.mock("../../lib/anthropic.js", () => ({ anthropic: { messages: { create: store.create } } }));
+vi.mock("../spend/index.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../spend/index.js")>()),
+  isOverBudget: async () => store.spend.overBudget,
+}));
 
 type Reading = { value: number; status: string; date: string };
 type Review = {
@@ -88,7 +94,7 @@ type Review = {
   moved: { markerKey: string; direction: string; from: Reading; to: Reading }[];
   stillAtRisk: { markerKey: string; from: Reading; to: Reading }[];
   measuredOnce: ({ markerKey: string } & Reading)[];
-  intro: string[];
+  intro: string[] | null;
 };
 
 const app = new Hono<AuthEnv>()
@@ -101,6 +107,14 @@ app.onError(handleError);
 
 async function getReview(user = "alice") {
   const res = await app.request(`/profiles/${profileId}/year-review`, {
+    headers: { "x-user": user },
+  });
+  return { status: res.status, body: (await res.json()) as Review };
+}
+
+async function writeIntro(user = "alice") {
+  const res = await app.request(`/profiles/${profileId}/year-review/intro`, {
+    method: "POST",
     headers: { "x-user": user },
   });
   return { status: res.status, body: (await res.json()) as Review };
@@ -134,6 +148,7 @@ beforeEach(() => {
   store.reports.splice(0);
   store.rows.splice(0);
   store.intros.clear();
+  store.spend.overBudget = false;
   store.create.mockReset();
   store.create.mockResolvedValue(intro(goodIntro));
   store.reports.push(
@@ -260,13 +275,48 @@ describe("not found", () => {
 
   test("another user's profile answers 404", async () => {
     expect((await getReview("mallory")).status).toBe(404);
+    expect((await writeIntro("mallory")).status).toBe(404);
+    expect(store.create).not.toHaveBeenCalled();
+  });
+});
+
+describe("read", () => {
+  test("a review with no intro yet answers intro null and makes no Claude call", async () => {
+    const { status, body } = await getReview();
+    expect(status).toBe(200);
+    expect(body.intro).toBeNull();
+    expect(body.reportCount).toBe(3);
+    expect(store.create).not.toHaveBeenCalled();
+    expect(store.intros.size).toBe(0);
+  });
+
+  test("a written intro comes back on the next read with no Claude call", async () => {
+    await writeIntro();
+    store.create.mockClear();
+    expect((await getReview()).body.intro).toEqual(goodIntro.map(({ text }) => text));
+    expect(store.create).not.toHaveBeenCalled();
+  });
+
+  test("a rejected intro reads as the engine text with no Claude call", async () => {
+    store.create.mockResolvedValue(intro([{ text: "Bad; sentence.", citedKeys: [] }]));
+    await writeIntro();
+    store.create.mockClear();
+    expect((await getReview()).body.intro).toEqual(engineText);
+    expect(store.create).not.toHaveBeenCalled();
+  });
+
+  test("an intro of older review facts reads as null after a new report, with no Claude call", async () => {
+    await writeIntro();
+    store.create.mockClear();
+    store.reports.push({ id: "r5", collectedAt: "2025-09-01", score: 88, labName: "Moon Labs" });
+    expect((await getReview()).body.intro).toBeNull();
     expect(store.create).not.toHaveBeenCalled();
   });
 });
 
 describe("intro", () => {
   test("an intro that passes the validator is returned and cites only review markers", async () => {
-    const { body } = await getReview();
+    const { body } = await writeIntro();
     expect(body.intro).toEqual(goodIntro.map(({ text }) => text));
     const facts = store.create.mock.calls[0]![0].messages[0].content[0].text as string;
     expect(facts).toContain("ldl_cholesterol | LDL cholesterol");
@@ -279,7 +329,7 @@ describe("intro", () => {
         { text: "Your score rose; LDL cholesterol improved.", citedKeys: ["ldl_cholesterol"] },
       ]),
     );
-    const { body } = await getReview();
+    const { body } = await writeIntro();
     expect(store.create).toHaveBeenCalledTimes(2);
     expect(body.intro).toEqual(engineText);
   });
@@ -288,7 +338,7 @@ describe("intro", () => {
     store.create
       .mockResolvedValueOnce(intro([{ text: "TSH stayed optimal.", citedKeys: ["tsh"] }]))
       .mockResolvedValueOnce(intro(goodIntro));
-    const { body } = await getReview();
+    const { body } = await writeIntro();
     const retry = store.create.mock.calls[1]![0].messages[0].content[1].text as string;
     expect(retry).toContain('cites "tsh", which is not in this report');
     expect(body.intro).toEqual(goodIntro.map(({ text }) => text));
@@ -297,37 +347,46 @@ describe("intro", () => {
   test("a sentence over 20 words is rejected", async () => {
     const long = Array.from({ length: 21 }, () => "word").join(" ");
     store.create.mockResolvedValue(intro([{ text: long, citedKeys: [] }]));
-    expect((await getReview()).body.intro).toEqual(engineText);
+    expect((await writeIntro()).body.intro).toEqual(engineText);
   });
 
   test("a failed Claude call falls back to the engine text and caches nothing", async () => {
     store.create.mockRejectedValue(new Error("overloaded"));
-    expect((await getReview()).body.intro).toEqual(engineText);
+    expect((await writeIntro()).body.intro).toEqual(engineText);
     expect(store.intros.size).toBe(0);
   });
 });
 
 describe("cache", () => {
-  test("a second open uses the cached intro and makes no Claude call", async () => {
-    await getReview();
-    const { body } = await getReview();
+  test("a second write uses the cached intro and makes no Claude call", async () => {
+    await writeIntro();
+    const { body } = await writeIntro();
     expect(store.create).toHaveBeenCalledTimes(1);
     expect(body.intro).toEqual(goodIntro.map(({ text }) => text));
   });
 
-  test("a rejected intro is cached, so a second open makes no Claude call either", async () => {
+  test("a rejected intro is cached, so a second write makes no Claude call either", async () => {
     store.create.mockResolvedValue(intro([{ text: "Bad; sentence.", citedKeys: [] }]));
-    await getReview();
-    const { body } = await getReview();
+    await writeIntro();
+    const { body } = await writeIntro();
     expect(store.create).toHaveBeenCalledTimes(2);
     expect(body.intro).toEqual(engineText);
   });
 
   test("a new report changes the review facts and writes a new intro", async () => {
-    await getReview();
+    await writeIntro();
     store.reports.push({ id: "r5", collectedAt: "2025-09-01", score: 88, labName: "Moon Labs" });
     marker("r5", "ldl_cholesterol", 99, "optimal", "mg/dL");
-    await getReview();
+    await writeIntro();
     expect(store.create).toHaveBeenCalledTimes(2);
   });
+});
+
+test("over the monthly Claude cap the intro is the engine text, with no Claude call and nothing cached", async () => {
+  store.spend.overBudget = true;
+  const { status, body } = await writeIntro();
+  expect(status).toBe(200);
+  expect(body.intro).toEqual(engineText);
+  expect(store.create).not.toHaveBeenCalled();
+  expect(store.intros.size).toBe(0);
 });

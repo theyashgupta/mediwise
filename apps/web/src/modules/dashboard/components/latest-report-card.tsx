@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { scoreChange } from "../config/score-change";
 import type { LatestReport } from "../types";
+import { wrapLabel } from "@/common/utils/wrap-label";
 
 type LatestReportCardProps = {
   report: LatestReport;
@@ -64,7 +65,7 @@ export function LatestReportCard({ report }: LatestReportCardProps) {
   return (
     <section
       aria-labelledby="latest-report"
-      className="grid gap-6 rounded-xl border bg-card p-6 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center sm:gap-10 sm:p-8"
+      className="grid grid-cols-1 gap-6 rounded-xl border bg-card p-6 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center sm:gap-10 sm:p-8"
     >
       {report.score !== null && report.tier && (
         <ScoreRing score={report.score} tier={t.report.summary.tiers[report.tier]} size="lg" />
@@ -109,7 +110,7 @@ export function LatestReportCard({ report }: LatestReportCardProps) {
             </dl>
           </div>
         )}
-        <Button asChild>
+        <Button asChild className={wrapLabel}>
           <Link
             to="/reports/$reportId"
             params={{ reportId: report.id }}

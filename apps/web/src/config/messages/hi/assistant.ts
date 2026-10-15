@@ -1,6 +1,7 @@
 import type { Messages } from "..";
 import { plural } from "../plural";
 import { review } from "../review";
+import { formatCount } from "../locales";
 
 export const assistant: Messages["assistant"] = {
   askReport: "इस रिपोर्ट के बारे में पूछें",
@@ -24,7 +25,11 @@ export const assistant: Messages["assistant"] = {
   },
   off: "सहायक अभी उपलब्ध नहीं है। बाद में फिर कोशिश करें।",
   loadError: "हम आपके सवाल लोड नहीं कर सके।",
-  left: (n: number) => plural("hi", n, { one: `${n} सवाल बाकी`, other: `${n} सवाल बाकी` }),
+  left: (n: number) =>
+    plural("hi", n, {
+      one: `${formatCount("hi", n)} सवाल बाकी`,
+      other: `${formatCount("hi", n)} सवाल बाकी`,
+    }),
   out: {
     use_credit: "आपके पास कोई सवाल बाकी नहीं है। 20 और सवालों के लिए 1 क्रेडिट इस्तेमाल करें।",
     buy: "आपके पास कोई सवाल बाकी नहीं है। और सवाल पूछने के लिए क्रेडिट खरीदें।",

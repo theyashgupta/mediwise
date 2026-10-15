@@ -1,6 +1,7 @@
 import type { Messages } from "..";
 import { plural } from "../plural";
 import { review } from "../review";
+import { formatCount } from "../locales";
 
 export const dashboard: Messages["dashboard"] = {
   ask: {
@@ -58,7 +59,7 @@ export const dashboard: Messages["dashboard"] = {
   },
   processing: {
     titleOne: "आपकी रिपोर्ट पढ़ी जा रही है",
-    titleMany: (n: number) => `आपकी ${n} रिपोर्ट पढ़ी जा रही हैं`,
+    titleMany: (n: number) => `आपकी ${formatCount("hi", n)} रिपोर्ट पढ़ी जा रही हैं`,
     bodyOne: "रिपोर्ट तैयार होने पर यह पेज अपडेट हो जाएगा।",
     bodyMany: "हर रिपोर्ट तैयार होने पर यह पेज अपडेट हो जाएगा।",
   },
@@ -128,7 +129,11 @@ export const dashboard: Messages["dashboard"] = {
     title: "हाल की रिपोर्ट",
     all: "सभी रिपोर्ट",
     fallbackTitle: "रिपोर्ट",
-    files: (n: number) => plural("hi", n, { one: `${n} फ़ाइल`, other: `${n} फ़ाइलें` }),
+    files: (n: number) =>
+      plural("hi", n, {
+        one: `${formatCount("hi", n)} फ़ाइल`,
+        other: `${formatCount("hi", n)} फ़ाइलें`,
+      }),
   },
   retest: {
     title: review("दोबारा टेस्ट का समय"),
@@ -151,7 +156,7 @@ export const dashboard: Messages["dashboard"] = {
     empty: "परिवार के सदस्य जोड़ें, ताकि उनकी रिपोर्ट यहाँ दिखें।",
     add: "परिवार का सदस्य जोड़ें",
     noReport: "अभी कोई रिपोर्ट नहीं।",
-    atRisk: (n: number) => review(`${n} मार्कर जोखिम में`),
+    atRisk: (n: number) => review(`${formatCount("hi", n)} मार्कर जोखिम में`),
     stale: "पिछले 12 महीनों में कोई रिपोर्ट नहीं।",
     staleFrequent: "पिछले 3 महीनों में कोई रिपोर्ट नहीं।",
     upload: "रिपोर्ट अपलोड करें",

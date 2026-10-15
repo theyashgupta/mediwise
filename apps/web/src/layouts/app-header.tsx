@@ -46,7 +46,7 @@ export function AppHeader() {
       >
         <LogoMark />
       </Link>
-      <div className="min-w-0 md:hidden">
+      <div className="max-w-48 min-w-0 md:hidden">
         <ProfileSwitcherContainer placement="inline" />
       </div>
       <AppBreadcrumb className="hidden flex-1 md:block" />

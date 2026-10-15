@@ -4,6 +4,8 @@ import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/components/ui/button";
 import { formatReviewDate } from "../config/year-review";
 import type { YearReview } from "../types";
+import { wrapLabel } from "@/common/utils/wrap-label";
+import { cn } from "@/lib/utils";
 
 type YearReviewCardProps = {
   review: YearReview;
@@ -37,7 +39,7 @@ export function YearReviewCard({ review, profileId }: YearReviewCardProps) {
           </p>
         </div>
       </div>
-      <Button asChild variant="outline" className="self-start sm:self-center">
+      <Button asChild variant="outline" className={cn(wrapLabel, "self-start sm:self-center")}>
         <Link to="/year-review" search={{ profileId }}>
           {t.yearReview.card.open}
           <ArrowRight aria-hidden />

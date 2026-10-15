@@ -1,6 +1,7 @@
 import type { Messages } from "..";
 import { plural } from "../plural";
 import { review } from "../review";
+import { formatCount } from "../locales";
 
 export const profiles: Messages["profiles"] = {
   relation: {
@@ -24,7 +25,11 @@ export const profiles: Messages["profiles"] = {
   },
   approximate: "अनुमानित",
   approximateBirthNote: "हमने यह तारीख एक रिपोर्ट पर लिखी उम्र से निकाली है। सही तारीख डालें।",
-  rows: (n: number) => plural("hi", n, { one: `${n} पंक्ति`, other: `${n} पंक्तियाँ` }),
+  rows: (n: number) =>
+    plural("hi", n, {
+      one: `${formatCount("hi", n)} पंक्ति`,
+      other: `${formatCount("hi", n)} पंक्तियाँ`,
+    }),
   rowsFor: (rows: string, name: string) => `${name} के लिए ${rows}`,
   saving: "सेव हो रहा है",
   form: {
@@ -82,10 +87,10 @@ export const profiles: Messages["profiles"] = {
     removed: (name: string) => review(`हमने ${name} को हटा दिया।`),
   },
   card: {
-    years: (n: number) => `${n} साल`,
+    years: (n: number) => `${formatCount("hi", n)} साल`,
     dateOfBirthMissing: "जन्म की तारीख नहीं है",
     noReports: "कोई रिपोर्ट नहीं",
-    reports: (n: number) => `${n} रिपोर्ट`,
+    reports: (n: number) => `${formatCount("hi", n)} रिपोर्ट`,
     yearReview: (name: string) => `${name} का साल का सार`,
     edit: (name: string) => `${name} की प्रोफ़ाइल बदलें`,
     remove: (name: string) => `${name} को हटाएँ`,

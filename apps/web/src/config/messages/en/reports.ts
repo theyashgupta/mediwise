@@ -1,4 +1,5 @@
 import { plural } from "../plural";
+import { formatCount } from "../locales";
 
 export const reports = {
   list: {
@@ -27,14 +28,14 @@ export const reports = {
       "Hold the phone flat above the page.",
     ],
     selected: "Selected files",
-    fileCount: (count: number, max: number) => `${count} of ${max} files`,
+    fileCount: (count: number, max: number) => `${formatCount("en", count)} of ${max} files`,
     totalSize: (size: string, max: number) => `${size} of ${max} MB`,
     fileSize: (size: string) => `${size} MB`,
     uploadingFile: (name: string) => `Uploading ${name}`,
     uploaded: "Uploaded",
     remove: (name: string) => `Remove ${name}`,
     shared: (count: number) =>
-      `We added ${plural("en", count, { one: `${count} file`, other: `${count} files` })} from another app. Check the profile. Then select Read my report.`,
+      `We added ${plural("en", count, { one: `${formatCount("en", count)} file`, other: `${formatCount("en", count)} files` })} from another app. Check the profile. Then select Read my report.`,
     photo: {
       small: "This photo is small. Take it again closer to the page.",
       dark: "This photo is dark. Take it again in good light.",
@@ -72,7 +73,7 @@ export const reports = {
     madeOn: (date: string) => `Made on ${date}.`,
     notOpened: "Not opened yet.",
     opened: (count: number, date: string) =>
-      `Opened ${plural("en", count, { one: `${count} time`, other: `${count} times` })}. Last opened on ${date}.`,
+      `Opened ${plural("en", count, { one: `${formatCount("en", count)} time`, other: `${formatCount("en", count)} times` })}. Last opened on ${date}.`,
     endedTitle: "This link has ended",
     endedBody: "Ask the person who sent you this link for a new link.",
   },
@@ -93,7 +94,11 @@ export const reports = {
     dateOfBirthApproximate: "Date of birth (approximate)",
     sex: "Sex",
     age: "Age",
-    years: (age: number) => plural("en", age, { one: `${age} year`, other: `${age} years` }),
+    years: (age: number) =>
+      plural("en", age, {
+        one: `${formatCount("en", age)} year`,
+        other: `${formatCount("en", age)} years`,
+      }),
     report: "Report",
     labs: "Labs",
     collectedOn: "Collected on",

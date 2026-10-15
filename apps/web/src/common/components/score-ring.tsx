@@ -12,9 +12,9 @@ const radius = 52;
 const circumference = 2 * Math.PI * radius;
 
 const ringSizes = {
-  sm: "size-12",
-  md: "size-28 sm:size-36",
-  lg: "size-36 sm:size-40",
+  sm: "w-12",
+  md: "w-28 sm:w-36",
+  lg: "w-36 sm:w-40",
 };
 
 export function ScoreRing({ score, tier, size, className }: ScoreRingProps) {
@@ -25,9 +25,12 @@ export function ScoreRing({ score, tier, size, className }: ScoreRingProps) {
     <div
       role="img"
       aria-label={t.common.score.label(value, tier)}
-      className={cn("flex flex-col items-center gap-1", className)}
+      className={cn("flex max-w-full flex-col items-center gap-1", className)}
     >
-      <div className={cn("@container relative", ringSizes[size])} data-testid="score-ring">
+      <div
+        className={cn("@container relative aspect-square max-w-full", ringSizes[size])}
+        data-testid="score-ring"
+      >
         <svg viewBox="0 0 120 120" className="size-full -rotate-90" aria-hidden>
           <circle cx="60" cy="60" r={radius} fill="none" strokeWidth="6" className="stroke-muted" />
           <circle

@@ -6,5 +6,13 @@ export type Messages = typeof en;
 
 export const messages: Record<Locale, Messages> = { en, hi };
 
-export { defaultLocale, intlTag, isLocale, localeNames, locales, type Locale } from "./locales";
+export {
+  defaultLocale,
+  formatCount,
+  intlTag,
+  isLocale,
+  localeNames,
+  locales,
+  type Locale,
+} from "./locales";
 export { plural } from "./plural";

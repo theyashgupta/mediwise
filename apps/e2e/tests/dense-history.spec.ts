@@ -133,6 +133,50 @@ test("Home leads with the overview blocks, each suggestion block ends with the d
   }
 });
 
+test("Home at 1280 px gives a block alone in its row the full width, so no column stays empty", async () => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/");
+  const habits = page.getByRole("region", { name: "Habits and questions for your doctor" });
+  await expect(habits).toBeVisible();
+  const rows = await habits.evaluate((region) => {
+    const grid = region.parentElement!;
+    const cells = [...grid.children].map((cell) => cell.getBoundingClientRect());
+    return cells.map((cell) => ({
+      width: cell.width,
+      gridWidth: grid.getBoundingClientRect().width,
+      alone: cells.filter((other) => Math.abs(other.top - cell.top) < 1).length === 1,
+    }));
+  });
+  expect(rows.length).toBeGreaterThan(1);
+  for (const row of rows.filter(({ alone }) => alone)) {
+    expect(row.width).toBeCloseTo(row.gridWidth, 0);
+  }
+});
+
+test("Home at 390 px with 200 percent text has no sideways scroll", async () => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await expect(page.getByRole("region", { name: "Needs attention" })).toBeVisible();
+  await page.evaluate(() => {
+    document.documentElement.style.fontSize = "32px";
+  });
+  const wide = await page.evaluate(() => ({
+    scroll: document.documentElement.scrollWidth,
+    view: window.innerWidth,
+    past: [...document.querySelectorAll("main *")]
+      .filter((node) => node.getBoundingClientRect().right > window.innerWidth + 1)
+      .map((node) => `${node.tagName} "${node.textContent?.trim().slice(0, 40)}"`)
+      .slice(0, 5),
+  }));
+  await page.evaluate(() => {
+    document.documentElement.style.fontSize = "";
+  });
+  expect(
+    wide.scroll,
+    `page is ${wide.scroll} px wide: ${wide.past.join(" | ")}`,
+  ).toBeLessThanOrEqual(wide.view);
+});
+
 test("Trends keeps an eye on B12, filters by direction and status through the URL and ends each suggestion with the doctor line", async () => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/trends");

@@ -1,6 +1,7 @@
 import type { Messages } from "..";
 import { plural } from "../plural";
 import { review } from "../review";
+import { formatCount } from "../locales";
 
 export const episodes: Messages["episodes"] = {
   title: "एपिसोड",
@@ -9,7 +10,11 @@ export const episodes: Messages["episodes"] = {
     "एपिसोड एक ही सिलसिले की जाँचों की रिपोर्ट को साथ रखता है, जैसे कुछ हफ़्तों में कई जाँचें।",
   empty: "अभी कोई एपिसोड नहीं है। 45 दिन में तीन रिपोर्ट आने पर MediWise एक एपिसोड सुझाता है।",
   loadError: "हम एपिसोड लोड नहीं कर सके।",
-  reports: (n: number) => plural("hi", n, { one: `${n} रिपोर्ट`, other: `${n} रिपोर्ट` }),
+  reports: (n: number) =>
+    plural("hi", n, {
+      one: `${formatCount("hi", n)} रिपोर्ट`,
+      other: `${formatCount("hi", n)} रिपोर्ट`,
+    }),
   period: (from: string, to: string) => `${from} से ${to}`,
   openSince: (from: string) => `${from} से खुला`,
   open: "खुला",
@@ -18,7 +23,7 @@ export const episodes: Messages["episodes"] = {
   proposal: {
     title: review("ये रिपोर्ट शायद साथ की हैं"),
     body: (count: number, from: string, to: string) =>
-      `${from} से ${to} के बीच ${count} रिपोर्ट आईं। इन्हें एक एपिसोड की तरह देखने के लिए नाम दें।`,
+      `${from} से ${to} के बीच ${formatCount("hi", count)} रिपोर्ट आईं। इन्हें एक एपिसोड की तरह देखने के लिए नाम दें।`,
     save: "एपिसोड के रूप में सेव करें",
     saving: "सेव कर रहे हैं",
     dismiss: "बंद करें",
@@ -45,14 +50,16 @@ export const episodes: Messages["episodes"] = {
       description: "एपिसोड की हर रिपोर्ट, सबसे पुरानी पहले।",
       empty: "इस एपिसोड में कोई रिपोर्ट नहीं है। रिपोर्ट के पेज से कोई रिपोर्ट जोड़ें।",
       markers: (n: number, flagged: number) =>
-        review(`${n} मार्कर, ${flagged} वॉच या जोखिम की स्थिति में`),
+        review(
+          `${formatCount("hi", n)} मार्कर, ${formatCount("hi", flagged)} वॉच या जोखिम की स्थिति में`,
+        ),
       unnamedReport: "रिपोर्ट",
     },
     repeated: {
       title: "दोहराए गए मार्कर",
       description: "इस एपिसोड में जिन मार्कर के दो या ज़्यादा मान हैं।",
       empty: "इस एपिसोड में किसी मार्कर के दो मान नहीं हैं।",
-      values: (n: number) => `${n} मान`,
+      values: (n: number) => `${formatCount("hi", n)} मान`,
     },
     since: {
       title: "एपिसोड शुरू होने के बाद से",

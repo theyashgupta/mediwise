@@ -1,9 +1,10 @@
 import type { Messages } from "..";
 import { review } from "../review";
+import { formatCount } from "../locales";
 
 export const report: Messages["report"] = {
   title: "आपकी रिपोर्ट",
-  markerCount: (count: number) => `${count} मार्कर`,
+  markerCount: (count: number) => `${formatCount("hi", count)} मार्कर`,
   loadError: "हम यह रिपोर्ट लोड नहीं कर सके।",
   readError: "हम यह रिपोर्ट पढ़ नहीं सके।",
   deleted: review("हमने रिपोर्ट हटा दी।"),
@@ -35,10 +36,12 @@ export const report: Messages["report"] = {
   summary: {
     score: (score: number | null) => `आपका स्कोर ${score} है।`,
     coverage: (panel: string, measured: number, core: number) =>
-      review(`${panel}, ${core} में से ${measured} मुख्य मार्कर`),
+      review(
+        `${panel}, ${formatCount("hi", core)} में से ${formatCount("hi", measured)} मुख्य मार्कर`,
+      ),
     capped: (measured: number, core: number) =>
       review(
-        `हमने स्कोर की ऊपरी सीमा तय की। इस रिपोर्ट में ${core} में से ${measured} मुख्य मार्कर हैं।`,
+        `हमने स्कोर की ऊपरी सीमा तय की। इस रिपोर्ट में ${formatCount("hi", core)} में से ${formatCount("hi", measured)} मुख्य मार्कर हैं।`,
       ),
     tiers: {
       apex: review("एपेक्स"),
@@ -78,7 +81,7 @@ export const report: Messages["report"] = {
     description: review("ये संकेत दो या ज़्यादा मार्कर से मिलते हैं।"),
     markers: "इस पैटर्न के मार्कर",
     whatToDo: review("क्या करें: "),
-    sources: (count: number) => `स्रोत (${count})`,
+    sources: (count: number) => `स्रोत (${formatCount("hi", count)})`,
   },
   findings: {
     title: "नतीजे",
@@ -132,7 +135,7 @@ export const report: Messages["report"] = {
   moveFirst: {
     title: review("पहले इन पर काम करें"),
     description: review("इन मार्कर पर पहले काम करें, इसी क्रम में।"),
-    more: (count: number) => review(`${count} और`),
+    more: (count: number) => review(`${formatCount("hi", count)} और`),
   },
   narrative: {
     title: "आपकी रिपोर्ट क्या कहती है",

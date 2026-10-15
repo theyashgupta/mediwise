@@ -309,6 +309,21 @@ describe.each(["en", "hi"] as const)("the health overview on Home in %s", (local
     expect(order).toEqual(order.toSorted((a, b) => a - b));
   });
 
+  test("a Home load with no year in review intro only reads, so it never asks for an intro", async () => {
+    const requests = fakeNetwork({
+      "GET /me": () => me,
+      "GET /profiles": () => [selfProfile],
+      "GET /dashboard": () => overview,
+      "GET /dashboard/family": () => [],
+      [`GET /profiles/${selfProfile.id}/year-review`]: () => ({ ...yearReview, intro: null }),
+      [`GET /profiles/${selfProfile.id}/questions`]: () => [],
+    });
+    await renderApp("/", { locale });
+
+    expect(await screen.findByRole("heading", { name: t.yearReview.title })).toBeTruthy();
+    expect(requests.filter((r) => r.method !== "GET")).toEqual([]);
+  });
+
   test("each block has one source line, a link to trends and, with a suggestion, one disclaimer", async () => {
     overviewNetwork(overview);
     await renderApp("/", { locale });

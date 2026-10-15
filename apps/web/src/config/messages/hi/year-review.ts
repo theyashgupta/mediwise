@@ -1,14 +1,19 @@
 import type { Messages } from "..";
 import { plural } from "../plural";
 import { review } from "../review";
+import { formatCount } from "../locales";
 
 export const yearReview: Messages["yearReview"] = {
   title: "साल का सार",
   period: (from: string, to: string) => `${from} से ${to}`,
   card: {
     score: (from: number, to: number) => `स्कोर ${from} → ${to}`,
-    moved: (n: number) => plural("hi", n, { one: `${n} मार्कर बदला`, other: `${n} मार्कर बदले` }),
-    stillAtRisk: (n: number) => review(`${n} अब भी जोखिम में`),
+    moved: (n: number) =>
+      plural("hi", n, {
+        one: `${formatCount("hi", n)} मार्कर बदला`,
+        other: `${formatCount("hi", n)} मार्कर बदले`,
+      }),
+    stillAtRisk: (n: number) => review(`${formatCount("hi", n)} अब भी जोखिम में`),
     open: "सार खोलें",
   },
   direction: { improved: review("बेहतर स्थिति"), worsened: review("खराब स्थिति") },
@@ -36,5 +41,7 @@ export const yearReview: Messages["yearReview"] = {
     emptyBody:
       "साल के सार के लिए एक साल की दो रिपोर्ट चाहिए। क्या बदला, यह देखने के लिए दूसरी रिपोर्ट अपलोड करें।",
     upload: "रिपोर्ट अपलोड करें",
+    writeIntro: "परिचय लिखें",
+    introError: "हम परिचय नहीं लिख सके। फिर से कोशिश करें।",
   },
 };

@@ -1,9 +1,13 @@
 import { plural } from "../plural";
+import { formatCount } from "../locales";
 
 export const report = {
   title: "Your report",
   markerCount: (count: number) =>
-    plural("en", count, { one: `${count} marker`, other: `${count} markers` }),
+    plural("en", count, {
+      one: `${formatCount("en", count)} marker`,
+      other: `${formatCount("en", count)} markers`,
+    }),
   loadError: "We could not load this report.",
   readError: "We could not read this report.",
   deleted: "We deleted the report.",
@@ -33,9 +37,9 @@ export const report = {
   summary: {
     score: (score: number | null) => `Your score is ${score}.`,
     coverage: (panel: string, measured: number, core: number) =>
-      `${panel}, ${measured} of ${core} core markers`,
+      `${panel}, ${formatCount("en", measured)} of ${formatCount("en", core)} core markers`,
     capped: (measured: number, core: number) =>
-      `We capped the score. This report has ${measured} of ${core} core markers.`,
+      `We capped the score. This report has ${formatCount("en", measured)} of ${formatCount("en", core)} core markers.`,
     tiers: {
       apex: "Apex",
       platinum: "Platinum",
@@ -74,7 +78,7 @@ export const report = {
     description: "Signals that come from two or more markers.",
     markers: "Markers in this pattern",
     whatToDo: "What to do: ",
-    sources: (count: number) => `Sources (${count})`,
+    sources: (count: number) => `Sources (${formatCount("en", count)})`,
   },
   findings: {
     title: "Findings",
@@ -118,7 +122,7 @@ export const report = {
   moveFirst: {
     title: "Move first",
     description: "The markers to work on first, in order.",
-    more: (count: number) => `${count} more`,
+    more: (count: number) => `${formatCount("en", count)} more`,
   },
   narrative: {
     title: "What your report says",

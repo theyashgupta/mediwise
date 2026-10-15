@@ -1,4 +1,5 @@
 import { plural } from "../plural";
+import { formatCount } from "../locales";
 
 export const assistant = {
   askReport: "Ask about this report",
@@ -19,7 +20,11 @@ export const assistant = {
   },
   off: "The assistant is not available now. Try again later.",
   loadError: "We could not load your questions.",
-  left: (n: number) => plural("en", n, { one: `${n} question left`, other: `${n} questions left` }),
+  left: (n: number) =>
+    plural("en", n, {
+      one: `${formatCount("en", n)} question left`,
+      other: `${formatCount("en", n)} questions left`,
+    }),
   out: {
     use_credit: "You have no questions left. Use 1 credit to get 20 more questions.",
     buy: "You have no questions left. Buy credits to ask more questions.",
