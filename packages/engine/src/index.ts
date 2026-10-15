@@ -94,6 +94,11 @@ export {
   proposeEpisode,
 } from "./episode.js";
 export { patterns } from "./patterns/catalog.js";
+export {
+  buildPatternTrends,
+  type PatternChange,
+  type PatternTrend,
+} from "./patterns/pattern-trends.js";
 export { alertKeys } from "./patterns/study-alerts.js";
 export {
   categoryLabel,

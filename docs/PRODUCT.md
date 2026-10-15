@@ -53,6 +53,7 @@ In:
 11. Retest due dates and a calendar file: a due date for markers with a sourced retest interval, and an `.ics` file the user adds to the phone calendar. MediWise stores no reminder.
 12. Questions about your own reports: a person asks about the reports of one profile and gets 1 to 5 sentences that cite the report and date of every number. The assistant explains. It does not diagnose, treat or reassure (see `docs/research/assistant.md`).
 13. Suggestions for each profile: habits, retests, supplements to ask about and see-a-doctor flags. The engine makes them from the catalog by fixed rules, and each one carries the disclaimer "MediWise is for information. Ask your doctor before you act on this."
+14. Home is the health overview of a profile. First it shows what needs attention, see a doctor and patterns across reports. Next come retests due, and habits and questions for your doctor. The latest report card comes after them. Each block names where its data comes from and links to the detail.
 
 Out of v1 (do not build, do not scaffold):
 

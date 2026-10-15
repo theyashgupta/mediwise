@@ -72,6 +72,36 @@ export const dashboard = {
     worsening: "Worsening",
     change: (delta: string, date: string) => `${delta} since ${date}`,
     study: "Study report",
+    source: "From the latest value of each marker in all your reports.",
+  },
+  trendsLink: "Open trends",
+  doctor: {
+    title: "See a doctor",
+    source: "From results well outside your calibrated range and from lines in your study reports.",
+    now: "Today",
+    soon: "Soon",
+  },
+  suggestion: {
+    markers: "Markers behind this suggestion",
+    openStudy: "Open the study report",
+  },
+  patterns: {
+    title: "Patterns across reports",
+    source: "We check groups of markers on the latest value of each marker in all your reports.",
+    markers: "Markers in this pattern",
+    change: {
+      new: "New",
+      worsening: "Worsening",
+      improving: "Improving",
+      stable: "No change",
+      cleared: "Cleared",
+    },
+  },
+  habits: {
+    title: "Habits and questions for your doctor",
+    source: "From markers outside your calibrated range in all your reports.",
+    habits: "Habits",
+    questions: "Questions for your doctor",
   },
   recent: {
     title: "Recent reports",
@@ -86,6 +116,7 @@ export const dashboard = {
     addLabel: (marker: string) => `Add the ${marker} retest to your calendar`,
     add: "Add to calendar",
     askDoctor: "Ask your doctor before you book a retest.",
+    source: "From the date of your last test and the usual retest time for each marker.",
   },
   calendar: {
     summary: (marker: string, name: string) => `Retest ${marker} for ${name}`,

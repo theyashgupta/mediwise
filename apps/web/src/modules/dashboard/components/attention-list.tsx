@@ -13,6 +13,7 @@ import { MarkerValue, markerLink, studiesLink } from "@/modules/reports";
 import { directionStyles } from "@/modules/trends";
 import { type AttentionFilter, attentionFilters, matchesFilter } from "../config/attention-filter";
 import type { AttentionItem } from "../types";
+import { TrendsLink } from "./trends-link";
 
 type AttentionListProps = {
   items: AttentionItem[];
@@ -89,7 +90,12 @@ export function AttentionList({ items }: AttentionListProps) {
   const [filter, setFilter] = useState<AttentionFilter>("all");
   const shown = items.filter((item) => matchesFilter(item, filter));
   return (
-    <Section id="needs-attention" title={text.title}>
+    <Section
+      id="needs-attention"
+      title={text.title}
+      description={text.source}
+      action={<TrendsLink />}
+    >
       {items.length === 0 ? (
         <p className="rounded-xl border bg-card p-4 text-muted-foreground">{text.none}</p>
       ) : (
