@@ -64,7 +64,7 @@ test("the admin sees spend, reads, queue, credits, profiles, failed reads and bo
   const alerts = within(main()).getByTestId("admin-alerts");
   expect(within(alerts).getByText(/at 83% of the monthly cap/)).toBeTruthy();
   expect(within(alerts).getByText(/in the queue for 45 min/)).toBeTruthy();
-  expect(within(main()).getByText("Claude or network error")).toBeTruthy();
+  expect(within(main()).getByText("Upstream or network error")).toBeTruthy();
   expect(within(main()).queryByText(selfProfile.name)).toBeNull();
 });
 
