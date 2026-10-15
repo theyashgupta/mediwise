@@ -4,7 +4,7 @@ import { handleError } from "../../common/problem.js";
 import { env } from "../../config/env.js";
 import type { AuthEnv } from "../../middleware/auth.js";
 import { reportsRoutes } from "./reports.routes.js";
-import { backfillReportTitles } from "./reports.service.js";
+import { backfillReportTitles, egfrEquation } from "./reports.service.js";
 
 const store = vi.hoisted(() => {
   type Report = {
@@ -16,6 +16,7 @@ const store = vi.hoisted(() => {
     note?: string | null;
     title?: string | null;
     titleEdited?: boolean;
+    dateAmbiguous?: boolean;
   };
   type File = {
     id?: string;
@@ -39,7 +40,16 @@ const store = vi.hoisted(() => {
   const links: object[] = [];
   const insights: { current?: object; usage?: object } = {};
   const credits = new Map<string, { balance: number; readsToday: number }>();
-  const view = ({ id, profileId, status, createdAt, note, title, titleEdited }: Report) => ({
+  const view = ({
+    id,
+    profileId,
+    status,
+    createdAt,
+    note,
+    title,
+    titleEdited,
+    dateAmbiguous,
+  }: Report) => ({
     id,
     profileId,
     status,
@@ -47,6 +57,7 @@ const store = vi.hoisted(() => {
     note: note ?? null,
     title: title ?? null,
     titleEdited: titleEdited ?? false,
+    dateAmbiguous: dateAmbiguous ?? false,
     markerCount: 0,
   });
   const find = (owner: string, id: string) =>
@@ -378,6 +389,8 @@ function stored(row: object) {
     value: null,
     valueText: null,
     unit: null,
+    printedValue: null,
+    printedUnit: null,
     labRangeLow: null,
     labRangeHigh: null,
     status: null,
@@ -832,6 +845,72 @@ test("a done report groups markers by catalog category with catalog copy, ranks 
   });
 });
 
+test("a report from abroad shows the printed unit beside the canonical one, HbA1c once, the eGFR equation and the date flag", async () => {
+  const { body } = await create([pdf]);
+  const report = store.reports.find((r) => r.id === body.id);
+  if (report) Object.assign(report, { status: "done", dateAmbiguous: true });
+  store.markerRows.push(
+    stored({
+      markerKey: "creatinine",
+      rawName: "Creatinine",
+      value: 1,
+      unit: "mg/dL",
+      printedValue: 88.4,
+      printedUnit: "umol/L",
+      status: "optimal",
+    }),
+    stored({
+      markerKey: "hba1c",
+      rawName: "HbA1c",
+      value: 6.5,
+      unit: "%",
+      printedValue: 6.5,
+      printedUnit: "%",
+      status: "watch",
+    }),
+    stored({
+      markerKey: "hba1c",
+      rawName: "HbA1c",
+      value: 48,
+      unit: "mmol/mol",
+      printedValue: 48,
+      printedUnit: "mmol/mol",
+    }),
+    stored({
+      markerKey: "egfr",
+      rawName: "eGFR (CKD-EPI 2009)",
+      value: 92,
+      unit: "mL/min/1.73m²",
+      printedValue: 92,
+      printedUnit: "mL/min/1.73m2",
+      status: "optimal",
+    }),
+  );
+
+  const detail = (await (await call("GET", `/reports/${body.id}`)).json()) as {
+    header: { dateAmbiguous: boolean };
+    categories: { markers: { markerKey: string }[] }[];
+  };
+  const rows = detail.categories.flatMap((c) => c.markers);
+
+  expect(detail.header.dateAmbiguous).toBe(true);
+  expect(rows.filter((row) => row.markerKey === "hba1c")).toEqual([
+    expect.objectContaining({ value: 6.5, unit: "%", printed: null }),
+  ]);
+  expect(rows).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        markerKey: "creatinine",
+        value: 1,
+        unit: "mg/dL",
+        printed: { value: 88.4, unit: "umol/L" },
+        equation: null,
+      }),
+      expect.objectContaining({ markerKey: "egfr", printed: null, equation: "CKD-EPI 2009" }),
+    ]),
+  );
+});
+
 test("a marker page returns the row, its South Asian watch band and source, history, copy, follow-ups and neighbours", async () => {
   const { body } = await create([pdf]);
   const report = store.reports.find((r) => r.id === body.id);
@@ -1135,4 +1214,15 @@ test("translating a report calls Claude once, stores the Hindi text and its toke
 test("translating an unfinished report returns 409", async () => {
   const { body } = await create([pdf]);
   expect((await call("POST", `/reports/${body.id}/translation`)).status).toBe(409);
+});
+
+test.each([
+  ["eGFR (CKD-EPI 2021)", "CKD-EPI 2021"],
+  ["eGFR CKD EPI 2009", "CKD-EPI 2009"],
+  ["eGFR (CKD-EPI)", "CKD-EPI"],
+  ["eGFR by MDRD", "MDRD"],
+  ["Creatinine clearance (Cockcroft-Gault)", "Cockcroft-Gault"],
+  ["eGFR", null],
+])("the printed name %j names the eGFR equation %j", (rawName, equation) => {
+  expect(egfrEquation(rawName)).toBe(equation);
 });
