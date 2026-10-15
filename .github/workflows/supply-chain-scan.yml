@@ -78,17 +78,18 @@ jobs:
         env:
           ALLOW: esbuild unrs-resolver
         run: |
-          shopt -s nullglob
-          printf '%s\n' \
-            node_modules/.pnpm/*/node_modules/*/package.json node_modules/.pnpm/*/node_modules/@*/*/package.json \
-            node_modules/*/package.json node_modules/@*/*/package.json \
-            {apps,packages}/*/node_modules/*/package.json {apps,packages}/*/node_modules/@*/*/package.json \
-          | node -e '
+          node -e '
             const fs = require("fs"), path = require("path");
             const allow = new Set(process.env.ALLOW.split(/\s+/).filter(Boolean));
+            const files = fs.globSync([
+              "node_modules/.pnpm/*/node_modules/{*,@*/*}/package.json",
+              "node_modules/{*,@*/*}/package.json",
+              "{apps,packages}/*/node_modules/{*,@*/*}/package.json",
+              "{apps,packages}/*/package.json",
+            ]);
             const seen = new Set();
             let fail = 0;
-            for (const f of fs.readFileSync(0, "utf8").split("\n").filter(Boolean)) {
+            for (const f of files) {
               let real;
               try { real = fs.realpathSync(f); } catch { continue; }
               if (seen.has(real)) continue;

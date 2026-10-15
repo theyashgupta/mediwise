@@ -255,7 +255,7 @@ Update the baseline only when the growth is necessary, or when a chunk is new, r
 | IOC filenames | A known worm file in the repo, for example `setup_bun.js`, `bun_environment.js` or `truffleSecrets.json`. It does not look in `node_modules` or `.git`. |
 | IOC strings | A known exfil host or secret scanner name in a file of the repo. The list is in the workflow. It does not look in `node_modules`, `.git` or the workflow file, so do not copy a pattern into another file. |
 | Lockfile | A package in `pnpm-lock.yaml` that comes from a host other than `registry.npmjs.org`: a tarball URL, a git repo, a directory or a `file:` version. It also fails when `.npmrc` or `pnpm-workspace.yaml` sets a different registry. |
-| Install-hook allowlist | A package with a `preinstall`, `install` or `postinstall` script, or a `binding.gyp` file, that is not in the allowlist. The step reads each package in `node_modules/.pnpm` and each hoisted package. |
+| Install-hook allowlist | A package with a `preinstall`, `install` or `postinstall` script, or a `binding.gyp` file, that is not in the allowlist. The step reads each package in `node_modules/.pnpm`, each hoisted package and each workspace package. |
 | pnpm audit | A known advisory. A high advisory shows in the log. A critical advisory fails the job. |
 
 The install runs with `pnpm install --frozen-lockfile --ignore-scripts`, so no install script runs before the allowlist step.
