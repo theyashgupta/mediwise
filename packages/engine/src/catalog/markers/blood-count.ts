@@ -2,7 +2,7 @@ import { range } from "../range.js";
 import type { Marker } from "../schema.js";
 import { sources } from "../sources.js";
 
-const { bain2005, dacie2017, nfhs5, tietz2022, who2016Myeloid, whoAnaemia2024 } = sources;
+const { bain2005, dacie2017, kost1990, nfhs5, tietz2022, who2016Myeloid, whoAnaemia2024 } = sources;
 
 const perMicrolitre = [
   { from: "10^9/L", factor: 1 },
@@ -41,7 +41,7 @@ export const bloodCountMarkers: Marker[] = [
     ],
     southAsianNote:
       "Anaemia is very common in India. NFHS-5 found it in 57% of women aged 15 to 49 and 25% of men. The WHO cut-offs apply to everyone, so MediWise uses the same range here.",
-    sources: [whoAnaemia2024, who2016Myeloid, nfhs5],
+    sources: [whoAnaemia2024, who2016Myeloid, nfhs5, kost1990],
     core: true,
     direction: "both",
   },
@@ -256,7 +256,7 @@ export const bloodCountMarkers: Marker[] = [
     whatMovesIt:
       "Infections, stress, smoking, steroids and hard exercise raise it. Some viral infections, medicines and nutrient deficiencies lower it.",
     ranges: [range(dacie2017, [4.0, 10.0], [3.0, 12.0])],
-    sources: [dacie2017],
+    sources: [dacie2017, kost1990],
     core: false,
     direction: "both",
   },
@@ -530,7 +530,7 @@ export const bloodCountMarkers: Marker[] = [
     whatMovesIt:
       "Viral fevers such as dengue, alcohol and some medicines lower it. Iron deficiency, infection, inflammation and recent surgery raise it.",
     ranges: [range(dacie2017, [150, 410], [100, 450])],
-    sources: [dacie2017],
+    sources: [dacie2017, kost1990],
     core: false,
     direction: "both",
   },

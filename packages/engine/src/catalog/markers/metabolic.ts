@@ -7,6 +7,7 @@ const {
   ada2025,
   icmrDiabetes2018,
   icmrIndiab2023,
+  kost1990,
   misra2009,
   tietz2022,
   usPharmacistAda2022,
@@ -45,7 +46,7 @@ export const metabolicMarkers: Marker[] = [
     ranges: [range(ada2025, [70, 99], [54, 125])],
     southAsianNote:
       "Diabetes is common and starts early in India. ICMR-INDIAB found diabetes in 11.4% and prediabetes in 15.3% of adults. The diagnostic cut-offs are the same, so MediWise uses the same range here.",
-    sources: [ada2025, icmrIndiab2023, icmrDiabetes2018],
+    sources: [ada2025, icmrIndiab2023, icmrDiabetes2018, kost1990],
     core: true,
     direction: "both",
   },
@@ -79,7 +80,7 @@ export const metabolicMarkers: Marker[] = [
     ranges: [range(ada2025, [70, 139], [54, 199])],
     southAsianNote:
       "Indian adults often show high post-meal sugar while fasting sugar still looks normal, partly because of rice- and wheat-heavy meals. ICMR guidance recommends checking both.",
-    sources: [ada2025, icmrDiabetes2018],
+    sources: [ada2025, icmrDiabetes2018, kost1990],
     core: false,
     direction: "both",
   },
@@ -107,7 +108,7 @@ export const metabolicMarkers: Marker[] = [
     whatMovesIt:
       "The last meal, stress, illness and medicines move it within hours. Long-term habits move the baseline it sits on.",
     ranges: [range(ada2025, [70, 139], [54, 199])],
-    sources: [ada2025],
+    sources: [ada2025, kost1990],
     core: false,
     direction: "both",
   },
@@ -181,7 +182,7 @@ export const metabolicMarkers: Marker[] = [
     ranges: [range(tietz2022, [2, 12], [2, 25])],
     southAsianNote:
       "Asian Indians tend to have more insulin resistance than Europeans at the same body weight. The Indian consensus on obesity and metabolic syndrome describes this pattern. No source publishes a separate insulin range, so MediWise uses the same range here.",
-    sources: [tietz2022, misra2009],
+    sources: [tietz2022, misra2009, ada2025],
     core: true,
     direction: "both",
   },

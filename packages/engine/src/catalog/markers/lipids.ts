@@ -33,7 +33,7 @@ export const lipidMarkers: Marker[] = [
     whatMovesIt:
       "Saturated and trans fats, weight gain and genetics raise it. Fibre, exercise, weight loss and statins lower it.",
     ranges: [range(ncepAtp3, [null, 199], [null, 239])],
-    sources: [ncepAtp3],
+    sources: [ncepAtp3, ahaAcc2018],
     core: false,
     direction: "high_is_bad",
   },
@@ -104,7 +104,7 @@ export const lipidMarkers: Marker[] = [
     ],
     southAsianNote:
       "Low HDL is the most common lipid problem in Indian adults in the ICMR-INDIAB survey. The cut-offs are the same, so MediWise uses the same range here.",
-    sources: [ncepAtp3, icmrIndiab2023],
+    sources: [ncepAtp3, icmrIndiab2023, ahaAcc2018],
     core: true,
     direction: "low_is_bad",
   },

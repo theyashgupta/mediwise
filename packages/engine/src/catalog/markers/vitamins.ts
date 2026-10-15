@@ -80,7 +80,7 @@ export const vitaminMarkers: Marker[] = [
     ranges: [range(bsh2014, [300, null], [200, null])],
     southAsianNote:
       "B12 deficiency is very common in India, especially in vegetarians. Yajnik and colleagues linked it to high homocysteine in rural and urban Indian adults. No source publishes a separate range, so MediWise uses the same range here.",
-    sources: [bsh2014, yajnik2006],
+    sources: [bsh2014, yajnik2006, iomBVitamins1998],
     core: true,
     supplementable: true,
     direction: "low_is_bad",
@@ -109,7 +109,7 @@ export const vitaminMarkers: Marker[] = [
     whatMovesIt:
       "Low intake of greens and pulses, alcohol and some medicines lower it. A recent folate-rich meal or supplement raises serum folate quickly.",
     ranges: [range(whoFolate2015, [4.0, null], [3.0, null])],
-    sources: [whoFolate2015, bsh2014],
+    sources: [whoFolate2015, bsh2014, iomBVitamins1998],
     core: false,
     supplementable: true,
     direction: "low_is_bad",

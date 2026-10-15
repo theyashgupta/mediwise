@@ -1,6 +1,7 @@
 import type { Pattern } from "../types.js";
-import { hindiMarkerText, hindiPatternText } from "./hi/index.js";
-import type { Marker } from "./schema.js";
+import { lifestyle } from "./advice.js";
+import { hindiLifestyleText, hindiMarkerText, hindiPatternText } from "./hi/index.js";
+import type { Lifestyle, Marker } from "./schema.js";
 
 export const textLocales = ["en", "hi"] as const;
 export type TextLocale = (typeof textLocales)[number];
@@ -30,6 +31,18 @@ export function markerText(entry: Marker, locale: TextLocale): MarkerText {
     southAsianNote,
     textRuleFollowUps: entry.textRules?.flatMap(({ followUp }) => (followUp ? [followUp] : [])),
   };
+}
+
+export type LifestyleText = Pick<Lifestyle, "habits" | "raises" | "lowers">;
+
+/** Returns the lifestyle lines of a marker in a locale, or the English lines when Hindi has none. */
+export function lifestyleText(markerKey: string, locale: TextLocale): LifestyleText | undefined {
+  const entry = lifestyle[markerKey];
+  if (!entry) return undefined;
+  const { habits, raises, lowers } = entry;
+  return (
+    (locale === "hi" ? hindiLifestyleText[markerKey] : undefined) ?? { habits, raises, lowers }
+  );
 }
 
 export type PatternText = Pick<Pattern, "name" | "description" | "whatItSuggests" | "whatToDo">;

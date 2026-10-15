@@ -2,7 +2,7 @@ import { range } from "../range.js";
 import type { Marker } from "../schema.js";
 import { sources } from "../sources.js";
 
-const { aga2020, camaschella2015, nfhs5, tietz2022, whoFerritin2020 } = sources;
+const { aga2020, camaschella2015, icmrNin2024, nfhs5, tietz2022, whoFerritin2020 } = sources;
 
 const ironConversions = [{ from: "µmol/L", factor: 5.585 }];
 
@@ -27,7 +27,7 @@ export const ironMarkers: Marker[] = [
       range(tietz2022, [65, 175], [50, 200], { sex: "male" }),
       range(tietz2022, [50, 170], [40, 200], { sex: "female" }),
     ],
-    sources: [tietz2022, camaschella2015],
+    sources: [tietz2022, camaschella2015, icmrNin2024],
     core: false,
     supplementable: true,
     direction: "both",
@@ -131,7 +131,7 @@ export const ironMarkers: Marker[] = [
     ],
     southAsianNote:
       "NFHS-5 found anaemia in 57% of Indian women aged 15 to 49. Low iron is the most common cause of anaemia worldwide, per WHO. The cut-offs are the same, so MediWise uses the same range here.",
-    sources: [aga2020, whoFerritin2020, nfhs5, tietz2022],
+    sources: [aga2020, whoFerritin2020, nfhs5, tietz2022, icmrNin2024],
     core: true,
     supplementable: true,
     direction: "both",

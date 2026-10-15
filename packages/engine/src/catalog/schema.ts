@@ -127,6 +127,24 @@ export const markerSchema = z.object({
 });
 export type Marker = z.infer<typeof markerSchema>;
 
+const adviceLines = z.array(z.string().min(1)).min(1).max(3);
+
+export const lifestyleSchema = z.object({
+  side: z.enum(["high", "low"]),
+  habits: adviceLines,
+  raises: adviceLines,
+  lowers: adviceLines,
+  source: z.string().min(1),
+});
+export type Lifestyle = z.infer<typeof lifestyleSchema>;
+
+const limitSchema = z.object({ value: z.number(), source: z.string().min(1) });
+
+export const urgentLimitSchema = z
+  .object({ below: limitSchema.optional(), above: limitSchema.optional() })
+  .refine(({ below, above }) => below || above, "an urgent limit needs below or above");
+export type UrgentLimit = z.infer<typeof urgentLimitSchema>;
+
 export const formulaSchema = z.discriminatedUnion("kind", [
   z.object({
     kind: z.literal("ratio"),
