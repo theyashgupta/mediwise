@@ -1,0 +1,114 @@
+{
+  "profile": {
+    "ageYears": 52,
+    "sex": "male",
+    "ancestry": "unknown"
+  },
+  "values": [
+    {
+      "rawName": "HbA1c",
+      "panel": "Biochemistry",
+      "value": 6.6,
+      "unit": "%",
+      "labHigh": 6
+    },
+    {
+      "rawName": "HbA1c",
+      "panel": "Biochemistry",
+      "value": 49,
+      "unit": "mmol/mol",
+      "labHigh": 42
+    },
+    {
+      "rawName": "Glucose (fasting)",
+      "panel": "Biochemistry",
+      "value": 6.4,
+      "unit": "mmol/L",
+      "labLow": 3,
+      "labHigh": 6
+    },
+    {
+      "rawName": "Urea",
+      "panel": "Biochemistry",
+      "value": 6.2,
+      "unit": "mmol/L",
+      "labLow": 2.5,
+      "labHigh": 8
+    },
+    {
+      "rawName": "Creatinine",
+      "panel": "Biochemistry",
+      "value": 81,
+      "unit": "umol/L",
+      "labLow": 60,
+      "labHigh": 110
+    },
+    {
+      "rawName": "eGFR (CKD-EPI 2021)",
+      "panel": "Biochemistry",
+      "value": ">90",
+      "unit": "mL/min/1.73m2",
+      "labLow": 60
+    },
+    {
+      "rawName": "Uric acid",
+      "panel": "Biochemistry",
+      "value": 0.38,
+      "unit": "mmol/L",
+      "labLow": 0.2,
+      "labHigh": 0.42
+    },
+    {
+      "rawName": "Calcium",
+      "panel": "Biochemistry",
+      "value": 2.38,
+      "unit": "mmol/L",
+      "labLow": 2.1,
+      "labHigh": 2.6
+    },
+    {
+      "rawName": "Cholesterol",
+      "panel": "Biochemistry",
+      "value": 5.1,
+      "unit": "mmol/L",
+      "labHigh": 5.5
+    },
+    {
+      "rawName": "HDL cholesterol",
+      "panel": "Biochemistry",
+      "value": 1.1,
+      "unit": "mmol/L",
+      "labLow": 1
+    },
+    {
+      "rawName": "LDL cholesterol",
+      "panel": "Biochemistry",
+      "value": 3.2,
+      "unit": "mmol/L",
+      "labHigh": 3.5
+    },
+    {
+      "rawName": "Triglycerides",
+      "panel": "Biochemistry",
+      "value": 1.9,
+      "unit": "mmol/L",
+      "labHigh": 1.5
+    },
+    {
+      "rawName": "Haemoglobin",
+      "panel": "Biochemistry",
+      "value": 152,
+      "unit": "g/L",
+      "labLow": 130,
+      "labHigh": 180
+    },
+    {
+      "rawName": "Ferritin",
+      "panel": "Biochemistry",
+      "value": 210,
+      "unit": "ug/L",
+      "labLow": 30,
+      "labHigh": 500
+    }
+  ]
+}

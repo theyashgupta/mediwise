@@ -1,5 +1,9 @@
 import { describe, expect, test } from "vitest";
 import fullPanel from "../fixtures/full-panel.json";
+import auHba1cDual from "../fixtures/intl-au-hba1c-dual.json";
+import deDecimalComma from "../fixtures/intl-de-decimal-comma.json";
+import ukNhsAppStyle from "../fixtures/intl-uk-nhs-app-style.json";
+import usQuestStyle from "../fixtures/intl-us-quest-style.json";
 import lipidOnly from "../fixtures/lipid-only.json";
 import thyroidOnly from "../fixtures/thyroid-only.json";
 import unknownUnits from "../fixtures/unknown-units.json";
@@ -7,6 +11,7 @@ import {
   ancestrySchema,
   assessMeasurements,
   derived,
+  findMarker,
   markers,
   runEngine,
   type EngineInput,
@@ -17,7 +22,13 @@ const fixtures = {
   "lipid-only": lipidOnly,
   "thyroid-only": thyroidOnly,
   "unknown-units": unknownUnits,
+  "intl-us-quest-style": usQuestStyle,
+  "intl-uk-nhs-app-style": ukNhsAppStyle,
+  "intl-de-decimal-comma": deDecimalComma,
+  "intl-au-hba1c-dual": auHba1cDual,
 } as Record<string, EngineInput>;
+
+const international = Object.keys(fixtures).filter((name) => name.startsWith("intl-"));
 
 const full = fixtures["full-panel"]!;
 
@@ -45,6 +56,41 @@ describe("fixtures", () => {
       new Set(["supplement", "retest", "measure"]),
     );
     expect(output.unmeasured.length).toBeGreaterThan(0);
+  });
+
+  test.each(international)(
+    "every printed name of %s maps by alias, except a bare GLUCOSE",
+    (name) => {
+      const unmapped = fixtures[name]!.values.filter(
+        (value) => !findMarker(value.rawName, value.panel, value.value),
+      );
+      expect(unmapped.map((value) => value.rawName)).toEqual(
+        name === "intl-us-quest-style" ? ["GLUCOSE"] : [],
+      );
+    },
+  );
+
+  test("HbA1c printed in percent and in mmol/mol scores once, in percent", () => {
+    const hba1c = runEngine(fixtures["intl-au-hba1c-dual"]!).markers.filter(
+      (item) => item.markerKey === "hba1c",
+    );
+    expect(hba1c).toEqual([expect.objectContaining({ value: 6.6, unit: "%", status: "risk" })]);
+  });
+
+  test("HbA1c in mmol/mol converts with the NGSP equation, never a glucose factor", () => {
+    const hba1c = runEngine(fixtures["intl-uk-nhs-app-style"]!).markers.find(
+      (item) => item.markerKey === "hba1c",
+    );
+    expect(hba1c).toMatchObject({ value: 6.2, unit: "%" });
+  });
+
+  test("a US BUN stays BUN and a UK or German urea stays urea", () => {
+    const keys = (name: string) => runEngine(fixtures[name]!).markers.map((item) => item.markerKey);
+    expect(keys("intl-us-quest-style")).toContain("bun");
+    expect(keys("intl-us-quest-style")).not.toContain("blood_urea");
+    expect(keys("intl-uk-nhs-app-style")).toContain("blood_urea");
+    expect(keys("intl-de-decimal-comma")).toContain("blood_urea");
+    expect(keys("intl-uk-nhs-app-style")).not.toContain("bun");
   });
 
   test("the unknown-units panel marks unknown units and keeps unmapped names", () => {

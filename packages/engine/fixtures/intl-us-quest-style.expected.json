@@ -1,0 +1,715 @@
+{
+  "markers": [
+    {
+      "markerKey": "hba1c",
+      "value": 5.9,
+      "unit": "%",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 5.6,
+        "watchLow": null,
+        "watchHigh": 6.4,
+        "source": "ada2025"
+      },
+      "labRange": {
+        "low": null,
+        "high": 5.7
+      },
+      "deviation": 0.054
+    },
+    {
+      "markerKey": "bun",
+      "value": 18,
+      "unit": "mg/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 7,
+        "optimalHigh": 20,
+        "watchLow": 5,
+        "watchHigh": 25,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 7,
+        "high": 25
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "creatinine",
+      "value": 0.92,
+      "unit": "mg/dL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 0.6,
+        "optimalHigh": 1.1,
+        "watchLow": 0.5,
+        "watchHigh": 1.3,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 0.5,
+        "high": 0.99
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "egfr",
+      "value": 82,
+      "unit": "mL/min/1.73m²",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": 90,
+        "optimalHigh": null,
+        "watchLow": 60,
+        "watchHigh": null,
+        "source": "kdigo2024"
+      },
+      "labRange": {
+        "low": 60,
+        "high": null
+      },
+      "deviation": -0.089
+    },
+    {
+      "markerKey": "sodium",
+      "value": 140,
+      "unit": "mmol/L",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 136,
+        "optimalHigh": 145,
+        "watchLow": 133,
+        "watchHigh": 148,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 135,
+        "high": 146
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "potassium",
+      "value": 4.1,
+      "unit": "mmol/L",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 3.5,
+        "optimalHigh": 5,
+        "watchLow": 3.2,
+        "watchHigh": 5.5,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 3.5,
+        "high": 5.3
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "total_cholesterol",
+      "value": 212,
+      "unit": "mg/dL",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 199,
+        "watchLow": null,
+        "watchHigh": 239,
+        "source": "ncepAtp3"
+      },
+      "labRange": {
+        "low": null,
+        "high": 200
+      },
+      "deviation": 0.065
+    },
+    {
+      "markerKey": "hdl_cholesterol",
+      "value": 44,
+      "unit": "mg/dL",
+      "status": "risk",
+      "calibrated": {
+        "optimalLow": 60,
+        "optimalHigh": null,
+        "watchLow": 50,
+        "watchHigh": null,
+        "source": "ncepAtp3"
+      },
+      "labRange": {
+        "low": 50,
+        "high": null
+      },
+      "deviation": -0.267
+    },
+    {
+      "markerKey": "triglycerides",
+      "value": 160,
+      "unit": "mg/dL",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 149,
+        "watchLow": null,
+        "watchHigh": 199,
+        "source": "ncepAtp3"
+      },
+      "labRange": {
+        "low": null,
+        "high": 150
+      },
+      "deviation": 0.074
+    },
+    {
+      "markerKey": "ldl_cholesterol",
+      "value": 136,
+      "unit": "mg/dL",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 99,
+        "watchLow": null,
+        "watchHigh": 159,
+        "source": "ncepAtp3"
+      },
+      "labRange": {
+        "low": null,
+        "high": 100
+      },
+      "deviation": 0.374
+    },
+    {
+      "markerKey": "alt",
+      "value": 22,
+      "unit": "U/L",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 25,
+        "watchLow": null,
+        "watchHigh": 50,
+        "source": "acg2017"
+      },
+      "labRange": {
+        "low": 6,
+        "high": 29
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "ast",
+      "value": 19,
+      "unit": "U/L",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 35,
+        "watchLow": null,
+        "watchHigh": 70,
+        "source": "tietz2022"
+      },
+      "labRange": {
+        "low": 10,
+        "high": 35
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "tsh",
+      "value": 2.1,
+      "unit": "µIU/mL",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 0.45,
+        "optimalHigh": 4.12,
+        "watchLow": 0.1,
+        "watchHigh": 10,
+        "source": "ataAace2012"
+      },
+      "labRange": {
+        "low": 0.4,
+        "high": 4.5
+      },
+      "deviation": 0
+    },
+    {
+      "markerKey": "vitamin_d",
+      "value": 24,
+      "unit": "ng/mL",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": 30,
+        "optimalHigh": 100,
+        "watchLow": 20,
+        "watchHigh": 150,
+        "source": "endoVitD2011"
+      },
+      "labRange": {
+        "low": 30,
+        "high": 100
+      },
+      "deviation": -0.086
+    },
+    {
+      "markerKey": "ferritin",
+      "value": 38,
+      "unit": "ng/mL",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": 45,
+        "optimalHigh": 200,
+        "watchLow": 15,
+        "watchHigh": 300,
+        "source": "aga2020"
+      },
+      "labRange": {
+        "low": 16,
+        "high": 232
+      },
+      "deviation": -0.045
+    }
+  ],
+  "derived": [
+    {
+      "markerKey": "tc_hdl_ratio",
+      "value": 4.8,
+      "unit": "ratio",
+      "status": "risk",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 4,
+        "watchLow": null,
+        "watchHigh": 4.5,
+        "source": "millan2009"
+      },
+      "deviation": 0.2,
+      "inputs": [
+        "total_cholesterol",
+        "hdl_cholesterol"
+      ]
+    },
+    {
+      "markerKey": "ldl_hdl_ratio",
+      "value": 3.1,
+      "unit": "ratio",
+      "status": "risk",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 2.5,
+        "watchLow": null,
+        "watchHigh": 3,
+        "source": "millan2009"
+      },
+      "deviation": 0.24,
+      "inputs": [
+        "ldl_cholesterol",
+        "hdl_cholesterol"
+      ]
+    },
+    {
+      "markerKey": "non_hdl_cholesterol",
+      "value": 168,
+      "unit": "mg/dL",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 129,
+        "watchLow": null,
+        "watchHigh": 189,
+        "source": "ncepAtp3"
+      },
+      "deviation": 0.302,
+      "inputs": [
+        "total_cholesterol",
+        "hdl_cholesterol"
+      ]
+    },
+    {
+      "markerKey": "tg_hdl_ratio",
+      "value": 3.6,
+      "unit": "ratio",
+      "status": "risk",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 2,
+        "watchLow": null,
+        "watchHigh": 2.9,
+        "source": "mclaughlin2003"
+      },
+      "deviation": 0.8,
+      "inputs": [
+        "triglycerides",
+        "hdl_cholesterol"
+      ]
+    },
+    {
+      "markerKey": "ast_alt_ratio",
+      "value": 0.86,
+      "unit": "ratio",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 1.5,
+        "watchLow": null,
+        "watchHigh": 1.99,
+        "source": "acg2017"
+      },
+      "deviation": 0,
+      "inputs": [
+        "ast",
+        "alt"
+      ]
+    },
+    {
+      "markerKey": "bun_creatinine_ratio",
+      "value": 19.6,
+      "unit": "ratio",
+      "status": "optimal",
+      "calibrated": {
+        "optimalLow": 10,
+        "optimalHigh": 20,
+        "watchLow": 8,
+        "watchHigh": 25,
+        "source": "tietz2022"
+      },
+      "deviation": 0,
+      "inputs": [
+        "bun",
+        "creatinine"
+      ]
+    },
+    {
+      "markerKey": "estimated_average_glucose",
+      "value": 123,
+      "unit": "mg/dL",
+      "status": "watch",
+      "calibrated": {
+        "optimalLow": null,
+        "optimalHigh": 114,
+        "watchLow": null,
+        "watchHigh": 137,
+        "source": "ada2025"
+      },
+      "deviation": 0.079,
+      "inputs": [
+        "hba1c"
+      ]
+    }
+  ],
+  "unmapped": [
+    {
+      "rawName": "GLUCOSE",
+      "value": 115,
+      "unit": "mg/dL"
+    }
+  ],
+  "score": {
+    "overall": 73,
+    "byCategory": {
+      "metabolic": 60,
+      "lipids": 49,
+      "inflammation": null,
+      "kidney": 90,
+      "liver": 100,
+      "thyroid": 100,
+      "vitamins": 60,
+      "iron": 60,
+      "blood_count": null,
+      "electrolytes": 100,
+      "urate": null,
+      "cardiac": null,
+      "hormones": null,
+      "bone": null,
+      "urine": null,
+      "vitals": null,
+      "studies": null,
+      "other": null
+    },
+    "coverage": {
+      "measured": 9,
+      "core": 16,
+      "pct": 56
+    },
+    "capped": false,
+    "tier": "gold",
+    "formula": "A marker in its optimal range scores 100. A marker in watch scores 60. A marker in risk scores 20. A core marker counts two times. Your score is the weighted mean of these points. When the report has fewer than half of the core markers, the highest score is 70. When the report has fewer than a quarter of the core markers, the highest score is 50."
+  },
+  "verdict": "7 of 15 markers sit in your calibrated ranges. HDL cholesterol is the one to move first.",
+  "moveFirst": [
+    {
+      "markerKey": "hdl_cholesterol",
+      "severity": "critical",
+      "reason": "HDL cholesterol is 44 mg/dL, below your optimal range of 60 mg/dL or more."
+    },
+    {
+      "markerKey": "ldl_cholesterol",
+      "severity": "out_of_optimal",
+      "reason": "LDL cholesterol is 136 mg/dL, above your optimal range of up to 99 mg/dL."
+    },
+    {
+      "markerKey": "egfr",
+      "severity": "out_of_optimal",
+      "reason": "Estimated GFR is 82 mL/min/1.73m², below your optimal range of 90 mL/min/1.73m² or more."
+    },
+    {
+      "markerKey": "vitamin_d",
+      "severity": "out_of_optimal",
+      "reason": "Vitamin D (25-OH) is 24 ng/mL, below your optimal range of 30 to 100 ng/mL."
+    },
+    {
+      "markerKey": "triglycerides",
+      "severity": "out_of_optimal",
+      "reason": "Triglycerides is 160 mg/dL, above your optimal range of up to 149 mg/dL."
+    }
+  ],
+  "followUps": [
+    {
+      "kind": "supplement",
+      "markerKey": "vitamin_d",
+      "title": "Ask your doctor about a supplement for low Vitamin D (25-OH)",
+      "why": "Your Vitamin D (25-OH) is below your calibrated range. The Endocrine Society's 2011 guideline calls under 20 ng/mL deficient and 30 or above sufficient. Its 2024 update stopped advising routine testing in healthy adults, but very low levels still harm bone and muscle.",
+      "next": "Ask your doctor whether a supplement suits you and what dose to take. Retest in 8 to 12 weeks. Midday sun on bare skin, supplements and fortified foods raise it. Little time outdoors, darker skin, covering clothing, obesity and some medicines lower it.",
+      "rank": 1
+    },
+    {
+      "kind": "supplement",
+      "markerKey": "ferritin",
+      "title": "Ask your doctor about a supplement for low Ferritin",
+      "why": "Your Ferritin is below your calibrated range. Low ferritin is the earliest sign of iron deficiency, often before hemoglobin falls. The WHO calls under 15 ng/mL deficient in healthy adults. The AGA uses under 45 to diagnose iron deficiency in anaemia.",
+      "next": "Ask your doctor whether a supplement suits you and what dose to take. Retest in 8 to 12 weeks. Heavy periods, blood donation, pregnancy and a low-iron diet lower it. Inflammation, infection, fatty liver and alcohol raise it, which can hide low iron.",
+      "rank": 2
+    },
+    {
+      "kind": "retest",
+      "markerKey": "hdl_cholesterol",
+      "title": "Retest HDL cholesterol in 8 to 12 weeks",
+      "why": "Your HDL cholesterol is well outside your calibrated range. Low HDL is under 40 mg/dL in men and under 50 in women. It is linked with higher heart risk and insulin resistance. Raising HDL with drugs did not cut heart attacks, so HDL is a signal rather than a target.",
+      "next": "Exercise, weight loss and quitting smoking raise it. Refined carbohydrates, inactivity, belly fat and smoking lower it. Book a retest in 8 to 12 weeks. Take both reports to your doctor.",
+      "rank": 3
+    },
+    {
+      "kind": "measure",
+      "markerKey": "glucose_fasting",
+      "title": "Measure Fasting glucose",
+      "why": "Fasting glucose is not on this report. By ADA criteria, 100 to 125 mg/dL is prediabetes, and 126 or above on two tests is diabetes. Catching the rise early gives years to reverse it.",
+      "next": "Ask for Fasting glucose at your next blood test. Fasting glucose is the sugar level in your blood after an overnight fast of at least eight hours. It reflects how well the body keeps sugar steady without food.",
+      "rank": 4
+    },
+    {
+      "kind": "measure",
+      "markerKey": "insulin_fasting",
+      "title": "Measure Fasting insulin",
+      "why": "Fasting insulin is not on this report. High fasting insulin with normal sugar is an early sign of insulin resistance, often years before prediabetes. Combined with glucose it gives HOMA-IR.",
+      "next": "Ask for Fasting insulin at your next blood test. Insulin is the hormone that moves sugar from blood into cells. Fasting insulin shows how hard the pancreas works to hold fasting sugar in range.",
+      "rank": 5
+    },
+    {
+      "kind": "measure",
+      "markerKey": "apolipoprotein_b",
+      "title": "Measure Apolipoprotein B",
+      "why": "Apolipoprotein B is not on this report. ApoB predicts heart risk at least as well as LDL and better when triglycerides are high. ESC/EAS sets under 100 mg/dL for moderate risk, and AHA/ACC treats 130 or above as a risk enhancer.",
+      "next": "Ask for Apolipoprotein B at your next blood test. Every LDL, VLDL and Lp(a) particle carries exactly one ApoB protein. Measuring ApoB counts the harmful particles directly.",
+      "rank": 6
+    },
+    {
+      "kind": "measure",
+      "markerKey": "lipoprotein_a",
+      "title": "Measure Lipoprotein(a)",
+      "why": "Lipoprotein(a) is not on this report. A high level raises the risk of heart attack, stroke and aortic valve narrowing, even when LDL is good. The EAS calls under 30 mg/dL low and over 50 high.",
+      "next": "Ask for Lipoprotein(a) at your next blood test. Lp(a) is an LDL-like particle with an extra protein attached. Your genes mostly set its level, and it stays about the same for life.",
+      "rank": 7
+    },
+    {
+      "kind": "measure",
+      "markerKey": "hs_crp",
+      "title": "Measure High-sensitivity CRP",
+      "why": "High-sensitivity CRP is not on this report. The AHA and CDC class under 1 mg/L as low heart risk. They class 1 to 3 as average and above 3 as high. A value above 10 usually reflects a passing infection, so you should repeat the test when you are well.",
+      "next": "Ask for High-sensitivity CRP at your next blood test. hs-CRP measures the same protein as CRP but detects much lower levels. That makes it useful for spotting quiet, long-term inflammation.",
+      "rank": 8
+    },
+    {
+      "kind": "measure",
+      "markerKey": "vitamin_b12",
+      "title": "Measure Vitamin B12",
+      "why": "Vitamin B12 is not on this report. Low B12 causes tiredness, tingling, memory problems and large-cell anaemia, and nerve damage can become permanent. The BSH treats under 200 pg/mL as likely deficient and 200 to 300 as a grey zone.",
+      "next": "Ask for Vitamin B12 at your next blood test. The body needs vitamin B12 to make red blood cells and to keep nerves healthy. It comes almost only from animal foods such as milk, curd, eggs, fish and meat.",
+      "rank": 9
+    },
+    {
+      "kind": "measure",
+      "markerKey": "hemoglobin",
+      "title": "Measure Hemoglobin",
+      "why": "Hemoglobin is not on this report. Low hemoglobin is anaemia, which causes tiredness, breathlessness and poor focus. Very high hemoglobin thickens the blood and is worth a check with a doctor.",
+      "next": "Ask for Hemoglobin at your next blood test. Hemoglobin is the iron-rich protein inside red blood cells. It collects oxygen in the lungs and releases it in the tissues. The test measures how much hemoglobin is in a given volume of blood.",
+      "rank": 10
+    }
+  ],
+  "unmeasured": [
+    {
+      "markerKey": "glucose_fasting",
+      "name": "Fasting glucose",
+      "description": "Your blood sugar after at least eight hours without food."
+    },
+    {
+      "markerKey": "insulin_fasting",
+      "name": "Fasting insulin",
+      "description": "How much insulin your body needs to keep fasting sugar steady."
+    },
+    {
+      "markerKey": "apolipoprotein_b",
+      "name": "Apolipoprotein B",
+      "description": "A count of the particles that can build plaque in arteries."
+    },
+    {
+      "markerKey": "lipoprotein_a",
+      "name": "Lipoprotein(a)",
+      "description": "An inherited cholesterol particle that raises heart risk."
+    },
+    {
+      "markerKey": "hs_crp",
+      "name": "High-sensitivity CRP",
+      "description": "Low-grade inflammation linked with heart and metabolic risk."
+    },
+    {
+      "markerKey": "vitamin_b12",
+      "name": "Vitamin B12",
+      "description": "A vitamin for nerves and red blood cells, found in animal foods."
+    },
+    {
+      "markerKey": "hemoglobin",
+      "name": "Hemoglobin",
+      "description": "The oxygen-carrying protein in red blood cells."
+    }
+  ],
+  "patterns": [
+    {
+      "key": "metabolic_lipid_triad",
+      "name": "Metabolic syndrome lipid triad",
+      "description": "High triglycerides and low HDL with blood sugar above the optimal range.",
+      "severity": "risk",
+      "whatItSuggests": "These values often appear together with insulin resistance. Together they may raise your heart and blood sugar risk.",
+      "whatToDo": "Ask your doctor to check your waist size and blood pressure. These two complete the check for metabolic syndrome.",
+      "askDoctor": [
+        "Should we check my waist size and blood pressure for metabolic syndrome?",
+        "How often should I retest my lipids and HbA1c?"
+      ],
+      "sources": [
+        {
+          "id": "ncepAtp3",
+          "title": "Third Report of the National Cholesterol Education Program Expert Panel on Detection, Evaluation, and Treatment of High Blood Cholesterol in Adults (ATP III) Final Report. Circulation",
+          "year": 2002,
+          "url": "https://doi.org/10.1161/circ.106.25.3143"
+        },
+        {
+          "id": "misra2009",
+          "title": "Consensus statement for diagnosis of obesity, abdominal obesity and the metabolic syndrome for Asian Indians. Misra A et al., J Assoc Physicians India",
+          "year": 2009,
+          "url": "https://pubmed.ncbi.nlm.nih.gov/19582986/"
+        }
+      ],
+      "matched": [
+        {
+          "markerKey": "triglycerides",
+          "name": "Triglycerides",
+          "value": 160,
+          "unit": "mg/dL"
+        },
+        {
+          "markerKey": "hdl_cholesterol",
+          "name": "HDL cholesterol",
+          "value": 44,
+          "unit": "mg/dL"
+        },
+        {
+          "markerKey": "hba1c",
+          "name": "HbA1c",
+          "value": 5.9,
+          "unit": "%"
+        }
+      ]
+    },
+    {
+      "key": "insulin_resistance",
+      "name": "Insulin resistance signal",
+      "description": "High HOMA-IR, or a triglyceride to HDL ratio above 3.",
+      "severity": "watch",
+      "whatItSuggests": "Your body may need more insulin than usual to control blood sugar. This often comes before blood sugar rises.",
+      "whatToDo": "Ask your doctor about a fasting insulin test and an HbA1c retest in 3 months.",
+      "askDoctor": [
+        "Do my values suggest insulin resistance?",
+        "Should I have a fasting insulin test with my next HbA1c?"
+      ],
+      "sources": [
+        {
+          "id": "matthews1985",
+          "title": "Homeostasis model assessment: insulin resistance and beta-cell function from fasting plasma glucose and insulin concentrations in man. Matthews DR et al., Diabetologia",
+          "year": 1985,
+          "url": "https://doi.org/10.1007/BF00280883"
+        },
+        {
+          "id": "mclaughlin2003",
+          "title": "Use of metabolic markers to identify overweight individuals who are insulin resistant. McLaughlin T et al., Ann Intern Med",
+          "year": 2003,
+          "url": "https://doi.org/10.7326/0003-4819-139-10-200311180-00007"
+        },
+        {
+          "id": "endukuru2020",
+          "title": "Cut-off Values and Clinical Utility of Surrogate Markers for Insulin Resistance and Beta-Cell Function to Identify Metabolic Syndrome and Its Components among Southern Indian Adults. Endukuru CK et al., J Obes Metab Syndr",
+          "year": 2020,
+          "url": "https://doi.org/10.7570/jomes20071"
+        }
+      ],
+      "matched": [
+        {
+          "markerKey": "triglycerides",
+          "name": "Triglycerides to HDL cholesterol ratio",
+          "value": 3.64,
+          "unit": "ratio"
+        }
+      ]
+    },
+    {
+      "key": "prediabetes",
+      "name": "Prediabetes range",
+      "description": "HbA1c or fasting glucose in the prediabetes range.",
+      "severity": "watch",
+      "whatItSuggests": "Your blood sugar is above the optimal range but below the diabetes range. Many people in this range can lower it.",
+      "whatToDo": "Retest HbA1c and fasting glucose in 3 to 6 months. Ask your doctor about a plan to lower your blood sugar.",
+      "askDoctor": [
+        "My blood sugar is in the prediabetes range. How often should I retest it?"
+      ],
+      "sources": [
+        {
+          "id": "ada2025",
+          "title": "Standards of Care in Diabetes 2025. American Diabetes Association, Diabetes Care 48 (Suppl 1)",
+          "year": 2025,
+          "url": "https://diabetesjournals.org/care/issue/48/Supplement_1"
+        },
+        {
+          "id": "icmrDiabetes2018",
+          "title": "ICMR Guidelines for Management of Type 2 Diabetes. Indian Council of Medical Research",
+          "year": 2018,
+          "url": "https://www.icmr.gov.in/icmrobject/custom_data/pdf/resource-guidelines/ICMR_GuidelinesType2diabetes2018_0.pdf"
+        }
+      ],
+      "matched": [
+        {
+          "markerKey": "hba1c",
+          "name": "HbA1c",
+          "value": 5.9,
+          "unit": "%"
+        }
+      ]
+    }
+  ],
+  "doctorQuestions": [
+    "Should we check my waist size and blood pressure for metabolic syndrome?",
+    "How often should I retest my lipids and HbA1c?",
+    "Do my values suggest insulin resistance?",
+    "Should I have a fasting insulin test with my next HbA1c?",
+    "My blood sugar is in the prediabetes range. How often should I retest it?",
+    "My HDL cholesterol is 44 mg/dL. Should we retest or investigate?"
+  ]
+}

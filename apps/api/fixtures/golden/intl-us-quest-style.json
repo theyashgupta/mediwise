@@ -1,0 +1,142 @@
+{
+  "sample": "intl-us-quest-style.pdf",
+  "labName": "Bluepine Clinical Laboratories",
+  "person": {
+    "dateOfBirth": "1979-04-19",
+    "sex": "female",
+    "ancestry": "unknown"
+  },
+  "score": 73,
+  "mapped": 15,
+  "total": 16,
+  "markers": [
+    {
+      "rawName": "GLUCOSE",
+      "markerKey": null,
+      "value": 115,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": null
+    },
+    {
+      "rawName": "HEMOGLOBIN A1c",
+      "markerKey": "hba1c",
+      "value": 5.9,
+      "valueText": null,
+      "unit": "%",
+      "status": "watch"
+    },
+    {
+      "rawName": "UREA NITROGEN (BUN)",
+      "markerKey": "bun",
+      "value": 18,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "CREATININE",
+      "markerKey": "creatinine",
+      "value": 0.92,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "EGFR",
+      "markerKey": "egfr",
+      "value": 82,
+      "valueText": null,
+      "unit": "mL/min/1.73m²",
+      "status": "watch"
+    },
+    {
+      "rawName": "SODIUM",
+      "markerKey": "sodium",
+      "value": 140,
+      "valueText": null,
+      "unit": "mmol/L",
+      "status": "optimal"
+    },
+    {
+      "rawName": "POTASSIUM",
+      "markerKey": "potassium",
+      "value": 4.1,
+      "valueText": null,
+      "unit": "mmol/L",
+      "status": "optimal"
+    },
+    {
+      "rawName": "CHOLESTEROL, TOTAL",
+      "markerKey": "total_cholesterol",
+      "value": 212,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "watch"
+    },
+    {
+      "rawName": "HDL CHOLESTEROL",
+      "markerKey": "hdl_cholesterol",
+      "value": 44,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "risk"
+    },
+    {
+      "rawName": "TRIGLYCERIDES",
+      "markerKey": "triglycerides",
+      "value": 160,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "watch"
+    },
+    {
+      "rawName": "LDL-CHOLESTEROL",
+      "markerKey": "ldl_cholesterol",
+      "value": 136,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "watch"
+    },
+    {
+      "rawName": "ALT",
+      "markerKey": "alt",
+      "value": 22,
+      "valueText": null,
+      "unit": "U/L",
+      "status": "optimal"
+    },
+    {
+      "rawName": "AST",
+      "markerKey": "ast",
+      "value": 19,
+      "valueText": null,
+      "unit": "U/L",
+      "status": "optimal"
+    },
+    {
+      "rawName": "TSH",
+      "markerKey": "tsh",
+      "value": 2.1,
+      "valueText": null,
+      "unit": "µIU/mL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "VITAMIN D, 25-OH, TOTAL",
+      "markerKey": "vitamin_d",
+      "value": 24,
+      "valueText": null,
+      "unit": "ng/mL",
+      "status": "watch"
+    },
+    {
+      "rawName": "FERRITIN",
+      "markerKey": "ferritin",
+      "value": 38,
+      "valueText": null,
+      "unit": "ng/mL",
+      "status": "watch"
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "profile": {
+    "ageYears": 39,
+    "sex": "female",
+    "ancestry": "unknown"
+  },
+  "values": [
+    {
+      "rawName": "Haemoglobin",
+      "value": 128,
+      "unit": "g/L",
+      "labLow": 115,
+      "labHigh": 165
+    },
+    {
+      "rawName": "White cell count",
+      "value": 6.2,
+      "unit": "10^9/L",
+      "labLow": 4,
+      "labHigh": 11
+    },
+    {
+      "rawName": "HbA1c",
+      "value": 44,
+      "unit": "mmol/mol",
+      "labLow": 20,
+      "labHigh": 41
+    },
+    {
+      "rawName": "Fasting glucose",
+      "value": 5.4,
+      "unit": "mmol/L",
+      "labLow": 3,
+      "labHigh": 6
+    },
+    {
+      "rawName": "Serum sodium",
+      "value": 139,
+      "unit": "mmol/L",
+      "labLow": 133,
+      "labHigh": 146
+    },
+    {
+      "rawName": "Serum potassium",
+      "value": 4.3,
+      "unit": "mmol/L",
+      "labLow": 3.5,
+      "labHigh": 5.3
+    },
+    {
+      "rawName": "Urea",
+      "value": 5.1,
+      "unit": "mmol/L",
+      "labLow": 2.5,
+      "labHigh": 7.8
+    },
+    {
+      "rawName": "Serum creatinine",
+      "value": 74,
+      "unit": "umol/L",
+      "labLow": 45,
+      "labHigh": 84
+    },
+    {
+      "rawName": "eGFR (CKD-EPI 2009)",
+      "value": 88,
+      "unit": "mL/min/1.73m2",
+      "labLow": 60
+    },
+    {
+      "rawName": "Total cholesterol",
+      "value": 5.6,
+      "unit": "mmol/L",
+      "labHigh": 5
+    },
+    {
+      "rawName": "HDL cholesterol",
+      "value": 1.3,
+      "unit": "mmol/L",
+      "labLow": 1.2
+    },
+    {
+      "rawName": "Triglycerides",
+      "value": 1.4,
+      "unit": "mmol/L",
+      "labHigh": 1.7
+    },
+    {
+      "rawName": "Bilirubin",
+      "value": 9,
+      "unit": "umol/L",
+      "labHigh": 21
+    },
+    {
+      "rawName": "ALT",
+      "value": 21,
+      "unit": "U/L",
+      "labHigh": 33
+    },
+    {
+      "rawName": "Serum TSH",
+      "value": 1.9,
+      "unit": "mU/L",
+      "labLow": 0.27,
+      "labHigh": 4.2
+    },
+    {
+      "rawName": "Serum free T4",
+      "value": 15.2,
+      "unit": "pmol/L",
+      "labLow": 12,
+      "labHigh": 22
+    },
+    {
+      "rawName": "Serum ferritin",
+      "value": 45,
+      "unit": "ug/L",
+      "labLow": 13,
+      "labHigh": 150
+    },
+    {
+      "rawName": "Vitamin B12",
+      "value": 320,
+      "unit": "ng/L",
+      "labLow": 197,
+      "labHigh": 771
+    },
+    {
+      "rawName": "Serum 25-hydroxy vitamin D",
+      "value": 62,
+      "unit": "nmol/L",
+      "labLow": 50,
+      "labHigh": 175
+    }
+  ]
+}

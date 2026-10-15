@@ -1,0 +1,166 @@
+{
+  "sample": "intl-uk-nhs-app-style.pdf",
+  "labName": null,
+  "person": {
+    "dateOfBirth": "1985-07-22",
+    "sex": "female",
+    "ancestry": "unknown"
+  },
+  "score": 89,
+  "mapped": 19,
+  "total": 19,
+  "markers": [
+    {
+      "rawName": "Haemoglobin",
+      "markerKey": "hemoglobin",
+      "value": 12.8,
+      "valueText": null,
+      "unit": "g/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "White cell count",
+      "markerKey": "wbc_count",
+      "value": 6.2,
+      "valueText": null,
+      "unit": "10^3/µL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "HbA1c",
+      "markerKey": "hba1c",
+      "value": 6.2,
+      "valueText": null,
+      "unit": "%",
+      "status": "watch"
+    },
+    {
+      "rawName": "Fasting glucose",
+      "markerKey": "glucose_fasting",
+      "value": 97,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Serum sodium",
+      "markerKey": "sodium",
+      "value": 139,
+      "valueText": null,
+      "unit": "mmol/L",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Serum potassium",
+      "markerKey": "potassium",
+      "value": 4.3,
+      "valueText": null,
+      "unit": "mmol/L",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Urea",
+      "markerKey": "blood_urea",
+      "value": 31,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Serum creatinine",
+      "markerKey": "creatinine",
+      "value": 0.84,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "eGFR (CKD-EPI 2009)",
+      "markerKey": "egfr",
+      "value": 88,
+      "valueText": null,
+      "unit": "mL/min/1.73m²",
+      "status": "watch"
+    },
+    {
+      "rawName": "Total cholesterol",
+      "markerKey": "total_cholesterol",
+      "value": 217,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "watch"
+    },
+    {
+      "rawName": "HDL cholesterol",
+      "markerKey": "hdl_cholesterol",
+      "value": 50,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "watch"
+    },
+    {
+      "rawName": "Triglycerides",
+      "markerKey": "triglycerides",
+      "value": 124,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Bilirubin",
+      "markerKey": "bilirubin_total",
+      "value": 0.53,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "ALT",
+      "markerKey": "alt",
+      "value": 21,
+      "valueText": null,
+      "unit": "U/L",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Serum TSH",
+      "markerKey": "tsh",
+      "value": 1.9,
+      "valueText": null,
+      "unit": "µIU/mL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Serum free T4",
+      "markerKey": "free_t4",
+      "value": 1.18,
+      "valueText": null,
+      "unit": "ng/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Serum ferritin",
+      "markerKey": "ferritin",
+      "value": 45,
+      "valueText": null,
+      "unit": "ng/mL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Vitamin B12",
+      "markerKey": "vitamin_b12",
+      "value": 320,
+      "valueText": null,
+      "unit": "pg/mL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Serum 25-hydroxy vitamin D",
+      "markerKey": "vitamin_d",
+      "value": 24.8,
+      "valueText": null,
+      "unit": "ng/mL",
+      "status": "watch"
+    }
+  ]
+}
