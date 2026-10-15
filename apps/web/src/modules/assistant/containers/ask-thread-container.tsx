@@ -213,13 +213,18 @@ export function AskThreadContainer({
   if (variant === "panel") {
     return (
       <>
-        <header className="flex items-center gap-2 border-b px-3 py-2">
+        <header className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b px-3 py-2">
           <Mascot state={mascot} size={48} />
-          <div className="min-w-0 flex-1">
-            <SheetTitle className="truncate text-base">{title}</SheetTitle>
+          <div className="order-last min-w-0 basis-full px-1 sm:order-none sm:flex-1 sm:basis-0 sm:px-0">
+            <SheetTitle className="text-base text-balance wrap-break-word">{title}</SheetTitle>
             {leftNote}
           </div>
-          <GlassButton asChild size="icon" className="size-11" aria-label={t.widget.fullPage}>
+          <GlassButton
+            asChild
+            size="icon"
+            className="ml-auto size-11 sm:ml-0"
+            aria-label={t.widget.fullPage}
+          >
             <Link to="/ask" search={{ report: reportId, q: draft || undefined }}>
               <Maximize2 aria-hidden />
             </Link>

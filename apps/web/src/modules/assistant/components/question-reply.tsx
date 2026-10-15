@@ -51,7 +51,7 @@ export function QuestionReply({ item, flagging, onFact, onFlag }: QuestionReplyP
               data-testid="assistant-refusal"
               className="rounded-xl border border-dashed px-4 py-3 text-muted-foreground"
             >
-              {item.copy}
+              {item.refusalKind === "emergency" ? t.emergency : item.copy}
             </p>
           )}
         </div>

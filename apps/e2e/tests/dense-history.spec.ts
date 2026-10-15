@@ -301,6 +301,83 @@ for (const width of [360, 390]) {
   });
 }
 
+/** Lists the links and buttons that elementsFromPoint finds under the Ask launcher, on a 3 by 3 grid inside it. */
+function controlsUnderLauncher() {
+  return page.getByTestId("ask-launcher").evaluate((launcher) => {
+    const { left, top, width, height } = launcher.getBoundingClientRect();
+    const found = new Set<string>();
+    for (const x of [0.1, 0.5, 0.9]) {
+      for (const y of [0.1, 0.5, 0.9]) {
+        for (const node of document.elementsFromPoint(left + width * x, top + height * y)) {
+          const control = node.closest("a, button, summary, [role=button]");
+          if (control && control !== launcher) found.add(control.outerHTML.slice(0, 120));
+        }
+      }
+    }
+    return [...found];
+  });
+}
+
+for (const width of [390, 1280]) {
+  test(`at ${width} px no link or button sits under the Ask launcher at the bottom of Home and a report, and the footer links stay above it`, async () => {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto("/");
+    await expect(page.getByTestId("recent-report-link").first()).toBeVisible();
+    const report = await page.getByTestId("recent-report-link").first().getAttribute("href");
+    for (const path of ["/", report ?? ""]) {
+      await page.goto(path);
+      await expect(page.getByTestId("site-footer")).toBeVisible();
+      if (path !== "/") await expect(page.getByTestId("report-done")).toBeVisible();
+      await page.waitForLoadState("networkidle");
+      await expect
+        .poll(() =>
+          page.evaluate(() => {
+            const before = document.documentElement.scrollHeight;
+            window.scrollTo(0, before);
+            return window.scrollY + window.innerHeight >= before - 1;
+          }),
+        )
+        .toBe(true);
+      expect.soft(await controlsUnderLauncher(), path).toEqual([]);
+
+      const launcherTop = (await page.getByTestId("ask-launcher").boundingBox())?.y ?? 0;
+      const links = page.getByTestId("site-footer").getByRole("link");
+      for (const link of await links.all()) {
+        const box = await link.boundingBox();
+        expect
+          .soft(box && launcherTop - (box.y + box.height), `${path} ${await link.textContent()}`)
+          .toBeGreaterThanOrEqual(8);
+      }
+    }
+  });
+}
+
+for (const width of [320, 1280]) {
+  test(`the Ask panel title at ${width} px shows the whole profile name with the first name on one line`, async () => {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto("/");
+    await page.getByTestId("ask-launcher").click();
+    const title = page
+      .getByTestId("ask-panel")
+      .getByRole("heading", { name: `Ask about ${profileName}'s reports` });
+    await expect(title).toBeVisible();
+    const shown = await title.evaluate((node, first) => {
+      const text = node.firstChild!;
+      const range = document.createRange();
+      const start = (text.textContent ?? "").indexOf(first);
+      range.setStart(text, start);
+      range.setEnd(text, start + first.length);
+      return {
+        clipped: node.scrollWidth > node.clientWidth || node.scrollHeight > node.clientHeight,
+        firstNameLines: range.getClientRects().length,
+      };
+    }, profileName.split(" ")[0]!);
+    expect(shown).toEqual({ clipped: false, firstNameLines: 1 });
+    await page.keyboard.press("Escape");
+    await expect(page.getByTestId("ask-panel")).toBeHidden();
+  });
+}
+
 test("on a phone the avatar menu opens Settings in two taps", async () => {
   await page.setViewportSize({ width: 360, height: 800 });
   await page.goto("/");
