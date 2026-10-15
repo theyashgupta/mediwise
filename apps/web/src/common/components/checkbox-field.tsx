@@ -21,7 +21,7 @@ export function CheckboxField({ checked, onChange, label, testId }: CheckboxFiel
         />
       </FormControl>
       <div className="grid gap-1">
-        <FormLabel className="font-normal leading-snug">{label}</FormLabel>
+        <FormLabel className="min-h-6 font-normal leading-snug">{label}</FormLabel>
         <FormMessage />
       </div>
     </FormItem>

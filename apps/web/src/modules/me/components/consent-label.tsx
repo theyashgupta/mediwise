@@ -15,7 +15,7 @@ export function ConsentLabel({ kind }: ConsentLabelProps) {
   return (
     <span>
       {before}
-      <Link to={to} target="_blank" className="font-medium underline underline-offset-4">
+      <Link to={to} target="_blank" className="py-1 font-medium underline underline-offset-4">
         {link}
       </Link>
       {after}

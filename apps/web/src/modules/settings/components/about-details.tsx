@@ -2,7 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { useT } from "@/common/hooks/use-locale";
 import { contact, policyLinks } from "@/modules/payments";
 
-const linkClass = "font-medium text-primary underline-offset-4 hover:underline";
+const linkClass =
+  "inline-flex min-h-6 items-center font-medium text-primary underline-offset-4 hover:underline";
 
 export function AboutDetails() {
   const t = useT();

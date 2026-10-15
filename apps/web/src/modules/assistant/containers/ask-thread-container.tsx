@@ -109,16 +109,11 @@ export function AskThreadContainer({
   }
 
   const send = (question: string) =>
-    ask.mutate(
-      { question, ...(reportId && { reportId }) },
-      {
-        onSuccess: () => {
-          setDraft("");
-          setTalking(true);
-          requestAnimationFrame(() => end.current?.scrollIntoView({ block: "end" }));
-        },
-      },
-    );
+    ask.mutateAsync({ question, ...(reportId && { reportId }) }).then(() => {
+      setDraft("");
+      setTalking(true);
+      requestAnimationFrame(() => end.current?.scrollIntoView({ block: "end" }));
+    });
 
   const items = (questions.data ?? []).toReversed();
   const title = profile ? t.titleFor(profile.name) : t.title;

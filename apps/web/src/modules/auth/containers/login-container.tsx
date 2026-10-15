@@ -42,11 +42,8 @@ export function LoginContainer() {
         />
         <CredentialsForm
           mode="sign-in"
-          submitting={signIn.isPending}
           error={signIn.error?.message}
-          onSubmit={(values) =>
-            signIn.mutate(values, { onSuccess: () => navigate({ href: next }) })
-          }
+          onSubmit={(values) => signIn.mutateAsync(values).then(() => navigate({ href: next }))}
         />
       </AuthCard>
       <div className="mt-6 flex justify-center">

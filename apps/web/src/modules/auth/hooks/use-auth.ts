@@ -1,8 +1,9 @@
-import { policyVersion } from "@mediwise/shared";
+import { policyVersion, requiredConsentKinds } from "@mediwise/shared";
 import type { AuthError } from "@supabase/supabase-js";
 import { useMutation } from "@tanstack/react-query";
 import { env } from "@/config/env";
 import { supabase } from "@/lib/supabase";
+import { giveConsents } from "@/modules/me";
 import { authErrorMessage } from "../config/messages";
 import type { Credentials, EmailInput } from "../config/schemas";
 
@@ -19,15 +20,15 @@ export function useSignIn() {
 }
 
 /**
- * Creates an account.
+ * Creates an account and stores both consents ticked on the form.
  *
  * @remarks
- * The form submits only with both consent boxes ticked, so `consent_version` carries them to the upload page, which stores them.
+ * Without a session (email confirmation on) the consents cannot be stored yet, so `consent_version` carries them to the first upload, which is also the fallback when this store fails.
  */
 export function useSignUp() {
   return useMutation({
-    mutationFn: ({ email, password }: Credentials) =>
-      unwrap(
+    mutationFn: async ({ email, password }: Credentials) => {
+      const result = await unwrap(
         supabase.auth.signUp({
           email,
           password,
@@ -36,7 +37,10 @@ export function useSignUp() {
             data: { consent_version: policyVersion },
           },
         }),
-      ),
+      );
+      if (result.data.session) await giveConsents([...requiredConsentKinds]).catch(() => undefined);
+      return result;
+    },
   });
 }
 
