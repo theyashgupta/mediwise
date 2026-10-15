@@ -6,7 +6,7 @@ export const pricing: Messages["pricing"] = {
   title: "जितनी रिपोर्ट पढ़वाएँ, उतना पेमेंट करें",
   body: (maxFiles: number) =>
     review(
-      `एक क्रेडिट से MediWise एक रिपोर्ट पढ़ता है, ${maxFiles} फ़ाइलों तक। कीमतें भारतीय रुपये में हैं और इनमें GST शामिल है।`,
+      `एक क्रेडिट से MediWise एक रिपोर्ट पढ़ता है, ${maxFiles} फ़ाइलों तक। कीमतें भारतीय रुपये में हैं और इनमें टैक्स शामिल है।`,
     ),
   pack: (credits: number) => `${credits} रिपोर्ट`,
   best: "प्रति रिपोर्ट सबसे कम कीमत",

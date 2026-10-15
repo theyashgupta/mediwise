@@ -3,11 +3,11 @@ import { review } from "../review";
 
 export const bento: Messages["bento"] = {
   eyebrow: "सुविधाएँ",
-  title: "भारत की लैब जैसी रिपोर्ट छापती हैं, उनके लिए बना",
+  title: "हर लैब की रिपोर्ट के लिए बना",
   files: {
     title: (maxFiles: number) => `एक रिपोर्ट में ${maxFiles} फ़ाइलें तक`,
     body: (fileMb: number, totalMb: number) =>
-      `PDF, JPG, PNG, HEIC या WebP। हर फ़ाइल ${fileMb} MB तक, कुल ${totalMb} MB तक।`,
+      `PDF, फ़ोटो या पेशेंट पोर्टल का स्क्रीनशॉट, JPG, PNG, HEIC या WebP में। हर फ़ाइल ${fileMb} MB तक, कुल ${totalMb} MB तक।`,
   },
   family: {
     title: "परिवार की प्रोफ़ाइल",

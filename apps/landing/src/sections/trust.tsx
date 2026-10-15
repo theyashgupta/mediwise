@@ -1,10 +1,10 @@
-import { CreditCard, IdCard, MapPin, Scale, Stethoscope } from "lucide-react";
+import { CreditCard, IdCard, Lock, Scale, Stethoscope } from "lucide-react";
 import { messages, type Locale } from "@/config/messages";
 
 export function Trust({ locale }: { locale: Locale }) {
   const t = messages[locale].trust;
   const items = [
-    { icon: MapPin, ...t.storage },
+    { icon: Lock, ...t.storage },
     { icon: Scale, ...t.law },
     { icon: Stethoscope, ...t.diagnosis },
     { icon: IdCard, ...t.identity },

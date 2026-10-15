@@ -4,12 +4,12 @@ import { review } from "../review";
 export const trust: Messages["trust"] = {
   title: "MediWise आपका डेटा कैसे संभालता है",
   storage: {
-    title: "भारत में स्टोर",
-    body: review("हम आपकी रिपोर्ट और नतीजे मुंबई के Supabase सर्वर पर रखते हैं।"),
+    title: review("ट्रांज़िट और स्टोरेज, दोनों में एन्क्रिप्टेड"),
+    body: review("आपकी रिपोर्ट और नतीजे सिर्फ़ आपके खाते तक सीमित हैं।"),
   },
   law: {
-    title: review("DPDP Act 2023 का पालन करने के लिए बना"),
-    body: "डिजिटल निजी डेटा पर भारत का कानून।",
+    title: review("डेटा सुरक्षा कानून का पालन करने के लिए बना"),
+    body: review("हम आपका डेटा नहीं बेचते। हम विज्ञापन नहीं दिखाते।"),
   },
   diagnosis: {
     title: "कोई निदान नहीं",
@@ -17,7 +17,9 @@ export const trust: Messages["trust"] = {
   },
   identity: {
     title: "पहचान वाले पेज हटते हैं",
-    body: review("जब MediWise आपकी फ़ाइलें पढ़ता है, तो आधार या PAN कार्ड जैसे पेज हटा देता है।"),
+    body: review(
+      "जब MediWise आपकी फ़ाइलें पढ़ता है, तो पहचान दस्तावेज़ वाले पेज हटा देता है, जैसे पासपोर्ट या राष्ट्रीय पहचान पत्र।",
+    ),
   },
-  payments: { title: "UPI और कार्ड", body: "पेमेंट Cashfree से होते हैं।" },
+  payments: { title: "कार्ड और UPI", body: "पेमेंट Cashfree से होते हैं।" },
 };

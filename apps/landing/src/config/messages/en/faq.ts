@@ -19,7 +19,7 @@ export const faq = {
     question: "How accurate is it?",
     answer: [
       "An AI model copies the values from your report. Fixed rules then score them, so the same values always give the same score.",
-      "Each range cites a published source, such as guidelines from ADA, ICMR or KDIGO.",
+      "Each range cites a published source, such as guidelines from ADA, KDIGO, WHO and national bodies.",
       "MediWise can misread a value. Compare each value with your printed report.",
     ],
   },
@@ -33,9 +33,10 @@ export const faq = {
   data: {
     question: "How do you store my data?",
     answer: [
-      "We store your reports and results on Supabase servers in Mumbai. Your files are private to your account.",
+      "Your reports and results are encrypted in transit and at rest. They are private to your account.",
+      "We store them on Supabase servers in Mumbai, India.",
       "To read a report, MediWise sends its pages to an AI model made by Anthropic.",
-      "MediWise removes identity pages, such as Aadhaar or PAN cards, when it reads your files. You can delete a report or your account at any time.",
+      "MediWise removes pages with identity documents, such as passports or national ID cards, when it reads your files. You can delete a report or your account at any time.",
     ],
   },
   refund: {

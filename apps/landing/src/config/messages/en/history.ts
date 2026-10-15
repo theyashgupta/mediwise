@@ -14,7 +14,7 @@ export const history = {
     alt: "An episode timeline: five reports from 3 Feb 2025 to 17 Mar 2025, oldest first.",
   },
   hindi: {
-    title: "Your report in Hindi",
+    title: "Your report in your language",
     body: "Choose Hindi in Settings or on the sign-in page. The app, the marker explanations and the report summary show in Hindi. Marker names and printed lines stay as the lab prints them.",
     alt: "The report summary in Hindi. Marker names such as Urine albumin and Homocysteine stay in English.",
   },

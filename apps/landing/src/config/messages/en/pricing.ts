@@ -2,7 +2,7 @@ export const pricing = {
   eyebrow: "Pricing",
   title: "Pay for each report you read",
   body: (maxFiles: number) =>
-    `One credit reads one report, with up to ${maxFiles} files. Prices are in Indian rupees and include GST.`,
+    `One credit reads one report, with up to ${maxFiles} files. Prices are in Indian rupees and include tax.`,
   pack: (credits: number) => `${credits} ${credits === 1 ? "report" : "reports"}`,
   best: "Lowest price per report",
   forOneReport: "For one report",

@@ -1,4 +1,5 @@
 import type { Messages } from "..";
+import { review } from "../review";
 
 export const howItWorks: Messages["howItWorks"] = {
   eyebrow: "यह कैसे काम करता है",
@@ -12,7 +13,9 @@ export const howItWorks: Messages["howItWorks"] = {
   },
   understand: {
     title: "समझें",
-    body: "MediWise हर मार्कर आसान अंग्रेज़ी या हिन्दी में समझाता है। यह हर मार्कर को आपकी उम्र, लिंग और वंश की रेंज से स्कोर करता है।",
+    body: review(
+      "MediWise हर मार्कर आसान भाषा में समझाता है, अभी अंग्रेज़ी और हिन्दी में। यह हर मान को छपी हुई रेफ़रेंस रेंज और आपकी उम्र, लिंग और वंश की रेंज के सामने दिखाता है।",
+    ),
     alt: "Vitamin B12 का पेज: मार्कर क्या है, उसका मान, और रेंज में उसकी जगह।",
   },
   track: {

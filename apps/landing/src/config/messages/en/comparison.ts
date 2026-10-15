@@ -8,7 +8,7 @@ export const comparison = {
     explained: {
       label: "Explained",
       pdf: "Test names and numbers",
-      us: "Every marker in plain English or Hindi",
+      us: "Every marker in plain language",
     },
     scored: {
       label: "Scored",
