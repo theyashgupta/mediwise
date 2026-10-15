@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mascot candidate sheet</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap"
+    />
+    <style>
+      html { background: #181715; }
+      body { margin: 0; font-family: Inter, sans-serif; width: 820px; }
+      .light { --bg: #fbfaf7; --card: #fefdfb; --border: #e0ddda; --fg: #201c19; --muted: #68625e;
+        --mascot-body: #176b6b; --mascot-face: #fbfaf7; --mascot-panel: #fbfaf7; --mascot-ink: #201c19; --mascot-tint: #e0f0ef; }
+      .dark { --bg: #181715; --card: #1f1e1c; --border: #32302e; --fg: #ecebe8; --muted: #a8a49f;
+        --mascot-body: #76c8c7; --mascot-face: #181715; --mascot-panel: #181715; --mascot-ink: #ecebe8; --mascot-tint: #1f3332; }
+      .theme { background: var(--bg); color: var(--fg); padding: 28px 32px; display: grid; gap: 24px; }
+      h2 { margin: 0; font-size: 13px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+      .row { display: flex; align-items: flex-end; gap: 32px; }
+      .cell { display: grid; justify-items: center; gap: 8px; font-size: 12px; color: var(--muted); width: 120px; }
+      .cell svg { display: block; overflow: visible; }
+      .chat { display: flex; align-items: flex-end; gap: 10px; width: 390px; padding: 16px; box-sizing: border-box;
+        border: 1px solid var(--border); border-radius: 16px; background: var(--card); }
+      .bubble { font-size: 14px; line-height: 1.4; padding: 10px 14px; border-radius: 14px 14px 14px 4px;
+        border: 1px solid var(--border); background: var(--bg); }
+
+      svg * { transform-box: fill-box; transform-origin: center; }
+      .figure { transform-origin: 50% 100%; }
+      .open { opacity: 0; }
+      .listening .figure { transform: translateX(-0.8px) rotate(-8deg); }
+      .listening .eye { transform: scale(1.12); }
+      .listening .smile { opacity: 0; }
+      .listening .open { opacity: 1; transform: scale(0.55); }
+      .thinking .figure { transform: translateY(-1px); }
+      .thinking .eyes { transform: translate(1.3px, -1.5px); }
+      .thinking .smile { transform: translateX(1.2px) scaleX(0.55); }
+      .talking .smile { opacity: 0; }
+      .talking .open { opacity: 1; }
+    </style>
+  </head>
+  <body>
+    <script type="module">
+      const name = new URLSearchParams(location.search).get("mark");
+      const svg = await (await fetch(`${name}.svg`)).text();
+      const mark = (size) => svg.replace("<svg ", `<svg width="${size}" height="${size}" `);
+      const poses = ["idle", "listening", "thinking", "talking"];
+      const row = (size) =>
+        poses.map((p) => `<div class="cell ${p}">${mark(size)}<span>${p} · ${size} px</span></div>`).join("");
+      for (const theme of ["light", "dark"]) {
+        document.body.insertAdjacentHTML(
+          "beforeend",
+          `<section class="theme ${theme}">
+            <h2>${name} · ${theme}</h2>
+            <div class="row">${row(96)}</div>
+            <div class="row">${row(48)}</div>
+            <div class="chat"><div class="talking">${mark(48)}</div><div class="bubble">Your LDL is in the optimal range.</div></div>
+          </section>`,
+        );
+      }
+      document.body.dataset.ready = "true";
+    </script>
+  </body>
+</html>
