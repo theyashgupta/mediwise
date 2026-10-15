@@ -14,7 +14,7 @@ export function AuthLayout() {
         {!online && <OfflineState />}
         <Outlet />
       </main>
-      <SiteFooter className="w-full max-w-auth flex-col! border-t-0 pt-0" />
+      <SiteFooter className="w-full max-w-auth border-t-0 pt-0 md:max-w-2xl" />
     </div>
   );
 }

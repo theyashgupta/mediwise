@@ -15,6 +15,8 @@ export const site = {
     privacy: "Privacy policy",
     refunds: "Refund policy",
     contact: "Contact",
+    legal: (year: number, company: string) =>
+      `© ${year} MediWise. MediWise is a brand of ${company}.`,
   },
   notFound: {
     title: "Page not found",

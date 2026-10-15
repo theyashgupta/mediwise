@@ -20,6 +20,14 @@ export const settings = {
     title: "Language",
     description: "MediWise saves this choice on this device and in your account.",
   },
+  about: {
+    title: "About",
+    description: (company: string) => `MediWise is a brand of ${company}.`,
+    brand: "Brand",
+    company: "Company",
+    email: "Email",
+    policies: "Policies",
+  },
   data: {
     title: "Your data",
     description: "Download a copy of your profiles, reports and markers, or delete all of it.",

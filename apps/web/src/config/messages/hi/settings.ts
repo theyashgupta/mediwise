@@ -25,6 +25,14 @@ export const settings: Messages["settings"] = {
     title: "भाषा",
     description: "MediWise यह पसंद इस डिवाइस पर और आपके खाते में सेव करता है।",
   },
+  about: {
+    title: "जानकारी",
+    description: (company: string) => review(`MediWise, ${company} का एक ब्रांड है।`),
+    brand: "ब्रांड",
+    company: "कंपनी",
+    email: "ईमेल",
+    policies: "नीतियाँ",
+  },
   data: {
     title: "आपका डेटा",
     description: review("अपनी प्रोफ़ाइल, रिपोर्ट और मार्कर की कॉपी डाउनलोड करें, या यह सब हटाएँ।"),

@@ -1,10 +1,26 @@
 export const contact = {
-  businessName: "[legal name of the business owner]",
-  email: "[contact email]",
-  address: "[postal address in India]",
+  brand: "MediWise",
+  businessName: "Codegenix",
+  proprietor: "Yash Anil Gupta",
+  email: "yashguptaab66@gmail.com",
+  phone: "+91 94044 12694",
+  address: "Dondaicha, Dhule, Maharashtra 425408, India",
+  gstin: "27CYZPG9330A1Z6",
 };
 
-export const policyUpdated = "2026-10-13";
+export const policyUpdated = "2026-10-15";
+
+const contactLines = [
+  `${contact.brand} is a brand of ${contact.businessName}.`,
+  `Business: ${contact.businessName}`,
+  `Proprietor: ${contact.proprietor}`,
+  `Email: ${contact.email}`,
+  `Phone: ${contact.phone}`,
+  `Address: ${contact.address}`,
+  `GSTIN: ${contact.gstin}`,
+];
+
+const contactSection = { heading: "Contact", body: contactLines };
 
 export type PolicyPage = "terms" | "privacy" | "refunds" | "contact";
 
@@ -59,6 +75,7 @@ export const policies: Record<PolicyPage, Policy> = {
           "We can change these terms. The date at the top of this page shows the last change.",
         ],
       },
+      contactSection,
     ],
   },
   privacy: {
@@ -116,6 +133,7 @@ export const policies: Record<PolicyPage, Policy> = {
           "When you delete your account, MediWise keeps one deletion record. The record has the time and the number of profiles, reports and files that we deleted. It has a one-way code made from your account ID, not your name or email address. It has no report values. We keep each record for at least one year. Your data download does not include these records.",
         ],
       },
+      contactSection,
     ],
   },
   refunds: {
@@ -144,6 +162,7 @@ export const policies: Record<PolicyPage, Policy> = {
           "When we cannot read a report, we return its credit to your account. You can use that credit for a different report.",
         ],
       },
+      contactSection,
     ],
   },
   contact: {
@@ -151,12 +170,7 @@ export const policies: Record<PolicyPage, Policy> = {
     sections: [
       {
         heading: "Contact MediWise",
-        body: [
-          `Email: ${contact.email}`,
-          `Business: ${contact.businessName}`,
-          `Address: ${contact.address}`,
-          "We reply to each email within 2 working days.",
-        ],
+        body: [...contactLines, "We reply to each email within 2 working days."],
       },
     ],
   },
