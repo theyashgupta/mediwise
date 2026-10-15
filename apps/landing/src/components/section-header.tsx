@@ -15,7 +15,7 @@ export function SectionHeader({
   className?: string;
 }) {
   return (
-    <div className={cn("reveal max-w-2xl", className)}>
+    <div data-reveal="" className={cn("max-w-2xl", className)}>
       <p className="font-mono text-xs tracking-wider text-primary uppercase">{eyebrow}</p>
       <h2 id={id} className="mt-3 text-3xl font-semibold tracking-tight text-balance md:text-4xl">
         {title}

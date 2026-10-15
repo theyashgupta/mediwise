@@ -55,6 +55,14 @@ export const facts = {
   cheapestPaise: Math.round(cheapest.amount / cheapest.credits),
 };
 
+const heroMarkerKeys = ["vitamin_b12", "ldl_cholesterol", "urine_albumin"];
+
+export const heroMarkers = heroMarkerKeys.map((key) => {
+  const marker = markers.find((item) => item.key === key);
+  if (!marker) throw new Error(`The catalog has no marker ${key}`);
+  return marker.name;
+});
+
 const marqueeCategories: Category[][] = [
   ["metabolic", "lipids", "cardiac", "inflammation", "liver", "kidney", "thyroid"],
   ["vitamins", "iron", "blood_count", "electrolytes", "bone", "urate", "hormones"],

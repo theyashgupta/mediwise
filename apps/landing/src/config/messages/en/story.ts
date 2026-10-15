@@ -1,6 +1,4 @@
 export const story = {
-  eyebrow: "Inside a report",
-  title: "What MediWise shows you",
   body: "Every screen on this page is from the MediWise app. The person and the values are made up.",
   alert: {
     title: "A line for your doctor",
@@ -20,6 +18,5 @@ export const story = {
   questions: {
     title: "Questions for your doctor",
     body: "MediWise writes questions from your results. Copy them and take them to your next visit.",
-    alt: "Six questions for the doctor, with a button to copy all of them.",
   },
 };

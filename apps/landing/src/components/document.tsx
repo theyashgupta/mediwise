@@ -1,7 +1,7 @@
 import { Inter, JetBrains_Mono } from "next/font/google";
 import type { ReactNode } from "react";
 import { localePages, type Locale } from "@/config/messages";
-import { siteUrl } from "@/lib/site";
+import { restoreMotion, siteUrl } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { contact } from "../../../web/src/modules/payments/config/policies";
 import "../app/globals.css";
@@ -29,8 +29,6 @@ const organization = JSON.stringify({
   email: contact.email,
   telephone: contact.phone,
 });
-
-const restoreMotion = `try{if(localStorage.getItem("motion")==="paused")document.documentElement.dataset.motion="paused"}catch(e){}`;
 
 export function Document({
   locale,

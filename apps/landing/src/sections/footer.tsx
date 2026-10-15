@@ -13,7 +13,7 @@ export function FinalCta({ locale }: { locale: Locale }) {
       aria-labelledby="cta-title"
       className="mx-auto max-w-content px-4 py-12 md:px-8 md:py-20"
     >
-      <div className="reveal rounded-2xl border bg-card px-6 py-14 text-center md:px-12">
+      <div data-reveal="" className="rounded-2xl border bg-card px-6 py-14 text-center md:px-12">
         <h2
           id="cta-title"
           className="text-3xl font-semibold tracking-tight text-balance md:text-4xl"

@@ -3,7 +3,7 @@ import { review } from "../review";
 
 export const howItWorks: Messages["howItWorks"] = {
   eyebrow: "यह कैसे काम करता है",
-  title: "लैब PDF से साफ़ रिपोर्ट तक, तीन कदम में",
+  title: review("लैब PDF से साफ़ रिपोर्ट तक"),
   body: "आपको मार्कर का मतलब जानने की ज़रूरत नहीं है। MediWise रिपोर्ट पढ़ता है और आपको बताता है।",
   upload: {
     title: "अपलोड करें",

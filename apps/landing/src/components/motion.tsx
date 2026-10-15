@@ -44,34 +44,80 @@ export function useStill() {
 }
 
 /**
- * Calls `onChange` each time the element enters or leaves the viewport, shrunk by `rootMargin`.
- *
- * @remarks
- * `once` stops watching after the first entry, for reveals that must not run twice.
+ * Calls `onEnter` once, the first time the element enters the viewport, then stops watching.
  */
-export function useIntersection(
-  ref: RefObject<Element | null>,
-  onChange: (inView: boolean) => void,
-  { rootMargin = "0px", once = false }: { rootMargin?: string; once?: boolean } = {},
-) {
-  const callback = useRef(onChange);
+export function useFirstEntry(ref: RefObject<Element | null>, onEnter: () => void) {
+  const callback = useRef(onEnter);
   useEffect(() => {
-    callback.current = onChange;
+    callback.current = onEnter;
   });
   useEffect(() => {
     const element = ref.current;
     if (!element) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry) return;
-        callback.current(entry.isIntersecting);
-        if (entry.isIntersecting && once) observer.disconnect();
-      },
-      { rootMargin },
-    );
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry?.isIntersecting) return;
+      callback.current();
+      observer.disconnect();
+    });
     observer.observe(element);
     return () => observer.disconnect();
-  }, [ref, rootMargin, once]);
+  }, [ref]);
+}
+
+/**
+ * Hides each reveal element that starts below the viewport and shows it again when it scrolls in.
+ *
+ * @remarks
+ * The callback reads only entry fields, so it never forces a layout.
+ */
+export function revealEntries(
+  entries: Pick<IntersectionObserverEntry, "target" | "isIntersecting" | "boundingClientRect">[],
+  observer: Pick<IntersectionObserver, "unobserve">,
+  viewportBottom: number,
+) {
+  for (const entry of entries) {
+    const element = entry.target as HTMLElement;
+    if (!entry.isIntersecting && entry.boundingClientRect.top >= viewportBottom) {
+      element.dataset.reveal = "hidden";
+      continue;
+    }
+    element.dataset.reveal = "shown";
+    observer.unobserve(element);
+  }
+}
+
+/** Starts the reveal observer and flags the hero when it leaves the viewport or the tab is hidden. */
+export function watchMotion() {
+  const root = document.documentElement;
+  const reveal = new IntersectionObserver((entries) =>
+    revealEntries(entries, reveal, entries[0]?.rootBounds?.bottom ?? Infinity),
+  );
+  for (const element of document.querySelectorAll('[data-reveal]:not([data-reveal="shown"])'))
+    reveal.observe(element);
+
+  const hero = document.getElementById("top");
+  const heroObserver = new IntersectionObserver(([entry]) => {
+    if (hero && entry) hero.dataset.offscreen = String(!entry.isIntersecting);
+  });
+  if (hero) heroObserver.observe(hero);
+
+  const onVisibility = () => {
+    root.dataset.tab = document.visibilityState;
+  };
+  onVisibility();
+  document.addEventListener("visibilitychange", onVisibility);
+
+  return () => {
+    reveal.disconnect();
+    heroObserver.disconnect();
+    document.removeEventListener("visibilitychange", onVisibility);
+  };
+}
+
+export function MotionObservers() {
+  const still = useStill();
+  useEffect(() => (still ? undefined : watchMotion()), [still]);
+  return null;
 }
 
 /**
@@ -157,7 +203,7 @@ export function NumberTicker({
   const [inView, setInView] = useState(false);
   const still = useStill();
   const final = formatTicker(value, decimals, prefix);
-  useIntersection(ref, (entered) => entered && setInView(true), { once: true });
+  useFirstEntry(ref, () => setInView(true));
 
   useEffect(() => {
     const element = ref.current;

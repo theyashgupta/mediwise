@@ -1,11 +1,10 @@
+import { MotionObservers } from "@/components/motion";
 import { messages, type Locale } from "@/config/messages";
-import { Bento } from "@/sections/bento";
 import { Comparison } from "@/sections/comparison";
 import { Faq } from "@/sections/faq";
-import { FeatureStory } from "@/sections/feature-story";
+import { Features } from "@/sections/features";
 import { FinalCta, Footer } from "@/sections/footer";
 import { Hero } from "@/sections/hero";
-import { History } from "@/sections/history";
 import { HowItWorks } from "@/sections/how-it-works";
 import { MarkerMarquee } from "@/sections/marquee";
 import { Nav } from "@/sections/nav";
@@ -25,13 +24,11 @@ export function Landing({ locale }: { locale: Locale }) {
       <Nav locale={locale} />
       <main id="main">
         <Hero locale={locale} />
-        <MarkerMarquee locale={locale} />
         <HowItWorks locale={locale} />
-        <FeatureStory locale={locale} />
-        <History locale={locale} />
-        <Comparison locale={locale} />
-        <Bento locale={locale} />
         <Numbers locale={locale} />
+        <Comparison locale={locale} />
+        <Features locale={locale} />
+        <MarkerMarquee locale={locale} />
         <Trust locale={locale} />
         <Pricing locale={locale} />
         {/** Testimonials go here, after real customer quotes exist. Do not write invented ones. */}
@@ -39,6 +36,7 @@ export function Landing({ locale }: { locale: Locale }) {
         <FinalCta locale={locale} />
       </main>
       <Footer locale={locale} />
+      <MotionObservers />
     </>
   );
 }
