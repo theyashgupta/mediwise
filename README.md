@@ -13,7 +13,7 @@ It tracks every marker across reports for your whole family.
 [![Node](https://img.shields.io/badge/node-24-brightgreen)](https://nodejs.org)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-![MediWise demo: upload a repeat ultrasound, see it linked to the earlier scan, open the Settled block, then switch the app to Hindi](docs/assets/demo.gif)
+![MediWise: your lab report, explained marker by marker. Every marker in plain words, scored for your age, sex and ancestry, tracked across every report](docs/assets/ad-hook.gif)
 
 </div>
 
