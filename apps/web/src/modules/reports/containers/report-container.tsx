@@ -1,4 +1,4 @@
-import { getRouteApi, Link, useNavigate } from "@tanstack/react-router";
+import { getRouteApi, Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
   CirclePause,
   FileDown,
@@ -7,7 +7,7 @@ import {
   MessagesSquare,
   Trash2,
 } from "lucide-react";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { toast } from "sonner";
 import { useT } from "@/common/hooks/use-locale";
 import { useCrumbLabel } from "@/common/hooks/use-crumb-label";
@@ -15,15 +15,17 @@ import { AfterFirstPaint } from "@/common/components/after-first-paint";
 import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
 import { PageHeader } from "@/common/components/page-header";
+import { StatusBadge } from "@/common/components/status-badge";
 import { GlassButton } from "@/common/components/surface/glass";
+import type { Status } from "@/common/utils/status";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReportEpisodeContainer } from "@/modules/episodes";
 import { useMe } from "@/modules/me";
 import { useActiveProfile } from "@/modules/profiles";
 import { DeleteReportDialog } from "../components/delete-report-dialog";
 import { DoctorQuestions } from "../components/doctor-questions";
 import { FindingList } from "../components/finding-list";
+import { FoldSection, type FoldSectionProps } from "../components/fold-section";
 import { FollowUpList } from "../components/follow-up-list";
 import { MarkerSections } from "../components/marker-sections";
 import { MoveFirstList } from "../components/move-first-list";
@@ -36,10 +38,15 @@ import { ReportNote } from "../components/report-note";
 import { ReportStatusBadge } from "../components/report-status-badge";
 import { ReportSummary } from "../components/report-summary";
 import { ReportTitle } from "../components/report-title";
+import { SectionNav } from "../components/section-nav";
 import { SettledList } from "../components/settled-list";
+import { StatusCounts } from "../components/status-counts";
 import { StudyList } from "../components/study-list";
 import { UnmeasuredList } from "../components/unmeasured-list";
 import { formatReportDate } from "../config/report";
+import { maxFindingCards } from "../config/findings";
+import { alertStudyIds } from "../config/studies";
+import { useOpenSections } from "../hooks/use-open-sections";
 import { useReportLinks } from "../hooks/use-report-links";
 import { useReportTranslation } from "../hooks/use-report-translation";
 import { inProgress } from "../config/status";
@@ -53,6 +60,12 @@ import { SharedLinksContainer } from "./shared-links-container";
 import { ShareReportContainer } from "./share-report-container";
 
 const route = getRouteApi("/_app/reports/$reportId");
+
+type Fold = Pick<FoldSectionProps, "id" | "title" | "count" | "summary" | "description"> & {
+  defaultOpen?: boolean;
+  shown: boolean;
+  content: ReactNode;
+};
 
 export function ReportContainer() {
   const { reportId } = route.useParams();
@@ -72,24 +85,164 @@ export function ReportContainer() {
   const profileId = report.data?.profileId;
   const translation = useReportTranslation(reportId, report.data?.translation);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const sections = useOpenSections();
+  const hash = useLocation({ select: (location) => location.hash });
 
   if (report.isPending) return <LoadingState variant="page" />;
   if (report.isError) {
     return <ErrorState message={t.report.loadError} onRetry={() => report.refetch()} />;
   }
 
-  const { header, status } = report.data;
-  const filter: MarkerFilter = show === "attention" ? "attention" : "all";
-  const markerCount =
-    report.data.categories.reduce((total, category) => total + category.markers.length, 0) +
-    report.data.derived.length +
-    report.data.unmapped.length;
+  const detail = report.data;
+  const { header, status } = detail;
+  const filter: MarkerFilter = show ?? "all";
+  const scored = [...detail.categories.flatMap((category) => category.markers), ...detail.derived];
+  const markerCount = scored.length + detail.unmapped.length;
+  const alertIds = alertStudyIds(detail.findings);
+  const findings = detail.findings.slice(0, maxFindingCards);
+  const linkCandidates = (siblings.data?.pages.flatMap((page) => page.items) ?? [])
+    .filter(
+      (item) =>
+        item.status === "done" &&
+        item.id !== reportId &&
+        !detail.links.some((link) => link.other.id === item.id),
+    )
+    .map((item) => ({
+      id: item.id,
+      label: item.title ?? formatReportDate(item.collectedAt, item.createdAt),
+    }));
+  const severities = (items: { severity: Status }[]) =>
+    items.map((item) => ({ status: item.severity }));
+  const folds: Fold[] = [
+    {
+      id: "findings",
+      title: t.report.findings.title,
+      description: t.report.findings.description,
+      count: findings.length,
+      summary: <StatusCounts items={severities(findings)} />,
+      defaultOpen: true,
+      shown: detail.findings.length > 0,
+      content: <FindingList reportId={reportId} detail={detail} />,
+    },
+    {
+      id: "studies",
+      title: t.report.studies.title,
+      description: t.report.studies.description,
+      count: detail.studies.length + detail.files.images.length,
+      summary: alertIds.size > 0 && <StatusBadge status="risk" count={alertIds.size} />,
+      shown: detail.studies.length + detail.files.images.length > 0,
+      content: (
+        <StudyList studies={detail.studies} images={detail.files.images} alertIds={alertIds} />
+      ),
+    },
+    {
+      id: "markers",
+      title: t.report.sections.markers,
+      count: markerCount,
+      summary: <StatusCounts items={scored} only={["risk", "watch"]} />,
+      shown: markerCount > 0,
+      content: (
+        <MarkerSections
+          reportId={reportId}
+          detail={detail}
+          filter={filter}
+          onFilterChange={setFilter}
+        />
+      ),
+    },
+    {
+      id: "patterns",
+      title: t.report.patterns.title,
+      description: t.report.patterns.description,
+      count: detail.patterns.length,
+      summary: <StatusCounts items={severities(detail.patterns)} />,
+      shown: detail.patterns.length > 0,
+      content: <PatternList reportId={reportId} items={detail.patterns} />,
+    },
+    {
+      id: "narrative",
+      title: t.report.narrative.title,
+      summary: detail.narrative?.sections.find((section) => section.sentences.length > 0)
+        ?.sentences[0]?.text,
+      shown: detail.narrative !== null,
+      content: detail.narrative && (
+        <ReportNarrative reportId={reportId} narrative={detail.narrative} detail={detail} />
+      ),
+    },
+    {
+      id: "follow-ups",
+      title: t.report.sections.followUps,
+      count: detail.followUps.length,
+      summary: detail.followUps[0]?.title,
+      shown: markerCount + detail.followUps.length > 0,
+      content: <FollowUpList items={detail.followUps} />,
+    },
+    {
+      id: "doctor-questions",
+      title: t.report.sections.doctorQuestions,
+      count: detail.doctorQuestions.length,
+      summary: detail.doctorQuestions[0],
+      shown: markerCount + detail.doctorQuestions.length > 0,
+      content: <DoctorQuestions items={detail.doctorQuestions} />,
+    },
+    {
+      id: "unmeasured",
+      title: t.report.sections.unmeasured,
+      count: detail.unmeasured.length,
+      summary: detail.unmeasured.map((item) => item.name).join(", "),
+      shown: markerCount + detail.unmeasured.length > 0,
+      content: <UnmeasuredList items={detail.unmeasured} />,
+    },
+    {
+      id: "settled",
+      title: t.report.settled.title,
+      description: t.report.settled.description,
+      count: detail.settled.length,
+      summary: detail.settled[0]?.title,
+      shown: detail.settled.length > 0,
+      content: <SettledList items={detail.settled} />,
+    },
+    {
+      id: "links",
+      title: t.report.links.title,
+      description: t.report.links.description,
+      count: detail.links.length || undefined,
+      defaultOpen: detail.links.length > 0,
+      shown: detail.links.length + linkCandidates.length > 0,
+      content: (
+        <ReportLinks
+          links={detail.links}
+          candidates={linkCandidates}
+          busy={links.link.isPending || links.update.isPending}
+          failed={links.link.isError || links.update.isError}
+          onUpdate={(linkId, state) => links.update.mutate({ reportId, linkId, state })}
+          onLink={(otherId, kind) => links.link.mutate({ reportId, otherId, kind })}
+        />
+      ),
+    },
+    {
+      id: "note",
+      title: t.report.note.label,
+      summary: detail.note ?? undefined,
+      shown: true,
+      content: (
+        <ReportNote
+          key={reportId}
+          note={detail.note}
+          saving={saveNote.isPending}
+          saved={saveNote.isSuccess && saveNote.variables.reportId === reportId}
+          failed={saveNote.isError && saveNote.variables.reportId === reportId}
+          onSave={(note) => saveNote.mutate({ reportId, note })}
+        />
+      ),
+    },
+  ].filter((fold) => fold.shown);
 
   function setFilter(next: MarkerFilter) {
     void navigate({
       to: "/reports/$reportId",
       params: { reportId },
-      search: next === "attention" ? { show: "attention" } : {},
+      search: next === "all" ? {} : { show: next },
       replace: true,
       resetScroll: false,
     });
@@ -208,7 +361,7 @@ export function ReportContainer() {
         />
       )}
       {status === "done" && (
-        <div className="space-y-12" data-testid="report-done">
+        <div className="space-y-8" data-testid="report-done">
           {(translation.translating || translation.failed) && (
             <p className="flex items-center gap-3 text-sm text-muted-foreground" role="status">
               {translation.translating && (
@@ -217,82 +370,33 @@ export function ReportContainer() {
               {translation.translating ? t.report.translation.writing : t.report.translation.failed}
             </p>
           )}
-          {header.score !== null && <ReportSummary header={header} verdict={report.data.verdict} />}
+          {(header.score !== null || detail.moveFirst.length > 0) && (
+            <div className="overflow-hidden rounded-xl border bg-card">
+              {header.score !== null && <ReportSummary header={header} verdict={detail.verdict} />}
+              {detail.moveFirst.length > 0 && (
+                <MoveFirstList reportId={reportId} items={detail.moveFirst} />
+              )}
+            </div>
+          )}
           <AfterFirstPaint>
-            <ReportLinks
-              links={report.data.links}
-              candidates={(siblings.data?.pages.flatMap((page) => page.items) ?? [])
-                .filter(
-                  (item) =>
-                    item.status === "done" &&
-                    item.id !== reportId &&
-                    !report.data.links.some((link) => link.other.id === item.id),
-                )
-                .map((item) => ({
-                  id: item.id,
-                  label: item.title ?? formatReportDate(item.collectedAt, item.createdAt),
-                }))}
-              busy={links.link.isPending || links.update.isPending}
-              failed={links.link.isError || links.update.isError}
-              onUpdate={(linkId, state) => links.update.mutate({ reportId, linkId, state })}
-              onLink={(otherId, kind) => links.link.mutate({ reportId, otherId, kind })}
-            />
-            <ReportEpisodeContainer reportId={reportId} profileId={report.data.profileId} />
-            <ReportNote
-              key={reportId}
-              note={report.data.note}
-              saving={saveNote.isPending}
-              saved={saveNote.isSuccess && saveNote.variables.reportId === reportId}
-              failed={saveNote.isError && saveNote.variables.reportId === reportId}
-              onSave={(note) => saveNote.mutate({ reportId, note })}
-            />
-            <PatternList reportId={reportId} items={report.data.patterns} />
-            <FindingList reportId={reportId} detail={report.data} />
-            <SettledList items={report.data.settled} />
-            <StudyList studies={report.data.studies} images={report.data.files.images} />
-            <MoveFirstList reportId={reportId} items={report.data.moveFirst} />
-            {report.data.narrative && (
-              <ReportNarrative
-                reportId={reportId}
-                narrative={report.data.narrative}
-                detail={report.data}
-              />
-            )}
-            {markerCount > 0 && (
-              <Tabs defaultValue="markers" className="gap-4">
-                <TabsList className="w-full max-w-full justify-start overflow-x-auto sm:w-fit">
-                  <TabsTrigger value="markers" className="text-muted-foreground">
-                    {t.report.tabs.markers(markerCount)}
-                  </TabsTrigger>
-                  <TabsTrigger value="follow-ups" className="text-muted-foreground">
-                    {t.report.tabs.followUps(report.data.followUps.length)}
-                  </TabsTrigger>
-                  <TabsTrigger value="unmeasured" className="text-muted-foreground">
-                    {t.report.tabs.unmeasured(report.data.unmeasured.length)}
-                  </TabsTrigger>
-                  <TabsTrigger value="doctor-questions" className="text-muted-foreground">
-                    {t.report.tabs.doctorQuestions(report.data.doctorQuestions.length)}
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="markers">
-                  <MarkerSections
-                    reportId={reportId}
-                    detail={report.data}
-                    filter={filter}
-                    onFilterChange={setFilter}
-                  />
-                </TabsContent>
-                <TabsContent value="follow-ups">
-                  <FollowUpList items={report.data.followUps} />
-                </TabsContent>
-                <TabsContent value="unmeasured">
-                  <UnmeasuredList items={report.data.unmeasured} />
-                </TabsContent>
-                <TabsContent value="doctor-questions">
-                  <DoctorQuestions items={report.data.doctorQuestions} />
-                </TabsContent>
-              </Tabs>
-            )}
+            <SectionNav hash={hash} sections={folds} />
+            <div className="border-b">
+              {folds.map((fold) => (
+                <FoldSection
+                  key={fold.id}
+                  id={fold.id}
+                  title={fold.title}
+                  count={fold.count}
+                  summary={fold.summary}
+                  description={fold.description}
+                  open={sections.isOpen(fold.id, fold.defaultOpen ?? false)}
+                  onOpenChange={(open) => sections.setOpen(fold.id, open)}
+                >
+                  {fold.content}
+                </FoldSection>
+              ))}
+            </div>
+            <ReportEpisodeContainer reportId={reportId} profileId={detail.profileId} />
           </AfterFirstPaint>
         </div>
       )}

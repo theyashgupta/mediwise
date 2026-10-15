@@ -20,7 +20,7 @@ export function ReportSummary({ header, verdict }: ReportSummaryProps) {
   return (
     <section
       aria-labelledby="verdict"
-      className="grid gap-6 rounded-xl border bg-card p-6 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center sm:gap-10 sm:p-8"
+      className="grid gap-6 p-6 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center sm:gap-10 sm:p-8"
     >
       <div className="min-w-0 space-y-4">
         <h2 id="verdict" className="text-2xl font-semibold tracking-tight text-balance">

@@ -10,11 +10,13 @@ export const report = {
   paused: "Reading is paused for now. We will read your report when reading starts again.",
   reading: "We are reading your report. This page updates when it is ready.",
   readAgain: "Read it again",
-  tabs: {
-    markers: (count: number) => `Markers (${count})`,
-    followUps: (count: number) => `Follow-ups (${count})`,
-    unmeasured: (count: number) => `Unmeasured (${count})`,
-    doctorQuestions: (count: number) => `Questions for your doctor (${count})`,
+  sections: {
+    nav: "Report sections",
+    goTo: "Go to",
+    markers: "Markers",
+    followUps: "Follow-ups",
+    unmeasured: "Unmeasured",
+    doctorQuestions: "Questions for your doctor",
   },
   status: {
     draft: "Uploading",
@@ -112,6 +114,7 @@ export const report = {
   moveFirst: {
     title: "Move first",
     description: "The markers to work on first, in order.",
+    more: (count: number) => `${count} more`,
   },
   narrative: {
     title: "What your report says",
@@ -144,10 +147,10 @@ export const report = {
     copyError: "We could not copy the questions. Select the text and copy it.",
   },
   markers: {
-    filters: { all: "All", attention: "Watch and risk only" },
+    all: "All",
     filterLabel: "Filter markers",
     shown: "markers shown",
-    noneInAttention: "No marker on this report is in watch or risk.",
+    noneInFilter: "No marker on this report has this status.",
     ratios: "Ratios",
     unmapped: "Not recognised",
     unmappedNote: "We could not match this marker. We did not score it.",

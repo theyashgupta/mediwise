@@ -1,6 +1,5 @@
 import { Badge } from "@/components/ui/badge";
 import { useT } from "@/common/hooks/use-locale";
-import { Section } from "@/common/components/section";
 import { chipClass } from "../config/report";
 import type { ReportDetail } from "../types";
 import { MarkerChip } from "./marker-chip";
@@ -40,30 +39,28 @@ export function ReportNarrative({ reportId, narrative, detail }: ReportNarrative
   }
 
   return (
-    <Section id="narrative" title={t.report.narrative.title}>
-      <div className="space-y-6 rounded-xl border bg-card p-6 sm:p-8">
-        {narrative.sections
-          .filter((section) => section.sentences.length > 0)
-          .map((section) => (
-            <div key={section.heading} className="max-w-measure space-y-1.5">
-              <h3 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
-                {t.report.narrative.headings[section.heading]}
-              </h3>
-              <p className="leading-7">
-                {section.sentences.map((sentence, index) => (
-                  <span key={index}>
-                    {sentence.text}
-                    {sentence.markerKeys.length > 0 && (
-                      <span className="mx-1 inline-flex flex-wrap gap-1 align-middle">
-                        {sentence.markerKeys.map(chip)}
-                      </span>
-                    )}{" "}
-                  </span>
-                ))}
-              </p>
-            </div>
-          ))}
-      </div>
-    </Section>
+    <div className="space-y-6 rounded-xl border bg-card p-6 sm:p-8">
+      {narrative.sections
+        .filter((section) => section.sentences.length > 0)
+        .map((section) => (
+          <div key={section.heading} className="max-w-measure space-y-1.5">
+            <h3 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+              {t.report.narrative.headings[section.heading]}
+            </h3>
+            <p className="leading-7">
+              {section.sentences.map((sentence, index) => (
+                <span key={index}>
+                  {sentence.text}
+                  {sentence.markerKeys.length > 0 && (
+                    <span className="mx-1 inline-flex flex-wrap gap-1 align-middle">
+                      {sentence.markerKeys.map(chip)}
+                    </span>
+                  )}{" "}
+                </span>
+              ))}
+            </p>
+          </div>
+        ))}
+    </div>
   );
 }

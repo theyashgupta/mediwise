@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { printedLines, studyTitle } from "./studies";
+import { alertStudyIds, printedLines, studyTitle } from "./studies";
 
 test("a study title names the kind and the printed body region when there is one", () => {
   expect(studyTitle({ kind: "xray", bodyRegion: "Chest PA" })).toBe("X-ray, Chest PA");
@@ -15,4 +15,13 @@ test("printed text splits into trimmed lines with blank lines dropped", () => {
     "Otherwise normal ECG",
   ]);
   expect(printedLines(null)).toEqual([]);
+});
+
+test("only a study alert marks the studies it cites", () => {
+  expect(
+    alertStudyIds([
+      { kind: "study_alert", citedStudyIds: ["a"] },
+      { kind: "study", citedStudyIds: ["b"] },
+    ]),
+  ).toEqual(new Set(["a"]));
 });

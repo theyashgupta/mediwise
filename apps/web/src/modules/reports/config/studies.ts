@@ -1,6 +1,6 @@
 import { getT } from "@/common/hooks/use-locale";
 import { messages } from "@/config/messages";
-import type { Study } from "../types";
+import type { Finding, Study } from "../types";
 
 /**
  * Names a study card by its kind and, when printed, its body region: "X-ray, Chest PA".
@@ -24,4 +24,11 @@ export function printedLines(text: string | null) {
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean);
+}
+
+/** Returns the ids of the studies that an open study alert cites. */
+export function alertStudyIds(findings: Pick<Finding, "kind" | "citedStudyIds">[]) {
+  return new Set(
+    findings.filter((finding) => finding.kind === "study_alert").flatMap((f) => f.citedStudyIds),
+  );
 }

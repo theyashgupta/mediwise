@@ -1,5 +1,5 @@
 /** @vitest-environment jsdom */
-import { screen, waitFor } from "@testing-library/react";
+import { cleanup, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { messages } from "@/config/messages";
@@ -120,4 +120,20 @@ test("asking about a family member's report switches to that profile and opens i
     expect(requests.some(({ path }) => path === `/profiles/${member.id}/questions`)).toBe(true),
   );
   expect(requests.some(({ path }) => path === `/profiles/${selfProfile.id}/questions`)).toBe(false);
+});
+
+test("a fold the reader opens stays open the next time a report renders", async () => {
+  network(me);
+  await renderApp(`/reports/${report.id}`);
+  const title = () =>
+    screen.findByRole("heading", { name: messages.en.report.note.label }, { timeout: 10_000 });
+  const fold = async () => (await title()).closest("details");
+
+  expect((await fold())?.open).toBe(false);
+  await userEvent.click(await title());
+  await waitFor(async () => expect((await fold())?.open).toBe(true));
+
+  cleanup();
+  await renderApp(`/reports/${report.id}`);
+  expect((await fold())?.open).toBe(true);
 });

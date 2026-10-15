@@ -1,5 +1,11 @@
 import { expect, test } from "vitest";
-import { conditionValue, formatReportDate, panelLabel, validateReportSearch } from "./report";
+import {
+  conditionValue,
+  formatReportDate,
+  panelLabel,
+  statusCounts,
+  validateReportSearch,
+} from "./report";
 
 test("a capped panel is partial, 75% coverage or more is comprehensive, less is standard", () => {
   expect(panelLabel({ pct: 88 }, true)).toBe("Partial panel");
@@ -13,8 +19,10 @@ test("the collection date wins over the upload date and keeps its day in every t
 });
 
 test("only show=attention survives the search params", () => {
-  expect(validateReportSearch({ show: "attention" })).toEqual({ show: "attention" });
-  expect(validateReportSearch({ show: "everything" })).toEqual({});
+  expect(validateReportSearch({ show: "risk" })).toEqual({ show: "risk" });
+  expect(validateReportSearch({ show: "optimal" })).toEqual({ show: "optimal" });
+  expect(validateReportSearch({ show: "all" })).toEqual({});
+  expect(validateReportSearch({ show: "attention" })).toEqual({});
   expect(validateReportSearch({})).toEqual({});
 });
 
@@ -22,4 +30,12 @@ test("a condition value keeps its unit, and a ratio or a text value prints alone
   expect(conditionValue(388.9, "pg/mL")).toBe("388.9 pg/mL");
   expect(conditionValue(4.5678, "ratio")).toBe("4.57");
   expect(conditionValue("Reactive", "")).toBe("Reactive");
+});
+
+test("status counts list the worst status first and skip a status with no item", () => {
+  const items = [{ status: "optimal" }, { status: "risk" }, { status: "optimal" }] as const;
+  expect(statusCounts([...items])).toEqual([
+    { status: "risk", count: 1 },
+    { status: "optimal", count: 2 },
+  ]);
 });
