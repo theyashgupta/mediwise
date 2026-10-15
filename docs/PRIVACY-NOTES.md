@@ -8,7 +8,8 @@ This file records what MediWise does with consent, with the data of family membe
 
 - Sign-up shows two separate boxes. Both are clear at the start, and the form does not submit until both are ticked.
   - `terms`: "I am 18 or older and I accept the Terms".
-  - `health_data`: "I agree that MediWise stores my health reports and sends their content to Anthropic in the United States to read them. See the Privacy policy." This is the explicit health data consent.
+  - `health_data`: "I agree that MediWise stores my health reports and uses an AI service to read them, as the Privacy policy describes." This is the explicit health data consent.
+- The `health_data` box names no vendor and no country on purpose (MEDI-172). Only the privacy policy names the vendor. A provider change needs a policy edit and a new policy version, not a checkbox change.
 - Each consent is one row in `consent_records`: user id, kind, policy version, accepted time, withdrawn time, and the SHA-256 of the browser user agent. Row level security is on, with no policies.
 - The third kind, `assistant_review`, is the review-month consent of the Ask page. Migration 0029 moved the rows of the old `assistant_consents` table here and dropped that table.
 - The API sets the policy version (`policyVersion` in `packages/shared`). The client sends only the kinds, so no row has a version that the API did not set. A database check refuses an empty version.

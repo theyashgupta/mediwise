@@ -31,6 +31,11 @@ test("both consent boxes start clear, and submit with them clear shows two error
   expect(form.getByRole("link", { name: t.me.consent.healthLink }).getAttribute("href")).toBe(
     "/privacy",
   );
+  expect(
+    screen.getByLabelText(
+      "I agree that MediWise stores my health reports and uses an AI service to read them, as the Privacy policy describes.",
+    ),
+  ).toBe(health);
 
   await userEvent.click(screen.getByTestId("auth-submit"));
 
