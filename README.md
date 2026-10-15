@@ -11,7 +11,7 @@
 
 ## Know what your next lab report says.
 
-Upload a report as a PDF or photos. MediWise explains every marker and scores it for your age, sex and ancestry.
+Upload a report from any lab as a PDF, photos or a patient portal screenshot. MediWise explains every marker and shows each value against the printed reference range and a range for your age, sex and ancestry. Then it tracks each marker across visits.
 
 **[Open the app](https://app.mediwise.theyashgupta.me)** · **[See it in videos](#see-it)**
 
@@ -61,9 +61,9 @@ MediWise copies the words from your ultrasound, X-ray and ECG reports. When a li
 </picture>
 </p>
 
-### Read your report in English or Hindi
+### Read your report in your language
 
-Choose Hindi in Settings or on the sign-in page. The app, the marker explanations and the report summary show in Hindi. Marker names and printed lines stay as the lab prints them.
+MediWise shows in English and Hindi today. Choose Hindi in Settings or on the sign-in page. The app, the marker explanations and the report summary show in Hindi. Marker names and printed lines stay as the lab prints them.
 
 <p align="center">
 <picture>
@@ -84,7 +84,7 @@ Every screen is from the app. The people and the reports are made up.
 
 All the videos are attached to the release [demos-2026-10](https://github.com/theyashgupta/mediwise/releases/tag/demos-2026-10).
 
-**MediWise is for information. It does not give a diagnosis and it does not replace a doctor.**
+**MediWise is for information. It does not give a diagnosis and it does not replace a doctor. MediWise is not a medical device.**
 
 ## For developers
 
