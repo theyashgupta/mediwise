@@ -352,6 +352,71 @@ for (const width of [390, 1280]) {
   });
 }
 
+test("at 390 px the last footer link of every page sits clear of the tab bar and the Ask launcher", async () => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  const report = await page.getByTestId("recent-report-link").first().getAttribute("href");
+  const paths = [
+    "/",
+    "/reports",
+    report ?? "",
+    "/trends",
+    "/trends/glucose_fasting",
+    "/profiles",
+    "/settings",
+    "/credits",
+  ];
+  for (const path of paths) {
+    await page.goto(path);
+    await expect(page.getByTestId("site-footer")).toBeVisible();
+    await page.waitForLoadState("networkidle");
+    await page.evaluate(() =>
+      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" }),
+    );
+    await page.waitForTimeout(500);
+    await page.mouse.wheel(0, -20);
+    await expect(page.getByTestId("mobile-tab-bar")).not.toHaveAttribute("data-hidden");
+    await expect(page.getByTestId("mobile-tab-bar")).toHaveCSS("translate", "none");
+    const last = page.getByTestId("site-footer").getByRole("link").last();
+    const hit = await last.evaluate((link) => {
+      const { x, y, width, height } = link.getBoundingClientRect();
+      return link.contains(document.elementFromPoint(x + width / 2, y + height / 2));
+    });
+    expect.soft(hit, path).toBe(true);
+  }
+});
+
+test("a pressed button and a pressed tab move with motion and stay still with reduced motion", async () => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/profiles");
+  const targets = [
+    page.getByTestId("profile-add"),
+    page.getByTestId("mobile-tab-bar").getByRole("link").first(),
+  ];
+  /** Presses the target, reads its translate and scale, and releases the pointer away from it so nothing opens. */
+  const pressed = async (target: Locator) => {
+    const box = (await target.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.waitForTimeout(300);
+    const style = await target.evaluate((node) => {
+      const { translate, scale, transform } = getComputedStyle(node);
+      return { translate, scale, transform };
+    });
+    await page.mouse.move(1, 1);
+    await page.mouse.up();
+    return style;
+  };
+  const still = { translate: "none", scale: "none", transform: "none" };
+
+  expect(await pressed(targets[0]!)).toMatchObject({ translate: "0px 1px" });
+  expect((await pressed(targets[1]!)).scale).not.toBe("none");
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  for (const target of targets) expect(await pressed(target)).toEqual(still);
+  await page.emulateMedia({ reducedMotion: null });
+});
+
 for (const width of [320, 1280]) {
   test(`the Ask panel title at ${width} px shows the whole profile name with the first name on one line`, async () => {
     await page.setViewportSize({ width, height: 800 });

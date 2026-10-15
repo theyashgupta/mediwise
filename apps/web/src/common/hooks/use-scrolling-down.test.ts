@@ -29,3 +29,23 @@ test("scrolling down sets it, scrolling up or to the top clears it, and a small 
   scrollTo(0);
   expect(result.current).toBe(false);
 });
+
+test("a scroll step that comes with a taller page, as when rows above the view render, changes nothing", () => {
+  const setHeight = (height: number) =>
+    Object.defineProperty(document.documentElement, "scrollHeight", {
+      configurable: true,
+      value: height,
+    });
+  setHeight(2000);
+  scrollTo(0);
+  const { result } = renderHook(() => useScrollingDown());
+  scrollTo(600);
+  scrollTo(500);
+  expect(result.current).toBe(false);
+
+  setHeight(2060);
+  scrollTo(560);
+  expect(result.current).toBe(false);
+  scrollTo(700);
+  expect(result.current).toBe(true);
+});
