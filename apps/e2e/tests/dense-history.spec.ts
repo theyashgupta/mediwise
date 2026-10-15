@@ -93,6 +93,44 @@ test("Home lists what needs attention across every report, and the risk chip kee
   await expect(rows).toHaveCount(all);
 });
 
+test("Home leads with the overview blocks, each suggestion block ends with the disclaimer, and the year in review and family stay", async () => {
+  await page.goto("/");
+  const patterns = page.getByRole("region", { name: "Patterns across reports" });
+  await expect(patterns.getByTestId("pattern-row").first()).toBeVisible();
+  const headings = await page.getByRole("heading", { level: 2 }).allTextContents();
+  const order = [
+    "Needs attention",
+    "See a doctor",
+    "Patterns across reports",
+    "Habits and questions for your doctor",
+    "Your latest report",
+    "Year in review",
+    "Your family",
+    "Recent reports",
+  ].map((title) => headings.indexOf(title));
+  expect(
+    order.every((index) => index >= 0),
+    headings.join(" | "),
+  ).toBe(true);
+  expect(order).toEqual(order.toSorted((a, b) => a - b));
+
+  await expect(
+    patterns.getByTestId("pattern-row").filter({ hasText: "B12 deficiency" }),
+  ).toHaveCount(1);
+  await expect(
+    patterns.getByTestId("pattern-row").filter({ hasText: "Prediabetes" }),
+  ).toContainText("Cleared");
+  for (const name of [
+    "See a doctor",
+    "Patterns across reports",
+    "Habits and questions for your doctor",
+  ]) {
+    await expect(
+      page.getByRole("region", { name }).getByTestId("suggestion-disclaimer"),
+    ).toHaveText("MediWise is for information. Ask your doctor before you act on this.");
+  }
+});
+
 test("Trends keeps an eye on B12, filters by direction and status through the URL and ends each suggestion with the doctor line", async () => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/trends");
