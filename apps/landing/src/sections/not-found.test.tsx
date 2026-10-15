@@ -13,5 +13,5 @@ test("the Hindi 404 page shows Hindi text and links to the Hindi home page and t
   const html = renderToStaticMarkup(<NotFound locale="hi" />);
   expect(html).toContain("पेज नहीं मिला");
   expect(html).toContain('href="/hi#how-it-works"');
-  expect(html).toContain('href="/" hrefLang="en-IN"');
+  expect(html).toContain('href="/" hrefLang="en"');
 });

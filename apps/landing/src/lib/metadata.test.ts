@@ -15,7 +15,7 @@ test("each page links to both languages and to the English page as x-default", a
   const { pageMetadata } = await load();
   for (const locale of ["en", "hi"] as const) {
     expect(pageMetadata(locale).alternates?.languages).toEqual({
-      "en-IN": "https://mediwise.theyashgupta.me/",
+      en: "https://mediwise.theyashgupta.me/",
       "hi-IN": "https://mediwise.theyashgupta.me/hi",
       "x-default": "https://mediwise.theyashgupta.me/",
     });
@@ -30,7 +30,7 @@ test("the Hindi page has its own canonical link, title and Open Graph locale", a
   expect(hindi.openGraph).toMatchObject({
     url: "/hi",
     locale: "hi_IN",
-    alternateLocale: ["en_IN"],
+    alternateLocale: ["en_US"],
     title: hindi.title,
     description: hindi.description,
   });
@@ -41,5 +41,5 @@ test("the English page keeps its title and points Open Graph at the Hindi page a
   const english = pageMetadata("en");
   expect(english.alternates?.canonical).toBe("/");
   expect(english.title).toBe("MediWise: your lab report, explained marker by marker");
-  expect(english.openGraph).toMatchObject({ locale: "en_IN", alternateLocale: ["hi_IN"] });
+  expect(english.openGraph).toMatchObject({ locale: "en_US", alternateLocale: ["hi_IN"] });
 });

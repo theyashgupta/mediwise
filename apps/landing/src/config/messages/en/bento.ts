@@ -1,10 +1,10 @@
 export const bento = {
   eyebrow: "Features",
-  title: "Built for the reports Indian labs print",
+  title: "Built for reports from any lab",
   files: {
     title: (maxFiles: number) => `Up to ${maxFiles} files in one report`,
     body: (fileMb: number, totalMb: number) =>
-      `PDF, JPG, PNG, HEIC or WebP. Each file up to ${fileMb} MB, ${totalMb} MB in total.`,
+      `PDF, photo or patient portal screenshot, in JPG, PNG, HEIC or WebP. Each file up to ${fileMb} MB, ${totalMb} MB in total.`,
   },
   family: {
     title: "Family profiles",

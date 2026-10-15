@@ -29,7 +29,7 @@ test("the switch on the English page links to /hi and names Hindi in Devanagari"
 test("the switch on the Hindi page links to / and names English", () => {
   const html = renderToStaticMarkup(<LanguageSwitch current="hi" />);
   expect(html).toContain('href="/"');
-  expect(html).toContain('hrefLang="en-IN"');
+  expect(html).toContain('hrefLang="en"');
   expect(html).toContain(">English<");
 });
 

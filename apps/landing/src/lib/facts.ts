@@ -7,7 +7,13 @@ import {
   sources,
   type Category,
 } from "@mediwise/engine";
-import { maxFileBytes, maxFiles, maxProfilesPerUser, maxTotalBytes } from "@mediwise/shared";
+import {
+  maxFileBytes,
+  maxFiles,
+  maxProfilesPerUser,
+  maxTotalBytes,
+  reportMimes,
+} from "@mediwise/shared";
 import { paymentPacks } from "../../../api/src/modules/payments/payments.config";
 import type { Locale } from "../config/messages";
 
@@ -39,6 +45,7 @@ export const facts = {
   patterns: patterns.length,
   sources: Object.keys(sources).length,
   maxFiles,
+  fileTypes: reportMimes.length,
   maxFileMb: megabytes(maxFileBytes),
   maxTotalMb: megabytes(maxTotalBytes),
   maxProfiles: maxProfilesPerUser,

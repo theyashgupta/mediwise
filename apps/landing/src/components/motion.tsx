@@ -109,7 +109,7 @@ export function PauseMotionButton({ label, className }: { label: string; classNa
 }
 
 /**
- * Writes a number the way the ticker shows it: Indian digit grouping, fixed decimals, optional prefix.
+ * Writes a number the way the ticker shows it: en-IN digit grouping, fixed decimals, optional prefix.
  */
 export function formatTicker(value: number, decimals: number, prefix = "") {
   return (

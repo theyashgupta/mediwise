@@ -1,9 +1,10 @@
 export const site = {
   title: "MediWise: your lab report, explained marker by marker",
   description:
-    "Upload a lab report as a PDF or photos. MediWise explains every marker, scores it for your age, sex and ancestry, and tracks it across visits.",
+    "Upload a lab report as a PDF, photos or a screenshot. MediWise explains every marker, shows each value against the printed reference range and tracks it across visits.",
   skipToContent: "Skip to content",
-  disclaimer: "MediWise is for information, not diagnosis. It does not replace a doctor.",
+  disclaimer:
+    "MediWise is for information, not diagnosis. It does not replace a doctor. MediWise is not a medical device.",
   readReport: "Read my report",
   signIn: "Sign in",
   pauseMotion: "Pause motion",

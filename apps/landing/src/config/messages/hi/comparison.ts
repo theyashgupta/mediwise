@@ -10,7 +10,7 @@ export const comparison: Messages["comparison"] = {
     explained: {
       label: "जानकारी",
       pdf: "टेस्ट के नाम और नंबर",
-      us: "हर मार्कर आसान अंग्रेज़ी या हिन्दी में",
+      us: "हर मार्कर आसान भाषा में",
     },
     scored: {
       label: "स्कोर",

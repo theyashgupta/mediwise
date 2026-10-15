@@ -13,13 +13,14 @@ test("every link to the app uses NEXT_PUBLIC_APP_URL without a trailing slash, a
   expect(appLinks.terms).toBe("https://app.mediwise.theyashgupta.me/terms");
 });
 
-test("the sitemap lists the English and Hindi pages with hreflang links under NEXT_PUBLIC_SITE_URL", async () => {
+test("the sitemap lists the English and Hindi pages with hreflang and x-default links under NEXT_PUBLIC_SITE_URL", async () => {
   vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://mediwise.theyashgupta.me");
   const { default: sitemap } = await import("../app/sitemap");
   const { default: robots } = await import("../app/robots");
   const languages = {
-    "en-IN": "https://mediwise.theyashgupta.me/",
+    en: "https://mediwise.theyashgupta.me/",
     "hi-IN": "https://mediwise.theyashgupta.me/hi",
+    "x-default": "https://mediwise.theyashgupta.me/",
   };
   expect(sitemap()).toEqual([
     { url: "https://mediwise.theyashgupta.me/", alternates: { languages } },

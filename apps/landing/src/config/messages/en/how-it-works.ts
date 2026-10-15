@@ -10,7 +10,7 @@ export const howItWorks = {
   },
   understand: {
     title: "Understand",
-    body: "MediWise explains every marker in plain English or Hindi. It scores each marker against ranges for your age, sex and ancestry.",
+    body: "MediWise explains every marker in plain language, in English and Hindi today. It shows each value against the printed reference range and a range for your age, sex and ancestry.",
     alt: "The Vitamin B12 page: what the marker is, the value, and where it sits in the range.",
   },
   track: {

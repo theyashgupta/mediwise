@@ -10,7 +10,7 @@ export function Hero({ locale }: { locale: Locale }) {
   const callouts = [
     { value: t.callouts.files(facts.maxFiles), label: t.callouts.filesLabel },
     { value: t.callouts.markers(facts.markers), label: t.callouts.markersLabel },
-    { value: t.callouts.storage, label: t.callouts.storageLabel },
+    { value: t.callouts.fileTypes(facts.fileTypes), label: t.callouts.fileTypesLabel },
   ];
   return (
     <section id="top" aria-labelledby="hero-title" className="relative">
@@ -33,7 +33,7 @@ export function Hero({ locale }: { locale: Locale }) {
             <span className="font-mono text-base text-foreground">{facts.firstPack.price}</span>{" "}
             {t.forOneReport}{" "}
             <span className="font-mono text-base text-foreground">{facts.cheapest.perReport}</span>{" "}
-            {t.perReportInPack(facts.cheapest.credits)} {t.gst}
+            {t.perReportInPack(facts.cheapest.credits)} {t.tax}
           </p>
           <p className="mt-4 flex max-w-xl gap-2 text-sm text-muted-foreground">
             <Info aria-hidden className="mt-0.5 size-4 shrink-0" />
@@ -51,7 +51,7 @@ export function Hero({ locale }: { locale: Locale }) {
         </div>
       </div>
 
-      <div className="mx-auto max-w-content md:px-8">
+      <div className="mx-auto max-w-content pb-12 md:px-8 md:pb-16">
         <dl className="grid grid-cols-1 border-y sm:grid-cols-3 md:rounded-xl md:border">
           {callouts.map((callout) => (
             <div

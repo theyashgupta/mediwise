@@ -3,12 +3,15 @@ import { localePages, locales, messages, type Locale } from "../config/messages"
 import { siteUrl } from "./site";
 
 /**
- * Maps each page's language tag to its absolute URL, for hreflang links and the sitemap.
+ * Maps each page's language tag to its absolute URL, plus x-default for the English page, for hreflang links and the sitemap.
  */
 export function alternateUrls() {
-  return Object.fromEntries(
-    locales.map((locale) => [localePages[locale].lang, `${siteUrl}${localePages[locale].path}`]),
-  );
+  return {
+    ...Object.fromEntries(
+      locales.map((locale) => [localePages[locale].lang, `${siteUrl}${localePages[locale].path}`]),
+    ),
+    "x-default": `${siteUrl}/`,
+  };
 }
 
 /**
@@ -23,7 +26,7 @@ export function pageMetadata(locale: Locale): Metadata {
     description,
     alternates: {
       canonical: page.path,
-      languages: { ...alternateUrls(), "x-default": `${siteUrl}/` },
+      languages: alternateUrls(),
     },
     icons: {
       icon: [
