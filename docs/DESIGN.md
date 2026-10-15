@@ -249,8 +249,9 @@ The app shell lives in `src/layouts`. The five destinations are Home, Reports, T
 - **Collapse.** The button in the sidebar footer or the `[` key. The browser keeps the choice in `localStorage` under `sidebar`.
 - **Profile switcher.** In the sidebar footer: the initial, the name and the relation. The menu lists every profile and links to Manage profiles. Below `md`, the switcher is in the header.
 - **Header.** 48 px. It shows the page title, and the breadcrumb on inner pages. The current page is `text-base font-semibold` on phones and `text-lg` from `md`, on one line with a `title` for the full text. Parent crumbs stay `text-sm` muted. A page name from `nav.ts` never shrinks. A name that a page sets, such as a report title, truncates first, and the current page keeps at least 40% of the row. A border shows only after the page scrolls. On the right: the upload button (Home and Reports only), the theme toggle and the user menu.
+- **User menu.** The avatar opens it on every width: the account line, Settings, the theme choice and sign out (MEDI-173). On a phone it is the way to Settings, two taps from any page.
 - **Breadcrumb names.** A page names its own crumb with `useCrumbLabel(path, label)`, for example the lab name of a report. Without a label, the crumb uses the title in `nav.ts`.
-- **Phone, under 768 px.** A floating tab bar with the five destinations and the upload action in the middle. The breadcrumb of an inner page moves above the page title. See [Phone tab bar](#phone-tab-bar-medi-152).
+- **Phone, under 768 px.** A floating tab bar with Home, Reports, Trends and Profiles, and the upload action in the middle (MEDI-173). Settings is in the user menu. The breadcrumb of an inner page moves above the page title. See [Phone tab bar](#phone-tab-bar-medi-152).
 - **Keyboard.** `G` then `H`, `R`, `T`, `P` or `S` goes to a destination. `[` collapses or expands the sidebar. `?` opens the shortcuts dialog. Shortcuts do not fire while focus is in a text field. Focus rings use `ring-ring/50` at 3 px.
 - **Overlays.** Dialogs, menus and toasts follow the page theme, as before.
 
@@ -270,7 +271,7 @@ Lighthouse accessibility on 2026-10-13 (desktop, dev server, Lighthouse 12.8.2):
 
 - **Shape.** The bar floats 16 px from the left, the right and the bottom, plus the safe-area insets, and is at most 448 px wide, centred (MEDI-169). It is 64 px tall and fully round. It uses `GlassSurface layer="bar"` (the bar tint and the 12 px blur), a 1 px border and `shadow-(--shadow-glass)`.
 - **Ask launcher.** The launcher sits above the bar at the right edge, 92 px from the bottom plus the safe-area inset, so it never covers a tab (MEDI-169). The bar no longer keeps a free corner.
-- **Items.** Each item shows its icon and a one-word label under it, 11 px, medium weight, one line (MEDI-169). The labels are `shell.tabs` in the message files: Home, Reports, Upload, Trends, Family, Settings. The order, the routes and the accessible names did not change. Upload is a 48 px primary circle that rises 28 px out of its slot, with its label in line with the other labels. Its accessible name stays "Upload a report".
+- **Items.** Each item shows its icon and a one-word label under it, 11 px, medium weight, one line (MEDI-169). The labels are `shell.tabs` in the message files: Home, Reports, Upload, Trends, Family. Settings left the bar for the user menu (MEDI-173), so Upload has two tabs on each side and sits in the exact centre of the bar. The routes and the accessible names did not change. Upload is a 48 px primary circle that rises 28 px out of its slot, with its label in line with the other labels. Its accessible name stays "Upload a report".
 - **Active item.** A 16 px rounded `bg-primary/10` square holds the icon and the label, both in `text-primary`. The icon keeps the 15% fill and the heavier stroke. The dot is gone (MEDI-169).
 - **Hover and press.** A `foreground/5` fill on hover (pointer devices only). The item scales to 90% while pressed. `motion-reduce` turns the transitions off.
 - **Hide on scroll.** The bar slides down when the page scrolls down and comes back when it scrolls up or reaches the top (`useScrollingDown`, steps under 8 px do not count). It stays in view while focus is in it.
@@ -304,6 +305,16 @@ Screenshots for MEDI-169 on 2026-10-15, web dev server against `mediwise-dev`, t
 | 360 x 800, Hindi | [light](design/screenshots/medi-169-tab-bar-hindi-light-360.png) | |
 
 Measured for MEDI-169: the bar is 328 px wide at 360 px and 358 px at 390 px. The widest label is "Settings", 43 px in a 52 px slot at 360 px. The launcher bottom is 10 px above the bar top.
+
+Screenshots for MEDI-173 on 2026-10-16, web dev server against `mediwise-dev`, the demo account, Home with the Ask launcher on.
+
+| View | Light | Dark |
+| - | - | - |
+| Tab bar, 360 x 800 | [light](design/screenshots/medi-173-tab-bar-light-360.png) | [dark](design/screenshots/medi-173-tab-bar-dark-360.png) |
+| Tab bar, 390 x 800 | [light](design/screenshots/medi-173-tab-bar-light-390.png) | [dark](design/screenshots/medi-173-tab-bar-dark-390.png) |
+| User menu with Settings, 360 x 800 | [light](design/screenshots/medi-173-avatar-menu-light-360.png) | [dark](design/screenshots/medi-173-avatar-menu-dark-360.png) |
+
+Measured for MEDI-173: the tabs left of Upload span 125.6 px and the tabs right of it span 125.6 px at 360 px, and 137.6 px on each side at 390 px. The Upload centre is within 0.01 px of the bar centre. The e2e check allows 2 px.
 
 ### Ask chat widget (MEDI-151)
 

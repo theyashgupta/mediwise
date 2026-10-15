@@ -15,7 +15,6 @@ export const shell: Messages["shell"] = {
     upload: "अपलोड",
     trends: "ट्रेंड",
     profiles: "परिवार",
-    settings: "सेटिंग",
   },
   pages: {
     ask: "पूछें",

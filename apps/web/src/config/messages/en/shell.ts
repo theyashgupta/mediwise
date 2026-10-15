@@ -12,7 +12,6 @@ export const shell = {
     upload: "Upload",
     trends: "Trends",
     profiles: "Family",
-    settings: "Settings",
   },
   pages: {
     ask: "Ask",

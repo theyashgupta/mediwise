@@ -1,4 +1,5 @@
-import { LogOut, Monitor, Moon, Sun, User } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { LogOut, Monitor, Moon, Settings, Sun, User } from "lucide-react";
 import { useT } from "@/common/hooks/use-locale";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -55,6 +56,13 @@ export function UserMenu({
             {account ?? (loading ? t.me.menu.loadingAccount : t.me.menu.unavailable)}
           </span>
         </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild data-testid="menu-settings">
+          <Link to="/settings">
+            <Settings aria-hidden />
+            {t.me.menu.settings}
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
           {t.me.menu.theme}

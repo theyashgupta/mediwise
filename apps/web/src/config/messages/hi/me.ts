@@ -7,6 +7,7 @@ export const me: Messages["me"] = {
     signedInAs: "इस खाते से साइन इन है",
     loadingAccount: "खाता लोड हो रहा है",
     unavailable: "खाता उपलब्ध नहीं है",
+    settings: "सेटिंग",
     theme: "थीम",
     light: "लाइट",
     dark: "डार्क",

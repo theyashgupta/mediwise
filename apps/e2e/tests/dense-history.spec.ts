@@ -203,7 +203,7 @@ for (const width of [390, 1440]) {
 }
 
 for (const width of [360, 390]) {
-  test(`the phone tab bar at ${width} px is centred, shows each label on one line and stays clear of the Ask launcher`, async () => {
+  test(`the phone tab bar at ${width} px is centred with Upload in the middle, shows each label on one line and stays clear of the Ask launcher`, async () => {
     await page.setViewportSize({ width, height: 800 });
     await page.goto("/");
     const bar = page.getByTestId("mobile-tab-bar");
@@ -217,7 +217,14 @@ for (const width of [360, 390]) {
     expect(Math.abs(box.x - (width - box.x - box.width))).toBeLessThanOrEqual(1);
 
     const tabs = bar.getByRole("link");
-    await expect(tabs).toHaveCount(6);
+    await expect(tabs).toHaveCount(5);
+    const { left, right } = await bar.locator("ul").evaluate((list) => {
+      const [first, , upload, , last] = [...list.children].map((item) =>
+        item.getBoundingClientRect(),
+      );
+      return { left: upload!.left - first!.left, right: last!.right - upload!.right };
+    });
+    expect(Math.abs(left - right), `left ${left} px, right ${right} px`).toBeLessThanOrEqual(2);
     const labels = await tabs.evaluateAll((links) =>
       links.map((link) => {
         const label = link.lastElementChild as HTMLElement;
@@ -249,6 +256,14 @@ for (const width of [360, 390]) {
     }
   });
 }
+
+test("on a phone the avatar menu opens Settings in two taps", async () => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.goto("/");
+  await page.getByTestId("user-menu").click();
+  await page.getByTestId("menu-settings").click();
+  await expect(page).toHaveURL(/\/settings$/);
+});
 
 test("compare takes the first and the last report, and one report never sits on both sides", async () => {
   await page.setViewportSize({ width: 1440, height: 900 });

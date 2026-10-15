@@ -20,8 +20,12 @@ const labelClass = "text-[11px] leading-3 font-medium whitespace-nowrap";
 export function MobileTabBar() {
   const t = useT();
   const hidden = useScrollingDown();
-  const [home, reports, ...rest] = navItems;
-  const tab = ({ to, name, icon: Icon }: (typeof navItems)[number]) => (
+  const [home, reports, trends, profiles] = navItems;
+  const tab = ({
+    to,
+    name,
+    icon: Icon,
+  }: Exclude<(typeof navItems)[number], { name: "settings" }>) => (
     <li key={to} className="flex flex-1 justify-center">
       <Link to={to} activeOptions={{ exact: to === "/" }} className={tabClass}>
         <Icon
@@ -61,7 +65,8 @@ export function MobileTabBar() {
               <span className={labelClass}>{t.shell.tabs.upload}</span>
             </Link>
           </li>
-          {rest.map(tab)}
+          {tab(trends)}
+          {tab(profiles)}
         </ul>
       </nav>
     </GlassSurface>
