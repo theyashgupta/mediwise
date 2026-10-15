@@ -15,6 +15,8 @@ export type {
   MarkerStatus,
   MoveFirst,
   Score,
+  Suggestion,
+  SuggestionKind,
   Tier,
   UnmappedValue,
   Unmeasured,

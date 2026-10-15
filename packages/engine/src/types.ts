@@ -190,3 +190,22 @@ export type FindingDraft = {
   askDoctor?: string;
   settlement?: Settlement;
 };
+
+export type SuggestionKind = "doctor_now" | "doctor_soon" | "supplement_ask" | "retest" | "habit";
+
+export type Suggestion = {
+  kind: SuggestionKind;
+  markerKeys: string[];
+  reportId: string;
+  date: string;
+  title: string;
+  why: string;
+  next: string;
+  disclaimer: string;
+  sources: Source[];
+  rank: number;
+  dueOn?: string;
+  habits?: string[];
+  raises?: string[];
+  lowers?: string[];
+};

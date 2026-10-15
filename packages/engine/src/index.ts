@@ -70,6 +70,7 @@ export {
 } from "./attention.js";
 export { retestDueDate } from "./retest.js";
 export { doctorLine, type TrendSuggestionInput, trendSuggestion } from "./suggestion.js";
+export { buildSuggestions } from "./suggestions.js";
 export { coverageCap, sameScoreScale, scoreFormula } from "./score.js";
 export { deviation, matchRange, trendDirection } from "./status.js";
 export type * from "./types.js";

@@ -42,7 +42,7 @@ const kindOrder: Record<FindingKind, number> = {
   study: 3,
   good_news: 4,
 };
-const studyKindNames: Record<string, string> = {
+export const studyKindNames: Record<string, string> = {
   xray: "X-ray",
   ultrasound: "ultrasound",
   ct: "CT scan",
