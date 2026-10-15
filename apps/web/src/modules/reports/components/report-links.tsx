@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Link2 } from "lucide-react";
 import { useState } from "react";
-import { Section } from "@/common/components/section";
 import { useT } from "@/common/hooks/use-locale";
 import { formatPlainDate } from "@/common/utils/date";
 import { Button } from "@/components/ui/button";
@@ -39,7 +38,6 @@ export function ReportLinks({
   const text = t.report.links;
   const [otherId, setOtherId] = useState("");
   const [kind, setKind] = useState<LinkKind>("repeat");
-  if (links.length === 0 && candidates.length === 0) return null;
   const detected = (link: ReportLink) =>
     link.createdBy === "detector" && link.state === "confirmed";
 
@@ -52,7 +50,7 @@ export function ReportLinks({
   }
 
   return (
-    <Section id="links" title={text.title} description={text.description}>
+    <div className="space-y-4">
       {links.length > 0 && (
         <ul className="space-y-3" data-testid="report-links">
           {links.map((link) => (
@@ -153,6 +151,6 @@ export function ReportLinks({
           {text.failed}
         </p>
       )}
-    </Section>
+    </div>
   );
 }

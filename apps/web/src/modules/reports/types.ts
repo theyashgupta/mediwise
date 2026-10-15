@@ -11,7 +11,7 @@ export type FollowUp = ReportDetail["followUps"][number];
 
 export type Study = ReportDetail["studies"][number];
 
-export type MarkerFilter = "all" | "attention";
+export type MarkerFilter = "all" | "risk" | "watch" | "optimal";
 
 export type Finding = ReportDetail["findings"][number];
 

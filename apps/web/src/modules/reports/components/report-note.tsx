@@ -20,7 +20,7 @@ export function ReportNote({ note, saving, saved, failed, onSave }: ReportNotePr
 
   return (
     <section className="max-w-measure space-y-2">
-      <label htmlFor="report-note" className="text-xl font-semibold tracking-tight">
+      <label htmlFor="report-note" className="sr-only">
         {t.report.note.label}
       </label>
       <p id="report-note-help" className="text-sm text-muted-foreground">

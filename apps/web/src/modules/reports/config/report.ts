@@ -1,6 +1,7 @@
 import { FlaskConical, type LucideIcon, Pill, RotateCw } from "lucide-react";
 import { getIntlTag, getT } from "@/common/hooks/use-locale";
-import type { FollowUp } from "../types";
+import type { Status } from "@/common/utils/status";
+import type { FollowUp, MarkerFilter } from "../types";
 
 export const chipClass = "gap-1.5 rounded-md bg-card font-normal hover:bg-accent";
 
@@ -54,6 +55,20 @@ export function formatReportDate(collectedAt: string | null, createdAt: string) 
     : new Date(createdAt).toLocaleDateString(getIntlTag(), options);
 }
 
-export function validateReportSearch(search: Record<string, unknown>): { show?: "attention" } {
-  return search.show === "attention" ? { show: "attention" } : {};
+export const markerFilters = ["all", "risk", "watch", "optimal"] as const satisfies MarkerFilter[];
+
+export function validateReportSearch(search: Record<string, unknown>): {
+  show?: Exclude<MarkerFilter, "all">;
+} {
+  const { show } = search;
+  return show === "risk" || show === "watch" || show === "optimal" ? { show } : {};
+}
+
+const statusOrder: Status[] = ["risk", "watch", "optimal", "unknown"];
+
+/** Counts the items of each status, worst first, and leaves out a status with no item. */
+export function statusCounts(items: { status: Status }[]) {
+  return statusOrder
+    .map((status) => ({ status, count: items.filter((item) => item.status === status).length }))
+    .filter(({ count }) => count > 0);
 }

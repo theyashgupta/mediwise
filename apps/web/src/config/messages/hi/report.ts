@@ -13,11 +13,13 @@ export const report: Messages["report"] = {
   paused: "अभी रिपोर्ट पढ़ना रुका हुआ है। पढ़ना फिर शुरू होने पर हम आपकी रिपोर्ट पढ़ेंगे।",
   reading: "हम आपकी रिपोर्ट पढ़ रहे हैं। रिपोर्ट तैयार होने पर यह पेज अपडेट होगा।",
   readAgain: "फिर से पढ़ें",
-  tabs: {
-    markers: (count: number) => `मार्कर (${count})`,
-    followUps: (count: number) => `अगले कदम (${count})`,
-    unmeasured: (count: number) => review(`नहीं मापे गए (${count})`),
-    doctorQuestions: (count: number) => `डॉक्टर से पूछने के सवाल (${count})`,
+  sections: {
+    nav: review("रिपोर्ट के हिस्से"),
+    goTo: review("यहाँ जाएँ"),
+    markers: "मार्कर",
+    followUps: "अगले कदम",
+    unmeasured: review("नहीं मापे गए"),
+    doctorQuestions: "डॉक्टर से पूछने के सवाल",
   },
   status: {
     draft: "अपलोड हो रही है",
@@ -127,6 +129,7 @@ export const report: Messages["report"] = {
   moveFirst: {
     title: review("पहले इन पर काम करें"),
     description: review("इन मार्कर पर पहले काम करें, इसी क्रम में।"),
+    more: (count: number) => review(`${count} और`),
   },
   narrative: {
     title: "आपकी रिपोर्ट क्या कहती है",
@@ -164,10 +167,10 @@ export const report: Messages["report"] = {
     copyError: "हम सवाल कॉपी नहीं कर सके। टेक्स्ट चुनें और उसे कॉपी करें।",
   },
   markers: {
-    filters: { all: "सभी", attention: review("सिर्फ़ ध्यान दें और जोखिम") },
+    all: "सभी",
     filterLabel: "मार्कर फ़िल्टर करें",
     shown: "मार्कर दिख रहे हैं",
-    noneInAttention: review("इस रिपोर्ट का कोई मार्कर ध्यान दें या जोखिम में नहीं है।"),
+    noneInFilter: review("इस रिपोर्ट के किसी मार्कर की यह स्थिति नहीं है।"),
     ratios: "अनुपात",
     unmapped: "पहचाना नहीं गया",
     unmappedNote: review("हम इस मार्कर को पहचान नहीं सके। हमने इसे स्कोर नहीं किया।"),
