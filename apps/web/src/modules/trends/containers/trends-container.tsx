@@ -1,5 +1,6 @@
 import { getRouteApi, Link } from "@tanstack/react-router";
 import { GitCompareArrows, ListFilter, TrendingUp, Upload } from "lucide-react";
+import { useDeferredValue, useMemo } from "react";
 import { EmptyState } from "@/common/components/empty-state";
 import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
@@ -20,10 +21,20 @@ function Content() {
   const { profile } = useActiveProfile();
   const trends = useTrends(profile?.id);
   const search = route.useSearch();
+  const listSearch = useDeferredValue(search);
   const navigate = route.useNavigate();
   const t = useT();
   const setSearch = (patch: TrendSearch) =>
     void navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
+  const markers = trends.data?.markers;
+  const visible = useMemo(
+    () =>
+      sortTrends(
+        (markers ?? []).filter((item) => matchesTrend(item, listSearch)),
+        listSearch.sort ?? "change",
+      ),
+    [markers, listSearch],
+  );
 
   if (!profile || trends.isPending) return <LoadingState variant="list" />;
   if (trends.isError) {
@@ -56,7 +67,6 @@ function Content() {
     );
   }
 
-  const visible = trends.data.markers.filter((item) => matchesTrend(item, search));
   return (
     <div className="space-y-8">
       <WatchList items={trends.data.attention} />
@@ -84,7 +94,7 @@ function Content() {
             }
           />
         ) : (
-          <TrendList items={sortTrends(visible, search.sort ?? "change")} />
+          <TrendList items={visible} />
         )}
       </div>
     </div>

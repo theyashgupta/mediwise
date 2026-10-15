@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
+import { memo } from "react";
 import { Section } from "@/common/components/section";
 import { StatusBadge } from "@/common/components/status-badge";
 import { useT } from "@/common/hooks/use-locale";
@@ -83,7 +84,7 @@ function Rows({ items }: WatchListProps) {
   );
 }
 
-export function WatchList({ items }: WatchListProps) {
+export const WatchList = memo(function WatchList({ items }: WatchListProps) {
   const t = useT();
   const rest = items.slice(shownFirst);
   return (
@@ -110,4 +111,4 @@ export function WatchList({ items }: WatchListProps) {
       )}
     </Section>
   );
-}
+});
