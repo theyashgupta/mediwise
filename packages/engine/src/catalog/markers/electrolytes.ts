@@ -2,7 +2,7 @@ import { range } from "../range.js";
 import type { Marker } from "../schema.js";
 import { sources } from "../sources.js";
 
-const { tietz2022 } = sources;
+const { kost1990, tietz2022 } = sources;
 
 const mEq = [{ from: "mEq/L", factor: 1 }];
 
@@ -24,7 +24,7 @@ export const electrolyteMarkers: Marker[] = [
     whatMovesIt:
       "Drinking large amounts of water, some blood pressure pills and some antidepressants lower it. Dehydration and fluid loss raise it.",
     ranges: [range(tietz2022, [136, 145], [133, 148])],
-    sources: [tietz2022],
+    sources: [tietz2022, kost1990],
     core: false,
     direction: "both",
   },
@@ -45,7 +45,7 @@ export const electrolyteMarkers: Marker[] = [
     whatMovesIt:
       "Water pills, vomiting and diarrhoea lower it. Kidney disease, some blood pressure medicines and potassium supplements raise it.",
     ranges: [range(tietz2022, [3.5, 5.0], [3.2, 5.5])],
-    sources: [tietz2022],
+    sources: [tietz2022, kost1990],
     core: false,
     direction: "both",
   },

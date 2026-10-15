@@ -26,6 +26,7 @@ import { profilesRoutes } from "./modules/profiles/index.js";
 import { reportsRoutes } from "./modules/reports/index.js";
 import { sharedExportRoutes, sharesRoutes } from "./modules/shares/index.js";
 import { spendRoutes } from "./modules/spend/index.js";
+import { suggestionsRoutes } from "./modules/suggestions/index.js";
 import { compareRoutes, trendsRoutes } from "./modules/trends/index.js";
 import { yearReviewRoutes } from "./modules/year-review/index.js";
 
@@ -59,6 +60,7 @@ export const app = new Hono()
   .route("/profiles", yearReviewRoutes)
   .route("/profiles", profileEpisodesRoutes)
   .route("/profiles", profileQuestionsRoutes)
+  .route("/profiles", suggestionsRoutes)
   .route("/questions", questionsRoutes)
   .route("/episodes", episodesRoutes)
   .route("/reports", reportsRoutes)

@@ -116,6 +116,15 @@ async function listAlerts(userId: string, profileId: string) {
   });
 }
 
+/** Loads the visits and the study alerts of a profile's done reports, the input of the attention list and suggestions. */
+export async function loadAttentionInput(userId: string, profileId: string, withAlerts = true) {
+  const [rows, alerts] = await Promise.all([
+    repo.listMarkerHistory(userId, profileId),
+    withAlerts ? listAlerts(userId, profileId) : [],
+  ]);
+  return { visits: toVisits(rows), alerts };
+}
+
 /**
  * Lists what needs attention across every done report of a profile, each row with a name to show.
  *
@@ -123,11 +132,8 @@ async function listAlerts(userId: string, profileId: string) {
  * Trends passes `withAlerts` false to get the marker rows only, so it skips the alert sequence queries.
  */
 export async function listAttention(userId: string, profileId: string, withAlerts = true) {
-  const [rows, alerts] = await Promise.all([
-    repo.listMarkerHistory(userId, profileId),
-    withAlerts ? listAlerts(userId, profileId) : [],
-  ]);
-  return buildAttention(toVisits(rows), alerts).map((item) =>
+  const { visits, alerts } = await loadAttentionInput(userId, profileId, withAlerts);
+  return buildAttention(visits, alerts).map((item) =>
     item.kind === "alert"
       ? { ...item, markerKey: null, name: item.title }
       : { ...item, name: catalogByKey.get(item.markerKey)?.name ?? item.markerKey },

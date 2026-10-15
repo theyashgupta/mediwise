@@ -5,6 +5,7 @@ import { sources } from "./sources.js";
 const {
   acg2017,
   ada2025,
+  ahaAcc2018,
   camaschella2015,
   ckdEpi2021,
   clevelandDkd2026,
@@ -116,7 +117,7 @@ export const derived: Derived[] = [
     ],
     southAsianNote:
       "The Lipid Association of India makes non-HDL cholesterol a co-primary target alongside LDL. Its non-HDL goals are 30 mg/dL above the LDL goal. Its stricter LDL thresholds for Indians also apply to non-HDL, so the watch band here ends at 160.",
-    sources: [ncepAtp3, lai2023],
+    sources: [ncepAtp3, lai2023, ahaAcc2018],
     core: false,
     direction: "high_is_bad",
     formula: { kind: "difference", minuend: "total_cholesterol", subtrahend: "hdl_cholesterol" },
@@ -176,7 +177,7 @@ export const derived: Derived[] = [
     whatMovesIt:
       "Less sugar, refined carbohydrates and alcohol lower it, often within weeks. More exercise and weight loss lower it further.",
     ranges: [range(mclaughlin2003, [null, 2.0], [null, 2.9])],
-    sources: [mclaughlin2003],
+    sources: [mclaughlin2003, ahaAcc2018],
     core: false,
     direction: "high_is_bad",
     formula: { kind: "ratio", numerator: "triglycerides", denominator: "hdl_cholesterol" },
@@ -352,7 +353,7 @@ export const derived: Derived[] = [
     ],
     southAsianNote:
       "A study of South Indian adults found that a HOMA-IR of 2.86 or more best identified metabolic syndrome. For South Asian profiles, the risk band starts there. The study had 150 people, so treat the cut-off as a guide.",
-    sources: [matthews1985, gayosoDiz2013, endukuru2020],
+    sources: [matthews1985, gayosoDiz2013, endukuru2020, ada2025],
     core: false,
     direction: "high_is_bad",
     formula: { kind: "homa_ir" },

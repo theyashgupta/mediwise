@@ -19,6 +19,7 @@ import { vitalsText } from "./vitals.js";
 import { vitaminsText } from "./vitamins.js";
 import type { MarkerText } from "../text.js";
 
+export { lifestyleText as hindiLifestyleText } from "./lifestyle.js";
 export { patternText as hindiPatternText } from "./patterns.js";
 
 export const hindiGroups: Record<string, Record<string, MarkerText>> = {

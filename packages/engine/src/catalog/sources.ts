@@ -570,4 +570,15 @@ export const sources = {
     year: 2026,
     url: "https://consultqd.clevelandclinic.org/diabetes-and-chronic-kidney-disease-management-a-practical-primary-care-approach",
   },
+  kost1990: {
+    id: "kost1990",
+    title:
+      "Critical limits for urgent clinician notification at US medical centers. Kost GJ, JAMA 263 (5)",
+    year: 1990,
+  },
+  icmrNin2024: {
+    id: "icmrNin2024",
+    title: "Dietary Guidelines for Indians. ICMR-National Institute of Nutrition, Hyderabad",
+    year: 2024,
+  },
 } satisfies Record<string, Source>;

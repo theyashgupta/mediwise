@@ -11,6 +11,7 @@ Every marker MediWise understands, with ranges, copy, aliases and sources. The c
 | `markers/<category>.ts` | Measured markers, one file per category.                                                                                       |
 | `derived.ts`            | Markers computed from other markers.                                                                                           |
 | `studies.ts`            | `studyMarkers`: ECG and scan measurements copied from printed study reports. Not in `markers`, so lab mapping never sees them. |
+| `advice.ts`             | `lifestyle` and `urgentLimits`: habit lines and doctor-now limits for suggestions.                                             |
 | `compute-derived.ts`    | `computeDerived(derived, values, profile)`.                                                                                    |
 | `find-marker.ts`        | `normalizeName` and the alias lookup.                                                                                          |
 | `categories.ts`         | Category display labels and order.                                                                                             |
@@ -66,6 +67,15 @@ Three markers have a South Asian range, because a published source gives a diffe
 ## Supplementable markers
 
 `supplementable: true` marks a marker where a low value can lead to a supplement follow-up: `vitamin_d`, `vitamin_b12`, `folate`, `iron` and `ferritin`. Ferritin is included because it is the usual test for low iron stores. The engine never names a dose. The follow-up tells the user to ask a doctor.
+
+## Suggestion tables
+
+`advice.ts` holds the catalog data for suggestions (MEDI-158). `hi/lifestyle.ts` holds the Hindi lines.
+
+- `lifestyle`: for each marker with a sourced lifestyle lever, the side the habits address (`high` or `low`), 1 to 3 habits, 1 to 3 things that raise it, 1 to 3 things that lower it, and one source the marker cites. Markers that share one block (for example LDL, non-HDL and total cholesterol) share one habit suggestion. A marker with no sourced lever has no entry.
+- `urgentLimits`: the limit past which a risk value gives a doctor-now suggestion, in the canonical unit, each side with its own source. Most limits are Kost 1990 critical limits. Glucose below 54 mg/dL is ADA 2025 level 2 low glucose, eGFR below 15 is KDIGO 2024 G5, and blood pressure above 180/120 mmHg is the ACC/AHA 2017 crisis level.
+- No line names a dose, a medicine, a diet plan or a diagnosis. `forbidden-words.test.ts` checks every line and every rendered suggestion in both languages.
+- The habit lines and the urgent limits are editorial choices from the cited sources. A clinician must review them before launch.
 
 ## Alias matching
 

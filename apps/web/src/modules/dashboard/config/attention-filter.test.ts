@@ -10,6 +10,7 @@ const marker = {
   date: "2026-09-15",
   value: 5.8,
   unit: "µIU/mL",
+  deviation: 0.4,
   precision: 2,
   previous: null,
 } as const;

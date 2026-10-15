@@ -98,6 +98,7 @@ export function findMarker(
   return smear?.unit === "text" ? smear : entry;
 }
 
+export { lifestyle, urgentLimits } from "./advice.js";
 export { categories } from "./categories.js";
 export { computeDerived, type DerivedProfile } from "./compute-derived.js";
 export { derived } from "./derived.js";
@@ -110,6 +111,8 @@ export {
   type FollowUpText,
   hindiCopyProblems,
   hindiSentences,
+  lifestyleText,
+  type LifestyleText,
   markerText,
   type MarkerText,
   patternText,

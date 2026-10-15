@@ -2,7 +2,7 @@ import { range } from "../range.js";
 import type { Marker } from "../schema.js";
 import { sources } from "../sources.js";
 
-const { endoVitD2011, tietz2022 } = sources;
+const { endoVitD2011, kost1990, tietz2022 } = sources;
 
 const calciumConversions = [{ from: "mmol/L", factor: 4.008 }];
 
@@ -32,7 +32,7 @@ export const boneMarkers: Marker[] = [
     whatMovesIt:
       "Overactive parathyroid glands and too much vitamin D raise it. Vitamin D deficiency, low magnesium and low albumin lower it.",
     ranges: [range(tietz2022, [8.6, 10.2], [8.2, 10.6])],
-    sources: [tietz2022],
+    sources: [tietz2022, kost1990],
     core: false,
     direction: "both",
   },

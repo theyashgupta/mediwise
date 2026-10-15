@@ -2,7 +2,7 @@ import { range } from "../range.js";
 import type { Marker } from "../schema.js";
 import { sources } from "../sources.js";
 
-const { clevelandDkd2026, kdigo2024, tietz2022 } = sources;
+const { clevelandDkd2026, kdigo2024, kost1990, tietz2022 } = sources;
 
 export const kidneyMarkers: Marker[] = [
   {
@@ -32,7 +32,7 @@ export const kidneyMarkers: Marker[] = [
       range(tietz2022, [0.7, 1.3], [0.6, 1.5], { sex: "male" }),
       range(tietz2022, [0.6, 1.1], [0.5, 1.3], { sex: "female" }),
     ],
-    sources: [tietz2022, kdigo2024],
+    sources: [tietz2022, kdigo2024, kost1990],
     core: true,
     direction: "both",
   },

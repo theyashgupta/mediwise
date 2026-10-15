@@ -22,6 +22,7 @@ export type AttentionMarker = {
   value: number;
   unit: string | null;
   status: FindingSeverity;
+  deviation: number;
   direction: TrendDirection;
   precision: number;
   previous: { reportId: string; date: string; value: number } | null;
@@ -92,14 +93,14 @@ function toItem(markerKey: string, all: Point[]) {
     value: last.row.value,
     unit: last.row.unit,
     status: last.row.status,
+    deviation: deviation(last.row.value, { optimalLow: optimal.low, optimalHigh: optimal.high }),
     direction,
     precision: entry?.precision ?? 2,
     previous: previous
       ? { reportId: previous.reportId, date: previous.date, value: previous.row.value }
       : null,
   };
-  const range = { optimalLow: optimal.low, optimalHigh: optimal.high };
-  return [{ item, distance: Math.abs(deviation(item.value, range)) }];
+  return [{ item, distance: Math.abs(item.deviation) }];
 }
 
 /**

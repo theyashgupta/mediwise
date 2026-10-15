@@ -2,7 +2,7 @@ import { range } from "../range.js";
 import type { Marker } from "../schema.js";
 import { sources } from "../sources.js";
 
-const { acg2017, tietz2022 } = sources;
+const { aasld2023, acg2017, tietz2022 } = sources;
 
 const bilirubinConversions = [{ from: "µmol/L", factor: 0.05847 }];
 const proteinConversions = [{ from: "g/L", factor: 0.1 }];
@@ -146,7 +146,7 @@ export const liverMarkers: Marker[] = [
       range(acg2017, [null, 33], [null, 66], { sex: "male" }),
       range(acg2017, [null, 25], [null, 50], { sex: "female" }),
     ],
-    sources: [acg2017],
+    sources: [acg2017, aasld2023],
     core: true,
     direction: "high_is_bad",
   },
@@ -205,7 +205,7 @@ export const liverMarkers: Marker[] = [
       range(tietz2022, [null, 61], [null, 120], { sex: "male" }),
       range(tietz2022, [null, 36], [null, 72], { sex: "female" }),
     ],
-    sources: [tietz2022, acg2017],
+    sources: [tietz2022, acg2017, aasld2023],
     core: false,
     direction: "high_is_bad",
   },
