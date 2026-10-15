@@ -31,7 +31,6 @@ export const shell: Messages["shell"] = {
   breadcrumb: "आप यहाँ हैं",
   home: "MediWise होम",
   upload: "रिपोर्ट अपलोड करें",
-  uploadShort: "अपलोड",
   skipToContent: "सीधे सामग्री पर जाएँ",
   mainNav: "मुख्य",
   menu: "मेन्यू",

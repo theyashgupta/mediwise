@@ -79,7 +79,7 @@ Why these choices:
 - Surfaces separate with a 1 px border or ring, never a shadow. `shadow-xs` and `shadow-sm` render nothing.
 - Only overlays (menus, select lists, toasts, sheets) use `shadow-md` and up, which map to one soft overlay shadow.
 - A card is one step lighter than the page in both themes. In dark, a popover is one more step lighter.
-- Glass panels (`GlassCard`, the glass `PageHeader`, `GlassDialogContent`) use `shadow-(--shadow-glass)`: a lit top edge and one soft shadow. Glass bars (top bar, sidebar, tab bar) have no shadow.
+- Glass panels (`GlassCard`, the glass `PageHeader`, `GlassDialogContent`) use `shadow-(--shadow-glass)`: a lit top edge and one soft shadow. Glass bars (top bar, sidebar) have no shadow. The phone tab bar floats over the page, so it also uses `shadow-(--shadow-glass)`.
 
 ## Do and do not
 
@@ -235,7 +235,7 @@ The app shell lives in `src/layouts`. The five destinations are Home, Reports, T
 - **Profile switcher.** In the sidebar footer: the initial, the name and the relation. The menu lists every profile and links to Manage profiles. Below `md`, the switcher is in the header.
 - **Header.** 48 px. It shows the page title, and the breadcrumb on inner pages. A border shows only after the page scrolls. On the right: the upload button (Home and Reports only), the theme toggle and the user menu.
 - **Breadcrumb names.** A page names its own crumb with `useCrumbLabel(path, label)`, for example the lab name of a report. Without a label, the crumb uses the title in `nav.ts`.
-- **Phone, under 768 px.** A bottom tab bar with the five destinations and the upload action in the middle. The breadcrumb of an inner page moves above the page title.
+- **Phone, under 768 px.** A floating tab bar with the five destinations and the upload action in the middle. The breadcrumb of an inner page moves above the page title. See [Phone tab bar](#phone-tab-bar-medi-152).
 - **Keyboard.** `G` then `H`, `R`, `T`, `P` or `S` goes to a destination. `[` collapses or expands the sidebar. `?` opens the shortcuts dialog. Shortcuts do not fire while focus is in a text field. Focus rings use `ring-ring/50` at 3 px.
 - **Overlays.** Dialogs, menus and toasts follow the page theme, as before.
 
@@ -247,9 +247,38 @@ Screenshots on 2026-10-13, web dev server, the demo account (made-up profile "Ar
 | Desktop, collapsed | [light](design/pages/after-shell-light-collapsed.jpg) | [dark](design/pages/after-shell-dark-collapsed.jpg) |
 | Header after scroll, report | [light](design/pages/after-shell-light-scrolled.jpg) | |
 | Shortcuts dialog | | [dark](design/pages/after-shell-dark-shortcuts.jpg) |
-| Phone tab bar | [light](design/pages/after-shell-light-phone.jpg) | [dark](design/pages/after-shell-dark-phone.jpg) |
+| Phone tab bar (before MEDI-152) | [light](design/pages/after-shell-light-phone.jpg) | [dark](design/pages/after-shell-dark-phone.jpg) |
 
 Lighthouse accessibility on 2026-10-13 (desktop, dev server, Lighthouse 12.8.2): 100 on `/`, the report page and `/trends`, in both themes, with the sidebar expanded. With the sidebar collapsed, `/` and the report page also score 100 in both themes.
+
+### Phone tab bar (MEDI-152)
+
+- **Shape.** The bar floats 16 px from the left and the bottom, plus the safe-area inset. It is 64 px tall and fully round. It uses `GlassSurface layer="bar"` (the bar tint and the 12 px blur), a 1 px border and `shadow-(--shadow-glass)`.
+- **Free corner.** The bar stops 80 px from the right edge. The Ask launcher (MEDI-151) goes in that corner.
+- **Items.** Icons only, with the name for screen readers. The order, the routes and the accessible names did not change. Upload is a 48 px primary circle that sits 12 px higher than the other items.
+- **Active item.** The icon gets a 15% fill and a heavier stroke, and a 4 px dot shows under it.
+- **Hover and press.** A `foreground/5` fill on hover (pointer devices only). The item scales to 90% while pressed. `motion-reduce` turns the transitions off.
+- **Hide on scroll.** The bar slides down when the page scrolls down and comes back when it scrolls up or reaches the top (`useScrollingDown`, steps under 8 px do not count). It stays in view while focus is in it.
+- **Dialogs and sheets.** The bar slides down while a dialog, a sheet or a menu locks the page scroll (`data-scroll-locked` on `body`).
+- **Room under the bar.** The page content has `7rem` of bottom padding plus the safe-area inset. The Ask composer sits 88 px from the bottom, above the bar.
+
+Screenshots on 2026-10-15, web dev server on the local e2e stack, the made-up dense history fixture (`db:seed-history`), 390 x 844.
+
+| Page | Light | Dark |
+| - | - | - |
+| Home | [after](design/pages/after-tab-bar-home-light-390.jpg) | [after](design/pages/after-tab-bar-home-dark-390.jpg) |
+| Trends | [after](design/pages/after-tab-bar-trends-light-390.jpg) | [after](design/pages/after-tab-bar-trends-dark-390.jpg) |
+
+Measured on 2026-10-15 with `pnpm perf` on this 8 GB Mac, production build, dense history fixture:
+
+| Gate | Result |
+| - | - |
+| INP on `/trends` at 390 px, 4x CPU throttle | 176 ms (136, 208, 176), budget 250 ms |
+| INP on `/trends` at 1440 px, 4x CPU throttle | 144 ms (136, 200, 144), budget 250 ms |
+| Lighthouse on Home, phone preset | performance 92, accessibility 100, best practices 100, SEO 63 |
+| Lighthouse on Trends, phone preset | performance 99, accessibility 100, best practices 100, SEO 63 |
+
+The INP check now also runs at 390 px, because the tab bar and its blur render only under 768 px.
 
 ## Layout widths
 

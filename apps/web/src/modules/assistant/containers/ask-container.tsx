@@ -166,7 +166,7 @@ export function AskContainer() {
           <GlassSurface
             asChild
             layer="bar"
-            className="sticky bottom-[calc(--spacing(14)+env(safe-area-inset-bottom))] z-20 mt-8 -mx-4 border-t px-4 py-3 md:bottom-0 md:mx-0 md:rounded-2xl md:border"
+            className="sticky bottom-[calc(--spacing(22)+env(safe-area-inset-bottom))] z-20 mt-8 -mx-4 border-t px-4 py-3 md:bottom-0 md:mx-0 md:rounded-2xl md:border"
           >
             <div>
               {needsConsent && (

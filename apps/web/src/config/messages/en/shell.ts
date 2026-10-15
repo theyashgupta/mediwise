@@ -28,7 +28,6 @@ export const shell = {
   breadcrumb: "Breadcrumb",
   home: "MediWise home",
   upload: "Upload a report",
-  uploadShort: "Upload",
   skipToContent: "Skip to content",
   mainNav: "Main",
   menu: "Menu",
