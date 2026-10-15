@@ -49,7 +49,7 @@ export function AppHeader() {
       <div className="min-w-0 md:hidden">
         <ProfileSwitcherContainer placement="inline" />
       </div>
-      <AppBreadcrumb className="hidden md:block" />
+      <AppBreadcrumb className="hidden flex-1 md:block" />
 
       <div className="ml-auto flex shrink-0 items-center gap-1">
         {upload && (

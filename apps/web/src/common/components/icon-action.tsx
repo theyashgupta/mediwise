@@ -39,7 +39,9 @@ export function OverflowMenu({ children }: { children: ReactNode }) {
           <EllipsisVertical aria-hidden />
         </IconAction>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">{children}</DropdownMenuContent>
+      <DropdownMenuContent align="end" className="w-auto">
+        {children}
+      </DropdownMenuContent>
     </DropdownMenu>
   );
 }
