@@ -1,16 +1,18 @@
 import type { Metadata, Viewport } from "next";
 import { localePages, locales, messages, type Locale } from "../config/messages";
-import { siteUrl } from "./site";
+import { securityPath, siteUrl } from "./site";
+
+export const homePath = (locale: Locale) => localePages[locale].path;
 
 /**
  * Maps each page's language tag to its absolute URL, plus x-default for the English page, for hreflang links and the sitemap.
  */
-export function alternateUrls() {
+export function alternateUrls(pathOf: (locale: Locale) => string = homePath) {
   return {
     ...Object.fromEntries(
-      locales.map((locale) => [localePages[locale].lang, `${siteUrl}${localePages[locale].path}`]),
+      locales.map((locale) => [localePages[locale].lang, `${siteUrl}${pathOf(locale)}`]),
     ),
-    "x-default": `${siteUrl}/`,
+    "x-default": `${siteUrl}${pathOf("en")}`,
   };
 }
 
@@ -48,6 +50,15 @@ export function pageMetadata(locale: Locale): Metadata {
       images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "MediWise" }],
     },
     twitter: { card: "summary_large_image", images: ["/og-image.png"] },
+  };
+}
+
+export function securityMetadata(locale: Locale): Metadata {
+  const { title, description } = messages[locale].security;
+  return {
+    title,
+    description,
+    alternates: { canonical: securityPath(locale), languages: alternateUrls(securityPath) },
   };
 }
 

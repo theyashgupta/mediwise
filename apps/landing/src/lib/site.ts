@@ -1,7 +1,12 @@
-import type { Locale } from "@/config/messages";
+import { localePages, type Locale } from "@/config/messages";
 
 export const siteUrl = new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").origin;
 export const appUrl = new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:5173").origin;
+
+export const securityPath = (locale: Locale) =>
+  locale === "en" ? "/security" : `${localePages[locale].path}/security`;
+
+export const securityPolicyUrl = "https://github.com/theyashgupta/mediwise/blob/main/SECURITY.md";
 
 export const appLinks = {
   signIn: (locale: Locale) => `${appUrl}/login?lang=${locale}`,

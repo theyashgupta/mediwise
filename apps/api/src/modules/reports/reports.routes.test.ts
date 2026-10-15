@@ -1,3 +1,4 @@
+import { policyVersion } from "@mediwise/shared";
 import { Hono } from "hono";
 import { beforeEach, expect, test, vi } from "vitest";
 import { handleError } from "../../common/problem.js";
@@ -206,6 +207,15 @@ vi.mock("../profiles/profiles.repo.js", () => store.profilesRepo);
 vi.mock("../../lib/storage.js", () => store.storage);
 vi.mock("../findings/findings.repo.js", () => store.findingsRepo);
 vi.mock("../links/links.repo.js", () => store.linksRepo);
+const consentVersions = vi.hoisted(() => new Map<string, string>());
+vi.mock("../consents/consents.repo.js", () => ({
+  listConsentsByUser: async (userId: string) => {
+    const policyVersion = consentVersions.get(userId);
+    return policyVersion
+      ? [{ kind: "health_data", policyVersion, acceptedAt: new Date(), withdrawnAt: null }]
+      : [];
+  },
+}));
 const edge = vi.hoisted(() => ({ create: vi.fn() }));
 vi.mock("../../lib/anthropic.js", () => ({ anthropic: { messages: { create: edge.create } } }));
 
@@ -259,6 +269,8 @@ beforeEach(() => {
   store.objects.clear();
   store.credits.clear();
   store.credits.set("alice", { balance: 50, readsToday: 0 });
+  consentVersions.clear();
+  consentVersions.set("alice", policyVersion);
   env.CLAUDE_HARD_STOP = false;
 });
 
@@ -1052,6 +1064,42 @@ test("the sixth read in one day returns 429", async () => {
   store.credits.set("alice", { balance: 50, readsToday: 4 });
   expect((await create([pdf])).res.status).toBe(201);
   expect((await create([pdf])).res.status).toBe(429);
+});
+
+test("a user with no health data consent gets a 403 that names it, and no draft is stored", async () => {
+  consentVersions.delete("alice");
+  const { res, body } = await create([pdf]);
+  expect(res.status).toBe(403);
+  expect(body).toMatchObject({ status: 403, missingConsent: "health_data" });
+  expect(store.reports).toEqual([]);
+});
+
+test("a health data consent for an older policy version gets the same 403", async () => {
+  consentVersions.set("alice", "2026-10-13");
+  const { res, body } = await create([pdf]);
+  expect(res.status).toBe(403);
+  expect(body).toMatchObject({ missingConsent: "health_data" });
+});
+
+test("confirming an upload after the health data consent lapsed returns 403 and queues nothing", async () => {
+  const { body } = await create([pdf]);
+  uploadAll(body.uploadUrls, [pdf.size]);
+  consentVersions.set("alice", "2026-10-13");
+  const res = await call("POST", `/reports/${body.id}/uploaded`);
+  expect(res.status).toBe(403);
+  expect(await res.json()).toMatchObject({ missingConsent: "health_data" });
+  expect(store.jobs).toEqual([]);
+});
+
+test("retrying a failed report without the health data consent returns 403 and queues nothing", async () => {
+  const { body } = await create([pdf]);
+  const report = store.reports.find((r) => r.id === body.id);
+  if (report) report.status = "failed";
+  consentVersions.delete("alice");
+  const res = await call("POST", `/reports/${body.id}/retry`);
+  expect(res.status).toBe(403);
+  expect(await res.json()).toMatchObject({ missingConsent: "health_data" });
+  expect(store.jobs).toEqual([]);
 });
 
 test("with CLAUDE_HARD_STOP every new report returns 503", async () => {

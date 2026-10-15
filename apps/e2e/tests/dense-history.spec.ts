@@ -45,6 +45,8 @@ test("a new user gets a profile with 12 reports in 10 weeks", async () => {
   await page.goto("/signup");
   await page.getByTestId("auth-email").fill(email);
   await page.getByTestId("auth-password").fill(password);
+  await page.getByTestId("auth-consent-terms").check();
+  await page.getByTestId("auth-consent-health_data").check();
   await page.getByTestId("auth-submit").click();
   await expect(page.getByTestId("user-menu")).toBeVisible();
 

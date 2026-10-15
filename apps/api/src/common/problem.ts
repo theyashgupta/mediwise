@@ -10,10 +10,15 @@ export function problem<S extends ContentfulStatusCode>(
   status: S,
   title: string,
   detail?: string,
+  extensions?: Record<string, string>,
 ) {
-  return c.json({ type: "about:blank", title, status, ...(detail && { detail }) }, status, {
-    "Content-Type": "application/problem+json",
-  });
+  return c.json(
+    { ...extensions, type: "about:blank", title, status, ...(detail && { detail }) },
+    status,
+    {
+      "Content-Type": "application/problem+json",
+    },
+  );
 }
 
 /**
@@ -23,9 +28,9 @@ export function problem<S extends ContentfulStatusCode>(
  * Unknown errors are logged and answered with a bare 500 so internals never reach the client.
  */
 export const handleError: ErrorHandler = (err, c) => {
-  if (err instanceof AppError || err instanceof HTTPException) {
-    return problem(c, err.status, err.message);
-  }
+  if (err instanceof AppError)
+    return problem(c, err.status, err.message, undefined, err.extensions);
+  if (err instanceof HTTPException) return problem(c, err.status, err.message);
   log.error(err);
   return problem(c, 500, "Internal Server Error");
 };

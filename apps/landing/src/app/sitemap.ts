@@ -1,14 +1,15 @@
 import type { MetadataRoute } from "next";
-import { localePages, locales } from "../config/messages";
-import { alternateUrls } from "../lib/metadata";
-import { siteUrl } from "../lib/site";
+import { locales } from "../config/messages";
+import { alternateUrls, homePath } from "../lib/metadata";
+import { securityPath, siteUrl } from "../lib/site";
 
 export const dynamic = "force-static";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const languages = alternateUrls();
-  return locales.map((locale) => ({
-    url: `${siteUrl}${localePages[locale].path}`,
-    alternates: { languages },
-  }));
+  return [homePath, securityPath].flatMap((pathOf) =>
+    locales.map((locale) => ({
+      url: `${siteUrl}${pathOf(locale)}`,
+      alternates: { languages: alternateUrls(pathOf) },
+    })),
+  );
 }

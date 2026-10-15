@@ -466,6 +466,17 @@ Do these steps in this order on `mediwise-prod`:
 
 A report read before MEDI-80 has no lab for each file. Its markers show the lab of the report, and its studies show no lab. To get the lab of each file and study, read the report again with `pnpm db:reread-reports --keep-classes`. That costs one read for each report.
 
+### Consent records (MEDI-165)
+
+Migration `0029_move_assistant_consents` copies the rows of `assistant_consents` into `consent_records` and then drops `assistant_consents`. The API before MEDI-165 reads that table in the data download and in account deletion. The API of MEDI-165 needs `consent_records`. Do these steps in this order on `mediwise-prod`, one after the other:
+
+1. Apply migrations `0028` and `0029`.
+2. Deploy the API and the web at once.
+
+Between step 1 and step 2, the data download and account deletion of the old API answer 500. Do not wait between the steps.
+
+After the deploy, every existing user sees the two consent boxes before the next upload. The value of `policyVersion` in `packages/shared` is the date of the policy text. If you deploy on a later day than that date, change it to the deploy date first.
+
 ## Roll back
 
 - Web: Cloudflare Pages, the project, Deployments. Open the last good production deploy, click the menu, Rollback to this deployment. This does not rebuild.

@@ -14,6 +14,7 @@ import {
   reports,
 } from "../../db/schema.js";
 import type { AuthEnv } from "../../middleware/auth.js";
+import { giveConsents } from "../consents/index.js";
 import { adminRoutes } from "./admin.routes.js";
 import type { getCreditHistory, listFailedReads } from "./admin.service.js";
 
@@ -206,7 +207,18 @@ test("the failed reads show an error class and no title, profile name or raw err
   expect(text).not.toContain("529 Overloaded");
 });
 
+test("the admin retry refuses a report whose owner has no health data consent", async () => {
+  const res = await app.request(`/admin/reports/${duplicateId}/retry`, {
+    method: "POST",
+    ...admin,
+  });
+  expect(res.status).toBe(403);
+  const [report] = await db.select().from(reports).where(eq(reports.id, duplicateId));
+  expect(report?.status).toBe("failed");
+});
+
 test("the admin retry reads a failed report of another user again", async () => {
+  await giveConsents(userB, ["health_data"]);
   const res = await app.request(`/admin/reports/${duplicateId}/retry`, {
     method: "POST",
     ...admin,

@@ -55,6 +55,8 @@ test("a pack bought through the stubbed Cashfree checkout adds its credits after
   await page.goto("/signup");
   await page.getByTestId("auth-email").fill(email);
   await page.getByTestId("auth-password").fill(password);
+  await page.getByTestId("auth-consent-terms").check();
+  await page.getByTestId("auth-consent-health_data").check();
   await page.getByTestId("auth-submit").click();
   await expect(page.getByTestId("user-menu")).toBeVisible();
 

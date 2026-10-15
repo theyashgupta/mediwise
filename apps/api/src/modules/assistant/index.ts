@@ -10,8 +10,6 @@ export { assistantEnabled, profileQuestionsRoutes, questionsRoutes } from "./ass
 export {
   askText,
   countReviews,
-  giveReviewConsent,
-  hasReviewConsent,
   isReviewRequired,
   loadReviewDay,
   storeReview,

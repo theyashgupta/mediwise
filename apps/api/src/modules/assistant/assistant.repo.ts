@@ -2,10 +2,10 @@ import { and, asc, desc, eq, gt, gte, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import {
   type AssistantReviewVerdict,
-  assistantConsents,
   assistantQuestions,
   assistantReviews,
   clearedQuestion,
+  consentRecords,
   episodes,
   findings,
   followUps,
@@ -384,18 +384,6 @@ export async function findCiteRows(
   };
 }
 
-export async function hasConsent(ownerUserId: string) {
-  const [row] = await db
-    .select({ userId: assistantConsents.userId })
-    .from(assistantConsents)
-    .where(eq(assistantConsents.userId, ownerUserId));
-  return row !== undefined;
-}
-
-export async function insertConsent(ownerUserId: string) {
-  await db.insert(assistantConsents).values({ userId: ownerUserId }).onConflictDoNothing();
-}
-
 /**
  * Lists the kept questions of one UTC day from accounts that agreed to the review before they asked, oldest first.
  *
@@ -417,12 +405,19 @@ export async function listReviewDay(day: string) {
       verdict: assistantReviews.verdict,
     })
     .from(assistantQuestions)
-    .innerJoin(assistantConsents, eq(assistantConsents.userId, assistantQuestions.userId))
+    .innerJoin(
+      consentRecords,
+      and(
+        eq(consentRecords.userId, assistantQuestions.userId),
+        eq(consentRecords.kind, "assistant_review"),
+        isNull(consentRecords.withdrawnAt),
+      ),
+    )
     .leftJoin(assistantReviews, eq(assistantReviews.questionId, assistantQuestions.id))
     .where(
       and(
         isNull(assistantQuestions.clearedAt),
-        gte(assistantQuestions.createdAt, assistantConsents.agreedAt),
+        gte(assistantQuestions.createdAt, consentRecords.acceptedAt),
         sql`${assistantQuestions.createdAt} >= ${start}`,
         sql`${assistantQuestions.createdAt} < ${start} + interval '1 day'`,
       ),

@@ -8,7 +8,13 @@ export const signInSchema = z.object({
   email,
   password: z.string().min(1, { error: () => getT().auth.validation.passwordRequired }),
 });
-export const signUpSchema = z.object({ email, password: newPassword });
+const consentBox = z.literal(true, { error: () => getT().me.consent.required });
+export const signUpSchema = z.object({
+  email,
+  password: newPassword,
+  terms: consentBox,
+  health_data: consentBox,
+});
 export const emailSchema = z.object({ email });
 export const loginSearchSchema = z.object({
   next: z.string().optional(),
@@ -24,5 +30,6 @@ export const newPasswordSchema = z
   });
 
 export type Credentials = z.infer<typeof signInSchema>;
+export type SignUpValues = Credentials & { terms?: boolean; health_data?: boolean };
 export type EmailInput = z.infer<typeof emailSchema>;
 export type NewPassword = z.infer<typeof newPasswordSchema>;

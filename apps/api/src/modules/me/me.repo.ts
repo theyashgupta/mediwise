@@ -1,9 +1,9 @@
-import { and, count, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, count, eq, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import {
-  assistantConsents,
   assistantQuestions,
   clearedQuestion,
+  consentRecords,
   deletionLog,
   jobs,
   profiles,
@@ -76,6 +76,10 @@ export async function deleteAllByOwner(
       .select({ total: count() })
       .from(assistantQuestions)
       .where(eq(assistantQuestions.userId, ownerUserId));
+    const [consentCount] = await tx
+      .select({ total: count() })
+      .from(consentRecords)
+      .where(eq(consentRecords.userId, ownerUserId));
     if (ids.length > 0) {
       await tx
         .delete(jobs)
@@ -87,7 +91,7 @@ export async function deleteAllByOwner(
         );
     }
     await tx.delete(profiles).where(eq(profiles.ownerUserId, ownerUserId));
-    await tx.delete(assistantConsents).where(eq(assistantConsents.userId, ownerUserId));
+    await tx.delete(consentRecords).where(eq(consentRecords.userId, ownerUserId));
     await tx
       .update(assistantQuestions)
       .set(clearedQuestion)
@@ -100,13 +104,14 @@ export async function deleteAllByOwner(
         reports: ids.length,
         files: log.files,
         questions: questionCount?.total ?? 0,
+        consents: consentCount?.total ?? 0,
       },
     });
   });
 }
 
 export async function exportByOwner(ownerUserId: string) {
-  const [profileRows, reportRows, markerRows, questionRows, [consent]] = await Promise.all([
+  const [profileRows, reportRows, markerRows, questionRows, consentRows] = await Promise.all([
     db.select().from(profiles).where(eq(profiles.ownerUserId, ownerUserId)),
     db
       .select()
@@ -130,15 +135,22 @@ export async function exportByOwner(ownerUserId: string) {
       .from(assistantQuestions)
       .where(and(eq(assistantQuestions.userId, ownerUserId), isNull(assistantQuestions.clearedAt))),
     db
-      .select({ agreedAt: assistantConsents.agreedAt })
-      .from(assistantConsents)
-      .where(eq(assistantConsents.userId, ownerUserId)),
+      .select({
+        kind: consentRecords.kind,
+        policyVersion: consentRecords.policyVersion,
+        acceptedAt: consentRecords.acceptedAt,
+        withdrawnAt: consentRecords.withdrawnAt,
+        userAgentHash: consentRecords.userAgentHash,
+      })
+      .from(consentRecords)
+      .where(eq(consentRecords.userId, ownerUserId))
+      .orderBy(asc(consentRecords.acceptedAt)),
   ]);
   return {
     profiles: profileRows,
     reports: reportRows,
     markers: markerRows,
     questions: questionRows,
-    assistantConsent: consent ?? null,
+    consents: consentRows,
   };
 }

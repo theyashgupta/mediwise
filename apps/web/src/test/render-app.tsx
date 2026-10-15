@@ -110,7 +110,7 @@ export function fakeNetwork(handlers: Record<string, Handler>) {
 /**
  * Stores a Supabase session the way the client does after sign-in, so no auth call is needed.
  */
-function storeSession(locale: Locale) {
+function storeSession(locale: Locale, metadata: Record<string, unknown> = {}) {
   localStorage.setItem(
     "sb-localhost-auth-token",
     JSON.stringify({
@@ -125,7 +125,7 @@ function storeSession(locale: Locale) {
         role: "authenticated",
         email,
         app_metadata: { provider: "email" },
-        user_metadata: { locale },
+        user_metadata: { locale, ...metadata },
         identities: [],
         created_at: "2026-10-01T00:00:00Z",
       },
@@ -140,8 +140,15 @@ function storeSession(locale: Locale) {
  * It uses the app's own router, providers and query client, the same tree `main.tsx` renders.
  * The router loads a location only while a `RouterProvider` is mounted, so it navigates after the render.
  */
-export async function renderApp(path: string, { locale = "en" }: { locale?: Locale } = {}) {
-  storeSession(locale);
+export async function renderApp(
+  path: string,
+  {
+    locale = "en",
+    metadata,
+    signedIn = true,
+  }: { locale?: Locale; metadata?: Record<string, unknown>; signedIn?: boolean } = {},
+) {
+  if (signedIn) storeSession(locale, metadata);
   await setLocale(locale);
   const view = render(
     <Providers>

@@ -119,6 +119,8 @@ test("a user who is not the admin gets Not Found on /admin with no breadcrumb or
   await ownerPage.goto("/signup");
   await ownerPage.getByTestId("auth-email").fill(ownerEmail);
   await ownerPage.getByTestId("auth-password").fill(password);
+  await ownerPage.getByTestId("auth-consent-terms").check();
+  await ownerPage.getByTestId("auth-consent-health_data").check();
   await ownerPage.getByTestId("auth-submit").click();
   await expect(ownerPage.getByTestId("user-menu")).toBeVisible();
   ownerToken = await accessToken(ownerEmail);

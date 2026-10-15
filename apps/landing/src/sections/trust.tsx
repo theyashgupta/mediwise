@@ -1,5 +1,6 @@
 import { CreditCard, IdCard, Lock, Scale, Stethoscope } from "lucide-react";
 import { messages, type Locale } from "@/config/messages";
+import { securityPath } from "@/lib/site";
 
 export function Trust({ locale }: { locale: Locale }) {
   const t = messages[locale].trust;
@@ -25,6 +26,12 @@ export function Trust({ locale }: { locale: Locale }) {
             </li>
           ))}
         </ul>
+        <a
+          href={securityPath(locale)}
+          className="mt-8 inline-block text-sm font-medium underline underline-offset-4"
+        >
+          {t.securityLink}
+        </a>
       </div>
     </section>
   );

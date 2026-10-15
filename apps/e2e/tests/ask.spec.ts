@@ -34,6 +34,8 @@ test("a new user with three credits reads one report for a family member", async
   await page.goto("/signup");
   await page.getByTestId("auth-email").fill(email);
   await page.getByTestId("auth-password").fill(password);
+  await page.getByTestId("auth-consent-terms").check();
+  await page.getByTestId("auth-consent-health_data").check();
   await page.getByTestId("auth-submit").click();
   await expect(page.getByTestId("user-menu")).toBeVisible();
   execFileSync("pnpm", ["--filter", "@mediwise/api", "credits:grant", email, "3", "e2e"], {

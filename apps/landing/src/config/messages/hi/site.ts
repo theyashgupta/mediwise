@@ -20,6 +20,7 @@ export const site: Messages["site"] = {
     privacy: "निजता नीति",
     refunds: "रिफ़ंड नीति",
     contact: "संपर्क",
+    security: review("सुरक्षा"),
     legal: (year: number, company: string) =>
       review(`© ${year} MediWise. MediWise, ${company} का एक ब्रांड है।`),
   },

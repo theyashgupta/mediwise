@@ -63,7 +63,7 @@ Why these choices:
 - **Inter** for the UI. Body text uses tabular numbers, so columns of values line up.
 - **JetBrains Mono** (`font-mono`) for values and units. Give the unit `text-muted-foreground`.
 - **Instrument Serif** for at most one heading per screen. `PageHeader` already uses it, so do not add another.
-- Fonts load from Google Fonts in `index.html`.
+- Fonts are self-hosted: the latin and latin-ext woff2 files of Inter, Instrument Serif and JetBrains Mono are in `apps/web/public/fonts`, with `@font-face` rules in `globals.css`. No request goes to Google (MEDI-165).
 
 ## Spacing and layout
 
@@ -133,7 +133,7 @@ Screenshots on 2026-10-13, web dev server, no data loaded:
 
 ## Primitives and libraries
 
-The primitives in `src/components/ui` come from the shadcn CLI with the `vega` preset (`pnpm dlx shadcn@latest apply vega`): Lucide icons, Inter, the classic density. We did not install the preset's `@fontsource-variable/inter` package because fonts load from Google Fonts. To regenerate a component, run `pnpm dlx shadcn@latest add <name> --overwrite` from `apps/web`.
+The primitives in `src/components/ui` come from the shadcn CLI with the `vega` preset (`pnpm dlx shadcn@latest apply vega`): Lucide icons, Inter, the classic density. We did not install the preset's `@fontsource-variable/inter` package because the web serves its own font files. To regenerate a component, run `pnpm dlx shadcn@latest add <name> --overwrite` from `apps/web`.
 
 We checked these collections on 2026-10-12 and adopted none. No primitive is missing, and each one fails at least one rule (free, no new runtime dependency, shadcn registry, Radix base).
 

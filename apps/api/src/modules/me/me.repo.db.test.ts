@@ -1,9 +1,10 @@
+import { policyVersion } from "@mediwise/shared";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { expect, test } from "vitest";
 import { db } from "../../db/client.js";
-import { assistantConsents, assistantQuestions, deletionLog, profiles } from "../../db/schema.js";
-import { giveReviewConsent } from "../assistant/index.js";
+import { assistantQuestions, consentRecords, deletionLog, profiles } from "../../db/schema.js";
+import { giveConsents } from "../consents/index.js";
 import { deleteAllByOwner, exportByOwner } from "./me.repo.js";
 
 async function ownerWithQuestions(questions: string[]) {
@@ -83,22 +84,29 @@ test("account deletion wipes the text of every question, keeps usage, cost and c
     expect(row.clearedAt).not.toBeNull();
   }
   const [row] = await db.select().from(deletionLog).where(eq(deletionLog.userIdHash, userIdHash));
-  expect(row?.counts).toEqual({ profiles: 1, reports: 0, files: 0, questions: 3 });
+  expect(row?.counts).toEqual({ profiles: 1, reports: 0, files: 0, questions: 3, consents: 0 });
 });
 
-test("review consent keeps its first time, goes out with the data download and goes away with the account", async () => {
+test("consent rows go out with the data download, go away with the account, and the deletion log counts them", async () => {
   const owner = randomUUID();
-  await giveReviewConsent(owner);
-  const [first] = await db
-    .select({ agreedAt: assistantConsents.agreedAt })
-    .from(assistantConsents)
-    .where(eq(assistantConsents.userId, owner));
-  await giveReviewConsent(owner);
-  expect((await exportByOwner(owner)).assistantConsent).toEqual({ agreedAt: first!.agreedAt });
+  await giveConsents(owner, ["terms", "health_data"], "Mozilla/5.0 Test");
+  await giveConsents(owner, ["assistant_review"]);
 
-  await deleteAllByOwner(owner, { userIdHash: "hash", files: 0 });
-  expect(
-    await db.select().from(assistantConsents).where(eq(assistantConsents.userId, owner)),
-  ).toEqual([]);
-  expect((await exportByOwner(owner)).assistantConsent).toBeNull();
+  const { consents } = await exportByOwner(owner);
+  expect(consents.map(({ kind }) => kind).toSorted()).toEqual([
+    "assistant_review",
+    "health_data",
+    "terms",
+  ]);
+  expect(consents.every(({ policyVersion: version }) => version === policyVersion)).toBe(true);
+  expect(consents.find(({ kind }) => kind === "terms")?.userAgentHash).toMatch(/^[0-9a-f]{64}$/);
+
+  const userIdHash = `hash-${owner}`;
+  await deleteAllByOwner(owner, { userIdHash, files: 0 });
+  expect(await db.select().from(consentRecords).where(eq(consentRecords.userId, owner))).toEqual(
+    [],
+  );
+  expect((await exportByOwner(owner)).consents).toEqual([]);
+  const [row] = await db.select().from(deletionLog).where(eq(deletionLog.userIdHash, userIdHash));
+  expect(row?.counts.consents).toBe(3);
 });
