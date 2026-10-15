@@ -32,6 +32,51 @@
   --container-content: 100rem;
   --container-measure: 72ch;
   --container-auth: 26.25rem;
+
+  /* Mascot loops animate `transform`, so they stack on the pose set by the translate, rotate and scale utilities. */
+  --animate-mascot-enter: mascot-enter 400ms var(--ease-standard) both;
+  --animate-mascot-breathe: mascot-breathe 4s ease-in-out infinite;
+  --animate-mascot-blink: mascot-blink 4s infinite;
+  --animate-mascot-bob: mascot-bob 1.2s ease-in-out infinite;
+  --animate-mascot-look: mascot-look 2.4s ease-in-out infinite;
+  --animate-mascot-talk: mascot-talk 240ms ease-in-out infinite alternate;
+
+  @keyframes mascot-enter {
+    from {
+      opacity: 0;
+      transform: translateY(6px) scale(0.85);
+    }
+  }
+  @keyframes mascot-breathe {
+    50% {
+      transform: scale(0.98, 1.03);
+    }
+  }
+  @keyframes mascot-blink {
+    0%,
+    90%,
+    100% {
+      transform: scaleY(1);
+    }
+    94% {
+      transform: scaleY(0.1);
+    }
+  }
+  @keyframes mascot-bob {
+    50% {
+      transform: translateY(-1px);
+    }
+  }
+  @keyframes mascot-look {
+    50% {
+      transform: translateX(-2.4px);
+    }
+  }
+  @keyframes mascot-talk {
+    to {
+      transform: scaleY(0.4);
+    }
+  }
 }
 
 @theme inline {
@@ -107,7 +152,7 @@
     --glass-overlay: var(--glass-tint-overlay);
     --glass-filter-bar: blur(var(--blur-glass-bar)) saturate(140%);
     --glass-filter-surface: blur(var(--blur-glass-surface)) saturate(140%);
-    }
+  }
 }
 
 @media (prefers-reduced-transparency: reduce) {
@@ -118,7 +163,7 @@
     --glass-overlay: var(--popover);
     --glass-filter-bar: none;
     --glass-filter-surface: none;
-    }
+  }
 }
 
 @utility glass-blur-bar {

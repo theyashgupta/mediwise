@@ -28,8 +28,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { Mascot, type MascotState } from "@/modules/mascot";
 
 const themes = ["light", "dark"] as const;
+
+const mascotStates: MascotState[] = ["idle", "listening", "thinking", "talking"];
 
 const sideNav = [
   { label: "Home", icon: Home, active: true },
@@ -165,6 +168,19 @@ function Specimens() {
             </DialogFooter>
           </GlassDialogContent>
         </Dialog>
+      </Specimen>
+
+      <Specimen title="Mascot: 96 px on desktop, 48 px on a phone">
+        {[96, 48].map((size) => (
+          <ul key={size} className="flex flex-wrap items-end gap-6">
+            {mascotStates.map((state) => (
+              <li key={state} className="grid justify-items-center gap-2">
+                <Mascot state={state} size={size} />
+                <span className="font-mono text-xs text-muted-foreground">{state}</span>
+              </li>
+            ))}
+          </ul>
+        ))}
       </Specimen>
 
       <Specimen title="StatTile: always solid, results only">
