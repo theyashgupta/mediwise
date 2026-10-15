@@ -1,13 +1,15 @@
 const referrerLine =
-  /(?:^[ \t]*|[ \t]{2,})Ref(?:erred)?\.?[ \t]*(?:By[ \t]*)?(?:Doctor|Dr\.?)?[ \t]*:[ \t]*(.*?)(?:[ \t]{2,}|$)/im;
+  /(?:^[ \t]*|[ \t]{2,})(?:Ref(?:erred)?\.?[ \t]*(?:By[ \t]*)?(?:Doctor|Dr\.?)?|Ordering[ \t]+(?:Physician|Provider))[ \t]*:[ \t]*(.*?)(?:[ \t]{2,}|$)/im;
 const labelLine = /\S\s*:\s*\S/;
+const layoutTitle = /^(?:(?:patient|specimen|client) information|test results|gp health record)$/i;
 
 /**
  * Reads the referring doctor and the letterhead text out of the pdftotext layout of page 1.
  *
  * @remarks
- * The letterhead is the first line above the patient block that is not a title such as "Laboratory Investigation Report".
- * Many labs print it as a logo with no text layer, so it is often missing.
+ * The letterhead is the first line above the patient block that is not a title such as "Laboratory Investigation Report",
+ * a US box title such as "Patient Information" or an NHS App title such as "Test results". Many labs print it as a logo
+ * with no text layer, so it is often missing.
  */
 export function printedHeader(page: string) {
   const referredBy = referrerLine.exec(page)?.[1]?.trim() || undefined;
@@ -21,7 +23,7 @@ export function printedHeader(page: string) {
   );
   const letterhead = top
     .map((line) => line.trim().split(/\s{2,}/)[0] ?? "")
-    .find((line) => line && !/report/i.test(line));
+    .find((line) => line && !/report/i.test(line) && !layoutTitle.test(line));
   return { referredBy, letterhead };
 }
 
@@ -33,7 +35,8 @@ const sameName = (a: string, b: string | undefined) =>
  * Returns the lab name, or the page 1 letterhead text when the name is a person, the referrer or the package.
  *
  * @remarks
- * claude-haiku-5-5 put the referring doctor or the package name in the lab name when the letterhead was only a logo.
+ * claude-haiku-5-5 put the referring doctor or the package name in the lab name when the letterhead was only a logo. A US
+ * box title or an NHS App title is a layout label, never a lab.
  */
 export function checkedLabName(
   report: { labName?: string; referredBy?: string; packageName?: string },
@@ -42,6 +45,10 @@ export function checkedLabName(
   const header = printedHeader(firstPage ?? "");
   const notLab = [report.referredBy, report.packageName, header.referredBy];
   return [report.labName, header.letterhead].find(
-    (name) => name && !personTitle.test(name) && !notLab.some((other) => sameName(name, other)),
+    (name) =>
+      name &&
+      !personTitle.test(name) &&
+      !layoutTitle.test(name.trim()) &&
+      !notLab.some((other) => sameName(name, other)),
   );
 }

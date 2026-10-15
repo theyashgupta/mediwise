@@ -1,6 +1,12 @@
 import { readFile } from "node:fs/promises";
 import { beforeEach, expect, test, vi } from "vitest";
-import { extractReport, printedAge, printedRange, readPages } from "./extraction.service.js";
+import {
+  extractReport,
+  printedAge,
+  printedRange,
+  printedValue,
+  readPages,
+} from "./extraction.service.js";
 import { stepUsage } from "./extraction.usage.js";
 
 const edge = vi.hoisted(() => ({ create: vi.fn() }));
@@ -162,4 +168,74 @@ test("a doctor read as the lab name is not stored", async () => {
   const report = await extractReport([{ text: labA }], stepUsage("claude-haiku-5-5"));
 
   expect(report.lab).toBeUndefined();
+});
+
+test.each([
+  ["> OR = 46", { referenceLow: 46 }],
+  ["< OR = 5.7", { referenceHigh: 5.7 }],
+  ["<5.7 % of total Hgb", { referenceHigh: 5.7 }],
+  ["4,5 - 5,9", { referenceLow: 4.5, referenceHigh: 5.9 }],
+  ["1,50,000 - 4,50,000", { referenceLow: 150000, referenceHigh: 450000 }],
+  ["0,270 - 4,200", { referenceLow: 0.27, referenceHigh: 4.2 }],
+  ["150,000 - 450,000", { referenceLow: 150000, referenceHigh: 450000 }],
+  ["Female: 12.0 - 15.5, Male: 13.5 - 17.5", {}],
+])("the international range %j gives %j", (range, bounds) => {
+  expect(printedRange(range)).toEqual(bounds);
+});
+
+test.each([
+  ["115 H", 115],
+  ["88 L", 88],
+  ["5.2 *", 5.2],
+  ["140 A", 140],
+  ["6.1 ↑", 6.1],
+  ["7,2 HH", 7.2],
+  ["4,5", 4.5],
+  ["7,500", 7500],
+  ["0,350", 0.35],
+  ["0,125 H", 0.125],
+  ["102.10", 102.1],
+  [92, 92],
+  ["Negative", "Negative"],
+  ["<5", "<5"],
+  ["H", "H"],
+  ["Reactive A", "Reactive A"],
+])("the printed value %j gives %j", (value, parsed) => {
+  expect(printedValue(value)).toBe(parsed);
+});
+
+test("dates the report cannot order are marked ambiguous, and the prompt asks for no unit conversion", async () => {
+  edge.create.mockResolvedValueOnce({
+    content: [
+      {
+        type: "tool_use",
+        id: "toolu_1",
+        name: "record_extraction",
+        input: {
+          collectedAt: "2025-03-04",
+          dateAmbiguous: true,
+          panels: [{ name: "Chemistry", rows: [["GLUCOSE", "115 H", "mg/dL", "65-99", 1]] }],
+        },
+      },
+    ],
+    stop_reason: "tool_use",
+    usage: { input_tokens: 10, output_tokens: 10 },
+  });
+
+  const report = await extractReport(
+    [{ text: "GLUCOSE  115 H  65-99 mg/dL" }],
+    stepUsage("claude-haiku-5-5"),
+  );
+
+  const request = edge.create.mock.calls[0]?.[0] as { system: { text: string }[] };
+  const system = request.system[0]?.text ?? "";
+  expect(system).toContain("Never convert a unit.");
+  expect(system).toContain("Antériorités");
+  expect(system).toContain("DD.MM.YYYY");
+  expect(system).toContain("Blutbild");
+  expect(report).toMatchObject({
+    collectedAt: "2025-03-04",
+    dateAmbiguous: true,
+    markers: [{ rawName: "GLUCOSE", value: 115, unit: "mg/dL" }],
+  });
 });

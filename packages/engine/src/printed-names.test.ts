@@ -48,3 +48,13 @@ test("a name the lab printed on one line stays as it is", () => {
   const marker = { rawName: "HIGH SENSITIVITY C-REACTIVE PROTEIN (HS-CRP)" };
   expect(joinWrappedNames([marker], [labBPage])).toEqual([marker]);
 });
+
+test("two tests on consecutive lines never join, so Urea above Creatinine stays urea", () => {
+  const page = [
+    " Test                 Result     Units      Reference Interval",
+    " Urea                 6.2        mmol/L     2.5 - 8.0",
+    " Creatinine           81         umol/L     60 - 110",
+  ].join("\n");
+  const markers = [{ rawName: "Urea" }, { rawName: "Creatinine" }];
+  expect(joinWrappedNames(markers, [page])).toEqual(markers);
+});

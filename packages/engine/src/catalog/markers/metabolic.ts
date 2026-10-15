@@ -13,7 +13,10 @@ const {
   usPharmacistAda2022,
 } = sources;
 
-const glucoseConversions = [{ from: "mmol/L", factor: 18.016 }];
+const glucoseConversions = [
+  { from: "mmol/L", factor: 18.016 },
+  { from: "g/L", factor: 100 },
+];
 
 export const metabolicMarkers: Marker[] = [
   {
@@ -31,6 +34,12 @@ export const metabolicMarkers: Marker[] = [
       "blood sugar fasting",
       "plasma glucose fasting",
       "fasting blood glucose",
+      "glukose nuchtern",
+      "glukose nuechtern",
+      "glycemie a jeun",
+      "glucosa en ayunas",
+      "glicemia a jejum",
+      "glicemia a digiuno",
     ],
     category: "metabolic",
     unit: "mg/dL",
@@ -132,10 +141,19 @@ export const metabolicMarkers: Marker[] = [
       "glycated haemoglobin ifcc",
       "glycosylated hemoglobin ifcc",
       "glycosylated haemoglobin ifcc",
+      "glycohemoglobin",
+      "glycohaemoglobin",
+      "glykiertes hamoglobin",
+      "glykiertes haemoglobin",
+      "hemoglobine glyquee",
+      "hemoglobina glicada",
     ],
     category: "metabolic",
     unit: "%",
-    conversions: [{ from: "mmol/mol", factor: 0.09148, offset: 2.152 }],
+    conversions: [
+      { from: "mmol/mol", factor: 0.09148, offset: 2.152 },
+      { from: "% of total Hgb", factor: 1 },
+    ],
     precision: 1,
     description: "Your average blood sugar over the last two to three months.",
     whatItIs:

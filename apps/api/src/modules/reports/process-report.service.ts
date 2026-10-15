@@ -8,7 +8,9 @@ import {
   type EngineValue,
   isPopulationRow,
   joinWrappedNames,
+  markers,
   runEngine,
+  toCanonical,
   type Visit,
 } from "@mediwise/engine";
 import type { ExtractedMarker, ExtractedReport, PageClass } from "@mediwise/shared";
@@ -51,6 +53,20 @@ import { ruleTitle } from "./reports.title.js";
 const maxPagesBytes = 40 * 1024 * 1024;
 const photoPixels = 1568;
 const derivedNames = new Map(derived.map((entry) => [entry.key, entry.name]));
+const catalogEntries = new Map([...markers, ...derived].map((entry) => [entry.key, entry]));
+
+/**
+ * Converts a repeated value of an already scored marker to the canonical unit, when the catalog lists its unit.
+ *
+ * @remarks
+ * A test printed in two units, such as HbA1c in % and mmol/mol, gives two rows. Episodes and trends read every row of a
+ * marker, so the unscored repeat must sit in the same unit as the scored row.
+ */
+function canonicalRepeat(markerKey: string | null, value: number | null, unit: string | undefined) {
+  const entry = markerKey ? catalogEntries.get(markerKey) : undefined;
+  const canonical = entry && value !== null ? toCanonical(entry, value, unit) : undefined;
+  return entry && canonical !== undefined ? { value: canonical, unit: entry.unit } : undefined;
+}
 
 /**
  * Checks an uploaded file and turns a photo into a JPEG Claude can read.
@@ -359,7 +375,11 @@ export async function readReport(
     const result = markerKey ? results.get(markerKey) : undefined;
     if (markerKey && result) results.delete(markerKey);
     const converted =
-      typeof result?.value === "number" ? { value: result.value, unit: result.unit } : undefined;
+      typeof result?.value === "number"
+        ? { value: result.value, unit: result.unit }
+        : result
+          ? undefined
+          : canonicalRepeat(markerKey, numeric, marker.unit);
     return {
       id: randomUUID(),
       reportId,
@@ -369,6 +389,8 @@ export async function readReport(
       value: converted?.value ?? numeric,
       valueText: numeric === null ? String(marker.value) : null,
       unit: converted?.unit ?? marker.unit ?? null,
+      printedValue: numeric,
+      printedUnit: marker.unit ?? null,
       labRangeLow: result ? (result.labRange?.low ?? null) : (marker.referenceLow ?? null),
       labRangeHigh: result ? (result.labRange?.high ?? null) : (marker.referenceHigh ?? null),
       status: result && result.status !== "unknown" ? result.status : null,
@@ -634,6 +656,10 @@ export async function processReport(reportId: string, usage: ReportUsage, reclas
       labName: read?.extraction.lab?.name ?? null,
       collectedAt,
       reportedAt: read?.extraction.reportedAt ?? null,
+      dateAmbiguous: Boolean(
+        read?.extraction.dateAmbiguous &&
+        (read.extraction.collectedAt || read.extraction.reportedAt),
+      ),
       score: scored ? Math.round(scored.output.score.overall) : null,
       tier: scored ? scored.output.score.tier : null,
       coverage: scored ? Math.round(scored.output.score.coverage.pct) : null,

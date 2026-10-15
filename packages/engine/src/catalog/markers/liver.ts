@@ -4,7 +4,10 @@ import { sources } from "../sources.js";
 
 const { aasld2023, acg2017, tietz2022 } = sources;
 
-const bilirubinConversions = [{ from: "µmol/L", factor: 0.05847 }];
+const bilirubinConversions = [
+  { from: "µmol/L", factor: 0.05847 },
+  { from: "mg/L", factor: 0.1 },
+];
 const proteinConversions = [{ from: "g/L", factor: 0.1 }];
 
 export const liverMarkers: Marker[] = [
@@ -101,10 +104,16 @@ export const liverMarkers: Marker[] = [
       "sgot ast",
       "sgot aspartate transaminase",
       "serum glutamic oxaloacetic transaminase",
+      "asat",
+      "got",
+      "tgo",
     ],
     category: "liver",
     unit: "U/L",
-    conversions: [{ from: "IU/L", factor: 1 }],
+    conversions: [
+      { from: "IU/L", factor: 1 },
+      { from: "µkat/L", factor: 60 },
+    ],
     precision: 0,
     description: "An enzyme that liver or muscle cells release under stress.",
     whatItIs:
@@ -130,10 +139,16 @@ export const liverMarkers: Marker[] = [
       "sgpt alt",
       "sgpt alanine transaminase",
       "serum glutamic pyruvic transaminase",
+      "alat",
+      "gpt",
+      "tgp",
     ],
     category: "liver",
     unit: "U/L",
-    conversions: [{ from: "IU/L", factor: 1 }],
+    conversions: [
+      { from: "IU/L", factor: 1 },
+      { from: "µkat/L", factor: 60 },
+    ],
     precision: 0,
     description: "The enzyme that best reflects strain on liver cells.",
     whatItIs:

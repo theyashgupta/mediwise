@@ -1,0 +1,131 @@
+{
+  "profile": {
+    "ageYears": 56,
+    "sex": "male",
+    "ancestry": "unknown"
+  },
+  "values": [
+    {
+      "rawName": "Hämoglobin",
+      "panel": "Klinische Chemie",
+      "value": 14.2,
+      "unit": "g/dl",
+      "labLow": 13.5,
+      "labHigh": 17.5
+    },
+    {
+      "rawName": "Glukose nüchtern",
+      "panel": "Klinische Chemie",
+      "value": 104,
+      "unit": "mg/dl",
+      "labLow": 70,
+      "labHigh": 100
+    },
+    {
+      "rawName": "HbA1c",
+      "panel": "Klinische Chemie",
+      "value": 5.8,
+      "unit": "%",
+      "labLow": 4,
+      "labHigh": 6
+    },
+    {
+      "rawName": "Kreatinin",
+      "panel": "Klinische Chemie",
+      "value": 1.05,
+      "unit": "mg/dl",
+      "labLow": 0.7,
+      "labHigh": 1.2
+    },
+    {
+      "rawName": "Harnstoff",
+      "panel": "Klinische Chemie",
+      "value": 32,
+      "unit": "mg/dl",
+      "labLow": 17,
+      "labHigh": 43
+    },
+    {
+      "rawName": "Harnsäure",
+      "panel": "Klinische Chemie",
+      "value": 6.8,
+      "unit": "mg/dl",
+      "labLow": 3.4,
+      "labHigh": 7
+    },
+    {
+      "rawName": "Natrium",
+      "panel": "Klinische Chemie",
+      "value": 141,
+      "unit": "mmol/l",
+      "labLow": 135,
+      "labHigh": 145
+    },
+    {
+      "rawName": "Kalium",
+      "panel": "Klinische Chemie",
+      "value": 4.4,
+      "unit": "mmol/l",
+      "labLow": 3.5,
+      "labHigh": 5.1
+    },
+    {
+      "rawName": "Cholesterin gesamt",
+      "panel": "Klinische Chemie",
+      "value": 231,
+      "unit": "mg/dl",
+      "labHigh": 200
+    },
+    {
+      "rawName": "HDL-Cholesterin",
+      "panel": "Klinische Chemie",
+      "value": 52,
+      "unit": "mg/dl",
+      "labLow": 40
+    },
+    {
+      "rawName": "LDL-Cholesterin",
+      "panel": "Klinische Chemie",
+      "value": 148,
+      "unit": "mg/dl",
+      "labHigh": 116
+    },
+    {
+      "rawName": "Triglyceride",
+      "panel": "Klinische Chemie",
+      "value": 156,
+      "unit": "mg/dl",
+      "labHigh": 150
+    },
+    {
+      "rawName": "GOT (ASAT)",
+      "panel": "Klinische Chemie",
+      "value": 24,
+      "unit": "U/l",
+      "labHigh": 50
+    },
+    {
+      "rawName": "GPT (ALAT)",
+      "panel": "Klinische Chemie",
+      "value": 31,
+      "unit": "U/l",
+      "labHigh": 50
+    },
+    {
+      "rawName": "TSH",
+      "panel": "Klinische Chemie",
+      "value": 1.85,
+      "unit": "mU/l",
+      "labLow": 0.27,
+      "labHigh": 4.2
+    },
+    {
+      "rawName": "Ferritin",
+      "panel": "Klinische Chemie",
+      "value": 120,
+      "unit": "µg/l",
+      "labLow": 30,
+      "labHigh": 400
+    }
+  ]
+}

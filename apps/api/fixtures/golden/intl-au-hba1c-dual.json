@@ -1,0 +1,126 @@
+{
+  "sample": "intl-au-hba1c-dual.pdf",
+  "labName": "Wattle Creek Pathology",
+  "person": {
+    "dateOfBirth": "1972-11-03",
+    "sex": "male",
+    "ancestry": "unknown"
+  },
+  "score": 76,
+  "mapped": 14,
+  "total": 14,
+  "markers": [
+    {
+      "rawName": "HbA1c",
+      "markerKey": "hba1c",
+      "value": 6.6,
+      "valueText": null,
+      "unit": "%",
+      "status": "risk"
+    },
+    {
+      "rawName": "HbA1c",
+      "markerKey": "hba1c",
+      "value": 6.6,
+      "valueText": null,
+      "unit": "%",
+      "status": null
+    },
+    {
+      "rawName": "Glucose (fasting)",
+      "markerKey": "glucose_fasting",
+      "value": 115,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "watch"
+    },
+    {
+      "rawName": "Urea",
+      "markerKey": "blood_urea",
+      "value": 37,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Creatinine",
+      "markerKey": "creatinine",
+      "value": 0.92,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "eGFR (CKD-EPI 2021)",
+      "markerKey": "egfr",
+      "value": null,
+      "valueText": ">90",
+      "unit": "mL/min/1.73m2",
+      "status": null
+    },
+    {
+      "rawName": "Uric acid",
+      "markerKey": "uric_acid",
+      "value": 6.4,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Calcium",
+      "markerKey": "calcium",
+      "value": 9.5,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Cholesterol",
+      "markerKey": "total_cholesterol",
+      "value": 197,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "HDL cholesterol",
+      "markerKey": "hdl_cholesterol",
+      "value": 43,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "watch"
+    },
+    {
+      "rawName": "LDL cholesterol",
+      "markerKey": "ldl_cholesterol",
+      "value": 124,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "watch"
+    },
+    {
+      "rawName": "Triglycerides",
+      "markerKey": "triglycerides",
+      "value": 168,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "watch"
+    },
+    {
+      "rawName": "Haemoglobin",
+      "markerKey": "hemoglobin",
+      "value": 15.2,
+      "valueText": null,
+      "unit": "g/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Ferritin",
+      "markerKey": "ferritin",
+      "value": 210,
+      "valueText": null,
+      "unit": "ng/mL",
+      "status": "optimal"
+    }
+  ]
+}

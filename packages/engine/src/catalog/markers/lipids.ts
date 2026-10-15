@@ -5,7 +5,10 @@ import { sources } from "../sources.js";
 const { ahaAcc2018, easLpa2022, escEas2019, icmrIndiab2023, lai2023, ncepAtp3, tietz2022 } =
   sources;
 
-const cholesterolConversions = [{ from: "mmol/L", factor: 38.67 }];
+const cholesterolConversions = [
+  { from: "mmol/L", factor: 38.67 },
+  { from: "g/L", factor: 100 },
+];
 const apoConversions = [{ from: "g/L", factor: 100 }];
 
 export const lipidMarkers: Marker[] = [
@@ -20,6 +23,9 @@ export const lipidMarkers: Marker[] = [
       "total cholesterol serum",
       "s cholesterol",
       "cholesterol serum",
+      "cholesterin",
+      "cholesterin gesamt",
+      "gesamtcholesterin",
     ],
     category: "lipids",
     unit: "mg/dL",
@@ -51,6 +57,7 @@ export const lipidMarkers: Marker[] = [
       "cholesterol ldl",
       "ldl direct",
       "ldl calculated",
+      "ldl cholesterin",
     ],
     category: "lipids",
     unit: "mg/dL",
@@ -86,6 +93,7 @@ export const lipidMarkers: Marker[] = [
       "high density lipoprotein cholesterol",
       "cholesterol hdl",
       "hdl direct",
+      "hdl cholesterin",
     ],
     category: "lipids",
     unit: "mg/dL",
@@ -122,7 +130,10 @@ export const lipidMarkers: Marker[] = [
     ],
     category: "lipids",
     unit: "mg/dL",
-    conversions: [{ from: "mmol/L", factor: 88.57 }],
+    conversions: [
+      { from: "mmol/L", factor: 88.57 },
+      { from: "g/L", factor: 100 },
+    ],
     precision: 0,
     description: "The main form of fat stored and carried in your blood.",
     whatItIs:

@@ -1,0 +1,131 @@
+{
+  "profile": {
+    "ageYears": 45,
+    "sex": "female",
+    "ancestry": "unknown"
+  },
+  "values": [
+    {
+      "rawName": "GLUCOSE",
+      "panel": "Chemistry",
+      "value": 115,
+      "unit": "mg/dL",
+      "labLow": 65,
+      "labHigh": 99
+    },
+    {
+      "rawName": "HEMOGLOBIN A1c",
+      "panel": "Chemistry",
+      "value": 5.9,
+      "unit": "% of total Hgb",
+      "labHigh": 5.7
+    },
+    {
+      "rawName": "UREA NITROGEN (BUN)",
+      "panel": "Chemistry",
+      "value": 18,
+      "unit": "mg/dL",
+      "labLow": 7,
+      "labHigh": 25
+    },
+    {
+      "rawName": "CREATININE",
+      "panel": "Chemistry",
+      "value": 0.92,
+      "unit": "mg/dL",
+      "labLow": 0.5,
+      "labHigh": 0.99
+    },
+    {
+      "rawName": "EGFR",
+      "panel": "Chemistry",
+      "value": 82,
+      "unit": "mL/min/1.73m2",
+      "labLow": 60
+    },
+    {
+      "rawName": "SODIUM",
+      "panel": "Chemistry",
+      "value": 140,
+      "unit": "mmol/L",
+      "labLow": 135,
+      "labHigh": 146
+    },
+    {
+      "rawName": "POTASSIUM",
+      "panel": "Chemistry",
+      "value": 4.1,
+      "unit": "mmol/L",
+      "labLow": 3.5,
+      "labHigh": 5.3
+    },
+    {
+      "rawName": "CHOLESTEROL, TOTAL",
+      "panel": "Chemistry",
+      "value": 212,
+      "unit": "mg/dL",
+      "labHigh": 200
+    },
+    {
+      "rawName": "HDL CHOLESTEROL",
+      "panel": "Chemistry",
+      "value": 44,
+      "unit": "mg/dL",
+      "labLow": 50
+    },
+    {
+      "rawName": "TRIGLYCERIDES",
+      "panel": "Chemistry",
+      "value": 160,
+      "unit": "mg/dL",
+      "labHigh": 150
+    },
+    {
+      "rawName": "LDL-CHOLESTEROL",
+      "panel": "Chemistry",
+      "value": 136,
+      "unit": "mg/dL",
+      "labHigh": 100
+    },
+    {
+      "rawName": "ALT",
+      "panel": "Chemistry",
+      "value": 22,
+      "unit": "U/L",
+      "labLow": 6,
+      "labHigh": 29
+    },
+    {
+      "rawName": "AST",
+      "panel": "Chemistry",
+      "value": 19,
+      "unit": "U/L",
+      "labLow": 10,
+      "labHigh": 35
+    },
+    {
+      "rawName": "TSH",
+      "panel": "Chemistry",
+      "value": 2.1,
+      "unit": "mIU/L",
+      "labLow": 0.4,
+      "labHigh": 4.5
+    },
+    {
+      "rawName": "VITAMIN D, 25-OH, TOTAL",
+      "panel": "Chemistry",
+      "value": 24,
+      "unit": "ng/mL",
+      "labLow": 30,
+      "labHigh": 100
+    },
+    {
+      "rawName": "FERRITIN",
+      "panel": "Chemistry",
+      "value": 38,
+      "unit": "ng/mL",
+      "labLow": 16,
+      "labHigh": 232
+    }
+  ]
+}

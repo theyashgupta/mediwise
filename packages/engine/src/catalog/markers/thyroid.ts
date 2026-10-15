@@ -21,7 +21,10 @@ export const thyroidMarkers: Marker[] = [
     ],
     category: "thyroid",
     unit: "µIU/mL",
-    conversions: [{ from: "mIU/L", factor: 1 }],
+    conversions: [
+      { from: "mIU/L", factor: 1 },
+      { from: "mU/L", factor: 1 },
+    ],
     precision: 2,
     description: "The brain's signal to the thyroid, the best single thyroid marker.",
     whatItIs:

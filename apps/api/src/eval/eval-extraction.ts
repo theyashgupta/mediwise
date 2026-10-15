@@ -16,7 +16,11 @@ type GoldenMarker = {
   unit: string | null;
   status: string | null;
 };
-type LabNameGolden = { sample: string; person: Parameters<typeof readReport>[2]; labName: string };
+type LabNameGolden = {
+  sample: string;
+  person: Parameters<typeof readReport>[2];
+  labName: string | null;
+};
 type Golden =
   | LabNameGolden
   | (LabNameGolden & { score: number; mapped: number; total: number; markers: GoldenMarker[] });
@@ -47,10 +51,9 @@ function byKey(markers: GoldenMarker[]) {
  * Runs the real read pipeline on each golden sample and prints every difference from the golden file, with the cost.
  *
  * @remarks
- * Every run calls Claude, so it never runs in CI. It stops before the next sample when the spend so far plus the most
- * expensive sample so far would pass $1. Pass a file name to run one sample. The read lab name must contain the golden
- * `labName`, and a golden file without markers checks only the lab name. The repo holds made-up samples. Real reports
- * stay in `~/Work/mediwise-samples/golden`. A golden `sample` path is relative to its golden file.
+ * Every run calls Claude, so it never runs in CI, and it stops before the next sample could pass $1 in total. The read
+ * lab name must contain the golden `labName`, and a null `labName` expects none, because a phone screenshot names no lab.
+ * Real reports stay in `~/Work/mediwise-samples/golden`, never in the repo.
  */
 async function evalExtraction() {
   const only = process.argv[2];
@@ -111,7 +114,11 @@ async function evalExtraction() {
 
     const labName = read.extraction.lab?.name;
     log.info(`lab name ${labName ?? "none"} (golden ${golden.labName})`);
-    if (!labName?.toLowerCase().includes(golden.labName.toLowerCase())) process.exitCode = 1;
+    const labMatches =
+      golden.labName === null
+        ? labName === undefined
+        : labName?.toLowerCase().includes(golden.labName.toLowerCase());
+    if (!labMatches) process.exitCode = 1;
     if (!("markers" in golden)) continue;
 
     const actual = read.markerRows;

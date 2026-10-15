@@ -29,6 +29,7 @@ export const vitaminMarkers: Marker[] = [
       "vitamin d total",
       "25 oh vitamin d total",
       "vitamin d 25 hydroxy",
+      "vitamin d 25 oh total",
       "25 oh vit d",
       "vitamin d3",
       "cholecalciferol",
@@ -68,7 +69,10 @@ export const vitaminMarkers: Marker[] = [
     ],
     category: "vitamins",
     unit: "pg/mL",
-    conversions: [{ from: "pmol/L", factor: 1.355 }],
+    conversions: [
+      { from: "pmol/L", factor: 1.355 },
+      { from: "ng/L", factor: 1 },
+    ],
     precision: 0,
     description: "A vitamin for nerves and red blood cells, found in animal foods.",
     whatItIs:

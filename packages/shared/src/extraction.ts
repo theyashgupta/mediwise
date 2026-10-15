@@ -21,6 +21,10 @@ export const extractedReportSchema = z.object({
     .optional(),
   collectedAt: z.iso.date().optional().describe("Sample collection date as YYYY-MM-DD"),
   reportedAt: z.iso.date().optional().describe("Report date as YYYY-MM-DD"),
+  dateAmbiguous: z
+    .boolean()
+    .optional()
+    .describe("The printed dates can read as day first or month first"),
   markers: z.array(
     z.object({
       rawName: text.describe("Test name exactly as printed"),

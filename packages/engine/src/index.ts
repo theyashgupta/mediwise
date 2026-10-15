@@ -58,7 +58,7 @@ export function assessMeasurements(values: EngineValue[], profile: EngineProfile
 
 export * from "./catalog/index.js";
 export { isPopulationRow, joinWrappedNames } from "./printed-names.js";
-export { toCanonical } from "./normalise.js";
+export { normaliseUnit, toCanonical } from "./normalise.js";
 export { rankMoveFirst } from "./rank.js";
 export {
   type AttentionAlert,

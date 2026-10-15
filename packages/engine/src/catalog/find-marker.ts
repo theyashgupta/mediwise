@@ -7,9 +7,12 @@ const specimenPrefix = /^(serum|plasma|blood|s|sr) /;
  *
  * @remarks
  * Only parentheses that hold a unit are dropped, because labs also use them for qualifiers such as "(Fasting)".
+ * Accents are folded first, so "Urée" and "Uree" match one alias.
  */
 export function normalizeName(raw: string): string {
   return raw
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
     .toLowerCase()
     .replace(/\(([^)]*[/%][^)]*|fl|pg)\)/g, " ")
     .replace(/%/g, " percent ")

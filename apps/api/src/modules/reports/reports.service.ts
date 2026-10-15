@@ -14,6 +14,7 @@ import {
   markers,
   markerText,
   matchRange,
+  normaliseUnit,
   patternText,
   rankMoveFirst,
   scoreFormula,
@@ -336,6 +337,33 @@ function toRange(low: number | null, high: number | null) {
   return low === null && high === null ? null : { low, high };
 }
 
+const egfrEquations: [string, RegExp][] = [
+  ["CKD-EPI 2021", /ckd[\s-]*epi\D*2021/i],
+  ["CKD-EPI 2009", /ckd[\s-]*epi\D*2009/i],
+  ["CKD-EPI", /ckd[\s-]*epi/i],
+  ["MDRD", /mdrd/i],
+  ["Cockcroft-Gault", /cockcroft/i],
+];
+
+/**
+ * Reads the eGFR equation out of the printed test name, for example "eGFR (CKD-EPI 2021)".
+ *
+ * @remarks
+ * Extraction puts the equation into the eGFR name when the report prints it, so the stored printed name holds it.
+ */
+export function egfrEquation(rawName: string) {
+  return egfrEquations.find(([, pattern]) => pattern.test(rawName))?.[0] ?? null;
+}
+
+/** Returns the value as the lab printed it, only when its unit differs from the stored canonical unit. */
+function printedReading(row: StoredMarker) {
+  const { printedValue, printedUnit, unit } = row;
+  if (printedValue === null || !printedUnit) return null;
+  return normaliseUnit(printedUnit) === normaliseUnit(unit ?? "")
+    ? null
+    : { value: printedValue, unit: printedUnit };
+}
+
 function toMarkerRow(row: StoredMarker, entry: Marker, locale: TextLocale) {
   return {
     markerKey: entry.key,
@@ -345,6 +373,8 @@ function toMarkerRow(row: StoredMarker, entry: Marker, locale: TextLocale) {
     value: row.value,
     valueText: row.valueText,
     unit: row.unit,
+    printed: printedReading(row),
+    equation: entry.key === "egfr" && !row.derived ? egfrEquation(row.rawName) : null,
     precision: entry.precision,
     status: row.status ?? ("unknown" as const),
     deviation:
@@ -436,6 +466,7 @@ function buildReportDetail(
       labName: report.labName,
       collectedAt: report.collectedAt,
       reportedAt: report.reportedAt,
+      dateAmbiguous: report.dateAmbiguous,
       markerCount: report.markerCount,
       score: report.score,
       tier: report.tier,

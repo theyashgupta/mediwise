@@ -25,6 +25,8 @@ export function MarkerHeader({ marker }: MarkerHeaderProps) {
             valueText={marker.valueText}
             unit={marker.unit}
             precision={marker.precision}
+            printed={marker.printed}
+            equation={marker.equation}
             className="text-3xl"
           />
           <StatusBadge status={marker.status} />

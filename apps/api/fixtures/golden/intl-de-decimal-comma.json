@@ -1,0 +1,142 @@
+{
+  "sample": "intl-de-decimal-comma.pdf",
+  "labName": "Laborzentrum Mittelfeld",
+  "person": {
+    "dateOfBirth": "1968-05-12",
+    "sex": "male",
+    "ancestry": "unknown"
+  },
+  "score": 83,
+  "mapped": 16,
+  "total": 16,
+  "markers": [
+    {
+      "rawName": "Hämoglobin",
+      "markerKey": "hemoglobin",
+      "value": 14.2,
+      "valueText": null,
+      "unit": "g/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Glukose nüchtern",
+      "markerKey": "glucose_fasting",
+      "value": 104,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "watch"
+    },
+    {
+      "rawName": "HbA1c",
+      "markerKey": "hba1c",
+      "value": 5.8,
+      "valueText": null,
+      "unit": "%",
+      "status": "watch"
+    },
+    {
+      "rawName": "Kreatinin",
+      "markerKey": "creatinine",
+      "value": 1.05,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Harnstoff",
+      "markerKey": "blood_urea",
+      "value": 32,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Harnsäure",
+      "markerKey": "uric_acid",
+      "value": 6.8,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Natrium",
+      "markerKey": "sodium",
+      "value": 141,
+      "valueText": null,
+      "unit": "mmol/L",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Kalium",
+      "markerKey": "potassium",
+      "value": 4.4,
+      "valueText": null,
+      "unit": "mmol/L",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Cholesterin gesamt",
+      "markerKey": "total_cholesterol",
+      "value": 231,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "watch"
+    },
+    {
+      "rawName": "HDL-Cholesterin",
+      "markerKey": "hdl_cholesterol",
+      "value": 52,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "watch"
+    },
+    {
+      "rawName": "LDL-Cholesterin",
+      "markerKey": "ldl_cholesterol",
+      "value": 148,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "watch"
+    },
+    {
+      "rawName": "Triglyceride",
+      "markerKey": "triglycerides",
+      "value": 156,
+      "valueText": null,
+      "unit": "mg/dL",
+      "status": "watch"
+    },
+    {
+      "rawName": "GOT (ASAT)",
+      "markerKey": "ast",
+      "value": 24,
+      "valueText": null,
+      "unit": "U/L",
+      "status": "optimal"
+    },
+    {
+      "rawName": "GPT (ALAT)",
+      "markerKey": "alt",
+      "value": 31,
+      "valueText": null,
+      "unit": "U/L",
+      "status": "optimal"
+    },
+    {
+      "rawName": "TSH",
+      "markerKey": "tsh",
+      "value": 1.85,
+      "valueText": null,
+      "unit": "µIU/mL",
+      "status": "optimal"
+    },
+    {
+      "rawName": "Ferritin",
+      "markerKey": "ferritin",
+      "value": 120,
+      "valueText": null,
+      "unit": "ng/mL",
+      "status": "optimal"
+    }
+  ]
+}

@@ -4,6 +4,7 @@ export const report = {
   loadError: "We could not load this report.",
   readError: "We could not read this report.",
   deleted: "We deleted the report.",
+  dateAmbiguous: "Check the report date. The lab printed it in a form that can read two ways.",
   compare: "Compare reports",
   export: "Export for doctor",
   delete: "Delete report",
