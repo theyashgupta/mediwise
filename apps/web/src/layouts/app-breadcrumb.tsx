@@ -32,14 +32,17 @@ export function AppBreadcrumb({ className, innerOnly }: AppBreadcrumbProps) {
               key={href}
               aria-current="page"
               title={label}
-              className="min-w-[40%] grow basis-0 truncate text-base font-semibold md:text-lg"
+              className="min-w-0 truncate text-base font-semibold md:text-lg"
             >
               {label}
             </li>
           ) : (
             <li
               key={href}
-              className={cn("flex items-center gap-1.5", fixed ? "shrink-0" : "min-w-0 shrink")}
+              className={cn(
+                "flex items-center gap-1.5",
+                fixed ? "shrink-0" : "max-w-max min-w-5 grow basis-0",
+              )}
             >
               <Link
                 to={href}

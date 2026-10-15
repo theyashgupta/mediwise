@@ -56,3 +56,7 @@ test("the chip text names the cited row, the lab and the date", () => {
     "Repeat study · Sunrise Diagnostics · 4 Aug 2026",
   );
 });
+
+test("a pattern chip whose report has no such pattern opens nothing", () => {
+  expect(chipTarget(cite({ kind: "pattern", target: null }))).toEqual({ kind: "none" });
+});

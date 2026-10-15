@@ -56,7 +56,7 @@ export function TrendControls({ categories, search, onSearchChange }: TrendContr
         <div
           role="group"
           aria-label={t.trends.controls.sort}
-          className="flex shrink-0 items-center gap-2"
+          className="flex max-w-full shrink-0 flex-wrap items-center gap-2"
         >
           <span className="text-sm text-muted-foreground">{t.trends.controls.sortBy}</span>
           {sorts.map((value) => (

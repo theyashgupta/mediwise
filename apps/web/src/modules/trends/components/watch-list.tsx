@@ -35,7 +35,7 @@ function WatchRow({ item }: { item: WatchItem }) {
       className="flex items-center gap-3 py-3 pr-3 pl-4 outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset"
     >
       <span
-        className={cn("h-9 w-1 shrink-0 rounded-full", statusStyles[item.status].mark)}
+        className={cn("w-1 shrink-0 self-stretch rounded-full", statusStyles[item.status].mark)}
         aria-hidden
       />
       <span className="min-w-0 flex-1">

@@ -1,5 +1,5 @@
 import { ChevronDown } from "lucide-react";
-import type { ReactNode } from "react";
+import { type ReactNode, useLayoutEffect, useRef } from "react";
 import { useT } from "@/common/hooks/use-locale";
 import type { Status } from "@/common/utils/status";
 import { Button } from "@/components/ui/button";
@@ -23,13 +23,22 @@ type GroupProps = {
   statuses: { status: Status }[];
   labs?: string[];
   open: boolean;
+  filter?: MarkerFilter;
   children: ReactNode;
 };
 
-function Group({ id, title, count, statuses, labs = [], open, children }: GroupProps) {
+function Group({ id, title, count, statuses, labs = [], open, filter, children }: GroupProps) {
   const t = useT();
+  const ref = useRef<HTMLDetailsElement>(null);
+  useLayoutEffect(() => {
+    if (ref.current) ref.current.open = open;
+  }, [open, filter]);
   return (
-    <details open={open} className="group/markers overflow-hidden rounded-xl border bg-card">
+    <details
+      ref={ref}
+      open={open}
+      className="group/markers overflow-hidden rounded-xl border bg-card"
+    >
       <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-3 outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset [&::-webkit-details-marker]:hidden">
         <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1.5">
           <h3 id={`section-${id}`} className="flex items-baseline gap-2 font-semibold">
@@ -102,13 +111,14 @@ export function MarkerSections({ reportId, detail, filter, onFilterChange }: Mar
       )}
       {sections.map((section) => (
         <Group
-          key={`${section.key}:${filter}`}
+          key={section.key}
           id={section.key}
           title={section.label}
           count={section.markers.length}
           statuses={section.markers}
           labs={"labs" in section ? section.labs : undefined}
           open={open}
+          filter={filter}
         >
           {section.markers.map((marker) => (
             <li key={marker.markerKey}>

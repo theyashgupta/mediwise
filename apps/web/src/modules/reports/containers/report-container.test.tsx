@@ -155,3 +155,65 @@ test("a fold the reader opens stays open the next time a report renders", async 
   await renderApp(`/reports/${report.id}`);
   expect((await fold())?.open).toBe(true);
 });
+
+test("a marker filter keeps each matching group mounted and opens it, so no group flashes out and back", async () => {
+  const row = (markerKey: string, name: string, status: "risk" | "watch" | "optimal") => ({
+    markerKey,
+    name,
+    shortName: null,
+    description: "",
+    value: 1,
+    valueText: null,
+    printed: null,
+    equation: null,
+    unit: "mg/dL",
+    precision: 0,
+    status,
+    deviation: null,
+    labRange: null,
+    calibratedRange: null,
+    labName: "Made-up Labs B",
+  });
+  fakeNetwork({
+    "GET /me": () => me,
+    "GET /profiles": () => [selfProfile, member],
+    [`GET /reports/${report.id}`]: () => ({
+      ...report,
+      categories: [
+        {
+          key: "heart",
+          label: "Heart",
+          labNames: [],
+          markers: [
+            row("homocysteine", "Homocysteine", "risk"),
+            row("hs_crp", "High-sensitivity CRP", "watch"),
+          ],
+        },
+        {
+          key: "kidney",
+          label: "Kidney",
+          labNames: [],
+          markers: [row("creatinine", "Creatinine", "optimal")],
+        },
+      ],
+    }),
+    "GET /reports": () => ({ items: [], nextCursor: null }),
+  });
+  await renderApp(`/reports/${report.id}`);
+  const group = async () =>
+    (await screen.findByRole("heading", { name: /^Heart/ }, { timeout: 10_000 })).closest(
+      "details",
+    );
+  const before = await group();
+  expect(before?.open).toBe(false);
+
+  await userEvent.click(screen.getByTestId("marker-filter-risk"));
+  await waitFor(() => expect(screen.queryByRole("heading", { name: /^Kidney/ })).toBeNull());
+  expect(await group()).toBe(before);
+  expect(before?.open).toBe(true);
+
+  before!.open = false;
+  await userEvent.click(screen.getByTestId("marker-filter-watch"));
+  await waitFor(() => expect(before?.open).toBe(true));
+  expect(await group()).toBe(before);
+});

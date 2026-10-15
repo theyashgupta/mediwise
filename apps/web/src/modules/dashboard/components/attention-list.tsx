@@ -44,7 +44,7 @@ function AttentionRow({ item }: { item: AttentionItem }) {
     >
       <span
         className={cn(
-          "h-9 w-1 shrink-0 rounded-full",
+          "w-1 shrink-0 self-stretch rounded-full",
           statusStyles[item.kind === "alert" ? "risk" : item.status].mark,
         )}
         aria-hidden
