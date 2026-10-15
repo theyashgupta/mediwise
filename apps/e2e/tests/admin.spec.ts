@@ -8,38 +8,25 @@ const ownerEmail = `e2e-admin-owner-${Date.now()}@example.com`;
 const password = "e2e-Password-1";
 const profileName = "Dense History";
 const authUrl = `${apiEnv.SUPABASE_URL}/auth/v1`;
-const seededJobKinds = "('e2e_spend', 'e2e_stale')";
 const adminRoutes = [
-  ["GET", "/admin/overview"],
+  ["GET", "/admin/credits"],
+  ["GET", "/admin/failed-reports"],
   ["GET", "/admin/spend"],
   ["POST", "/admin/reports/00000000-0000-4000-8000-000000000000/retry"],
 ] as const;
 
-type Overview = {
-  spend: {
-    todayCents: number;
-    weekCents: number;
-    monthCents: number;
-    capCents: number;
-    reads: number;
-    questions: number;
-    purchases: number;
-    revenuePaise: number;
-  };
-  days: { date: string; reads: number; costCents: number }[];
-  meanCostPerReadCents: number | null;
-  failed: { id: string; errorClass: string }[];
-  queue: { depth: number; oldestQueuedMs: number | null };
-  credits: { granted: number; purchased: number; spentOnReads: number; spentOnQuestions: number };
-  people: { profiles: number; users: number; activeProfiles: number; activeUsers: number };
-  alerts: string[];
-};
+type Total = { kind: string; events: number; credits: number; amountPaise: number };
+type CreditEvent = { userId: string; kind: string };
+type History = Record<
+  "reportCredits" | "questionPacks",
+  { totals: Total[]; events: CreditEvent[] }
+>;
 
 let adminPage: Page;
 let ownerPage: Page;
 let ownerToken: string;
 let failedReportId: string;
-let overview: Overview;
+let ownerId: string;
 
 test.describe.configure({ mode: "serial" });
 
@@ -47,7 +34,7 @@ test.describe.configure({ mode: "serial" });
  * Runs SQL on the e2e database with the API's own Postgres client.
  *
  * @remarks
- * The dense fixture holds only done reports, so the spend, the stale job and the failed read need a few rows of their own.
+ * The dense fixture holds only done reports, so the failed read needs a row update of its own.
  */
 function sql(query: string) {
   const script =
@@ -118,12 +105,11 @@ test.beforeAll(async ({ browser }) => {
 });
 
 test.afterAll(async () => {
-  sql(`delete from jobs where kind in ${seededJobKinds}`);
   await adminPage.close();
   await ownerPage.close();
 });
 
-test("without a session the three admin routes return 401", async () => {
+test("without a session the admin routes return 401", async () => {
   for (const [method, path] of adminRoutes) {
     expect((await callApi(method, path)).status, `${method} ${path}`).toBe(401);
   }
@@ -136,6 +122,7 @@ test("a user who is not the admin gets Not Found on /admin with no breadcrumb or
   await ownerPage.getByTestId("auth-submit").click();
   await expect(ownerPage.getByTestId("user-menu")).toBeVisible();
   ownerToken = await accessToken(ownerEmail);
+  ownerId = (JSON.parse(atob(ownerToken.split(".")[1] ?? "")) as { sub: string }).sub;
 
   await ownerPage.goto("/admin");
   await expect(ownerPage.getByText("Not Found")).toBeVisible();
@@ -147,7 +134,7 @@ test("a user who is not the admin gets Not Found on /admin with no breadcrumb or
   }
 });
 
-test("the owner gets the dense history, one failed read, and the month gets 90 percent of the cap and a stale job", async () => {
+test("the owner gets the dense history and one failed read with its credit returned", async () => {
   test.setTimeout(150_000);
   const env = { ...process.env, ...apiEnv };
   execFileSync("pnpm", ["--filter", "@mediwise/api", "db:seed-history", ownerEmail], {
@@ -174,109 +161,51 @@ test("the owner gets the dense history, one failed read, and the month gets 90 p
     update reports set status = 'failed', error = 'You have no report credits left.' where id = '${failedReportId}';
     insert into credits_ledger (user_id, delta, reason, report_id)
       select user_id, 1, 'refund', report_id from credits_ledger where report_id = '${failedReportId}';
-    delete from jobs where kind in ${seededJobKinds};
   `);
   expect(await ownerCredits()).toBe(1);
-
-  const adminToken = await accessToken(adminEmail);
-  const spend = (await (await callApi("GET", "/admin/spend", adminToken)).json()) as {
-    costCents: number;
-    capCents: number;
-  };
-  const missingCents = Math.max(0, spend.capCents * 0.9 - spend.costCents);
-  sql(`
-    insert into jobs (kind, payload, status, input_tokens, output_tokens)
-      values ('e2e_spend', '{}', 'failed', ${Math.ceil(missingCents * 5000)}, 0);
-    insert into jobs (kind, payload, run_after, created_at)
-      values ('e2e_stale', '{}', now() + interval '1 day', now() - interval '45 minutes');
-  `);
 });
 
-test("the admin sees spend, reads, queue, credits, profiles and failed reads as GET /admin/overview returns them", async () => {
+test("the admin sees the credit history totals as GET /admin/credits returns them, in rupees, with no dollar figure", async () => {
   await signIn(adminPage, adminEmail);
   const loaded = adminPage.waitForResponse(
     (res) =>
       res.request().method() === "GET" &&
       new URL(res.url()).port === String(apiPort) &&
-      new URL(res.url()).pathname === "/admin/overview",
+      new URL(res.url()).pathname === "/admin/credits",
   );
   await adminPage.goto("/admin");
-  overview = (await (await loaded).json()) as Overview;
+  const history = (await (await loaded).json()) as History;
   await expect(adminPage.getByRole("heading", { name: "Operator" })).toBeVisible();
+  await expect(adminPage.getByRole("heading", { name: "Report credits" })).toBeVisible();
+  await expect(adminPage.getByRole("heading", { name: "Question packs" })).toBeVisible();
 
-  const expected = await adminPage.evaluate(({ spend, queue, credits, people, ...rest }) => {
-    const usd = (cents: number) =>
-      (cents / 100).toLocaleString("en-IN", {
-        style: "currency",
-        currency: "USD",
-        maximumFractionDigits: cents < 100 ? 4 : 2,
-      });
-    const count = (value: number) => value.toLocaleString("en-IN");
-    const minutes = Math.floor((queue.oldestQueuedMs ?? 0) / 60_000);
-    return {
-      values: {
-        "admin-spend-today": usd(spend.todayCents),
-        "admin-spend-week": usd(spend.weekCents),
-        "admin-spend-month": usd(spend.monthCents),
-        "admin-reads-month": count(spend.reads),
-        "admin-questions-month": count(spend.questions),
-        "admin-purchases-month": `${count(spend.purchases)} · ${(spend.revenuePaise / 100).toLocaleString("en-IN", { style: "currency", currency: "INR" })}`,
-        "admin-queue-depth": count(queue.depth),
-        "admin-queue-oldest":
-          minutes < 60 ? `${minutes} min` : `${Math.floor(minutes / 60)} h ${minutes % 60} min`,
-        "admin-credits-granted": count(credits.granted),
-        "admin-credits-purchased": count(credits.purchased),
-        "admin-credits-reads": count(credits.spentOnReads),
-        "admin-credits-questions": count(credits.spentOnQuestions),
-        "admin-profiles": count(people.profiles),
-        "admin-users": count(people.users),
-        "admin-active-profiles": count(people.activeProfiles),
-        "admin-active-users": count(people.activeUsers),
-      },
-      chart: rest.days
-        .filter((day) => day.reads > 0)
-        .map(
-          (day) =>
-            `${count(day.reads)} ${day.reads === 1 ? "read" : "reads"}, ${usd(day.costCents)}`,
-        ),
-      mean: rest.meanCostPerReadCents === null ? null : usd(rest.meanCostPerReadCents),
-    };
-  }, overview);
-
-  for (const [testId, text] of Object.entries(expected.values)) {
-    await expect(adminPage.getByTestId(testId), testId).toHaveText(text);
+  for (const total of [...history.reportCredits.totals, ...history.questionPacks.totals]) {
+    await expect(adminPage.getByTestId(`admin-total-${total.kind}`), total.kind).toHaveText(
+      total.events.toLocaleString("en-IN"),
+    );
   }
-  expect(overview.spend.reads).toBeGreaterThan(0);
-  expect(expected.chart.length).toBeGreaterThan(0);
-  const chartLabel = await adminPage.getByTestId("admin-reads-chart").getAttribute("aria-label");
-  for (const day of expected.chart) expect(chartLabel).toContain(day);
-  await expect(
-    adminPage.getByText(`Mean cost per read in 30 days: ${expected.mean}.`),
-  ).toBeVisible();
+  await expect(adminPage.locator("main")).not.toContainText("$");
+  await expect(adminPage.getByText(/Claude spend|cost per read/i)).toHaveCount(0);
 
-  expect(overview.failed.find((report) => report.id === failedReportId)?.errorClass).toBe(
-    "no_credits",
-  );
-  await expect(adminPage.locator('[data-testid^="admin-failed-"]')).toHaveCount(
-    overview.failed.length,
-  );
   await expect(adminPage.getByTestId(`admin-failed-${failedReportId}`)).toContainText(
     "No credits left",
   );
 });
 
-test("the spend line shows at 80 percent of the cap and the queue line shows for a job older than 30 minutes", async () => {
-  const share = Math.round((overview.spend.monthCents / overview.spend.capCents) * 100);
-  expect(share).toBeGreaterThanOrEqual(80);
-  expect(overview.queue.oldestQueuedMs).toBeGreaterThan(30 * 60_000);
-  expect(overview.alerts).toEqual(["spend", "queue"]);
+test("a click on a user id shows only that user's events", async () => {
+  const filtered = adminPage.waitForResponse(
+    (res) => new URL(res.url()).searchParams.get("userId") === ownerId,
+  );
+  await adminPage.getByTitle(ownerId).first().click();
+  const history = (await (await filtered).json()) as History;
 
-  await expect(adminPage.getByTestId("admin-alert-spend")).toContainText(
-    `AI spend is at ${share}% of the monthly cap`,
-  );
-  await expect(adminPage.getByTestId("admin-alert-queue")).toContainText(
-    `A job is in the queue for ${await adminPage.getByTestId("admin-queue-oldest").textContent()}`,
-  );
+  await expect(adminPage.getByTestId("admin-user-filter")).toContainText(ownerId.slice(0, 8));
+  const kinds = history.reportCredits.events.map((event) => event.kind);
+  expect(kinds).toEqual(expect.arrayContaining(["grant", "upload", "refund"]));
+  expect(history.reportCredits.events.every((event) => event.userId === ownerId)).toBe(true);
+  await expect(
+    adminPage.getByTestId("admin-report-credits-events").locator("tbody tr"),
+  ).toHaveCount(history.reportCredits.events.length);
 });
 
 test("re-read sends the failed report to the queue, takes it off the failed table and debits one credit of the owner", async () => {

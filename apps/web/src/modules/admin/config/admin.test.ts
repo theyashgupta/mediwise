@@ -1,12 +1,9 @@
 import { expect, test } from "vitest";
-import { formatCents, formatWait } from "./admin";
+import { formatCreditChange, formatCredits } from "./admin";
 
-test("cents show as dollars with four decimals under one dollar", () => {
-  expect(formatCents(0.18)).toBe("$0.0018");
-  expect(formatCents(1650)).toBe("$16.50");
-});
-
-test("a wait shows minutes, then hours and minutes past one hour", () => {
-  expect(formatWait(45 * 60_000 + 30_000)).toBe("45 min");
-  expect(formatWait(135 * 60_000)).toBe("2 h 15 min");
+test("a credit change shows its sign, and a credit total shows its unit", () => {
+  expect(formatCreditChange(5)).toBe("+5");
+  expect(formatCreditChange(-1)).toBe("-1");
+  expect(formatCredits(-1)).toBe("1 credit");
+  expect(formatCredits(25)).toBe("25 credits");
 });

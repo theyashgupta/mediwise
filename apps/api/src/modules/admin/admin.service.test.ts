@@ -3,40 +3,29 @@ import { log } from "../../middleware/logger.js";
 import {
   alertsFor,
   errorClass,
-  getOverview,
+  getCreditHistory,
+  kindOf,
+  ledgerFilter,
+  listFailedReads,
   logAlerts,
-  periodStarts,
   retryFailedReport,
 } from "./admin.service.js";
 
 const now = new Date("2026-10-14T05:00:00Z");
-const sonnet = (cents: number, at: string, status = "done") => ({
-  status,
-  usage: null,
-  inputTokens: 0,
-  outputTokens: cents * 1000,
-  updatedAt: new Date(at),
+const at = (iso: string) => new Date(iso);
+const ledgerRow = (reason: string, delta: number, createdAt: string, extra = {}) => ({
+  id: `${reason}-${createdAt}`,
+  createdAt: at(createdAt),
+  userId: "user-a",
+  reason,
+  fromReport: reason === "upload",
+  delta,
+  amountPaise: null,
+  profiles: 2,
+  ...extra,
 });
 
 vi.mock("./admin.repo.js", () => ({
-  listJobsSince: async () => [
-    sonnet(1, "2026-10-14T01:00:00Z"),
-    sonnet(2, "2026-10-12T01:00:00Z"),
-    sonnet(4, "2026-10-04T01:00:00Z", "failed"),
-  ],
-  listQuestionsSince: async () => [
-    {
-      createdAt: new Date("2026-10-14T02:00:00Z"),
-      usage: {
-        model: "claude-haiku-5-5",
-        inputTokens: 0,
-        cachedInputTokens: 0,
-        cacheWriteTokens: 0,
-        outputTokens: 20_000,
-      },
-    },
-    { createdAt: new Date("2026-10-13T02:00:00Z"), usage: null },
-  ],
   findQueue: async () => ({ depth: 1, oldestAt: new Date("2026-10-14T04:00:00Z") }),
   listFailedReports: async () => [
     {
@@ -46,12 +35,25 @@ vi.mock("./admin.repo.js", () => ({
       jobError: null,
     },
   ],
-  sumCreditsByReason: async () => [
-    { reason: "grant", total: 5 },
-    { reason: "upload", total: -3 },
-    { reason: "refund", total: 1 },
+  listLedgerEvents: async (_filter: unknown, reasons: string[]) =>
+    reasons.includes("questions")
+      ? [ledgerRow("questions", -1, "2026-10-12T00:00:00Z")]
+      : [
+          ledgerRow("purchase", 5, "2026-10-13T00:00:00Z", { amountPaise: 19900 }),
+          ledgerRow("upload", -1, "2026-10-12T00:00:00Z"),
+        ],
+  listChargedQuestions: async () => [
+    { id: "q1", createdAt: at("2026-10-13T06:00:00Z"), userId: "user-a", profiles: 2 },
   ],
-  countProfiles: async () => ({ profiles: 2, users: 1, activeProfiles: 1, activeUsers: 1 }),
+  sumLedger: async () => [
+    { reason: "grant", fromReport: false, events: 1, credits: 5, amountPaise: 0 },
+    { reason: "purchase", fromReport: false, events: 2, credits: 25, amountPaise: 79800 },
+    { reason: "upload", fromReport: true, events: 3, credits: -3, amountPaise: 0 },
+    { reason: "refund", fromReport: true, events: 1, credits: 1, amountPaise: 0 },
+    { reason: "refund", fromReport: false, events: 1, credits: -5, amountPaise: 0 },
+    { reason: "questions", fromReport: false, events: 2, credits: -2, amountPaise: 0 },
+  ],
+  countChargedQuestions: async () => 7,
   findReportOwner: async () => undefined,
 }));
 
@@ -93,33 +95,49 @@ test("a failed read gets a fixed error class, never its raw error text", () => {
   expect(errorClass(null, null)).toBe("unexpected");
 });
 
-test("today, this week and this month start at UTC midnight, Monday and the first", () => {
-  const starts = periodStarts(new Date("2026-10-14T05:00:00Z"));
-  expect(new Date(starts.day).toISOString()).toBe("2026-10-14T00:00:00.000Z");
-  expect(new Date(starts.week).toISOString()).toBe("2026-10-12T00:00:00.000Z");
-  expect(new Date(starts.month).toISOString()).toBe("2026-10-01T00:00:00.000Z");
-  const sunday = periodStarts(new Date("2026-11-01T23:00:00Z"));
-  expect(new Date(sunday.week).toISOString()).toBe("2026-10-26T00:00:00.000Z");
+test("a refund with a report returns a read credit, a refund without one takes back a purchase", () => {
+  expect(kindOf({ reason: "refund", fromReport: true })).toBe("refund");
+  expect(kindOf({ reason: "refund", fromReport: false })).toBe("purchase_refund");
+  expect(kindOf({ reason: "upload", fromReport: true })).toBe("upload");
 });
 
-test("the overview adds question cost to today and this week, and counts reads per UTC day", async () => {
-  const overview = await getOverview(now);
+test("the date filter covers whole UTC days, the to day included", () => {
+  expect(ledgerFilter({ from: "2026-10-01", to: "2026-10-14", userId: "u" })).toEqual({
+    from: new Date("2026-10-01T00:00:00Z"),
+    to: new Date("2026-10-15T00:00:00Z"),
+    userId: "u",
+  });
+  expect(ledgerFilter({})).toEqual({ from: undefined, to: undefined, userId: undefined });
+});
 
-  expect(overview.spend).toMatchObject({ todayCents: 2, weekCents: 4, monthCents: 0 });
-  expect(overview.days.at(-1)).toEqual({ date: "2026-10-14", reads: 1, costCents: 1 });
-  expect(overview.days.at(-3)).toEqual({ date: "2026-10-12", reads: 1, costCents: 2 });
-  expect(overview.meanCostPerReadCents).toBe(3.5);
-  expect(overview.failed).toEqual([
+test("the credit history totals each kind and keeps report credits apart from question packs", async () => {
+  const history = await getCreditHistory({});
+
+  expect(history.reportCredits.totals).toEqual([
+    { kind: "grant", events: 1, credits: 5, amountPaise: 0 },
+    { kind: "purchase", events: 2, credits: 25, amountPaise: 79800 },
+    { kind: "upload", events: 3, credits: -3, amountPaise: 0 },
+    { kind: "refund", events: 1, credits: 1, amountPaise: 0 },
+    { kind: "purchase_refund", events: 1, credits: -5, amountPaise: 0 },
+  ]);
+  expect(history.questionPacks.totals).toEqual([
+    { kind: "questions", events: 2, credits: -2, amountPaise: 0 },
+    { kind: "question", events: 7, credits: 0, amountPaise: 0 },
+  ]);
+  expect(history.reportCredits.events.map((e) => [e.kind, e.credits, e.amountPaise])).toEqual([
+    ["purchase", 5, 19900],
+    ["upload", -1, null],
+  ]);
+  expect(history.questionPacks.events.map((e) => [e.kind, e.credits, e.profiles])).toEqual([
+    ["question", null, 2],
+    ["questions", -1, 2],
+  ]);
+});
+
+test("the failed reads carry an error class, never the raw error text", async () => {
+  expect(await listFailedReads()).toEqual([
     { id: "r1", createdAt: "2026-10-13T00:00:00.000Z", errorClass: "duplicate" },
   ]);
-  expect(overview.queue).toEqual({ depth: 1, oldestQueuedMs: 60 * minute });
-  expect(overview.credits).toEqual({
-    granted: 5,
-    purchased: 0,
-    spentOnReads: 2,
-    spentOnQuestions: 0,
-  });
-  expect(overview.alerts).toEqual(["queue"]);
 });
 
 test("the alert check writes one structured warning per alert, at most every 15 minutes", async () => {

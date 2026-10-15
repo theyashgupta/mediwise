@@ -56,7 +56,7 @@ Never commit a secret. Put API values in the Render dashboard only. The web valu
 | `ANTHROPIC_FINDINGS_MODEL` | no | Default `claude-haiku-5-5`. Writes the text of each finding. |
 | `CLAUDE_MONTHLY_CAP_CENTS` | no | Default `2000` (20 USD). Over the cap, the worker pauses every read and logs one warning per hour. Raise it and restart the service to resume the paused reads. |
 | `CLAUDE_HARD_STOP` | no | Default `false`. Set `true` to refuse every new upload with a 503. Reads already in the queue still run. |
-| `ADMIN_USER_ID` | no | Supabase user id that can open `/admin`, call `GET /admin/spend` and `GET /admin/overview`, and that gets `costCents` in `GET /reports/:id`. Empty means the route answers 404 for everyone and no report shows a cost. |
+| `ADMIN_USER_ID` | no | Supabase user id that can open `/admin`, call `GET /admin/spend`, `GET /admin/credits`, `GET /admin/failed-reports` and `POST /admin/reports/:id/retry`, and that gets `costCents` in `GET /reports/:id`. Empty means the route answers 404 for everyone and no report shows a cost. |
 | `ASSISTANT_ENABLED` | no | Default `false`. When `false`, every assistant route answers 404 and the web hides the Ask page entry points. |
 | `ASSISTANT_REVIEW` | no | Default `false`. With `ASSISTANT_ENABLED=true`, only accounts that agree to the review on the Ask page can ask. The web reads it from `GET /me`, so no web variable exists. |
 | `PAYMENTS_ENABLED` | no | Default `false`. When `false`, every `/payments` route answers 404. Set `true` only when the maintainer says enable. |
@@ -508,13 +508,24 @@ To see this month's Claude spend, call `GET /admin/spend` with the access token 
 
 ## Operator page
 
-Sign in as the `ADMIN_USER_ID` account and open `/admin`. The link is not in the navigation. Every other account gets the not found page, and `GET /admin/overview` answers 404.
+Sign in as the `ADMIN_USER_ID` account and open `/admin`.
 
-- The page shows Claude spend today, this week and this month against `CLAUDE_MONTHLY_CAP_CENTS`, reads per day for 30 days with the mean cost per read, the queue, credits granted and spent, and profiles and users.
-- Days are UTC. A week starts on Monday. "Active" means a report added in the last 30 days.
+Access rule:
+
+- Only the `ADMIN_USER_ID` account can open the page and call its API.
+- When `ADMIN_USER_ID` is empty, or the user is a different account, every `/admin` API route answers 404 and the web shows the not found page.
+- The navigation has no link to `/admin`.
+
+Content:
+
+- The page shows the credit history from `credits_ledger`, in two sections. "Report credits" shows credits granted, credits bought, report credits used, report credits returned and payments refunded. "Question packs" shows question packs bought and questions used.
+- Each section shows the total per kind and a table of the 200 newest events: date, user id, profile count of the user, kind, credit change and amount.
+- Use "From" and "To" to filter by UTC day. Both days are included. Click a user id to show only that user.
+- Every amount is in rupees. The page shows no Claude spend and no cost per read.
 - Failed reads show the date, the start of the report id and an error class. They show no title, lab, profile name or error text.
 - "Re-read" calls `POST /admin/reports/:id/retry`. The report goes to the queue again and uses one credit of its owner, the same as the owner's own retry.
-- Two alerts show on the page: spend at 80% of the monthly cap or more, and a job that waits more than 30 minutes. The worker checks them every 15 minutes and writes `alert kind=spend ...` or `alert kind=queue ...` as a warning in the log. No email is sent.
+
+Alerts: the worker checks two alerts every 15 minutes: spend at 80% of the monthly cap or more, and a job that waits more than 30 minutes. It writes `alert kind=spend ...` or `alert kind=queue ...` as a warning in the log. The page does not show them. No email is sent.
 
 ## Payments (Cashfree)
 

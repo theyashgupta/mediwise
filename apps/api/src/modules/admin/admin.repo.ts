@@ -1,30 +1,36 @@
-import { and, desc, eq, gte, inArray, ne, sql } from "drizzle-orm";
+import { type Column, and, desc, eq, gte, inArray, lt, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
-import { assistantQuestions, creditsLedger, jobs, profiles, reports } from "../../db/schema.js";
+import {
+  assistantQuestions,
+  creditReason,
+  creditsLedger,
+  jobs,
+  paymentOrders,
+  profiles,
+  reports,
+} from "../../db/schema.js";
+
+export type LedgerFilter = { from?: Date; to?: Date; userId?: string };
+type Reason = (typeof creditReason.enumValues)[number];
 
 const unfinished = inArray(jobs.status, ["queued", "running", "paused_budget"]);
 
-/** Lists the jobs updated since `since` with their token counts, so the service can price each one per model. */
-export async function listJobsSince(since: Date) {
-  return db
-    .select({
-      status: jobs.status,
-      usage: jobs.usage,
-      inputTokens: jobs.inputTokens,
-      outputTokens: jobs.outputTokens,
-      updatedAt: jobs.updatedAt,
-    })
-    .from(jobs)
-    .where(gte(jobs.updatedAt, since));
-}
+const fromReport = sql<boolean>`${creditsLedger.reportId} is not null`;
 
-/** Lists the assistant questions asked since `since` with their token usage, cleared ones included. */
-export async function listQuestionsSince(since: Date) {
-  return db
-    .select({ usage: assistantQuestions.usage, createdAt: assistantQuestions.createdAt })
-    .from(assistantQuestions)
-    .where(gte(assistantQuestions.createdAt, since));
-}
+const purchaseOrder = and(
+  eq(paymentOrders.id, creditsLedger.paymentOrderId),
+  eq(creditsLedger.reason, "purchase"),
+);
+
+const profileCount = (userId: Column) =>
+  sql<number>`(select count(*)::int from ${profiles} where ${profiles.ownerUserId} = ${userId})`;
+
+const within = (createdAt: Column, userId: Column, filter: LedgerFilter) =>
+  and(
+    filter.from && gte(createdAt, filter.from),
+    filter.to && lt(createdAt, filter.to),
+    filter.userId === undefined ? undefined : eq(userId, filter.userId),
+  );
 
 /**
  * Counts the jobs that have not finished and finds when the oldest one was queued.
@@ -69,39 +75,83 @@ export async function listFailedReports(limit: number) {
     .limit(limit);
 }
 
-/** Sums the credits ledger per reason over every user. */
-export async function sumCreditsByReason() {
+/** Lists the newest ledger rows with the given reasons, with the owner's profile count and the paid amount of a purchase. */
+export async function listLedgerEvents(filter: LedgerFilter, reasons: Reason[], limit: number) {
   return db
-    .select({ reason: creditsLedger.reason, total: sql<number>`sum(${creditsLedger.delta})::int` })
+    .select({
+      id: creditsLedger.id,
+      createdAt: creditsLedger.createdAt,
+      userId: creditsLedger.userId,
+      reason: creditsLedger.reason,
+      fromReport,
+      delta: creditsLedger.delta,
+      amountPaise: paymentOrders.amount,
+      profiles: profileCount(creditsLedger.userId),
+    })
     .from(creditsLedger)
-    .groupBy(creditsLedger.reason);
+    .leftJoin(paymentOrders, purchaseOrder)
+    .where(
+      and(
+        inArray(creditsLedger.reason, reasons),
+        within(creditsLedger.createdAt, creditsLedger.userId, filter),
+      ),
+    )
+    .orderBy(desc(creditsLedger.createdAt))
+    .limit(limit);
+}
+
+/** Sums the ledger per reason, with refunds of a read apart from refunds of a purchase. */
+export async function sumLedger(filter: LedgerFilter) {
+  return db
+    .select({
+      reason: creditsLedger.reason,
+      fromReport,
+      events: sql<number>`count(*)::int`,
+      credits: sql<number>`sum(${creditsLedger.delta})::int`,
+      amountPaise: sql<number>`coalesce(sum(${paymentOrders.amount}), 0)::int`,
+    })
+    .from(creditsLedger)
+    .leftJoin(paymentOrders, purchaseOrder)
+    .where(within(creditsLedger.createdAt, creditsLedger.userId, filter))
+    .groupBy(creditsLedger.reason, fromReport);
 }
 
 /**
- * Counts the profiles and their owners, in total and with a report added since `since`.
+ * Lists the newest questions that used up one question of the account.
  *
  * @remarks
- * A draft is an upload the user never finished, so it does not make a profile active.
+ * Only ids, dates and counts leave this query. The question and answer text stay out.
  */
-export async function countProfiles(since: Date) {
-  const active = db
-    .selectDistinct({ id: reports.profileId })
-    .from(reports)
-    .where(and(gte(reports.createdAt, since), ne(reports.status, "draft")));
-  const [row] = await db
+export async function listChargedQuestions(filter: LedgerFilter, limit: number) {
+  return db
     .select({
-      profiles: sql<number>`count(*)::int`,
-      users: sql<number>`count(distinct ${profiles.ownerUserId})::int`,
-      activeProfiles: sql<number>`count(*) filter (where ${inArray(profiles.id, active)})::int`,
-      activeUsers: sql<number>`count(distinct ${profiles.ownerUserId}) filter (where ${inArray(profiles.id, active)})::int`,
+      id: assistantQuestions.id,
+      createdAt: assistantQuestions.createdAt,
+      userId: assistantQuestions.userId,
+      profiles: profileCount(assistantQuestions.userId),
     })
-    .from(profiles);
-  return {
-    profiles: row?.profiles ?? 0,
-    users: row?.users ?? 0,
-    activeProfiles: row?.activeProfiles ?? 0,
-    activeUsers: row?.activeUsers ?? 0,
-  };
+    .from(assistantQuestions)
+    .where(
+      and(
+        eq(assistantQuestions.charged, true),
+        within(assistantQuestions.createdAt, assistantQuestions.userId, filter),
+      ),
+    )
+    .orderBy(desc(assistantQuestions.createdAt))
+    .limit(limit);
+}
+
+export async function countChargedQuestions(filter: LedgerFilter) {
+  const [row] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(assistantQuestions)
+    .where(
+      and(
+        eq(assistantQuestions.charged, true),
+        within(assistantQuestions.createdAt, assistantQuestions.userId, filter),
+      ),
+    );
+  return row?.count ?? 0;
 }
 
 export async function findReportOwner(id: string) {
