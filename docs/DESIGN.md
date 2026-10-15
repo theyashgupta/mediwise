@@ -90,6 +90,11 @@ Why these choices:
 | `font-mono` for `5.42 mmol/L` | Serif on a section title or a card title |
 | `variant="destructive"` for delete | `bg-risk` on a delete button |
 | A border to separate a card | `shadow-lg` on a card |
+| `IconAction` with a tooltip and an `aria-label` for a secondary action with a clear icon (compare, export, share, print) | A row of labelled outline buttons for secondary actions |
+| Delete as a `destructive` item in `OverflowMenu`, then the confirm dialog | A delete button next to the other actions, one tap from a mistake |
+| A text label on every primary action (Read my report, Send, Save, Buy) | An icon-only primary action |
+
+**Action rule (MEDI-170).** Secondary actions with a clear icon are icon buttons with a tooltip. Destructive actions live in an overflow menu. Primary actions keep their label. `IconAction` and `OverflowMenu` in `common/components/icon-action.tsx` carry the rule: 44 px targets under `md`, 36 px from `md`, and the tooltip label is the `aria-label`. Touch does not open a tooltip, so a phone reads the `aria-label`. `PageHeader tools` puts the group at the top right. The kitchen sink shows the pattern.
 
 ## Brand
 
@@ -234,7 +239,7 @@ The app shell lives in `src/layouts`. The five destinations are Home, Reports, T
 - **Sidebar.** 240 px wide, 56 px collapsed to icons. A collapsed row shows its label in a tooltip. Rows are 32 px tall with a 16 px icon. The active row has `bg-primary/10` and `text-primary`. A "Menu" label sits above the list. The logo is at the top. Collapsed, the sidebar shows the mark only.
 - **Collapse.** The button in the sidebar footer or the `[` key. The browser keeps the choice in `localStorage` under `sidebar`.
 - **Profile switcher.** In the sidebar footer: the initial, the name and the relation. The menu lists every profile and links to Manage profiles. Below `md`, the switcher is in the header.
-- **Header.** 48 px. It shows the page title, and the breadcrumb on inner pages. A border shows only after the page scrolls. On the right: the upload button (Home and Reports only), the theme toggle and the user menu.
+- **Header.** 48 px. It shows the page title, and the breadcrumb on inner pages. The current page is `text-base font-semibold` on phones and `text-lg` from `md`, on one line with a `title` for the full text. Parent crumbs stay `text-sm` muted. A border shows only after the page scrolls. On the right: the upload button (Home and Reports only), the theme toggle and the user menu.
 - **Breadcrumb names.** A page names its own crumb with `useCrumbLabel(path, label)`, for example the lab name of a report. Without a label, the crumb uses the title in `nav.ts`.
 - **Phone, under 768 px.** A floating tab bar with the five destinations and the upload action in the middle. The breadcrumb of an inner page moves above the page title. See [Phone tab bar](#phone-tab-bar-medi-152).
 - **Keyboard.** `G` then `H`, `R`, `T`, `P` or `S` goes to a destination. `[` collapses or expands the sidebar. `?` opens the shortcuts dialog. Shortcuts do not fire while focus is in a text field. Focus rings use `ring-ring/50` at 3 px.
@@ -492,7 +497,7 @@ They live in `apps/web/src/common/components/surface/`, not in a `packages/ui` p
 | `GlassCard` | shadcn `Card` | A frame with no result in it: the sign-in card. |
 | Glass top bar | `AppHeader` | Clear over the wash at the top. It takes the bar glass and its border after the page scrolls. |
 | `GlassDialogContent` | shadcn `DialogContent` | The keyboard shortcuts dialog. |
-| `GlassButton` | shadcn `Button`, `outline` | Actions on a glass surface: Compare reports and Export for doctor on the report header. |
+| `GlassButton` | shadcn `Button`, `outline` | Actions on a glass surface: Ask about this report on the report header. `IconAction` uses it for the icon group. |
 | `GlassBadge` | shadcn `Badge`, `outline` | Labels on glass that are not a result. A status always uses `StatusBadge`. |
 | `StatTile` | `dt` and `dd` in a `dl` | One number with a label, an optional unit and an optional status mark. Always solid. The dashboard shows the marker counts by status with it. |
 | `PageHeader glass` | `GlassSurface` | The report page header. |
