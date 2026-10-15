@@ -71,6 +71,22 @@ test.beforeAll(async () => {
   if (!profileId) throw new Error(`db:seed-history printed no profile id: ${seeded}`);
   await page.evaluate((id) => localStorage.setItem("activeProfileId", id), profileId);
 
+  await page.addInitScript(() => {
+    const slow: Interaction[] = [];
+    Object.assign(window, { slowInteractions: slow });
+    new PerformanceObserver((list) => {
+      for (const entry of list.getEntries() as PerformanceEventTiming[]) {
+        if (!entry.interactionId) continue;
+        const target = entry.target instanceof Element ? entry.target : null;
+        slow.push({
+          duration: entry.duration,
+          event: entry.name,
+          target: target?.closest("[data-testid]")?.getAttribute("data-testid") ?? "page",
+        });
+      }
+    }).observe({ type: "event", durationThreshold: 16, buffered: true } as PerformanceObserverInit);
+  });
+
   await page.goto(webOrigin);
   const link = page.getByTestId("latest-report-link");
   await expect(link).toBeVisible();
@@ -194,33 +210,24 @@ async function slowestInteraction() {
   });
 }
 
-test(`INP on trends stays under ${maxInpMs} ms with a 4x CPU throttle`, async () => {
-  await page.addInitScript(() => {
-    const slow: Interaction[] = [];
-    Object.assign(window, { slowInteractions: slow });
-    new PerformanceObserver((list) => {
-      for (const entry of list.getEntries() as PerformanceEventTiming[]) {
-        if (!entry.interactionId) continue;
-        const target = entry.target instanceof Element ? entry.target : null;
-        slow.push({
-          duration: entry.duration,
-          event: entry.name,
-          target: target?.closest("[data-testid]")?.getAttribute("data-testid") ?? "page",
-        });
-      }
-    }).observe({ type: "event", durationThreshold: 16, buffered: true } as PerformanceObserverInit);
-  });
-  const cdp = await context.newCDPSession(page);
-  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
-  const all: Interaction[] = [];
-  for (let run = 0; run < runs; run++) all.push(await slowestInteraction());
-  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
+for (const viewport of [
+  { width: 1440, height: 900 },
+  { width: 390, height: 844 },
+]) {
+  test(`INP on trends at ${viewport.width} px stays under ${maxInpMs} ms with a 4x CPU throttle`, async () => {
+    await page.setViewportSize(viewport);
+    const cdp = await context.newCDPSession(page);
+    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
+    const all: Interaction[] = [];
+    for (let run = 0; run < runs; run++) all.push(await slowestInteraction());
+    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
 
-  const inp = all.toSorted((a, b) => a.duration - b.duration)[Math.floor(runs / 2)]!;
-  process.stdout.write(
-    `inp trends: ${inp.duration} ms, runs ${all.map((i) => `${i.duration} (${i.target})`).join(" ")}\n`,
-  );
-  expect(inp.duration, `INP ${inp.duration} ms, ${inp.event} on ${inp.target}`).toBeLessThan(
-    maxInpMs,
-  );
-});
+    const inp = all.toSorted((a, b) => a.duration - b.duration)[Math.floor(runs / 2)]!;
+    process.stdout.write(
+      `inp trends ${viewport.width} px: ${inp.duration} ms, runs ${all.map((i) => `${i.duration} (${i.target})`).join(" ")}\n`,
+    );
+    expect(inp.duration, `INP ${inp.duration} ms, ${inp.event} on ${inp.target}`).toBeLessThan(
+      maxInpMs,
+    );
+  });
+}
