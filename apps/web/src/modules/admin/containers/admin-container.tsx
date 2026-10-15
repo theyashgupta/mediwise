@@ -2,6 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
+import { NotFoundState } from "@/common/components/not-found-state";
 import { PageHeader } from "@/common/components/page-header";
 import { CreditFilters } from "../components/credit-filters";
 import { CreditSection } from "../components/credit-section";
@@ -21,7 +22,7 @@ export function AdminContainer() {
       <ErrorState message="The credit history did not load." onRetry={() => credits.refetch()} />
     );
   }
-  if (!credits.data) return null;
+  if (!credits.data) return <NotFoundState />;
 
   const { reportCredits, questionPacks, eventLimit } = credits.data;
   const newest = `The ${eventLimit} newest events.`;
