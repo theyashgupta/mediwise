@@ -19,4 +19,5 @@ ALTER TABLE "profiles" ALTER COLUMN "year_review_intro" SET DATA TYPE text;--> s
 ALTER TABLE "reports" ALTER COLUMN "doctor_questions" SET DATA TYPE text;--> statement-breakpoint
 ALTER TABLE "reports" ALTER COLUMN "narrative" SET DATA TYPE text;--> statement-breakpoint
 ALTER TABLE "reports" ALTER COLUMN "translations" SET DATA TYPE text;--> statement-breakpoint
-ALTER TABLE "user_keys" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "user_keys" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+UPDATE "assistant_questions" SET "question" = NULL, "answer" = NULL WHERE "cleared_at" IS NOT NULL;
