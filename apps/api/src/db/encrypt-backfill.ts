@@ -1,22 +1,13 @@
 import { log } from "../middleware/logger.js";
 import { db } from "./client.js";
-import { backfillTable, countPlaintext, encryptedColumns } from "./encrypted-columns.js";
-
-const [mode] = process.argv.slice(2);
+import { encryptBackfill } from "./encrypted-columns.js";
 
 try {
-  if (mode !== undefined && mode !== "count") {
-    throw new Error("Usage: pnpm db:encrypt-backfill [count]");
-  }
-  const countOnly = mode === "count";
-  if (!countOnly) {
-    for (const entry of encryptedColumns) {
-      log.info(`encrypted ${await backfillTable(entry)} rows of ${entry.table}`);
-    }
-  }
-  const counts = await countPlaintext();
-  for (const [name, count] of Object.entries(counts)) log.info(`plaintext ${name}=${count}`);
-  if (Object.values(counts).some((count) => count > 0)) process.exitCode = 1;
+  const { encrypted, plaintext } = await encryptBackfill(process.argv[2]);
+  for (const [table, rows] of Object.entries(encrypted))
+    log.info(`encrypted ${rows} rows of ${table}`);
+  for (const [name, count] of Object.entries(plaintext)) log.info(`plaintext ${name}=${count}`);
+  if (Object.values(plaintext).some((count) => count > 0)) process.exitCode = 1;
 } catch (error) {
   log.error(error);
   process.exitCode = 1;

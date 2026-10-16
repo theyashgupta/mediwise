@@ -1,10 +1,10 @@
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { expect, test } from "vitest";
 import { db } from "./client.js";
 import { userKeys } from "./schema.js";
 import { CipherError } from "../lib/crypto.js";
-import { cipherFor, forgetUserKey, masterKeys, rewrapUserKeys } from "./user-keys.js";
+import { cipherFor, forgetUserKey, masterKeys, rewrapToV2, rewrapUserKeys } from "./user-keys.js";
 
 const rowsOf = (userId: string) => db.select().from(userKeys).where(eq(userKeys.userId, userId));
 
@@ -64,7 +64,8 @@ test("a rewrap to a master key the API does not have leaves the data key unreada
   const v2 = Buffer.alloc(32, 9);
   const withV2 = { newest: "v2", byId: new Map([...masterKeys.byId, ["v2", v2]]) };
 
-  expect(await rewrapUserKeys(withV2)).toBeGreaterThanOrEqual(1);
+  expect(await rewrapToV2(withV2)).toBeGreaterThanOrEqual(1);
+  expect(await rewrapToV2(withV2)).toBe(0);
   const [row] = await rowsOf(userId);
   expect(row!.wrappedKey.startsWith("v2.")).toBe(true);
 
@@ -74,4 +75,17 @@ test("a rewrap to a master key the API does not have leaves the data key unreada
   await rewrapUserKeys({ newest: "v1", byId: withV2.byId });
   forgetUserKey(userId);
   expect((await cipherFor(userId)).decrypt(value)).toBe("Asha Rao");
+});
+
+test("the key cache holds 1,000 users and drops the oldest one first", async () => {
+  const oldest = randomUUID();
+  const oldestKey = (await cipherFor(oldest)).keyId;
+  const others = Array.from({ length: 1000 }, () => randomUUID());
+  for (const userId of others) await cipherFor(userId);
+  const newest = others.at(-1)!;
+  const newestKey = (await cipherFor(newest)).keyId;
+  await db.delete(userKeys).where(inArray(userKeys.userId, [oldest, newest]));
+
+  expect((await cipherFor(newest)).keyId).toBe(newestKey);
+  expect((await cipherFor(oldest)).keyId).not.toBe(oldestKey);
 });

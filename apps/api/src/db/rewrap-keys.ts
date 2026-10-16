@@ -1,10 +1,9 @@
 import { log } from "../middleware/logger.js";
 import { db } from "./client.js";
-import { masterKeys, rewrapUserKeys } from "./user-keys.js";
+import { rewrapToV2 } from "./user-keys.js";
 
 try {
-  if (masterKeys.newest !== "v2") throw new Error("Set DATA_KEY_V2 before a rewrap.");
-  log.info(`rewrapped ${await rewrapUserKeys()} user keys under master key ${masterKeys.newest}`);
+  log.info(`rewrapped ${await rewrapToV2()} user keys under master key v2`);
 } catch (error) {
   log.error(error);
   process.exitCode = 1;

@@ -107,6 +107,23 @@ export async function countPlaintext() {
 }
 
 /**
+ * Encrypts every plaintext value unless `mode` is "count", then counts the plaintext values left.
+ *
+ * @remarks
+ * The mode is checked before any query, so a typo never starts a backfill.
+ */
+export async function encryptBackfill(mode: string | undefined) {
+  if (mode !== undefined && mode !== "count") {
+    throw new Error("Usage: pnpm db:encrypt-backfill [count]");
+  }
+  const encrypted: Record<string, number> = {};
+  if (mode !== "count") {
+    for (const entry of encryptedColumns) encrypted[entry.table] = await backfillTable(entry);
+  }
+  return { encrypted, plaintext: await countPlaintext() };
+}
+
+/**
  * Re-encrypts the values of rows now owned by `owner` that are still under the key of `from`.
  *
  * @remarks
