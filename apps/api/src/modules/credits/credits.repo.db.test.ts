@@ -34,7 +34,7 @@ async function chargedQuestions(userId: string, count: number) {
       userId,
       profileId: profile!.id,
       question: "What was my HbA1c?",
-      answer: { sentences: [] },
+      answer: JSON.stringify({ sentences: [] }),
       charged: true,
     })),
   );

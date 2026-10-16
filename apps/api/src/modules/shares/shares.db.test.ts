@@ -4,17 +4,24 @@ import { expect, test } from "vitest";
 import { handleError } from "../../common/problem.js";
 import { db } from "../../db/client.js";
 import { profiles, reportMarkers, reports } from "../../db/schema.js";
+import { cipherFor } from "../../lib/user-keys.js";
 import { sharedExportRoutes } from "./shares.routes.js";
 import { createShare, endShare } from "./shares.service.js";
 
 const appWithoutSession = new Hono().route("/share", sharedExportRoutes);
 appWithoutSession.onError(handleError);
 
-/** Writes a done report with one unmapped marker for a new profile of the user. */
+/** Writes a done report with one unmapped marker for a new profile of the user, its text encrypted as the API stores it. */
 async function doneReport(userId: string, name: string, markerName: string) {
+  const cipher = await cipherFor(userId);
   const [profile] = await db
     .insert(profiles)
-    .values({ ownerUserId: userId, name, relation: "self", ancestry: "unknown" })
+    .values({
+      ownerUserId: userId,
+      name: cipher.encrypt(name),
+      relation: "self",
+      ancestry: "unknown",
+    })
     .returning({ id: profiles.id });
   const [report] = await db
     .insert(reports)
@@ -23,6 +30,9 @@ async function doneReport(userId: string, name: string, markerName: string) {
       sourceKind: "pdf",
       status: "done",
       collectedAt: "2025-03-01",
+      title: cipher.encrypt(`${markerName} title`),
+      note: cipher.encrypt(`${markerName} note`),
+      doctorQuestions: cipher.encryptJson([`${markerName} question?`]),
     })
     .returning({ id: reports.id });
   await db
@@ -45,6 +55,12 @@ test("an anonymous request with an open token reads the shared report only", asy
   const body = await response.text();
   expect(body).toContain("Shared marker");
   expect(JSON.parse(body).person).toEqual({ firstName: "Asha", age: null });
+  expect(JSON.parse(body).report).toMatchObject({
+    header: { title: "Shared marker title" },
+    note: "Shared marker note",
+    doctorQuestions: ["Shared marker question?"],
+  });
+  expect(body).not.toContain("v1:");
   for (const hidden of [
     "Testcase",
     owner,

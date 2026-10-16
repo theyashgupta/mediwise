@@ -67,7 +67,7 @@ async function insertQuestionSpend(
   await db.insert(assistantQuestions).values({
     userId,
     question: "",
-    answer: { sentences: [] },
+    answer: JSON.stringify({ sentences: [] }),
     usage: {
       model: "claude-haiku-5-5",
       inputTokens: 0,

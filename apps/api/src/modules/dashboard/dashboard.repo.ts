@@ -1,7 +1,8 @@
 import { and, asc, count, desc, eq, inArray, isNotNull, ne, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import { findings, profiles, reportMarkers, reports } from "../../db/schema.js";
-import { reportFileNames } from "../reports/index.js";
+import { cipherFor } from "../../lib/user-keys.js";
+import { openReport, reportFileNames } from "../reports/index.js";
 
 const reportDate = sql<string>`coalesce(${reports.collectedAt}, (${reports.createdAt} at time zone 'UTC')::date)::text`;
 const newestFirst = [desc(reportDate), desc(reports.createdAt)];
@@ -16,7 +17,7 @@ const ofProfile = (ownerUserId: string, profileId: string) =>
  * A report not read yet has no collection date, so it sorts by its upload day and lands on top.
  */
 export async function listRecentReports(ownerUserId: string, profileId: string, limit: number) {
-  return db
+  const query = db
     .select({
       id: reports.id,
       status: reports.status,
@@ -34,12 +35,14 @@ export async function listRecentReports(ownerUserId: string, profileId: string, 
     .where(and(ofProfile(ownerUserId, profileId), ne(reports.status, "draft")))
     .orderBy(...newestFirst)
     .limit(limit);
+  const [rows, cipher] = await Promise.all([query, cipherFor(ownerUserId)]);
+  return rows.map(openReport(cipher));
 }
 
 const mappedCount = sql<number>`(select count(*)::int from ${reportMarkers} where ${reportMarkers}.${sql.identifier("report_id")} = ${reports}.${sql.identifier("id")} and ${reportMarkers}.${sql.identifier("marker_key")} is not null and not ${reportMarkers}.${sql.identifier("derived")})`;
 
 export async function listLatestDoneReports(ownerUserId: string, profileId: string, limit: number) {
-  return db
+  const query = db
     .select({
       id: reports.id,
       labName: reports.labName,
@@ -56,6 +59,8 @@ export async function listLatestDoneReports(ownerUserId: string, profileId: stri
     .where(and(ofProfile(ownerUserId, profileId), eq(reports.status, "done")))
     .orderBy(...newestFirst)
     .limit(limit);
+  const [rows, cipher] = await Promise.all([query, cipherFor(ownerUserId)]);
+  return rows.map(openReport(cipher));
 }
 
 export async function countReportsInProgress(ownerUserId: string, profileId: string) {
@@ -146,7 +151,7 @@ export async function listMarkerHistory(ownerUserId: string, profileId: string) 
 
 /** Lists the study alert findings of a profile's done reports, oldest report first. */
 export async function listAlertFindings(ownerUserId: string, profileId: string) {
-  return db
+  const query = db
     .select({
       reportId: reports.id,
       date: reportDate,
@@ -160,6 +165,8 @@ export async function listAlertFindings(ownerUserId: string, profileId: string) 
     .innerJoin(profiles, eq(profiles.id, reports.profileId))
     .where(and(doneOfProfile(ownerUserId, profileId), eq(findings.kind, "study_alert")))
     .orderBy(asc(reportDate), asc(reports.createdAt));
+  const [rows, cipher] = await Promise.all([query, cipherFor(ownerUserId)]);
+  return rows.map((row) => ({ ...row, title: cipher.decrypt(row.title) }));
 }
 
 export async function listAssessedMarkers(reportId: string) {
@@ -184,7 +191,7 @@ export async function listAssessedMarkers(reportId: string) {
  * One join reads both tables once for the whole family. A profile with no done report comes back once, with a null report.
  */
 export async function listFamilyDoneReports(ownerUserId: string) {
-  return db
+  const query = db
     .select({
       profileId: profiles.id,
       name: profiles.name,
@@ -201,6 +208,8 @@ export async function listFamilyDoneReports(ownerUserId: string) {
     .leftJoin(reports, and(eq(reports.profileId, profiles.id), eq(reports.status, "done")))
     .where(eq(profiles.ownerUserId, ownerUserId))
     .orderBy(desc(profiles.isSelf), asc(profiles.createdAt));
+  const [rows, cipher] = await Promise.all([query, cipherFor(ownerUserId)]);
+  return rows.map((row) => ({ ...row, name: cipher.decrypt(row.name) }));
 }
 
 export async function countRiskMarkers(reportIds: string[]) {

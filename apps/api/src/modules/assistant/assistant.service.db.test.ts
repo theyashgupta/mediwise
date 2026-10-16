@@ -1,10 +1,11 @@
 import { randomUUID } from "node:crypto";
 import type Anthropic from "@anthropic-ai/sdk";
 import type { AssistantCite } from "@mediwise/shared";
-import { and, eq, inArray } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { beforeAll, beforeEach, expect, test, vi } from "vitest";
 import { db } from "../../db/client.js";
 import * as schema from "../../db/schema.js";
+import { cipherFor } from "../../lib/user-keys.js";
 
 const edge = vi.hoisted(() => ({ create: vi.fn(), overBudget: false }));
 vi.mock("../../lib/anthropic.js", () => ({ anthropic: { messages: { create: edge.create } } }));
@@ -141,7 +142,7 @@ async function spendQuestions(owner: string, profile: string, count: number, cha
       userId: owner,
       profileId: profile,
       question: "Earlier?",
-      answer: { sentences: [] },
+      answer: JSON.stringify({ sentences: [] }),
       charged,
     })),
   );
@@ -211,14 +212,18 @@ test("the stored answer holds report ids, the focus report, the model and charge
     model: "claude-haiku-5-5",
     charged: true,
     flaggedAt: null,
-    answer: {
-      sentences: [
-        {
-          text: "Your HbA1c was 5.9 % on 4 Aug 2026.",
-          cites: [{ kind: "value", reportId, target: "hba1c" }],
-        },
-      ],
-    },
+    question: expect.stringMatching(/^v1:/),
+    answer: expect.stringMatching(/^v1:/),
+  });
+  const cipher = await cipherFor(userId);
+  expect(cipher.decrypt(row!.question)).toBe("What was my HbA1c?");
+  expect(cipher.decryptJson(row!.answer)).toEqual({
+    sentences: [
+      {
+        text: "Your HbA1c was 5.9 % on 4 Aug 2026.",
+        cites: [{ kind: "value", reportId, target: "hba1c" }],
+      },
+    ],
   });
 });
 
@@ -378,16 +383,18 @@ test("two parallel cited answers with 1 question left charge exactly one", async
     askQuestion(owner, profile, { question: "Second?" }),
   ]);
   expect(await getQuestionsLeft(owner)).toBe(0);
+  const cipher = await cipherFor(owner);
   const rows = await db
-    .select({ charged: schema.assistantQuestions.charged })
+    .select({
+      charged: schema.assistantQuestions.charged,
+      question: schema.assistantQuestions.question,
+    })
     .from(schema.assistantQuestions)
-    .where(
-      and(
-        eq(schema.assistantQuestions.userId, owner),
-        inArray(schema.assistantQuestions.question, ["First?", "Second?"]),
-      ),
-    );
-  expect(rows.map(({ charged }) => charged).toSorted()).toEqual([false, true]);
+    .where(eq(schema.assistantQuestions.userId, owner));
+  const asked = rows.filter(({ question }) =>
+    ["First?", "Second?"].includes(cipher.decrypt(question) ?? ""),
+  );
+  expect(asked.map(({ charged }) => charged).toSorted()).toEqual([false, true]);
 });
 
 test("clear chat keeps questions left and the daily count, and a cleared question is never flagged or sent again", async () => {
@@ -444,7 +451,7 @@ test("a profile deleted while Claude answers keeps the question's usage in a row
     .from(schema.assistantQuestions)
     .where(eq(schema.assistantQuestions.userId, owner));
   expect(rows).toHaveLength(1);
-  expect(rows[0]).toMatchObject({ question: "", profileId: null, charged: false });
+  expect(rows[0]).toMatchObject({ question: null, answer: null, profileId: null, charged: false });
   expect(rows[0]!.usage).not.toBeNull();
   expect(rows[0]!.clearedAt).not.toBeNull();
 });
@@ -464,7 +471,7 @@ async function storeCited(owner: string, profile: string, cites: AssistantCite[]
     userId: owner,
     profileId: profile,
     question: "Which report?",
-    answer: { sentences: [{ text: "Cited.", cites }] },
+    answer: JSON.stringify({ sentences: [{ text: "Cited.", cites }] }),
   });
 }
 
@@ -683,7 +690,7 @@ test("the review day lists the kept questions of that UTC day from consenting ac
     userId: stranger.owner,
     profileId: stranger.profile,
     question: `${marker}-no-consent`,
-    answer: { sentences: [] },
+    answer: JSON.stringify({ sentences: [] }),
     createdAt: new Date("2031-03-03T09:00:00Z"),
   });
   const [kept] = await db
@@ -693,14 +700,16 @@ test("the review day lists the kept questions of that UTC day from consenting ac
         userId: owner,
         profileId: profile,
         question: `${marker}-kept`,
-        answer: { sentences: [{ text: "Your HbA1c was 5.9 % on 4 Aug 2026.", cites: [cite] }] },
+        answer: JSON.stringify({
+          sentences: [{ text: "Your HbA1c was 5.9 % on 4 Aug 2026.", cites: [cite] }],
+        }),
         createdAt: new Date("2031-03-03T10:00:00Z"),
       },
       {
         userId: owner,
         profileId: profile,
-        question: "",
-        answer: { sentences: [] },
+        question: null,
+        answer: null,
         clearedAt: new Date("2031-03-03T11:00:00Z"),
         createdAt: new Date("2031-03-03T11:00:00Z"),
       },
@@ -708,7 +717,7 @@ test("the review day lists the kept questions of that UTC day from consenting ac
         userId: owner,
         profileId: profile,
         question: `${marker}-other-day`,
-        answer: { sentences: [] },
+        answer: JSON.stringify({ sentences: [] }),
         createdAt: new Date("2031-03-04T00:30:00Z"),
       },
     ])

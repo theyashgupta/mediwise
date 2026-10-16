@@ -1,8 +1,10 @@
+import type { AssistantAnswer } from "@mediwise/shared";
 import { and, asc, desc, eq, gt, gte, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import {
   type AssistantReviewVerdict,
   assistantQuestions,
+  type CachedSentences,
   assistantReviews,
   clearedQuestion,
   consentRecords,
@@ -17,29 +19,36 @@ import {
   studies,
   studyMeasurements,
 } from "../../db/schema.js";
+import { type Cipher, cipherFor, cipherForProfile } from "../../lib/user-keys.js";
 import { findQuestionCounts, lockUserCredits, type QuestionCounts } from "../credits/index.js";
 import type { Snapshot } from "./assistant.context.js";
 
 const visitDate = sql<string>`coalesce(${reports.collectedAt}, ${reports.createdAt}::date)::text`;
 
+export type StoredSnapshot = Omit<Snapshot, "person"> & {
+  person: Omit<Snapshot["person"], "ageYears"> & { dateOfBirth: string | null };
+};
+
 /**
  * Loads one profile's done reports as an assistant snapshot, with allowed columns only.
  *
  * @remarks
- * The select lists are the privacy boundary: no note, episode name, family history, signing doctor, profile name, date
- * of birth or file name is read, so none can reach a prompt. Age comes out of SQL, so the date of birth never leaves
- * the database.
+ * The select lists are the privacy boundary: no note, episode name, family history, signing doctor, profile name or file
+ * name is read, so none can reach a prompt. The date of birth is encrypted, so it comes out here and the service turns it
+ * into an age before the prompt is built.
  */
-export async function findSnapshot(profileId: string): Promise<Snapshot | undefined> {
-  const [person] = await db
+export async function findSnapshot(profileId: string): Promise<StoredSnapshot | undefined> {
+  const cipher = await cipherForProfile(profileId);
+  const [stored] = await db
     .select({
-      ageYears: sql<number | null>`extract(year from age(${profiles.dateOfBirth}::timestamp))::int`,
+      dateOfBirth: profiles.dateOfBirth,
       sex: profiles.sex,
       ancestry: profiles.ancestry,
     })
     .from(profiles)
     .where(eq(profiles.id, profileId));
-  if (!person) return undefined;
+  if (!stored || !cipher) return undefined;
+  const person = { ...stored, dateOfBirth: cipher.decrypt(stored.dateOfBirth) };
 
   const reportRows = await db
     .select({
@@ -148,7 +157,7 @@ export async function findSnapshot(profileId: string): Promise<Snapshot | undefi
           id: episodes.id,
           startedOn: episodes.startedOn,
           endedOn: episodes.endedOn,
-          summary: sql<string[] | null>`${episodes.summary}->'sentences'`,
+          summary: episodes.summary,
         })
         .from(episodes)
         .where(eq(episodes.profileId, profileId)),
@@ -188,10 +197,17 @@ export async function findSnapshot(profileId: string): Promise<Snapshot | undefi
           status,
         })),
     })),
-    findings: findingRows,
+    findings: findingRows.map((row) => ({
+      ...row,
+      title: cipher.decrypt(row.title),
+      body: cipher.decrypt(row.body),
+    })),
     followUps: followUpRows,
     links: linkRows,
-    episodes: episodeRows,
+    episodes: episodeRows.map((episode) => ({
+      ...episode,
+      summary: cipher.decryptJson<CachedSentences>(episode.summary)?.sentences ?? null,
+    })),
   };
 }
 
@@ -204,6 +220,25 @@ const questionColumns = {
   flaggedAt: assistantQuestions.flaggedAt,
   createdAt: assistantQuestions.createdAt,
 };
+
+export type QuestionRow = Omit<
+  typeof assistantQuestions.$inferInsert,
+  "charged" | "question" | "answer"
+> & { question: string; answer: AssistantAnswer };
+
+/**
+ * Decrypts the text of a kept question.
+ *
+ * @remarks
+ * Only a cleared row holds null text, and every reader filters cleared rows out.
+ */
+const openQuestion =
+  (cipher: Cipher) =>
+  <T extends { question: string | null; answer: string | null }>(row: T) => ({
+    ...row,
+    question: cipher.decrypt(row.question) ?? "",
+    answer: cipher.decryptJson<AssistantAnswer>(row.answer) ?? { sentences: [] },
+  });
 
 /** Tells whether a done report belongs to the profile. */
 export async function isProfileReport(profileId: string, reportId: string) {
@@ -223,22 +258,32 @@ export async function isProfileReport(profileId: string, reportId: string) {
  * The recount happens under the lock, so two parallel answers cannot both take the last question.
  */
 export async function insertQuestion(
-  row: Omit<typeof assistantQuestions.$inferInsert, "charged">,
+  row: QuestionRow,
   canCharge?: (counts: QuestionCounts) => boolean,
 ) {
+  const cipher = await cipherFor(row.userId);
+  const sealed = {
+    ...row,
+    question: cipher.encrypt(row.question),
+    answer: cipher.encryptJson(row.answer),
+  };
   if (!canCharge) {
-    const [inserted] = await db.insert(assistantQuestions).values(row).returning(questionColumns);
-    return inserted!;
+    const [inserted] = await db
+      .insert(assistantQuestions)
+      .values(sealed)
+      .returning(questionColumns);
+    return openQuestion(cipher)(inserted!);
   }
-  return db.transaction(async (tx) => {
+  const inserted = await db.transaction(async (tx) => {
     await lockUserCredits(tx, row.userId);
     const charged = canCharge(await findQuestionCounts(row.userId, tx));
-    const [inserted] = await tx
+    const [stored] = await tx
       .insert(assistantQuestions)
-      .values({ ...row, charged })
+      .values({ ...sealed, charged })
       .returning(questionColumns);
-    return inserted!;
+    return stored!;
   });
+  return openQuestion(cipher)(inserted);
 }
 
 /**
@@ -247,7 +292,7 @@ export async function insertQuestion(
  * @remarks
  * The Claude call already happened, so its tokens must still reach the spend cap.
  */
-export async function insertClearedQuestion(row: Parameters<typeof insertQuestion>[0]) {
+export async function insertClearedQuestion(row: QuestionRow) {
   await db.insert(assistantQuestions).values({ ...row, ...clearedQuestion, profileId: null });
 }
 
@@ -265,7 +310,7 @@ export async function countQuestionsToday(ownerUserId: string) {
 }
 
 export async function listQuestions(ownerUserId: string, profileId: string, limit: number) {
-  return db
+  const query = db
     .select(questionColumns)
     .from(assistantQuestions)
     .where(
@@ -277,6 +322,8 @@ export async function listQuestions(ownerUserId: string, profileId: string, limi
     )
     .orderBy(desc(assistantQuestions.createdAt), desc(assistantQuestions.id))
     .limit(limit);
+  const [rows, cipher] = await Promise.all([query, cipherFor(ownerUserId)]);
+  return rows.map(openQuestion(cipher));
 }
 
 /** Wipes the text of a profile's questions and keeps the rows, so the quota and the spend still count them. */
@@ -306,7 +353,7 @@ export async function flagQuestion(ownerUserId: string, id: string) {
       ),
     )
     .returning(questionColumns);
-  return row;
+  return row && openQuestion(await cipherFor(ownerUserId))(row);
 }
 
 const none = Promise.resolve([]);
@@ -376,12 +423,13 @@ export async function findCiteRows(
           .innerJoin(profiles, eq(profiles.id, episodes.profileId))
           .where(and(inArray(episodes.id, ids.episodes), eq(profiles.ownerUserId, ownerUserId))),
   ]);
+  const cipher = await cipherFor(ownerUserId);
   return {
-    reports: reportRows,
+    reports: reportRows.map((row) => ({ ...row, title: cipher.decrypt(row.title) })),
     studies: studyRows,
-    findings: findingRows,
+    findings: findingRows.map((row) => ({ ...row, title: cipher.decrypt(row.title) })),
     followUps: followUpRows,
-    episodes: episodeRows,
+    episodes: episodeRows.map((row) => ({ ...row, name: cipher.decrypt(row.name) })),
   };
 }
 
@@ -394,7 +442,7 @@ export async function findCiteRows(
  */
 export async function listReviewDay(day: string) {
   const start = sql`(${day}::timestamp at time zone 'UTC')`;
-  return db
+  const rows = await db
     .select({
       id: assistantQuestions.id,
       userId: assistantQuestions.userId,
@@ -424,6 +472,7 @@ export async function listReviewDay(day: string) {
       ),
     )
     .orderBy(asc(assistantQuestions.createdAt));
+  return Promise.all(rows.map(async (row) => openQuestion(await cipherFor(row.userId))(row)));
 }
 
 export async function findMarkerFacts(

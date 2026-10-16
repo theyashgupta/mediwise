@@ -10,6 +10,7 @@ import {
   studies,
   studyMeasurements,
 } from "../../db/schema.js";
+import { type Cipher, cipherFor } from "../../lib/user-keys.js";
 
 const profileColumns = {
   id: profiles.id,
@@ -42,16 +43,37 @@ const valueCount = sql<number>`(
 )`.mapWith(Number);
 
 type ProfileRow = typeof profiles.$inferInsert;
-export type ProfileValues = Omit<ProfileRow, "id" | "ownerUserId" | "isSelf" | "createdAt">;
+export type ProfileValues = Omit<
+  ProfileRow,
+  "id" | "ownerUserId" | "isSelf" | "createdAt" | "yearReviewIntro"
+>;
+
+const openProfile =
+  (cipher: Cipher) =>
+  <T extends { name: string; dateOfBirth: string | null }>(row: T) => ({
+    ...row,
+    name: cipher.decrypt(row.name),
+    dateOfBirth: cipher.decrypt(row.dateOfBirth),
+  });
+
+const sealProfile = <T extends Partial<ProfileValues>>(cipher: Cipher, input: T) => ({
+  ...input,
+  name: cipher.encrypt(input.name),
+  dateOfBirth: cipher.encrypt(input.dateOfBirth),
+});
 
 export async function listProfilesByOwner(ownerUserId: string) {
-  return db
-    .select({ ...profileColumns, reportCount: count(reports.id), valueCount })
-    .from(profiles)
-    .leftJoin(reports, eq(reports.profileId, profiles.id))
-    .where(eq(profiles.ownerUserId, ownerUserId))
-    .groupBy(profiles.id)
-    .orderBy(desc(profiles.isSelf), asc(profiles.createdAt));
+  const [rows, cipher] = await Promise.all([
+    db
+      .select({ ...profileColumns, reportCount: count(reports.id), valueCount })
+      .from(profiles)
+      .leftJoin(reports, eq(reports.profileId, profiles.id))
+      .where(eq(profiles.ownerUserId, ownerUserId))
+      .groupBy(profiles.id)
+      .orderBy(desc(profiles.isSelf), asc(profiles.createdAt)),
+    cipherFor(ownerUserId),
+  ]);
+  return rows.map(openProfile(cipher));
 }
 
 export async function findProfileById(ownerUserId: string, id: string) {
@@ -59,7 +81,7 @@ export async function findProfileById(ownerUserId: string, id: string) {
     .select(profileColumns)
     .from(profiles)
     .where(and(eq(profiles.id, id), eq(profiles.ownerUserId, ownerUserId)));
-  return row;
+  return row && openProfile(await cipherFor(ownerUserId))(row);
 }
 
 export async function countProfilesByOwner(ownerUserId: string) {
@@ -71,11 +93,12 @@ export async function countProfilesByOwner(ownerUserId: string) {
 }
 
 export async function insertProfile(ownerUserId: string, input: ProfileValues) {
+  const cipher = await cipherFor(ownerUserId);
   const [row] = await db
     .insert(profiles)
-    .values({ ...input, ownerUserId })
+    .values({ ...sealProfile(cipher, input), ownerUserId })
     .returning(profileColumns);
-  return row;
+  return row && openProfile(cipher)(row);
 }
 
 /**
@@ -85,9 +108,16 @@ export async function insertProfile(ownerUserId: string, input: ProfileValues) {
  * The partial unique index on `is_self` makes concurrent first calls safe; the loser inserts nothing.
  */
 export async function insertSelfProfileIfMissing(ownerUserId: string, name: string) {
+  const cipher = await cipherFor(ownerUserId);
   await db
     .insert(profiles)
-    .values({ ownerUserId, name, relation: "self", ancestry: "unknown", isSelf: true })
+    .values({
+      ownerUserId,
+      name: cipher.encrypt(name),
+      relation: "self",
+      ancestry: "unknown",
+      isSelf: true,
+    })
     .onConflictDoNothing();
 }
 
@@ -96,12 +126,13 @@ export async function updateProfile(
   id: string,
   input: Partial<ProfileValues>,
 ) {
+  const cipher = await cipherFor(ownerUserId);
   const [row] = await db
     .update(profiles)
-    .set(input)
+    .set(sealProfile(cipher, input))
     .where(and(eq(profiles.id, id), eq(profiles.ownerUserId, ownerUserId)))
     .returning(profileColumns);
-  return row;
+  return row && openProfile(cipher)(row);
 }
 
 /**
@@ -146,7 +177,7 @@ const doneReportsOf = (ownerUserId: string, profileId: string) =>
 
 /** Loads every note, marker, study and study measurement of a profile's done reports, for the CSV export. */
 export async function listExportRows(ownerUserId: string, profileId: string) {
-  const [noteRows, markerRows, studyRows, measurementRows] = await Promise.all([
+  const [noteRows, markerRows, studyRows, measurementRows, cipher] = await Promise.all([
     db
       .select({ ...exportReportColumns, labName: reports.labName, note: reports.note })
       .from(reports)
@@ -210,6 +241,16 @@ export async function listExportRows(ownerUserId: string, profileId: string) {
       .innerJoin(profiles, eq(profiles.id, reports.profileId))
       .where(doneReportsOf(ownerUserId, profileId))
       .orderBy(reportDate, asc(reports.createdAt), asc(studies.pageIndex)),
+    cipherFor(ownerUserId),
   ]);
-  return { noteRows, markerRows, studyRows, measurementRows };
+  const open = <T extends { title: string | null }>(row: T) => ({
+    ...row,
+    title: cipher.decrypt(row.title),
+  });
+  return {
+    noteRows: noteRows.map((row) => ({ ...open(row), note: cipher.decrypt(row.note) })),
+    markerRows: markerRows.map(open),
+    studyRows: studyRows.map(open),
+    measurementRows: measurementRows.map(open),
+  };
 }

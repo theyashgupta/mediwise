@@ -9,6 +9,7 @@ import {
   studies,
   studyMeasurements,
 } from "../../db/schema.js";
+import { cipherFor } from "../../lib/user-keys.js";
 import { markerLabName, reportFileNames } from "../reports/index.js";
 
 const reportDate = sql`coalesce(${reports.collectedAt}, ${reports.createdAt}::date)`;
@@ -32,7 +33,7 @@ const doneReportsOf = (ownerUserId: string, profileId: string) =>
  * A report without a lab date sorts by its upload date, the same order as the marker page history.
  */
 export async function listDoneReports(ownerUserId: string, profileId: string) {
-  return db
+  const query = db
     .select({
       id: reports.id,
       labName: reports.labName,
@@ -51,6 +52,13 @@ export async function listDoneReports(ownerUserId: string, profileId: string) {
     .leftJoin(episodes, eq(episodes.id, reports.episodeId))
     .where(doneReportsOf(ownerUserId, profileId))
     .orderBy(reportDate, asc(reports.createdAt));
+  const [rows, cipher] = await Promise.all([query, cipherFor(ownerUserId)]);
+  return rows.map((row) => ({
+    ...row,
+    title: cipher.decrypt(row.title),
+    episodeName: cipher.decrypt(row.episodeName),
+    fileName: cipher.decrypt(row.fileName),
+  }));
 }
 
 /**

@@ -54,7 +54,8 @@ const store = vi.hoisted(() => {
 
 vi.mock("./assistant.repo.js", () => store.repo);
 
-const { countReviews, loadReviewDay, storeReview } = await import("./assistant.service.js");
+const { countReviews, loadReviewDay, storeReview, withAge } =
+  await import("./assistant.service.js");
 
 function question(id: string, userId: string, cites: AssistantCite[], extra = {}) {
   return {
@@ -184,3 +185,28 @@ test("a pattern chip keeps its target only when its report holds that pattern, s
     { target: null, label: "Prediabetes range" },
   ]);
 });
+
+test.each([
+  ["1984-03-02", "2026-03-01", 41],
+  ["1984-03-02", "2026-03-02", 42],
+  [null, "2026-03-02", null],
+])(
+  "a snapshot with date of birth %s on %s carries age %s and no date of birth",
+  (dateOfBirth, today, ageYears) => {
+    const stored = {
+      person: { dateOfBirth, sex: "female", ancestry: "south_asian" },
+      reports: [],
+      markers: [],
+      studies: [],
+      findings: [],
+      followUps: [],
+      links: [],
+      episodes: [],
+    };
+
+    const snapshot = withAge(stored, today);
+
+    expect(snapshot.person).toEqual({ ageYears, sex: "female", ancestry: "south_asian" });
+    expect(JSON.stringify(snapshot)).not.toContain("1984");
+  },
+);

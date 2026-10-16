@@ -1,10 +1,8 @@
 import type { PatternMatch } from "@mediwise/engine";
 import {
   ancestries,
-  type AssistantAnswer,
   assistantRefusalKinds,
   consentKinds,
-  type Narrative,
   pageClasses,
   relations,
   reportStatuses,
@@ -54,6 +52,11 @@ export const creditReason = pgEnum("credit_reason", [
 ]);
 export const paymentOrderStatus = pgEnum("payment_order_status", ["created", "paid", "refunded"]);
 
+export type CachedSentences = { hash: string; sentences: string[] | null };
+export type ReportTranslations = {
+  hi?: { status: "done" | "failed"; text: Record<string, string> };
+};
+
 const createdAt = () => timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
 
 export const profiles = pgTable(
@@ -63,17 +66,14 @@ export const profiles = pgTable(
     ownerUserId: text("owner_user_id").notNull(),
     name: text().notNull(),
     relation: text({ enum: relations }).notNull(),
-    dateOfBirth: date("date_of_birth"),
+    dateOfBirth: text("date_of_birth"),
     dateOfBirthApproximate: boolean("date_of_birth_approximate").notNull().default(false),
     sex: text({ enum: sexes }),
     ancestry: text({ enum: ancestries }).notNull(),
     isSelf: boolean("is_self").notNull().default(false),
     permissionConfirmedAt: timestamp("permission_confirmed_at", { withTimezone: true }),
     guardianConfirmedAt: timestamp("guardian_confirmed_at", { withTimezone: true }),
-    yearReviewIntro: jsonb("year_review_intro").$type<{
-      hash: string;
-      sentences: string[] | null;
-    }>(),
+    yearReviewIntro: text("year_review_intro"),
     episodeProposalDismissedOn: date("episode_proposal_dismissed_on"),
     createdAt: createdAt(),
   },
@@ -112,12 +112,10 @@ export const reports = pgTable(
     coverage: integer(),
     verdict: text(),
     patterns: jsonb().$type<PatternMatch[]>(),
-    doctorQuestions: jsonb("doctor_questions").$type<string[]>(),
-    narrative: jsonb().$type<Narrative>(),
+    doctorQuestions: text("doctor_questions"),
+    narrative: text(),
     narrativeStatus: text("narrative_status", { enum: ["done", "failed"] }),
-    translations: jsonb().$type<{
-      hi?: { status: "done" | "failed"; text: Record<string, string> };
-    }>(),
+    translations: text(),
     note: text(),
     episodeId: uuid("episode_id").references(() => episodes.id, { onDelete: "set null" }),
     error: text(),
@@ -126,7 +124,6 @@ export const reports = pgTable(
   (t) => [
     index("reports_profile_id_idx").on(t.profileId),
     index("reports_episode_id_idx").on(t.episodeId),
-    check("reports_title_length", sql`char_length(${t.title}) <= 60`),
   ],
 );
 
@@ -148,12 +145,11 @@ export const episodes = pgTable(
     startedOn: date("started_on").notNull(),
     endedOn: date("ended_on"),
     note: text(),
-    summary: jsonb().$type<{ hash: string; sentences: string[] | null }>(),
+    summary: text(),
     createdAt: createdAt(),
   },
   (t) => [
     index("episodes_profile_id_idx").on(t.profileId),
-    check("episodes_note_length", sql`char_length(${t.note}) <= 200`),
     check("episodes_dates", sql`${t.endedOn} is null or ${t.endedOn} >= ${t.startedOn}`),
   ],
 );
@@ -438,7 +434,8 @@ export const reportShareOpens = pgTable(
  * One question to the assistant about one profile, with the answer as shown.
  *
  * @remarks
- * `answer` keeps report ids, not the references Claude saw, so a deleted report still leaves its sentence.
+ * `answer` keeps report ids, not the references Claude saw, so a deleted report still leaves its sentence. A cleared row
+ * keeps its usage and holds no text: `question` and `answer` are null.
  */
 export const assistantQuestions = pgTable(
   "assistant_questions",
@@ -447,8 +444,8 @@ export const assistantQuestions = pgTable(
     userId: text("user_id").notNull(),
     profileId: uuid("profile_id").references(() => profiles.id, { onDelete: "set null" }),
     focusReportId: uuid("focus_report_id").references(() => reports.id, { onDelete: "set null" }),
-    question: text().notNull(),
-    answer: jsonb().$type<AssistantAnswer>().notNull(),
+    question: text(),
+    answer: text(),
     refusalKind: text("refusal_kind", { enum: assistantRefusalKinds }),
     rules: text()
       .array()
@@ -465,7 +462,6 @@ export const assistantQuestions = pgTable(
   (t) => [
     index("assistant_questions_profile_id_created_at_idx").on(t.profileId, t.createdAt),
     index("assistant_questions_user_id_idx").on(t.userId),
-    check("assistant_questions_question_length", sql`char_length(${t.question}) <= 500`),
   ],
 );
 
@@ -495,6 +491,21 @@ export const consentRecords = pgTable(
   ],
 );
 
+/**
+ * One data key per user, wrapped by a master key from the environment.
+ *
+ * @remarks
+ * `wrapped_key` starts with the id of its master key, so a rotation rewraps this row and never touches encrypted rows.
+ * `key_id` is the id that every encrypted value of the user names.
+ */
+export const userKeys = pgTable("user_keys", {
+  id: uuid().primaryKey().defaultRandom(),
+  userId: text("user_id").notNull().unique(),
+  keyId: text("key_id").notNull(),
+  wrappedKey: text("wrapped_key").notNull(),
+  createdAt: createdAt(),
+});
+
 export const assistantReviewVerdicts = ["pass", "minor", "critical"] as const;
 export type AssistantReviewVerdict = (typeof assistantReviewVerdicts)[number];
 
@@ -513,8 +524,8 @@ export const assistantReviews = pgTable(
 );
 
 export const clearedQuestion = {
-  question: "",
-  answer: { sentences: [] },
+  question: null,
+  answer: null,
   refusalKind: null,
   focusReportId: null,
   clearedAt: sql`now()`,

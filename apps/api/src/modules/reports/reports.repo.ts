@@ -17,6 +17,7 @@ import { db } from "../../db/client.js";
 import {
   findings,
   followUps,
+  type ReportTranslations,
   jobs,
   markerAliasSuggestions,
   profiles,
@@ -26,8 +27,10 @@ import {
   studies,
   studyMeasurements,
 } from "../../db/schema.js";
+import { type Cipher, cipherFor, cipherForProfile, cipherForReport } from "../../lib/user-keys.js";
 import { findCreditUsage, lockUserCredits } from "../credits/index.js";
 import type { StepUsage } from "../extraction/index.js";
+import type { Narrative } from "@mediwise/shared";
 
 const ownedBy = (ownerUserId: string) =>
   inArray(
@@ -67,6 +70,26 @@ export const reportColumns = {
   createdAt: reports.createdAt,
 };
 
+/** Decrypts the text columns of `reportColumns`, and file names when the row has them. */
+export const openReport =
+  (cipher: Cipher) =>
+  <
+    T extends {
+      title: string | null;
+      note?: string | null;
+      error?: string | null;
+      fileNames?: string[];
+    },
+  >(
+    row: T,
+  ) => ({
+    ...row,
+    title: cipher.decrypt(row.title),
+    ...(row.note !== undefined && { note: cipher.decrypt(row.note) }),
+    ...(row.error !== undefined && { error: cipher.decrypt(row.error) }),
+    ...(row.fileNames && { fileNames: row.fileNames.map(cipher.decrypt) }),
+  });
+
 /**
  * The lab of a marker row: the lab of its file, or the report's lab for a row stored before markers kept their file.
  *
@@ -87,16 +110,17 @@ export async function findReportById(ownerUserId: string, id: string) {
     .select(reportColumns)
     .from(reports)
     .where(and(eq(reports.id, id), ownedBy(ownerUserId)));
-  return row;
+  return row && openReport(await cipherFor(ownerUserId))(row);
 }
 
 export async function updateReportNote(ownerUserId: string, id: string, note: string | null) {
+  const cipher = await cipherFor(ownerUserId);
   const [row] = await db
     .update(reports)
-    .set({ note })
+    .set({ note: cipher.encrypt(note) })
     .where(and(eq(reports.id, id), ownedBy(ownerUserId)))
     .returning({ note: reports.note });
-  return row;
+  return row && { note: cipher.decrypt(row.note) };
 }
 
 /** Sets a report's title and whether the user wrote it. */
@@ -106,12 +130,13 @@ export async function updateReportTitle(
   title: string,
   titleEdited: boolean,
 ) {
+  const cipher = await cipherFor(ownerUserId);
   const [row] = await db
     .update(reports)
-    .set({ title, titleEdited })
+    .set({ title: cipher.encrypt(title), titleEdited })
     .where(and(eq(reports.id, id), ownedBy(ownerUserId)))
     .returning({ title: reports.title, titleEdited: reports.titleEdited });
-  return row;
+  return row && { ...row, title: cipher.decrypt(row.title) };
 }
 
 /**
@@ -150,14 +175,16 @@ export async function listRuleTitledReportIds() {
 
 /** Stores the rule title of a report, unless the user wrote one in between. */
 export async function saveRuleTitle(id: string, title: string) {
+  const cipher = await cipherForReport(id);
+  if (!cipher) return;
   await db
     .update(reports)
-    .set({ title })
+    .set({ title: cipher.encrypt(title) })
     .where(and(eq(reports.id, id), eq(reports.titleEdited, false)));
 }
 
 export async function listReportFiles(reportId: string) {
-  return db
+  const query = db
     .select({
       id: reportFiles.id,
       storagePath: reportFiles.storagePath,
@@ -169,6 +196,8 @@ export async function listReportFiles(reportId: string) {
     .from(reportFiles)
     .where(eq(reportFiles.reportId, reportId))
     .orderBy(reportFiles.pageIndex);
+  const [rows, cipher] = await Promise.all([query, cipherForReport(reportId)]);
+  return cipher ? rows.map((row) => ({ ...row, name: cipher.decrypt(row.name) })) : [];
 }
 
 export async function listReportMarkers(reportId: string) {
@@ -222,43 +251,55 @@ export async function listStudies(reportId: string) {
     .leftJoin(film, eq(film.id, studies.filmFileId))
     .where(eq(studies.reportId, reportId))
     .orderBy(reportFiles.pageIndex, studies.pageIndex);
-  const measurements =
-    rows.length === 0
-      ? []
-      : await db
-          .select({
-            studyId: studyMeasurements.studyId,
-            key: studyMeasurements.key,
-            value: studyMeasurements.value,
-            valueText: studyMeasurements.valueText,
-            unit: studyMeasurements.unit,
-            printedRange: studyMeasurements.printedRange,
-            status: studyMeasurements.status,
-          })
-          .from(studyMeasurements)
-          .where(
-            inArray(
-              studyMeasurements.studyId,
-              rows.map((row) => row.id),
-            ),
-          );
+  if (rows.length === 0) return [];
+  const cipher = (await cipherForReport(reportId))!;
+  const measurements = await db
+    .select({
+      studyId: studyMeasurements.studyId,
+      key: studyMeasurements.key,
+      value: studyMeasurements.value,
+      valueText: studyMeasurements.valueText,
+      unit: studyMeasurements.unit,
+      printedRange: studyMeasurements.printedRange,
+      status: studyMeasurements.status,
+    })
+    .from(studyMeasurements)
+    .where(
+      inArray(
+        studyMeasurements.studyId,
+        rows.map((row) => row.id),
+      ),
+    );
   return rows.map((row) => ({
     ...row,
+    fileName: cipher.decrypt(row.fileName),
+    filmName: cipher.decrypt(row.filmName),
     measurements: measurements.filter((measurement) => measurement.studyId === row.id),
   }));
 }
 
 export async function findReportInsights(reportId: string) {
-  const [row] = await db
-    .select({
-      patterns: reports.patterns,
-      doctorQuestions: reports.doctorQuestions,
-      narrative: reports.narrative,
-      translations: reports.translations,
-    })
-    .from(reports)
-    .where(eq(reports.id, reportId));
-  return row;
+  const [[row], cipher] = await Promise.all([
+    db
+      .select({
+        patterns: reports.patterns,
+        doctorQuestions: reports.doctorQuestions,
+        narrative: reports.narrative,
+        translations: reports.translations,
+      })
+      .from(reports)
+      .where(eq(reports.id, reportId)),
+    cipherForReport(reportId),
+  ]);
+  return (
+    row &&
+    cipher && {
+      patterns: row.patterns,
+      doctorQuestions: cipher.decryptJson<string[]>(row.doctorQuestions),
+      narrative: cipher.decryptJson<Narrative>(row.narrative),
+      translations: cipher.decryptJson<ReportTranslations>(row.translations),
+    }
+  );
 }
 
 export async function findReportProfile(ownerUserId: string, reportId: string) {
@@ -339,6 +380,7 @@ export async function findReportForProcessing(id: string) {
     .innerJoin(profiles, eq(profiles.id, reports.profileId))
     .where(eq(reports.id, id));
   if (!report) return undefined;
+  const cipher = await cipherFor(report.ownerUserId);
   const files = await db
     .select({
       id: reportFiles.id,
@@ -351,7 +393,7 @@ export async function findReportForProcessing(id: string) {
     .from(reportFiles)
     .where(eq(reportFiles.reportId, id))
     .orderBy(reportFiles.pageIndex);
-  return { ...report, files };
+  return { ...report, dateOfBirth: cipher.decrypt(report.dateOfBirth), files };
 }
 
 /**
@@ -394,9 +436,11 @@ export async function fillDateOfBirth(
   dateOfBirth: string,
   approximate: boolean,
 ) {
+  const cipher = await cipherForProfile(profileId);
+  if (!cipher) return;
   await db
     .update(profiles)
-    .set({ dateOfBirth, dateOfBirthApproximate: approximate })
+    .set({ dateOfBirth: cipher.encrypt(dateOfBirth), dateOfBirthApproximate: approximate })
     .where(and(eq(profiles.id, profileId), isNull(profiles.dateOfBirth)));
 }
 
@@ -405,8 +449,18 @@ export async function updateReportStatus(
   status: "processing" | "paused" | "failed",
   error: string | null = null,
 ) {
-  await db.update(reports).set({ status, error }).where(eq(reports.id, id));
+  const cipher = await cipherForReport(id);
+  if (!cipher) return;
+  await db
+    .update(reports)
+    .set({ status, error: cipher.encrypt(error) })
+    .where(eq(reports.id, id));
 }
+
+type ReportResult = Omit<
+  typeof reports.$inferInsert,
+  "id" | "profileId" | "sourceKind" | "status" | "doctorQuestions" | "narrative" | "translations"
+> & { doctorQuestions?: string[] | null; narrative?: Narrative | null };
 
 /**
  * Replaces a report's markers, alias suggestions, follow-ups, studies and file labs, and marks it done, in one transaction.
@@ -416,7 +470,7 @@ export async function updateReportStatus(
  */
 export async function saveReportResult(
   id: string,
-  report: Omit<typeof reports.$inferInsert, "id" | "profileId" | "sourceKind" | "status">,
+  report: ReportResult,
   markers: (typeof reportMarkers.$inferInsert)[],
   suggestions: (typeof markerAliasSuggestions.$inferInsert)[],
   steps: (typeof followUps.$inferInsert)[],
@@ -427,7 +481,15 @@ export async function saveReportResult(
   findingRows: (typeof findings.$inferInsert)[] = [],
   fileLabs: { id: string; labName: string | null }[] = [],
 ) {
-  const { title, ...rest } = report;
+  const cipher = await cipherForReport(id);
+  if (!cipher) return;
+  const { title: plainTitle, doctorQuestions, narrative, ...rest } = report;
+  const title = cipher.encrypt(plainTitle);
+  const sealedFindings = findingRows.map((row) => ({
+    ...row,
+    title: cipher.encrypt(row.title),
+    body: cipher.encrypt(row.body),
+  }));
   await db.transaction(async (tx) => {
     for (const file of fileLabs) {
       await tx
@@ -447,16 +509,19 @@ export async function saveReportResult(
       rows.map((row) => ({ ...row, studyId: study.id ?? "" })),
     );
     if (measurements.length > 0) await tx.insert(studyMeasurements).values(measurements);
-    if (findingRows.length > 0) await tx.insert(findings).values(findingRows);
+    if (sealedFindings.length > 0) await tx.insert(findings).values(sealedFindings);
     await tx
       .update(reports)
       .set({
         ...rest,
+        note: cipher.encrypt(rest.note),
+        error: null,
+        doctorQuestions: cipher.encryptJson(doctorQuestions),
+        narrative: cipher.encryptJson(narrative),
         ...(title !== undefined && {
           title: sql`case when ${reports.titleEdited} then ${reports.title} else ${title} end`,
         }),
         status: "done",
-        error: null,
         translations: null,
       })
       .where(eq(reports.id, id));
@@ -496,7 +561,7 @@ export async function listReportsByProfile(
   limit: number,
   cursor?: string,
 ) {
-  return db
+  const query = db
     .select({
       ...reportColumns,
       fileNames: reportFileNames,
@@ -513,6 +578,8 @@ export async function listReportsByProfile(
     )
     .orderBy(desc(reports.createdAt))
     .limit(limit);
+  const [rows, cipher] = await Promise.all([query, cipherFor(ownerUserId)]);
+  return rows.map(openReport(cipher));
 }
 
 /**
@@ -527,11 +594,16 @@ export async function insertDraftReport(
   files: { storagePath: string; mime: string; size: number; pageIndex: number; name: string }[],
   check: (usage: Awaited<ReturnType<typeof findCreditUsage>>) => void,
 ) {
+  const cipher = await cipherFor(ownerUserId);
   await db.transaction(async (tx) => {
     await lockUserCredits(tx, ownerUserId);
     check(await findCreditUsage(ownerUserId, tx));
     await tx.insert(reports).values({ ...report, status: "draft" });
-    await tx.insert(reportFiles).values(files.map((file) => ({ ...file, reportId: report.id })));
+    await tx
+      .insert(reportFiles)
+      .values(
+        files.map((file) => ({ ...file, name: cipher.encrypt(file.name), reportId: report.id })),
+      );
   });
 }
 
@@ -598,11 +670,16 @@ export async function deleteDraftsCreatedBefore(ownerUserId: string, before: Dat
  */
 export async function saveTranslation(
   reportId: string,
-  translations: NonNullable<typeof reports.$inferSelect.translations>,
+  translations: ReportTranslations,
   usage: StepUsage,
 ) {
+  const cipher = await cipherForReport(reportId);
+  if (!cipher) return;
   await db.transaction(async (tx) => {
-    await tx.update(reports).set({ translations }).where(eq(reports.id, reportId));
+    await tx
+      .update(reports)
+      .set({ translations: cipher.encryptJson(translations) })
+      .where(eq(reports.id, reportId));
     const [job] = await tx
       .select({ id: jobs.id, usage: jobs.usage })
       .from(jobs)

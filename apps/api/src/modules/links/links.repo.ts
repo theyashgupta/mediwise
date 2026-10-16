@@ -2,6 +2,7 @@ import type { ReportLinkKind } from "@mediwise/shared";
 import { and, eq, inArray, ne, or, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import { profiles, reportLinks, reports } from "../../db/schema.js";
+import { cipherForReport } from "../../lib/user-keys.js";
 
 const visitDate = sql<string>`coalesce(${reports.collectedAt}, ${reports.createdAt}::date)::text`;
 
@@ -154,9 +155,12 @@ export async function listLinks(reportId: string) {
           })
           .from(reports)
           .where(inArray(reports.id, others));
+  const cipher = await cipherForReport(reportId);
   return links.flatMap((link, index) => {
     const other = rows.find(({ id }) => id === others[index]);
-    return other ? [{ ...link, other }] : [];
+    return other && cipher
+      ? [{ ...link, other: { ...other, title: cipher.decrypt(other.title) } }]
+      : [];
   });
 }
 
