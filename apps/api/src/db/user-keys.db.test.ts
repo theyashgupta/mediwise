@@ -80,12 +80,11 @@ test("a rewrap to a master key the API does not have leaves the data key unreada
 test("the key cache holds 1,000 users and drops the oldest one first", async () => {
   const oldest = randomUUID();
   const oldestKey = (await cipherFor(oldest)).keyId;
-  const others = Array.from({ length: 1000 }, () => randomUUID());
-  for (const userId of others) await cipherFor(userId);
-  const newest = others.at(-1)!;
+  await Promise.all(Array.from({ length: 999 }, () => cipherFor(randomUUID())));
+  const newest = randomUUID();
   const newestKey = (await cipherFor(newest)).keyId;
   await db.delete(userKeys).where(inArray(userKeys.userId, [oldest, newest]));
 
   expect((await cipherFor(newest)).keyId).toBe(newestKey);
   expect((await cipherFor(oldest)).keyId).not.toBe(oldestKey);
-});
+}, 30_000);

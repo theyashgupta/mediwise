@@ -4,9 +4,11 @@ import { testDatabaseUrl } from "./vitest.db.setup.ts";
 
 export default defineConfig({
   test: {
+    name: "db",
     include: ["src/**/*.db.test.ts"],
     globalSetup: "./vitest.db.setup.ts",
     fileParallelism: false,
+    sequence: { groupOrder: 1 },
     env: {
       ...unit.test?.env,
       DATABASE_URL: testDatabaseUrl,

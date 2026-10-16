@@ -45,7 +45,9 @@ A web page test renders the whole app in jsdom with Testing Library. It uses the
 
 ## Coverage
 
-`pnpm coverage` runs the `coverage` script of each package that has unit tests: api, web, landing, engine, shared and design-tokens. The CI `check` job runs it after `pnpm check`, so the job log shows the four numbers (statements, branches, functions, lines) of each package.
+`pnpm coverage` runs the `coverage` script of each package that has unit tests: api, web, landing, engine, shared and design-tokens. The CI `e2e` job runs it after `supabase start`, so the job log shows the four numbers (statements, branches, functions, lines) of each package.
+
+- The api coverage runs the unit project and the db project together (`apps/api/vitest.coverage.config.ts`) and counts both. The repos and the encryption code run their SQL only in the db project. Start the local Supabase before you run it on your machine.
 
 - Coverage counts every `.ts` and `.tsx` file under `src`, also a file that no test loads. Test files are not counted.
 - Each package sets four thresholds in its `coverage` script, never lower than measured minus 10, revisited when a ticket adds tests. A change that drops a package below a threshold fails the job.
@@ -60,7 +62,7 @@ A file that ends in `.db.test.ts` runs only in the db project (`apps/api/vitest.
 - It runs with `CLAUDE_STUB=true`, an empty `ANTHROPIC_API_KEY` and `CLAUDE_MONTHLY_CAP_CENTS=100`. It never calls Claude or Supabase auth.
 - Each test makes its own user id with `randomUUID()`, so tests do not share rows.
 - History tests seed the dense fixture with `insertDenseHistory` from `apps/api/src/db/dense-history.ts`, the same rows as `db:seed-history`. A test named "audit row N" covers row N of [research/continuous-history.md](research/continuous-history.md).
-- In CI the `e2e` job runs `pnpm test:db` after `supabase start` and before `pnpm e2e`.
+- In CI the db tests run inside `pnpm coverage` in the `e2e` job, after `supabase start` and before `pnpm e2e`. `pnpm test:db` runs them alone, without coverage.
 
 ### Row level security
 

@@ -15,7 +15,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
-    "coverage": "vitest run --coverage --coverage.include=src/**/*.{ts,tsx} --coverage.reporter=text-summary --coverage.thresholds.statements=75 --coverage.thresholds.branches=72 --coverage.thresholds.functions=75 --coverage.thresholds.lines=76",
+    "coverage": "NODE_ENV=test vitest run --config vitest.coverage.config.ts --coverage --coverage.include=src/**/*.{ts,tsx} --coverage.reporter=text-summary --coverage.thresholds.statements=75 --coverage.thresholds.branches=72 --coverage.thresholds.functions=75 --coverage.thresholds.lines=76",
     "test:db": "NODE_ENV=test vitest run --config vitest.db.config.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
