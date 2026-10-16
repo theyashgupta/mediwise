@@ -27,8 +27,28 @@ export async function createSignedUploadUrl(path: string) {
   return unwrap(await bucket().createSignedUploadUrl(path));
 }
 
-export async function createSignedDownloadUrl(path: string, expiresInSeconds = 300) {
-  return unwrap(await bucket().createSignedUrl(path, expiresInSeconds)).signedUrl;
+const downloadUrlSeconds = 300;
+
+/**
+ * Returns a download URL for each file that exists, valid for 5 minutes, saved under its given name.
+ *
+ * @remarks
+ * The expiry is fixed, so no caller can make a longer-lived link to a health report.
+ */
+export async function createSignedDownloadUrls<T extends { path: string; name: string }>(
+  files: T[],
+) {
+  if (files.length === 0) return [];
+  const signed = unwrap(
+    await bucket().createSignedUrls(
+      files.map((file) => file.path),
+      downloadUrlSeconds,
+    ),
+  );
+  return files.flatMap((file) => {
+    const url = signed.find((row) => row.path === file.path && !row.error)?.signedUrl;
+    return url ? [{ ...file, url: `${url}&download=${encodeURIComponent(file.name)}` }] : [];
+  });
 }
 
 export async function list(prefix: string) {

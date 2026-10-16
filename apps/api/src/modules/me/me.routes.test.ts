@@ -33,6 +33,12 @@ const store = vi.hoisted(() => {
         return name;
       },
       listStoragePathsByOwner: async (owner: string) => state.paths.get(owner) ?? [],
+      listFilesByOwner: async (owner: string) =>
+        (state.paths.get(owner) ?? []).map((path, index) => ({
+          reportId: "r1",
+          path,
+          name: index === 0 ? null : `page ${index}.jpg`,
+        })),
       deleteAllByOwner: async (owner: string, log: { userIdHash: string; files: number }) => {
         state.deletionLog.push(log);
         state.names.delete(owner);
@@ -49,6 +55,8 @@ const store = vi.hoisted(() => {
       remove: async (paths: string[]) => {
         state.removeCalls.push(paths);
       },
+      createSignedDownloadUrls: async (files: { path: string; name: string }[]) =>
+        files.map((file) => ({ ...file, url: `https://signed.example/${file.path}` })),
     },
     supabase: {
       auth: {
@@ -350,6 +358,22 @@ test("GET /me/export answers a JSON attachment with the user's data", async () =
     "questions",
     "reports",
   ]);
+});
+
+test("GET /me/export?files=1 adds a download URL with the name of every stored file", async () => {
+  store.state.paths.set("alice", ["alice/r1/0.pdf", "alice/r1/1.jpg"]);
+  const res = await call("GET", "/me/export?files=1");
+  expect(res.status).toBe(200);
+  const body = (await res.json()) as { files: unknown[]; profiles: unknown[] };
+  expect(body.files).toEqual([
+    { reportId: "r1", name: "0.pdf", url: "https://signed.example/alice/r1/0.pdf" },
+    { reportId: "r1", name: "page 1.jpg", url: "https://signed.example/alice/r1/1.jpg" },
+  ]);
+  expect(body.profiles).toHaveLength(1);
+});
+
+test("GET /me/export with an unknown files value answers 400", async () => {
+  expect((await call("GET", "/me/export?files=yes")).status).toBe(400);
 });
 
 test("during the review month GET /me asks for consent until POST /me/consents stores assistant_review", async () => {

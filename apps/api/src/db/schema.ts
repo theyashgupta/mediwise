@@ -330,6 +330,7 @@ export const jobs = pgTable(
   {
     id: uuid().primaryKey().defaultRandom(),
     kind: text().notNull(),
+    userId: text("user_id"),
     payload: jsonb().notNull(),
     status: jobStatus().notNull().default("queued"),
     attempts: integer().notNull().default(0),
@@ -341,7 +342,7 @@ export const jobs = pgTable(
     createdAt: createdAt(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("jobs_status_idx").on(t.status)],
+  (t) => [index("jobs_status_idx").on(t.status), index("jobs_user_id_idx").on(t.userId)],
 );
 
 export const paymentOrders = pgTable(
@@ -532,7 +533,7 @@ export type DeletionCounts = {
  * One row per account deletion, kept after the user's data is gone.
  *
  * @remarks
- * Holds only the SHA-256 of the user id, so the row names no person. Nothing deletes these rows, which keeps each for at least one year.
+ * Holds only the SHA-256 of the user id, so the row names no person. The retention sweep deletes a row after 2 years.
  */
 export const deletionLog = pgTable("deletion_log", {
   id: uuid().primaryKey().defaultRandom(),

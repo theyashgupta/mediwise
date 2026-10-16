@@ -135,6 +135,41 @@ describe("approximate date of birth", () => {
   });
 });
 
+test("a data download saves the JSON without the file links and lists each uploaded file", async () => {
+  const t = messages.en;
+  const saved: Blob[] = [];
+  Object.assign(URL, {
+    createObjectURL: (blob: Blob) => saved.push(blob) && "blob:export",
+    revokeObjectURL: () => {},
+  });
+  const file = { reportId: "r1", name: "Blood test.pdf", url: "https://storage.example/0.pdf" };
+  const requests = fakeNetwork({
+    "GET /me": () => me,
+    "GET /profiles": () => [selfProfile],
+    "GET /me/export": () => ({
+      exportedAt: "2026-10-16T00:00:00.000Z",
+      profiles: [],
+      files: [file],
+    }),
+  });
+  await renderApp("/settings");
+
+  await userEvent.click(
+    await within(region(t.settings.data.title)).findByRole("button", {
+      name: t.settings.data.download,
+    }),
+  );
+
+  const link = await screen.findByRole("link", { name: file.name });
+  expect(link.getAttribute("href")).toBe(file.url);
+  expect(screen.getByText(t.settings.data.filesExpire)).toBeTruthy();
+  expect(requests).toContainEqual({ method: "GET", path: "/me/export?files=1", body: undefined });
+  expect(JSON.parse(await saved[0]!.text())).toEqual({
+    exportedAt: "2026-10-16T00:00:00.000Z",
+    profiles: [],
+  });
+});
+
 describe("delete account", () => {
   const t = messages.en;
 
@@ -193,7 +228,6 @@ describe("delete account", () => {
     expect(screen.queryByText(t.settings.accountDeleted)).toBeNull();
     expect(requests.some((r) => r.path.startsWith("/auth/v1/logout"))).toBe(false);
   });
-
 });
 
 describe.each(["en", "hi"] as const)("about in %s", (locale) => {

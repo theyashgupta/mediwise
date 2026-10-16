@@ -483,8 +483,63 @@ After the deploy, every existing user sees the two consent boxes before the next
 - Web: Cloudflare Pages, the project, Deployments. Open the last good production deploy, click the menu, Rollback to this deployment. This does not rebuild.
 - Landing page: the same steps in the project `mediwise-landing`.
 - API: Render, `mediwise-api`, Events. Open the last good deploy, click Rollback.
-- Database: Drizzle has no down migrations. Write a new migration that reverses the change, then apply it. Before a risky migration, take a backup in Supabase, Database, Backups.
+- Database: Drizzle has no down migrations. Write a new migration that reverses the change, then apply it. Before a risky migration, take a manual backup (see Backups).
 - A rollback of the API does not undo a migration. Keep migrations additive, so the previous API version still runs on the new schema.
+
+## Backups
+
+`mediwise-prod` is on the Supabase Free plan (see `docs/DECISIONS.md`, Deploy). The Free plan has no automatic backup and no point-in-time recovery (PITR). The only backup is the manual dump below.
+
+| Plan | Database backup | Restore window |
+|---|---|---|
+| Free (now) | None. Take the manual dump below. | The age of the last manual dump. |
+| Pro | Daily, kept 7 days. Supabase, Database, Backups. | Back to the last daily backup. |
+| Pro with the PITR add-on | Continuous. | Any second in the PITR period. |
+
+No plan backs up the files in the `reports` storage bucket. A database restore gives `report_files` rows with no file when a file was deleted after the backup.
+
+### Manual dump (Free plan)
+
+Take a dump before each risky migration and on the first day of each month.
+
+1. Add `MEDIWISE_PROD_DB_URL` to the env-vault once. The value is the Session pooler URI (port 5432) of the `postgres` role: Supabase, `mediwise-prod`, Connect, Session pooler.
+2. Make sure that Docker runs. The Supabase CLI runs `pg_dump` in a container.
+3. Run the three dumps from an empty folder outside the repository:
+
+   ```sh
+   ~/.claude/scripts/with-env.sh sh -c 'supabase db dump --db-url "$MEDIWISE_PROD_DB_URL" -f roles.sql --role-only'
+   ~/.claude/scripts/with-env.sh sh -c 'supabase db dump --db-url "$MEDIWISE_PROD_DB_URL" -f schema.sql'
+   ~/.claude/scripts/with-env.sh sh -c 'supabase db dump --db-url "$MEDIWISE_PROD_DB_URL" -f data.sql --use-copy --data-only'
+   ```
+
+4. Make sure that each file is not empty: `wc -l roles.sql schema.sql data.sql`.
+5. Store the folder on an encrypted disk. The dump holds every report value and every email address. Never commit it and never upload it to a shared drive.
+6. Delete dumps older than 3 months.
+
+The runner loads the value into the command only. Never put the URI in the command text, because the shell history keeps it.
+
+### Quarterly restore drill
+
+Do the drill in the first week of January, April, July and October. Restore into a throwaway local Supabase project. Never restore into `mediwise-prod` and never into the e2e stack in `apps/e2e`, which other workspaces share.
+
+- [ ] Take a fresh manual dump (Free plan), or download the newest daily backup (Pro).
+- [ ] Make an empty folder `restore-drill` outside the repository. Run `supabase init` in it.
+- [ ] In `restore-drill/supabase/config.toml`, add 1000 to each port, so the project does not collide with the e2e stack.
+- [ ] Run `supabase start` in `restore-drill`.
+- [ ] Restore the dump with the `psql` of the database container (this Mac has no `psql`):
+
+   ```sh
+   cat roles.sql schema.sql <(echo 'set session_replication_role = replica;') data.sql \
+     | docker exec -i supabase_db_restore-drill psql -U postgres -d postgres --single-transaction -v ON_ERROR_STOP=1
+   ```
+
+- [ ] Make sure that the command ends with `COMMIT` and no `ERROR` line.
+- [ ] Count the rows of `profiles`, `reports`, `report_files` and `jobs`. Compare them with the same counts in `mediwise-prod` at the dump time.
+- [ ] Read one report with its markers in the local database.
+- [ ] Write down the date, the dump size, the restore time and each problem in the private operations log.
+- [ ] Run `supabase stop --no-backup` in `restore-drill`. Delete the folder and the dump files of the drill.
+
+When the project moves to Pro, replace the manual dump with the daily backup and keep the drill.
 
 ## One-off commands
 

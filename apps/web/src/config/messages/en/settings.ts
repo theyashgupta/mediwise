@@ -30,9 +30,12 @@ export const settings = {
   },
   data: {
     title: "Your data",
-    description: "Download a copy of your profiles, reports and markers, or delete all of it.",
+    description:
+      "Download a copy of your profiles, reports, markers and uploaded files, or delete all of it.",
     preparing: "Preparing download",
     download: "Download my data",
+    files: "Your uploaded files",
+    filesExpire: "Each file link works for 5 minutes. To get new links, download your data again.",
     delete: "Delete account",
   },
   deleteDialog: {
