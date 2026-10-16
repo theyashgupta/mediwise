@@ -1,7 +1,8 @@
+import { DrizzleQueryError } from "drizzle-orm/errors";
 import { Hono } from "hono";
 import { afterEach, expect, test, vi } from "vitest";
 import { env } from "../config/env.js";
-import { log, requestLogger } from "./logger.js";
+import { errorMessage, log, requestLogger } from "./logger.js";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -36,4 +37,26 @@ test("an error outside production keeps its stack for debugging", () => {
   const lines = captured("error");
   log.error(new Error("boom"));
   expect(lines[0]).toMatch(/^Error: boom\n[\s\S]*logger\.test\.ts/);
+});
+
+test("a failed query logs its SQL and the database message, never its params", () => {
+  const error = new DrizzleQueryError(
+    'update "profiles" set "name" = $1',
+    ["v1:abc:secret-ciphertext", "Asha Rao"],
+    new Error("value too long"),
+  );
+  for (const nodeEnv of ["production", "test"] as const) {
+    env.NODE_ENV = nodeEnv;
+    const lines = captured("error");
+    log.error(error);
+    expect(lines[0]).toMatch(
+      /^Error: Failed query: update "profiles" set "name" = \$1: value too long/,
+    );
+    expect(lines[0]).not.toContain("secret-ciphertext");
+    expect(lines[0]).not.toContain("Asha Rao");
+    vi.restoreAllMocks();
+  }
+  expect(errorMessage(error)).toBe(
+    'Failed query: update "profiles" set "name" = $1: value too long',
+  );
 });

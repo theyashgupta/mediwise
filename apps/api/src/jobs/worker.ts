@@ -1,7 +1,7 @@
 import { and, eq, lt, lte, or, sql } from "drizzle-orm";
 import { db } from "../db/client.js";
 import { jobs } from "../db/schema.js";
-import { log } from "../middleware/logger.js";
+import { errorMessage, log } from "../middleware/logger.js";
 import { logAlerts } from "../modules/admin/index.js";
 import { type ReportUsage, reportUsage, usageTotals } from "../modules/extraction/index.js";
 import { parkIfOverBudget, resumeIfUnderBudget } from "./budget.js";
@@ -51,10 +51,6 @@ async function claimJob() {
       .returning();
     return job;
   });
-}
-
-function errorMessage(error: unknown) {
-  return error instanceof Error ? error.message : String(error);
 }
 
 /**
