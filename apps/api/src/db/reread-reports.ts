@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { log } from "../middleware/logger.js";
+import { errorMessage, log } from "../middleware/logger.js";
 import { reportUsage } from "../modules/extraction/index.js";
 import { processReport } from "../modules/reports/index.js";
 import { db } from "./client.js";
@@ -19,7 +19,7 @@ async function rereadReports(reclassify: boolean) {
       await processReport(id, reportUsage(), reclassify);
     } catch (error) {
       failed++;
-      log.error(`reread report=${id} error=${error instanceof Error ? error.message : error}`);
+      log.error(`reread report=${id} error=${errorMessage(error)}`);
       await db.update(reports).set({ status: "done" }).where(eq(reports.id, id));
     }
   }

@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { parseOrigins } from "./env.js";
+import { dataKeySchema, parseOrigins } from "./env.js";
 
 test("an origin list splits on commas and drops spaces, empty entries and trailing slashes", () => {
   expect(
@@ -17,4 +17,19 @@ test("an entry that is not a URL fails at startup", () => {
 
 test("an empty list fails at startup", () => {
   expect(() => parseOrigins(" , ")).toThrow();
+});
+
+test("a data key of 32 bytes in base64 passes", () => {
+  expect(dataKeySchema.safeParse(Buffer.alloc(32, 1).toString("base64")).success).toBe(true);
+});
+
+test.each([
+  ["16 bytes", Buffer.alloc(16, 1).toString("base64")],
+  ["33 bytes", Buffer.alloc(33, 1).toString("base64")],
+  ["not base64", "not a key at all!"],
+  ["empty", ""],
+])("a data key of %s fails at startup without its value in the error", (_, value) => {
+  const result = dataKeySchema.safeParse(value);
+  expect(result.success).toBe(false);
+  if (value) expect(JSON.stringify(result.error)).not.toContain(value);
 });

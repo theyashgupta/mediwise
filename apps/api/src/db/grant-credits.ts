@@ -1,4 +1,4 @@
-import { log } from "../middleware/logger.js";
+import { errorMessage, log } from "../middleware/logger.js";
 import { grantCredits } from "../modules/credits/index.js";
 import { db } from "./client.js";
 
@@ -15,7 +15,7 @@ if (!email || !Number.isInteger(credits) || credits === 0 || !note) {
     const userId = await grantCredits(email, credits, note);
     log.info(`granted credits=${credits} user=${userId}`);
   } catch (error) {
-    log.error(error instanceof Error ? error.message : error);
+    log.error(errorMessage(error));
     process.exitCode = 1;
   }
 }

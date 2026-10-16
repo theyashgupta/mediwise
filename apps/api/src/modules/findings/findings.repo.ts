@@ -9,6 +9,7 @@ import {
   studies,
   studyMeasurements,
 } from "../../db/schema.js";
+import { cipherForReport } from "../../db/user-keys.js";
 
 const earlierVisitLimit = 12;
 const visitDate = sql<string>`coalesce(${reports.collectedAt}, ${reports.createdAt}::date)::text`;
@@ -113,7 +114,7 @@ export async function findEarlierVisits(profileId: string, reportId: string, dat
 }
 
 export async function listFindings(reportId: string) {
-  return db
+  const query = db
     .select({
       kind: findings.kind,
       severity: findings.severity,
@@ -125,4 +126,12 @@ export async function listFindings(reportId: string) {
     .from(findings)
     .where(eq(findings.reportId, reportId))
     .orderBy(asc(findings.rank));
+  const [rows, cipher] = await Promise.all([query, cipherForReport(reportId)]);
+  return cipher
+    ? rows.map((row) => ({
+        ...row,
+        title: cipher.decrypt(row.title),
+        body: cipher.decrypt(row.body),
+      }))
+    : [];
 }

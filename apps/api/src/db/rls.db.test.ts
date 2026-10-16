@@ -103,7 +103,12 @@ async function seedRows(userId: string) {
   const question = idOf(
     await db
       .insert(schema.assistantQuestions)
-      .values({ userId, profileId: profile, question: "Test", answer: { sentences: [] } })
+      .values({
+        userId,
+        profileId: profile,
+        question: "Test",
+        answer: JSON.stringify({ sentences: [] }),
+      })
       .returning(),
   );
   return {
@@ -202,6 +207,12 @@ async function seedRows(userId: string) {
         })
         .returning(),
     ),
+    user_keys: idOf(
+      await db
+        .insert(schema.userKeys)
+        .values({ userId, keyId: "test", wrappedKey: "v1.test" })
+        .returning(),
+    ),
   } satisfies Record<string, string>;
 }
 
@@ -260,6 +271,7 @@ afterAll(async () => {
     .where(inArray(schema.paymentOrders.id, both("payment_orders")));
   await db.delete(schema.jobs).where(inArray(schema.jobs.id, both("jobs")));
   await db.delete(schema.deletionLog).where(inArray(schema.deletionLog.id, both("deletion_log")));
+  await db.delete(schema.userKeys).where(inArray(schema.userKeys.id, both("user_keys")));
   await client.end();
 });
 

@@ -1,16 +1,21 @@
+import type { AssistantAnswer, Narrative } from "@mediwise/shared";
 import { and, asc, count, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import {
   assistantQuestions,
+  type CachedSentences,
+  type ReportTranslations,
   clearedQuestion,
   consentRecords,
   deletionLog,
+  userKeys,
   jobs,
   profiles,
   reportFiles,
   reportMarkers,
   reports,
 } from "../../db/schema.js";
+import { cipherFor, forgetUserKey } from "../../db/user-keys.js";
 
 const ownedProfileIds = (ownerUserId: string) =>
   db.select({ id: profiles.id }).from(profiles).where(eq(profiles.ownerUserId, ownerUserId));
@@ -29,16 +34,17 @@ export async function findSelfName(ownerUserId: string) {
     .select({ name: profiles.name })
     .from(profiles)
     .where(isSelfOf(ownerUserId));
-  return row?.name;
+  return row && (await cipherFor(ownerUserId)).decrypt(row.name);
 }
 
 export async function updateSelfName(ownerUserId: string, name: string) {
+  const cipher = await cipherFor(ownerUserId);
   const [row] = await db
     .update(profiles)
-    .set({ name })
+    .set({ name: cipher.encrypt(name) })
     .where(isSelfOf(ownerUserId))
     .returning({ name: profiles.name });
-  return row?.name;
+  return row && cipher.decrypt(row.name);
 }
 
 export async function listStoragePathsByOwner(ownerUserId: string) {
@@ -50,15 +56,19 @@ export async function listStoragePathsByOwner(ownerUserId: string) {
 }
 
 export async function listFilesByOwner(ownerUserId: string) {
-  return db
-    .select({
-      reportId: reportFiles.reportId,
-      path: reportFiles.storagePath,
-      name: reportFiles.name,
-    })
-    .from(reportFiles)
-    .where(inArray(reportFiles.reportId, ownedReportIds(ownerUserId)))
-    .orderBy(asc(reportFiles.reportId), asc(reportFiles.pageIndex));
+  const [rows, cipher] = await Promise.all([
+    db
+      .select({
+        reportId: reportFiles.reportId,
+        path: reportFiles.storagePath,
+        name: reportFiles.name,
+      })
+      .from(reportFiles)
+      .where(inArray(reportFiles.reportId, ownedReportIds(ownerUserId)))
+      .orderBy(asc(reportFiles.reportId), asc(reportFiles.pageIndex)),
+    cipherFor(ownerUserId),
+  ]);
+  return rows.map((row) => ({ ...row, name: cipher.decrypt(row.name) }));
 }
 
 /**
@@ -105,6 +115,7 @@ export async function deleteAllByOwner(
       .update(assistantQuestions)
       .set(clearedQuestion)
       .where(and(eq(assistantQuestions.userId, ownerUserId), isNull(assistantQuestions.clearedAt)));
+    await tx.delete(userKeys).where(eq(userKeys.userId, ownerUserId));
     await tx.insert(deletionLog).values({
       userIdHash: log.userIdHash,
       scope: "account",
@@ -117,9 +128,11 @@ export async function deleteAllByOwner(
       },
     });
   });
+  forgetUserKey(ownerUserId);
 }
 
 export async function exportByOwner(ownerUserId: string) {
+  const cipher = await cipherFor(ownerUserId);
   const [profileRows, reportRows, markerRows, questionRows, consentRows] = await Promise.all([
     db.select().from(profiles).where(eq(profiles.ownerUserId, ownerUserId)),
     db
@@ -156,10 +169,27 @@ export async function exportByOwner(ownerUserId: string) {
       .orderBy(asc(consentRecords.acceptedAt)),
   ]);
   return {
-    profiles: profileRows,
-    reports: reportRows,
+    profiles: profileRows.map((row) => ({
+      ...row,
+      name: cipher.decrypt(row.name),
+      dateOfBirth: cipher.decrypt(row.dateOfBirth),
+      yearReviewIntro: cipher.decryptJson<CachedSentences>(row.yearReviewIntro),
+    })),
+    reports: reportRows.map((row) => ({
+      ...row,
+      title: cipher.decrypt(row.title),
+      note: cipher.decrypt(row.note),
+      error: cipher.decrypt(row.error),
+      doctorQuestions: cipher.decryptJson<string[]>(row.doctorQuestions),
+      narrative: cipher.decryptJson<Narrative>(row.narrative),
+      translations: cipher.decryptJson<ReportTranslations>(row.translations),
+    })),
     markers: markerRows,
-    questions: questionRows,
+    questions: questionRows.map((row) => ({
+      ...row,
+      question: cipher.decrypt(row.question),
+      answer: cipher.decryptJson<AssistantAnswer>(row.answer),
+    })),
     consents: consentRows,
   };
 }

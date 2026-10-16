@@ -18,6 +18,16 @@ export function parseOrigins(list: string) {
     );
 }
 
+/**
+ * Validates a master data key: 32 bytes as base64.
+ *
+ * @remarks
+ * Zod leaves the input out of its issues, so a bad key never reaches the startup error.
+ */
+export const dataKeySchema = z
+  .base64()
+  .refine((value) => Buffer.from(value, "base64").length === 32, "must be 32 bytes in base64");
+
 const envSchema = z
   .object({
     PORT: z.coerce.number().int().positive().default(3001),
@@ -49,10 +59,16 @@ const envSchema = z
     CASHFREE_ENV: z.enum(["sandbox", "production"]).default("sandbox"),
     PAYMENTS_WEBHOOK_URL: z.url().optional(),
     CASHFREE_STUB: z.stringbool().default(false),
+    DATA_KEY_V1: dataKeySchema.optional(),
+    DATA_KEY_V2: dataKeySchema.optional(),
   })
   .refine(
     (e) => !e.PAYMENTS_ENABLED || (e.CASHFREE_APP_ID && e.CASHFREE_SECRET_KEY),
     "PAYMENTS_ENABLED=true needs CASHFREE_APP_ID and CASHFREE_SECRET_KEY.",
+  )
+  .refine(
+    (e) => e.DATA_KEY_V1 || e.DATA_KEY_V2,
+    "DATA_KEY_V1 is required. After a rotation DATA_KEY_V2 alone is enough.",
   )
   .refine(
     (e) => !(e.CLAUDE_STUB && e.NODE_ENV === "production"),

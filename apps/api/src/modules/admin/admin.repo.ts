@@ -9,6 +9,7 @@ import {
   profiles,
   reports,
 } from "../../db/schema.js";
+import { cipherFor } from "../../db/user-keys.js";
 
 export type LedgerFilter = { from?: Date; to?: Date; userId?: string };
 type Reason = (typeof creditReason.enumValues)[number];
@@ -62,17 +63,25 @@ export async function listFailedReports(limit: number) {
     .where(and(sql`${jobs.payload}->>'reportId' = ${reports.id}::text`, eq(jobs.status, "failed")))
     .orderBy(desc(jobs.updatedAt))
     .limit(1);
-  return db
+  const rows = await db
     .select({
       id: reports.id,
       createdAt: reports.createdAt,
       reportError: reports.error,
       jobError: sql<string | null>`(${lastJobError})`,
+      ownerUserId: profiles.ownerUserId,
     })
     .from(reports)
+    .innerJoin(profiles, eq(profiles.id, reports.profileId))
     .where(eq(reports.status, "failed"))
     .orderBy(desc(reports.createdAt))
     .limit(limit);
+  return Promise.all(
+    rows.map(async ({ ownerUserId, ...row }) => ({
+      ...row,
+      reportError: (await cipherFor(ownerUserId)).decrypt(row.reportError),
+    })),
+  );
 }
 
 /** Lists the newest ledger rows with the given reasons, with the owner's profile count and the paid amount of a purchase. */

@@ -18,6 +18,8 @@ services:
         sync: false
       - key: ANTHROPIC_USER_SALT
         sync: false
+      - key: DATA_KEY_V1
+        sync: false
       - key: CORS_ORIGINS
         value: "https://app.mediwise.theyashgupta.me,https://mediwise.pages.dev"
       - key: RUN_WORKER

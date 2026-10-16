@@ -32,6 +32,7 @@ export const apiEnv = {
   CASHFREE_SECRET_KEY: "e2e-secret-key",
   CASHFREE_ENV: "sandbox",
   ASSISTANT_ENABLED: "true",
+  DATA_KEY_V1: "ZTJlLXRlc3QtZGF0YS1rZXktdjEtbm90LXJlYWwtLSE=",
 };
 
 export const webEnv = {

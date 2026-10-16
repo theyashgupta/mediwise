@@ -21,6 +21,7 @@ export default defineConfig({
       SUPABASE_URL: "http://localhost:54321",
       SUPABASE_SERVICE_ROLE_KEY: "test",
       SUPABASE_JWT_SECRET: "test-secret-that-is-long-enough-for-hs256",
+      DATA_KEY_V1: "dGVzdC1kYXRhLWtleS12MS1ub3QtYS1yZWFsLWtleSE=",
     },
   },
 });

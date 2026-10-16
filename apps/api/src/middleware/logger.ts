@@ -17,6 +17,20 @@ function withRequestId(args: unknown[]) {
 }
 
 /**
+ * Returns the message of an error without the bound values of a failed query.
+ *
+ * @remarks
+ * Drizzle puts every query param in the message of a failed query, and those params hold health text and ciphertext.
+ * The SQL text and the database's own message stay, so the failure is still readable.
+ */
+export function errorMessage(error: unknown) {
+  if (!(error instanceof Error)) return String(error);
+  if (!("params" in error)) return error.message;
+  const [query] = error.message.split("\nparams: ");
+  return error.cause instanceof Error ? `${query}: ${error.cause.message}` : query!;
+}
+
+/**
  * Masks secrets in one log argument and cuts an error down to its name and message.
  *
  * @remarks
@@ -26,8 +40,10 @@ function withRequestId(args: unknown[]) {
 export function redact(arg: unknown): unknown {
   if (typeof arg === "string") return arg.replace(/(\/share\/)[^/\s?#]+/g, "$1***");
   if (!(arg instanceof Error)) return arg;
-  const line = redact(`${arg.name}: ${arg.message.slice(0, maxMessage)}`);
-  return env.NODE_ENV === "production" ? line : `${line}\n${redact(arg.stack ?? "")}`;
+  const message = errorMessage(arg);
+  const line = redact(`${arg.name}: ${message.slice(0, maxMessage)}`);
+  const stack = (arg.stack ?? "").replace(arg.message, () => message);
+  return env.NODE_ENV === "production" ? line : `${line}\n${redact(stack)}`;
 }
 
 const prepare = (args: unknown[]) => withRequestId(args.map(redact));

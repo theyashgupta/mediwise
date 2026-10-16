@@ -8,8 +8,9 @@ import { log } from "../../middleware/logger.js";
 import { callTool, type StepUsage, stepUsage } from "../extraction/index.js";
 import { hasConsent } from "../consents/index.js";
 import { getOwnedProfile } from "../profiles/index.js";
+import { ageOn } from "../reports/index.js";
 import { isOverBudget, stepCostCents } from "../spend/index.js";
-import { type AssistantContext, buildContext, nameOf } from "./assistant.context.js";
+import { type AssistantContext, buildContext, nameOf, type Snapshot } from "./assistant.context.js";
 import { assertQuestionLeft, type QuestionCounts, questionsLeftOf } from "../credits/index.js";
 import {
   dailyCapCopy,
@@ -164,6 +165,20 @@ export function askText(
     `New question: ${question}`,
     "Answer with the answer_question tool.",
   ].join("\n");
+}
+
+/**
+ * Turns the stored date of birth into an age in whole years on `today`, and drops the date.
+ *
+ * @remarks
+ * The date of birth is encrypted at rest, so age can no longer come out of SQL. Only the age reaches the prompt.
+ */
+export function withAge({ person, ...rest }: repo.StoredSnapshot, today: string): Snapshot {
+  const { dateOfBirth, ...known } = person;
+  return {
+    ...rest,
+    person: { ...known, ageYears: dateOfBirth ? ageOn(dateOfBirth, today) : null },
+  };
 }
 
 /**
@@ -338,8 +353,9 @@ export async function askQuestion(userId: string, profileId: string, body: AskQu
   }
   await assertCanAsk(userId);
 
-  const snapshot = await repo.findSnapshot(profileId);
-  if (!snapshot) throw new AppError(404, "We could not find this profile");
+  const stored = await repo.findSnapshot(profileId);
+  if (!stored) throw new AppError(404, "We could not find this profile");
+  const snapshot = withAge(stored, new Date().toISOString().slice(0, 10));
   if (snapshot.reports.length === 0) {
     const row = await store({ ...base, answer: { sentences: [] }, refusalKind: "not_in_data" });
     logQuestion(row.id, "empty:not_in_data", [], null, started);

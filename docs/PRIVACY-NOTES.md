@@ -99,6 +99,18 @@ This file records what MediWise does with consent, with the data of family membe
 - Settings saves the JSON without the links and lists the files under the download button. To get new links, the user downloads the data again.
 - A file that storage does not have, for example an upload the user did not finish, gets no link.
 
+### Field encryption (MEDI-166)
+
+- The API encrypts the free text and identity columns before it writes them: profile name, date of birth and year review intro; report title, note, narrative, translations, doctor questions and error; episode name, note and summary; finding title and body; file names; assistant question and answer.
+- The cipher is AES-256-GCM from `node:crypto`, with a new random nonce for each value. A stored value reads `v1:<key id>:<nonce>:<ciphertext>:<tag>`. A changed value fails to decrypt and the API answers 500. It never shows the ciphertext.
+- Each user has one random data key. The table `user_keys` holds it wrapped by a master key from the environment (`DATA_KEY_V1`). The master key is never in the database or the repository. The API and the scripts never log it, and DEPLOY.md never puts it on a command line.
+- A copy of the database without the master key shows none of the encrypted columns. Other columns stay plaintext: the printed text of studies (including family history and the signing doctor), follow-up text, marker names, lab names, and the sign-in email in Supabase Auth. Supabase also encrypts the disk, but that does not help when the service role key, a backup or a query leaks.
+- Marker values, units, ranges, statuses, scores, lab names, dates and the printed text of studies stay plaintext. Trends, scoring and the operator counts read them in SQL.
+- The API decrypts in memory. Pages, the doctor share page, the CSV download and the JSON data download show plaintext, as before.
+- Account deletion removes the user key in the same transaction. A database copy taken after the deletion cannot read that user's ciphertext. A backup taken before the deletion still holds the wrapped key, so with the master key it stays readable until the backup expires.
+- Clear chat, profile deletion and account deletion store null in the question and answer columns, not an empty text.
+- Error lines in the log, in `jobs.error` and from the operator scripts keep the failed SQL and the database message. They never keep the query values, so no value and no ciphertext reaches a log.
+
 ## Rule 10 timeline
 
 Rule 10 covers the data of a child, which is a person under 18.

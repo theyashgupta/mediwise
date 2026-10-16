@@ -13,6 +13,7 @@ import {
   profiles,
   reports,
 } from "../../db/schema.js";
+import { cipherFor } from "../../db/user-keys.js";
 import type { AuthEnv } from "../../middleware/auth.js";
 import { giveConsents } from "../consents/index.js";
 import { adminRoutes } from "./admin.routes.js";
@@ -80,7 +81,7 @@ beforeAll(async () => {
         sourceKind: "pdf",
         status: "failed",
         title: reportTitle,
-        error: "This file is already in your reports.",
+        error: (await cipherFor(userB)).encrypt("This file is already in your reports."),
         createdAt: new Date(Date.now() - 120_000),
       },
     ])
@@ -144,7 +145,7 @@ beforeAll(async () => {
   const question = (charged: boolean, date: string) => ({
     userId: userA,
     question: questionText,
-    answer: { sentences: [] },
+    answer: JSON.stringify({ sentences: [] }),
     charged,
     createdAt: day(date),
   });

@@ -25,6 +25,8 @@
     "db:seed-history": "tsx --conditions=development --env-file-if-exists=.env src/db/seed-history.ts",
     "db:reread-reports": "tsx --conditions=development --env-file-if-exists=.env src/db/reread-reports.ts",
     "db:backfill-titles": "tsx --conditions=development --env-file-if-exists=.env src/db/backfill-report-titles.ts",
+    "db:encrypt-backfill": "tsx --conditions=development src/db/encrypt-backfill.ts",
+    "db:rewrap-keys": "tsx --conditions=development src/db/rewrap-keys.ts",
     "credits:grant": "tsx --conditions=development --env-file-if-exists=.env src/db/grant-credits.ts",
     "eval:mapping": "tsx --conditions=development src/eval/eval-mapping.ts",
     "eval:extraction": "tsx --conditions=development --env-file-if-exists=.env src/eval/eval-extraction.ts",

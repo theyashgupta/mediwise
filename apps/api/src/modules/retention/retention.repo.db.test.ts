@@ -121,7 +121,11 @@ test("the sweep deletes cleared questions after 90 days but keeps a charged one 
   }
   const [question] = await db
     .insert(assistantQuestions)
-    .values({ userId: live, question: "What was my HbA1c?", answer: { sentences: [] } })
+    .values({
+      userId: live,
+      question: "What was my HbA1c?",
+      answer: JSON.stringify({ sentences: [] }),
+    })
     .returning({ id: assistantQuestions.id });
 
   await deleteClearedQuestions(daysAgo(90));

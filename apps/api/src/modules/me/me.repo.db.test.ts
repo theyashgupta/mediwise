@@ -9,10 +9,20 @@ import {
   deletionLog,
   jobs,
   profiles,
+  reportFiles,
   reports,
+  userKeys,
 } from "../../db/schema.js";
 import { giveConsents } from "../consents/index.js";
-import { deleteAllByOwner, exportByOwner } from "./me.repo.js";
+import { cipherFor } from "../../db/user-keys.js";
+import { ensureSelfProfile } from "../profiles/index.js";
+import {
+  deleteAllByOwner,
+  exportByOwner,
+  findSelfName,
+  listFilesByOwner,
+  updateSelfName,
+} from "./me.repo.js";
 
 async function ownerWithQuestions(questions: string[]) {
   const userId = randomUUID();
@@ -25,7 +35,9 @@ async function ownerWithQuestions(questions: string[]) {
       userId,
       profileId: profile!.id,
       question,
-      answer: { sentences: [{ text: "Your first report is in MediWise.", cites: [] }] },
+      answer: JSON.stringify({
+        sentences: [{ text: "Your first report is in MediWise.", cites: [] }],
+      }),
       refusalKind: question.includes("worry") ? "worry" : null,
     });
   }
@@ -81,8 +93,8 @@ test("account deletion wipes the text of every question, keeps usage, cost and c
   for (const row of left) {
     expect(row).toMatchObject({
       profileId: null,
-      question: "",
-      answer: { sentences: [] },
+      question: null,
+      answer: null,
       refusalKind: null,
       charged: true,
       costCents: 0.17,
@@ -116,6 +128,50 @@ test("consent rows go out with the data download, go away with the account, and 
   expect((await exportByOwner(owner)).consents).toEqual([]);
   const [row] = await db.select().from(deletionLog).where(eq(deletionLog.userIdHash, userIdHash));
   expect(row?.counts.consents).toBe(3);
+});
+
+test("the self name is stored encrypted and the data download returns profiles in plaintext", async () => {
+  const userId = randomUUID();
+  await ensureSelfProfile(userId, "asha@example.com");
+  const cipher = await cipherFor(userId);
+  const [profile] = await db
+    .update(profiles)
+    .set({
+      dateOfBirth: cipher.encrypt("1984-03-02"),
+      yearReviewIntro: cipher.encryptJson({ hash: "h", sentences: ["Your year in one line."] }),
+    })
+    .where(eq(profiles.ownerUserId, userId))
+    .returning({ id: profiles.id });
+
+  expect(await updateSelfName(userId, "Asha Rao")).toBe("Asha Rao");
+  expect(await findSelfName(userId)).toBe("Asha Rao");
+  const [raw] = await db.select().from(profiles).where(eq(profiles.id, profile!.id));
+  for (const column of [raw!.name, raw!.dateOfBirth, raw!.yearReviewIntro]) {
+    expect(column).toMatch(/^v1:/);
+  }
+
+  const { profiles: exported } = await exportByOwner(userId);
+  expect(exported[0]).toMatchObject({
+    name: "Asha Rao",
+    dateOfBirth: "1984-03-02",
+    yearReviewIntro: { hash: "h", sentences: ["Your year in one line."] },
+  });
+});
+
+test("account deletion removes the user's data key, so a leftover copy of the ciphertext can never be read", async () => {
+  const userId = randomUUID();
+  await ensureSelfProfile(userId, "asha@example.com");
+  const [{ name: copy }] = (await db
+    .select({ name: profiles.name })
+    .from(profiles)
+    .where(eq(profiles.ownerUserId, userId))) as [{ name: string }];
+  expect(await db.select().from(userKeys).where(eq(userKeys.userId, userId))).toHaveLength(1);
+
+  await deleteAllByOwner(userId, { userIdHash: randomUUID(), files: 0 });
+
+  expect(await db.select().from(userKeys).where(eq(userKeys.userId, userId))).toHaveLength(0);
+  const fresh = await cipherFor(userId);
+  expect(() => fresh.decrypt(copy)).toThrow("another data key");
 });
 
 test("account deletion leaves no jobs row for the user, in any status, and keeps the jobs of another user", async () => {
@@ -155,4 +211,29 @@ test("account deletion leaves no jobs row for the user, in any status, and keeps
       ),
     );
   expect(left).toEqual([{ userId: other }]);
+});
+
+test("the file list of the data download names each file as uploaded, not as stored ciphertext", async () => {
+  const userId = randomUUID();
+  await ensureSelfProfile(userId, "asha@example.com");
+  const cipher = await cipherFor(userId);
+  const [profile] = await db
+    .select({ id: profiles.id })
+    .from(profiles)
+    .where(eq(profiles.ownerUserId, userId));
+  const [report] = await db
+    .insert(reports)
+    .values({ profileId: profile!.id, sourceKind: "pdf", status: "done" })
+    .returning({ id: reports.id });
+  await db.insert(reportFiles).values({
+    reportId: report!.id,
+    storagePath: `${userId}/${report!.id}/0.pdf`,
+    mime: "application/pdf",
+    size: 1,
+    name: cipher.encrypt("asha-cbc.pdf"),
+  });
+
+  expect(await listFilesByOwner(userId)).toEqual([
+    { reportId: report!.id, path: `${userId}/${report!.id}/0.pdf`, name: "asha-cbc.pdf" },
+  ]);
 });
