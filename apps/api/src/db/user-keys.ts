@@ -156,3 +156,9 @@ export async function rewrapUserKeys(keys: MasterKeys = masterKeys) {
   }
   return rows.length;
 }
+
+/** Wraps every user key again under DATA_KEY_V2, and refuses while DATA_KEY_V2 is not set. */
+export async function rewrapToV2(keys: MasterKeys = masterKeys) {
+  if (keys.newest !== "v2") throw new Error("Set DATA_KEY_V2 before a rewrap.");
+  return rewrapUserKeys(keys);
+}

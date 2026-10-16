@@ -19,8 +19,6 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install --yes poppler-utils
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
-      # Prints the coverage summary of every package and fails when one drops below its threshold.
-      - run: pnpm coverage
       # Builds web and landing, and fails when a chunk grows over 10% against scripts/bundle-size.json.
       - run: pnpm size
 
@@ -51,8 +49,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # The suite never calls Claude: the API runs with CLAUDE_STUB=true and no ANTHROPIC_API_KEY.
       - run: supabase start --workdir apps/e2e
-      # The db tests run in their own database on the same local Supabase, never in the check job.
-      - run: pnpm test:db
+      # Prints the coverage summary of every package and fails when one drops below its threshold.
+      # The api coverage runs the unit and db tests together, the db tests in their own database on this Supabase.
+      - run: pnpm coverage
       - run: pnpm --filter @mediwise/e2e exec playwright install --with-deps chromium
       - run: pnpm e2e
       - if: failure()

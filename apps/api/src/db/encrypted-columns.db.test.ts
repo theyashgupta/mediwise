@@ -3,7 +3,13 @@ import { randomUUID } from "node:crypto";
 import { expect, test } from "vitest";
 import { cipherFor } from "./user-keys.js";
 import { db } from "./client.js";
-import { backfillTable, countPlaintext, encryptedColumns, rekeyRows } from "./encrypted-columns.js";
+import {
+  backfillTable,
+  countPlaintext,
+  encryptBackfill,
+  encryptedColumns,
+  rekeyRows,
+} from "./encrypted-columns.js";
 import {
   assistantQuestions,
   episodes,
@@ -139,9 +145,11 @@ test("the backfill encrypts every plaintext value in batches, a second run chang
     "legacy-500.pdf",
   );
 
-  expect(await backfillAll()).toBe(0);
+  const second = await encryptBackfill(undefined);
+  expect(Object.values(second.encrypted).every((rows) => rows === 0)).toBe(true);
+  expect(Object.values(second.plaintext).every((count) => count === 0)).toBe(true);
   expect(await stored(legacy)).toEqual(first);
-  expect(Object.values(await countPlaintext()).every((count) => count === 0)).toBe(true);
+  expect(await encryptBackfill("count")).toEqual({ encrypted: {}, plaintext: second.plaintext });
 });
 
 test("the count names each column that still holds plaintext", async () => {

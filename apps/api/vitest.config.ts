@@ -12,6 +12,7 @@ function testWorkers() {
 
 export default defineConfig({
   test: {
+    name: "unit",
     maxWorkers: testWorkers(),
     exclude: [...configDefaults.exclude, "**/*.db.test.ts"],
     env: {
