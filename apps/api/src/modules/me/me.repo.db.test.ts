@@ -1,9 +1,16 @@
 import { policyVersion } from "@mediwise/shared";
 import { randomUUID } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { eq, or, sql } from "drizzle-orm";
 import { expect, test } from "vitest";
 import { db } from "../../db/client.js";
-import { assistantQuestions, consentRecords, deletionLog, profiles } from "../../db/schema.js";
+import {
+  assistantQuestions,
+  consentRecords,
+  deletionLog,
+  jobs,
+  profiles,
+  reports,
+} from "../../db/schema.js";
 import { giveConsents } from "../consents/index.js";
 import { deleteAllByOwner, exportByOwner } from "./me.repo.js";
 
@@ -109,4 +116,43 @@ test("consent rows go out with the data download, go away with the account, and 
   expect((await exportByOwner(owner)).consents).toEqual([]);
   const [row] = await db.select().from(deletionLog).where(eq(deletionLog.userIdHash, userIdHash));
   expect(row?.counts.consents).toBe(3);
+});
+
+test("account deletion leaves no jobs row for the user, in any status, and keeps the jobs of another user", async () => {
+  const owner = await ownerWithQuestions([]);
+  const other = randomUUID();
+  const [profile] = await db
+    .select({ id: profiles.id })
+    .from(profiles)
+    .where(eq(profiles.ownerUserId, owner));
+  const [report] = await db
+    .insert(reports)
+    .values({ profileId: profile!.id, sourceKind: "pdf" })
+    .returning({ id: reports.id });
+  const payload = { reportId: report!.id, userId: owner };
+  await db.insert(jobs).values([
+    ...(["queued", "running", "paused_budget", "done", "failed"] as const).map((status) => ({
+      kind: "process_report",
+      userId: owner,
+      payload,
+      status,
+      error: status === "failed" ? "Claude could not read page 2" : null,
+    })),
+    { kind: "process_report", payload: { reportId: report!.id } },
+    { kind: "process_report", userId: other, payload: { reportId: randomUUID(), userId: other } },
+  ]);
+
+  await deleteAllByOwner(owner, { userIdHash: `hash-${owner}`, files: 0 });
+
+  const left = await db
+    .select({ userId: jobs.userId })
+    .from(jobs)
+    .where(
+      or(
+        eq(jobs.userId, owner),
+        eq(jobs.userId, other),
+        sql`${jobs.payload}->>'reportId' = ${report!.id}`,
+      ),
+    );
+  expect(left).toEqual([{ userId: other }]);
 });

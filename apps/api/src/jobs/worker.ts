@@ -4,6 +4,7 @@ import { jobs } from "../db/schema.js";
 import { log } from "../middleware/logger.js";
 import { logAlerts } from "../modules/admin/index.js";
 import { type ReportUsage, reportUsage, usageTotals } from "../modules/extraction/index.js";
+import { sweepIfDue } from "../modules/retention/index.js";
 import { parkIfOverBudget, resumeIfUnderBudget } from "./budget.js";
 import { failProcessReport, handleProcessReport } from "./process-report.job.js";
 
@@ -102,6 +103,7 @@ async function tick() {
   try {
     await resumeIfUnderBudget();
     await logAlerts();
+    await sweepIfDue();
     const job = await claimJob();
     if (job && !(await parkIfOverBudget(job))) await runJob(job);
   } catch (error) {
@@ -110,7 +112,7 @@ async function tick() {
 }
 
 /**
- * Polls the `jobs` table every 5 seconds and runs one job at a time.
+ * Polls the `jobs` table every 5 seconds and runs one job at a time, and runs the retention sweep once per hour.
  *
  * @remarks
  * `stop` lets the job in hand finish, so a deploy does not leave it for the 10 minute crash recovery.

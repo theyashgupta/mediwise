@@ -478,9 +478,11 @@ export async function requeueFailedReport(ownerUserId: string, id: string) {
       .returning({ id: reports.id });
     if (updated.length === 0) return;
     await tx.delete(jobs).where(unfinishedJobsOf([id]));
-    await tx
-      .insert(jobs)
-      .values({ kind: "process_report", payload: { reportId: id, userId: ownerUserId } });
+    await tx.insert(jobs).values({
+      kind: "process_report",
+      userId: ownerUserId,
+      payload: { reportId: id, userId: ownerUserId },
+    });
   });
 }
 
@@ -549,9 +551,11 @@ export async function queueDraftReport(ownerUserId: string, id: string) {
       .where(and(eq(reports.id, id), eq(reports.status, "draft"), ownedBy(ownerUserId)))
       .returning({ id: reports.id });
     if (updated.length === 0) return;
-    await tx
-      .insert(jobs)
-      .values({ kind: "process_report", payload: { reportId: id, userId: ownerUserId } });
+    await tx.insert(jobs).values({
+      kind: "process_report",
+      userId: ownerUserId,
+      payload: { reportId: id, userId: ownerUserId },
+    });
   });
 }
 
