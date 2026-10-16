@@ -14,7 +14,7 @@ import {
   userKeys,
 } from "../../db/schema.js";
 import { giveConsents } from "../consents/index.js";
-import { cipherFor } from "../../lib/user-keys.js";
+import { cipherFor } from "../../db/user-keys.js";
 import { ensureSelfProfile } from "../profiles/index.js";
 import {
   deleteAllByOwner,

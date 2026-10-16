@@ -1,6 +1,6 @@
 import { type SQL, sql } from "drizzle-orm";
-import { isEncrypted } from "../lib/crypto.js";
-import { type Cipher, cipherFor } from "../lib/user-keys.js";
+import { encryptedShape, fieldPrefix, isEncrypted } from "../lib/crypto.js";
+import { type Cipher, cipherFor } from "./user-keys.js";
 import { db } from "./client.js";
 
 const batchSize = 500;
@@ -31,7 +31,7 @@ type Row = Record<string, string | null> & { id: string; owner: string };
 
 const column = (name: string) => sql`t.${sql.identifier(name)}`;
 const plaintext = (name: string) =>
-  sql`(${column(name)} is not null and ${column(name)} not like 'v1:%')`;
+  sql`(${column(name)} is not null and ${column(name)} !~ ${encryptedShape})`;
 const selectRows = ({ table, owner, columns }: Entry, where: SQL) =>
   sql`select t.id, ${sql.raw(owner)} as owner, ${sql.join(columns.map(column), sql`, `)}
     from ${sql.identifier(table)} t where ${where} order by t.id`;
@@ -115,10 +115,10 @@ export async function countPlaintext() {
  */
 export async function rekeyRows(executor: Executor, from: Cipher, owner: string) {
   const to = await cipherFor(owner);
-  const prefix = `v1:${from.keyId}:%`;
+  const prefix = `${fieldPrefix}${from.keyId}:`;
   for (const entry of encryptedColumns) {
     const underFrom = sql.join(
-      entry.columns.map((name) => sql`${column(name)} like ${prefix}`),
+      entry.columns.map((name) => sql`${column(name)} like ${`${prefix}%`}`),
       sql` or `,
     );
     const rows = (await executor.execute<Row>(
@@ -127,7 +127,7 @@ export async function rekeyRows(executor: Executor, from: Cipher, owner: string)
     for (const row of rows) {
       const changes = entry.columns.flatMap((name) => {
         const value = row[name];
-        return value?.startsWith(`v1:${from.keyId}:`)
+        return value?.startsWith(prefix)
           ? [{ name, from: value, to: to.encrypt(from.decrypt(value)) }]
           : [];
       });

@@ -60,3 +60,9 @@ test("a failed query logs its SQL and the database message, never its params", (
     'Failed query: update "profiles" set "name" = $1: value too long',
   );
 });
+
+test("a failed query whose SQL holds $& still logs no params in the stack", () => {
+  const lines = captured("error");
+  log.error(new DrizzleQueryError("select '$&' as x", ["secret-ciphertext"], new Error("boom")));
+  expect(lines[0]).not.toContain("secret-ciphertext");
+});

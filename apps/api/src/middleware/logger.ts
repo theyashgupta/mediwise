@@ -42,7 +42,7 @@ export function redact(arg: unknown): unknown {
   if (!(arg instanceof Error)) return arg;
   const message = errorMessage(arg);
   const line = redact(`${arg.name}: ${message.slice(0, maxMessage)}`);
-  const stack = (arg.stack ?? "").replace(arg.message, message);
+  const stack = (arg.stack ?? "").replace(arg.message, () => message);
   return env.NODE_ENV === "production" ? line : `${line}\n${redact(stack)}`;
 }
 

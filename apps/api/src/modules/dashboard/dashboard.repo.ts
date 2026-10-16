@@ -1,7 +1,7 @@
 import { and, asc, count, desc, eq, inArray, isNotNull, ne, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import { findings, profiles, reportMarkers, reports } from "../../db/schema.js";
-import { cipherFor } from "../../lib/user-keys.js";
+import { cipherFor } from "../../db/user-keys.js";
 import { openReport, reportFileNames } from "../reports/index.js";
 
 const reportDate = sql<string>`coalesce(${reports.collectedAt}, (${reports.createdAt} at time zone 'UTC')::date)::text`;

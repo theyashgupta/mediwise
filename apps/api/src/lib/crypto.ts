@@ -1,7 +1,12 @@
 import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 
 const fieldVersion = "v1";
-const fieldPrefix = `${fieldVersion}:`;
+export const fieldPrefix = `${fieldVersion}:`;
+const tagLength = 16;
+
+export const encryptedShape =
+  "^v1:[A-Za-z0-9_-]{8}:[A-Za-z0-9_-]{16}:[A-Za-z0-9_-]*:[A-Za-z0-9_-]{22}$";
+const encryptedPattern = new RegExp(encryptedShape);
 const algorithm = "aes-256-gcm";
 
 export type DataKey = { id: string; key: Buffer };
@@ -28,7 +33,7 @@ function seal(key: Buffer, plaintext: Buffer) {
  */
 function open(key: Buffer, [nonce, ciphertext, tag]: string[]) {
   try {
-    const decipher = createDecipheriv(algorithm, key, decode(nonce!));
+    const decipher = createDecipheriv(algorithm, key, decode(nonce!), { authTagLength: tagLength });
     decipher.setAuthTag(decode(tag!));
     return Buffer.concat([decipher.update(decode(ciphertext!)), decipher.final()]);
   } catch {
@@ -60,8 +65,13 @@ export function unwrapKey(wrapped: string, masters: ReadonlyMap<string, Buffer>)
   return open(master, parts);
 }
 
-/** Tells whether a stored value is ciphertext of this format. */
-export const isEncrypted = (value: string) => value.startsWith(fieldPrefix);
+/**
+ * Tells whether a stored value has the full shape of ciphertext.
+ *
+ * @remarks
+ * A note the user wrote may start with "v1:", so the prefix alone would make the backfill skip it.
+ */
+export const isEncrypted = (value: string) => encryptedPattern.test(value);
 
 /** Encrypts one field value as `v1:<keyId>:<nonce>:<ciphertext>:<tag>`. */
 export function encryptField({ id, key }: DataKey, text: string) {
@@ -76,7 +86,7 @@ export function encryptField({ id, key }: DataKey, text: string) {
  * prefix and another key id fails closed.
  */
 export function decryptField({ id, key }: DataKey, value: string) {
-  if (!isEncrypted(value)) return value;
+  if (!value.startsWith(fieldPrefix)) return value;
   const [, keyId, ...parts] = value.split(":");
   if (parts.length !== 3) throw new CipherError("An encrypted value is malformed.");
   if (keyId !== id) throw new CipherError("An encrypted value belongs to another data key.");

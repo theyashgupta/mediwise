@@ -1,6 +1,6 @@
 import fixture from "@mediwise/engine/fixtures/dense-history.json" with { type: "json" };
 import { derived, type EngineProfile, type EngineValue, runEngine } from "@mediwise/engine";
-import { cipherFor } from "../lib/user-keys.js";
+import { cipherFor } from "./user-keys.js";
 import { db } from "./client.js";
 import { profiles, reportMarkers, reports } from "./schema.js";
 

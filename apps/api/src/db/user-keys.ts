@@ -1,7 +1,7 @@
 import { eq, not, like } from "drizzle-orm";
 import { env } from "../config/env.js";
-import { db } from "../db/client.js";
-import { episodes, profiles, reports, userKeys } from "../db/schema.js";
+import { db } from "./client.js";
+import { episodes, profiles, reports, userKeys } from "./schema.js";
 import {
   type DataKey,
   decryptField,
@@ -9,9 +9,9 @@ import {
   newDataKey,
   unwrapKey,
   wrapKey,
-} from "./crypto.js";
+} from "../lib/crypto.js";
 
-export type MasterKeys = { newest: string; byId: ReadonlyMap<string, Buffer> };
+type MasterKeys = { newest: string; byId: ReadonlyMap<string, Buffer> };
 
 export const masterKeys: MasterKeys = {
   newest: env.DATA_KEY_V2 ? "v2" : "v1",
@@ -32,6 +32,7 @@ export type Cipher = {
 
 const cacheLimit = 1000;
 const cache = new Map<string, DataKey>();
+const forgotten = new Map<string, number>();
 
 /**
  * Wraps one data key in the helpers the repos call.
@@ -39,7 +40,7 @@ const cache = new Map<string, DataKey>();
  * @remarks
  * Null and undefined pass through, so an optional field of a patch stays unset.
  */
-export function cipherOf(key: DataKey): Cipher {
+function cipherOf(key: DataKey): Cipher {
   const encrypt = <T extends string | null | undefined>(value: T) =>
     (value == null ? value : encryptField(key, value)) as T;
   const decrypt = <T extends string | null | undefined>(value: T) =>
@@ -61,11 +62,13 @@ export function cipherOf(key: DataKey): Cipher {
  *
  * @remarks
  * The insert does nothing on conflict and the row is read again, so two first calls at once agree on one key. Unwrapped
- * keys stay in memory for up to 1,000 users, the oldest dropped first.
+ * keys stay in memory for up to 1,000 users, the oldest dropped first. A key read while the account delete ran is not
+ * cached, so a deleted key never serves a later write.
  */
 async function dataKeyOf(userId: string) {
   const cached = cache.get(userId);
   if (cached) return cached;
+  const deletes = forgotten.get(userId);
   const select = () =>
     db
       .select()
@@ -87,6 +90,7 @@ async function dataKeyOf(userId: string) {
     row = (await select())!;
   }
   const key = { id: row.keyId, key: unwrapKey(row.wrappedKey, masterKeys.byId) };
+  if (forgotten.get(userId) !== deletes) return key;
   if (cache.size >= cacheLimit) cache.delete(cache.keys().next().value!);
   cache.set(userId, key);
   return key;
@@ -99,6 +103,7 @@ export async function cipherFor(userId: string) {
 /** Drops a user's key from memory, after the account delete removed its row. */
 export function forgetUserKey(userId: string) {
   cache.delete(userId);
+  forgotten.set(userId, (forgotten.get(userId) ?? 0) + 1);
 }
 
 async function ownerCipher(rows: Promise<{ owner: string }[]>) {

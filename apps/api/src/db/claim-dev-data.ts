@@ -1,8 +1,8 @@
 import { and, count, eq } from "drizzle-orm";
 import { z } from "zod";
 import { env } from "../config/env.js";
-import { log } from "../middleware/logger.js";
-import { cipherFor } from "../lib/user-keys.js";
+import { errorMessage, log } from "../middleware/logger.js";
+import { cipherFor } from "./user-keys.js";
 import { db } from "./client.js";
 import { rekeyRows } from "./encrypted-columns.js";
 import { profiles, reports } from "./schema.js";
@@ -14,7 +14,6 @@ const isSelfOf = (owner: string) => and(eq(profiles.ownerUserId, owner), eq(prof
  *
  * @remarks
  * The first sign-in creates an empty self profile, and one owner may have only one. That empty profile is deleted so the dev self profile, which holds the reports, takes its place.
- * The moved text is still under the dev user's key, so it is encrypted again with the user's key in the same transaction.
  */
 async function claimDevData(userId: string) {
   const devCipher = await cipherFor(env.DEV_USER_ID);
@@ -47,6 +46,11 @@ async function claimDevData(userId: string) {
 const userId = z
   .uuid()
   .parse(process.argv[2], { error: () => "Usage: pnpm db:claim-dev-data <supabase-user-id>" });
-const moved = await claimDevData(userId);
-log.info(`moved ${moved.length} profiles from ${env.DEV_USER_ID} to ${userId}`);
+try {
+  const moved = await claimDevData(userId);
+  log.info(`moved ${moved.length} profiles from ${env.DEV_USER_ID} to ${userId}`);
+} catch (error) {
+  log.error(errorMessage(error));
+  process.exitCode = 1;
+}
 await db.$client.end();

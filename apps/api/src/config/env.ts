@@ -59,12 +59,16 @@ const envSchema = z
     CASHFREE_ENV: z.enum(["sandbox", "production"]).default("sandbox"),
     PAYMENTS_WEBHOOK_URL: z.url().optional(),
     CASHFREE_STUB: z.stringbool().default(false),
-    DATA_KEY_V1: dataKeySchema,
+    DATA_KEY_V1: dataKeySchema.optional(),
     DATA_KEY_V2: dataKeySchema.optional(),
   })
   .refine(
     (e) => !e.PAYMENTS_ENABLED || (e.CASHFREE_APP_ID && e.CASHFREE_SECRET_KEY),
     "PAYMENTS_ENABLED=true needs CASHFREE_APP_ID and CASHFREE_SECRET_KEY.",
+  )
+  .refine(
+    (e) => e.DATA_KEY_V1 || e.DATA_KEY_V2,
+    "DATA_KEY_V1 is required. After a rotation DATA_KEY_V2 alone is enough.",
   )
   .refine(
     (e) => !(e.CLAUDE_STUB && e.NODE_ENV === "production"),

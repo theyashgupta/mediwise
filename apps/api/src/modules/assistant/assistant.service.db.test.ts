@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { beforeAll, beforeEach, expect, test, vi } from "vitest";
 import { db } from "../../db/client.js";
 import * as schema from "../../db/schema.js";
-import { cipherFor } from "../../lib/user-keys.js";
+import { cipherFor } from "../../db/user-keys.js";
 
 const edge = vi.hoisted(() => ({ create: vi.fn(), overBudget: false }));
 vi.mock("../../lib/anthropic.js", () => ({ anthropic: { messages: { create: edge.create } } }));

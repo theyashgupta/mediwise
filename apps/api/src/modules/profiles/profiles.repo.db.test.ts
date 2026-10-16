@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { expect, test } from "vitest";
 import { db } from "../../db/client.js";
 import { assistantQuestions, profiles } from "../../db/schema.js";
-import { cipherFor } from "../../lib/user-keys.js";
+import { cipherFor } from "../../db/user-keys.js";
 import {
   deleteProfile,
   findProfileById,

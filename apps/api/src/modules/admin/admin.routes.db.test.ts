@@ -13,7 +13,7 @@ import {
   profiles,
   reports,
 } from "../../db/schema.js";
-import { cipherFor } from "../../lib/user-keys.js";
+import { cipherFor } from "../../db/user-keys.js";
 import type { AuthEnv } from "../../middleware/auth.js";
 import { giveConsents } from "../consents/index.js";
 import { adminRoutes } from "./admin.routes.js";

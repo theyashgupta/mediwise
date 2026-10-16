@@ -1,9 +1,9 @@
 import { eq } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { expect, test } from "vitest";
-import { db } from "../db/client.js";
-import { userKeys } from "../db/schema.js";
-import { CipherError } from "./crypto.js";
+import { db } from "./client.js";
+import { userKeys } from "./schema.js";
+import { CipherError } from "../lib/crypto.js";
 import { cipherFor, forgetUserKey, masterKeys, rewrapUserKeys } from "./user-keys.js";
 
 const rowsOf = (userId: string) => db.select().from(userKeys).where(eq(userKeys.userId, userId));
@@ -18,6 +18,18 @@ test("a user's first encrypt stores one wrapped key, and later calls reuse it", 
   expect(rows).toHaveLength(1);
   expect(value.split(":")[1]).toBe(rows[0]!.keyId);
   expect(rows[0]!.wrappedKey).toMatch(/^v1\.[\w-]+\.[\w-]+\.[\w-]+$/);
+});
+
+test("a key read while the account delete runs is not cached, so the next call makes a new key", async () => {
+  const userId = randomUUID();
+  const reading = cipherFor(userId);
+  forgetUserKey(userId);
+  const stale = await reading;
+  await db.delete(userKeys).where(eq(userKeys.userId, userId));
+
+  const fresh = await cipherFor(userId);
+
+  expect(fresh.keyId).not.toBe(stale.keyId);
 });
 
 test("parallel first calls for one user agree on one key", async () => {

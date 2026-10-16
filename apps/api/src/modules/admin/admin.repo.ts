@@ -9,7 +9,7 @@ import {
   profiles,
   reports,
 } from "../../db/schema.js";
-import { cipherFor } from "../../lib/user-keys.js";
+import { cipherFor } from "../../db/user-keys.js";
 
 export type LedgerFilter = { from?: Date; to?: Date; userId?: string };
 type Reason = (typeof creditReason.enumValues)[number];

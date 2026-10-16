@@ -1,3 +1,4 @@
+import type { Narrative } from "@mediwise/shared";
 import {
   and,
   asc,
@@ -27,10 +28,9 @@ import {
   studies,
   studyMeasurements,
 } from "../../db/schema.js";
-import { type Cipher, cipherFor, cipherForProfile, cipherForReport } from "../../lib/user-keys.js";
+import { type Cipher, cipherFor, cipherForProfile, cipherForReport } from "../../db/user-keys.js";
 import { findCreditUsage, lockUserCredits } from "../credits/index.js";
 import type { StepUsage } from "../extraction/index.js";
-import type { Narrative } from "@mediwise/shared";
 
 const ownedBy = (ownerUserId: string) =>
   inArray(
@@ -252,7 +252,8 @@ export async function listStudies(reportId: string) {
     .where(eq(studies.reportId, reportId))
     .orderBy(reportFiles.pageIndex, studies.pageIndex);
   if (rows.length === 0) return [];
-  const cipher = (await cipherForReport(reportId))!;
+  const cipher = await cipherForReport(reportId);
+  if (!cipher) return [];
   const measurements = await db
     .select({
       studyId: studyMeasurements.studyId,

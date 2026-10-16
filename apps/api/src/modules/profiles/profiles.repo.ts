@@ -10,7 +10,7 @@ import {
   studies,
   studyMeasurements,
 } from "../../db/schema.js";
-import { type Cipher, cipherFor } from "../../lib/user-keys.js";
+import { type Cipher, cipherFor } from "../../db/user-keys.js";
 
 const profileColumns = {
   id: profiles.id,

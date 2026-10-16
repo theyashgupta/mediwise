@@ -19,7 +19,7 @@ import {
   studies,
   studyMeasurements,
 } from "../../db/schema.js";
-import { type Cipher, cipherFor, cipherForProfile } from "../../lib/user-keys.js";
+import { type Cipher, cipherFor, cipherForProfile } from "../../db/user-keys.js";
 import { findQuestionCounts, lockUserCredits, type QuestionCounts } from "../credits/index.js";
 import type { Snapshot } from "./assistant.context.js";
 

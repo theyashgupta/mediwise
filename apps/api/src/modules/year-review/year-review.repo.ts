@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import { type CachedSentences, profiles } from "../../db/schema.js";
-import { cipherForProfile } from "../../lib/user-keys.js";
+import { cipherForProfile } from "../../db/user-keys.js";
 
 export async function findIntro(profileId: string) {
   const [[row], cipher] = await Promise.all([

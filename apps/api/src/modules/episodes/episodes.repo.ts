@@ -1,7 +1,7 @@
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import { type CachedSentences, episodes, profiles, reports } from "../../db/schema.js";
-import { type Cipher, cipherFor, cipherForEpisode, cipherForProfile } from "../../lib/user-keys.js";
+import { type Cipher, cipherFor, cipherForEpisode, cipherForProfile } from "../../db/user-keys.js";
 
 const openEpisode =
   (cipher: Cipher) =>

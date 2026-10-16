@@ -2,7 +2,7 @@ import type { ReportLinkKind } from "@mediwise/shared";
 import { and, eq, inArray, ne, or, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import { profiles, reportLinks, reports } from "../../db/schema.js";
-import { cipherForReport } from "../../lib/user-keys.js";
+import { cipherForReport } from "../../db/user-keys.js";
 
 const visitDate = sql<string>`coalesce(${reports.collectedAt}, ${reports.createdAt}::date)::text`;
 

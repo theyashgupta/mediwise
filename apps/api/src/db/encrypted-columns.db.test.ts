@@ -1,7 +1,7 @@
 import { eq, inArray } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { expect, test } from "vitest";
-import { cipherFor } from "../lib/user-keys.js";
+import { cipherFor } from "./user-keys.js";
 import { db } from "./client.js";
 import { backfillTable, countPlaintext, encryptedColumns, rekeyRows } from "./encrypted-columns.js";
 import {
@@ -43,7 +43,7 @@ async function legacyRows(files: number) {
       profileId: profile!.id,
       sourceKind: "pdf",
       title: "Legacy title",
-      note: "Legacy note",
+      note: "v1: notes from the clinic",
       doctorQuestions: JSON.stringify(["Legacy question?"]),
     })
     .returning({ id: reports.id });
@@ -133,6 +133,7 @@ test("the backfill encrypts every plaintext value in batches, a second run chang
   const cipher = await cipherFor(legacy.userId);
   expect(cipher.decrypt(first.profile.name)).toBe("Legacy Asha");
   expect(cipher.decrypt(first.profile.dateOfBirth)).toBe("1984-03-02");
+  expect(cipher.decrypt(first.report.note)).toBe("v1: notes from the clinic");
   expect(cipher.decryptJson(first.report.doctorQuestions)).toEqual(["Legacy question?"]);
   expect(cipher.decrypt(first.files.find(({ pageIndex }) => pageIndex === 500)!.name)).toBe(
     "legacy-500.pdf",

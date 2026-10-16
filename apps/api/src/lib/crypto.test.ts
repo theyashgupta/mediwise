@@ -50,6 +50,18 @@ describe("field cipher", () => {
     expect(encryptField(key, "same")).not.toBe(encryptField(key, "same"));
   });
 
+  test("a value with a tag cut to 4 bytes fails closed", () => {
+    const parts = encryptField(key, "Asha Rao").split(":");
+    parts[4] = Buffer.from(parts[4]!, "base64url").subarray(0, 4).toString("base64url");
+    expect(() => decryptField(key, parts.join(":"))).toThrow(CipherError);
+  });
+
+  test("only a value of the full ciphertext shape counts as encrypted, so a note starting with v1: is plaintext", () => {
+    expect(isEncrypted(encryptField(key, "Asha"))).toBe(true);
+    expect(isEncrypted(encryptField(key, ""))).toBe(true);
+    expect(isEncrypted("v1: draft before the visit")).toBe(false);
+  });
+
   test("a value without the prefix is a legacy plaintext value and passes through", () => {
     expect(isEncrypted("Asha")).toBe(false);
     expect(decryptField(key, "Asha")).toBe("Asha");

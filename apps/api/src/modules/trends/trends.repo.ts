@@ -9,7 +9,7 @@ import {
   studies,
   studyMeasurements,
 } from "../../db/schema.js";
-import { cipherFor } from "../../lib/user-keys.js";
+import { cipherFor } from "../../db/user-keys.js";
 import { markerLabName, reportFileNames } from "../reports/index.js";
 
 const reportDate = sql`coalesce(${reports.collectedAt}, ${reports.createdAt}::date)`;

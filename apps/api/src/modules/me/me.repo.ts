@@ -15,7 +15,7 @@ import {
   reportMarkers,
   reports,
 } from "../../db/schema.js";
-import { cipherFor, forgetUserKey } from "../../lib/user-keys.js";
+import { cipherFor, forgetUserKey } from "../../db/user-keys.js";
 
 const ownedProfileIds = (ownerUserId: string) =>
   db.select({ id: profiles.id }).from(profiles).where(eq(profiles.ownerUserId, ownerUserId));

@@ -1,4 +1,4 @@
-import { log } from "../middleware/logger.js";
+import { errorMessage, log } from "../middleware/logger.js";
 import { findUserIdByEmail } from "../modules/credits/index.js";
 import { db } from "./client.js";
 import { denseHistoryReports, insertDenseHistory } from "./dense-history.js";
@@ -31,7 +31,7 @@ if (!email || !/^\d{4}-\d{2}-\d{2}$/.test(lastDate)) {
     );
     log.info(`seeded profile=${profileId} reports=${reportIds.length} user=${ownerUserId}`);
   } catch (error) {
-    log.error(error instanceof Error ? error.message : error);
+    log.error(errorMessage(error));
     process.exitCode = 1;
   }
 }

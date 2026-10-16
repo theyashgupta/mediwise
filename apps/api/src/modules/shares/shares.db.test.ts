@@ -4,7 +4,7 @@ import { expect, test } from "vitest";
 import { handleError } from "../../common/problem.js";
 import { db } from "../../db/client.js";
 import { profiles, reportMarkers, reports } from "../../db/schema.js";
-import { cipherFor } from "../../lib/user-keys.js";
+import { cipherFor } from "../../db/user-keys.js";
 import { sharedExportRoutes } from "./shares.routes.js";
 import { createShare, endShare } from "./shares.service.js";
 

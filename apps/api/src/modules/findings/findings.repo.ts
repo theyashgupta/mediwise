@@ -9,7 +9,7 @@ import {
   studies,
   studyMeasurements,
 } from "../../db/schema.js";
-import { cipherForReport } from "../../lib/user-keys.js";
+import { cipherForReport } from "../../db/user-keys.js";
 
 const earlierVisitLimit = 12;
 const visitDate = sql<string>`coalesce(${reports.collectedAt}, ${reports.createdAt}::date)::text`;

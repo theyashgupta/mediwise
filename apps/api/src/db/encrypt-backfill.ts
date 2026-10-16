@@ -2,9 +2,13 @@ import { log } from "../middleware/logger.js";
 import { db } from "./client.js";
 import { backfillTable, countPlaintext, encryptedColumns } from "./encrypted-columns.js";
 
-const countOnly = process.argv[2] === "count";
+const [mode] = process.argv.slice(2);
 
 try {
+  if (mode !== undefined && mode !== "count") {
+    throw new Error("Usage: pnpm db:encrypt-backfill [count]");
+  }
+  const countOnly = mode === "count";
   if (!countOnly) {
     for (const entry of encryptedColumns) {
       log.info(`encrypted ${await backfillTable(entry)} rows of ${entry.table}`);

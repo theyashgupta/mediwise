@@ -168,12 +168,6 @@ export function askText(
 }
 
 /**
- * Asks Claude for a cited answer and checks it, with one retry that lists the problems.
- *
- * @remarks
- * The profile block carries a cache breakpoint, so a follow-up question within 5 minutes reads it from the cache.
- */
-/**
  * Turns the stored date of birth into an age in whole years on `today`, and drops the date.
  *
  * @remarks
@@ -187,6 +181,12 @@ export function withAge({ person, ...rest }: repo.StoredSnapshot, today: string)
   };
 }
 
+/**
+ * Asks Claude for a cited answer and checks it, with one retry that lists the problems.
+ *
+ * @remarks
+ * The profile block carries a cache breakpoint, so a follow-up question within 5 minutes reads it from the cache.
+ */
 export async function writeAnswer(
   context: AssistantContext,
   ask: string,
