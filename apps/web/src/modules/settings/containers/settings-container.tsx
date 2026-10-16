@@ -88,6 +88,7 @@ export function SettingsContainer() {
             <ProfileCsvContainer />
             <DataActions
               downloading={download.isPending}
+              files={download.data?.files ?? []}
               error={download.error?.message}
               onDownload={() => download.mutate()}
               onDelete={() => {

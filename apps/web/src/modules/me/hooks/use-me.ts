@@ -13,6 +13,7 @@ export function useMe() {
  * Account mutations: rename, download the data export, delete everything.
  *
  * @remarks
+ * The download saves the JSON without the file links, which stop working after 5 minutes.
  * A rename refreshes `profiles` too because the name is the self profile's name. A delete refetches nothing, because a refetch would create a new self profile for the deleted user.
  */
 export function useMeMutations() {
@@ -28,8 +29,13 @@ export function useMeMutations() {
     }),
     download: useMutation({
       mutationFn: exportMe,
-      onSuccess: (blob) =>
-        downloadFile(blob, `mediwise-export-${new Date().toISOString().slice(0, 10)}.json`),
+      onSuccess: (data) =>
+        downloadFile(
+          new Blob([JSON.stringify({ ...data, files: undefined }, null, 2)], {
+            type: "application/json",
+          }),
+          `mediwise-export-${new Date().toISOString().slice(0, 10)}.json`,
+        ),
     }),
     remove: useMutation({ mutationFn: deleteMe }),
   };
