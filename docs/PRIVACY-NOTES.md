@@ -51,7 +51,7 @@ This file records what MediWise does with consent, with the data of family membe
 - The row has the SHA-256 of the user id, the time, the scope (`account`) and the counts of profiles, reports, files and assistant questions. Rows from before MEDI-75 have no question count.
 - The row has no name, email address, date of birth or report value.
 - Row level security is on, with no policies. Only the API role and the service role can read the table.
-- The app never deletes a row, so each row stays for at least one year.
+- The retention sweep deletes a row 2 years after the deletion. Each row stays for at least one year and at most 2 years, so the policy line "We keep each deletion record for at least one year" stays true.
 - The data download (`GET /me/export`) reads nothing from this table.
 
 ### Visit notes
@@ -69,11 +69,35 @@ This file records what MediWise does with consent, with the data of family membe
 - The JSON data download holds every question with its answer that the user did not clear.
 - "Clear chat", profile deletion and account deletion remove the question text, the answer text and the refusal kind.
 - The row stays with the user id, the model, the token counts, the cost, the charged flag and the time. Profile and account deletion also remove the profile from the row.
+- The retention sweep deletes a cleared row 90 days after it was cleared. A charged row of an account that still has a profile stays, because questions left subtracts every charged question. A charged row of a deleted account goes after 90 days.
 - These counts keep the question quota, the daily limit and the monthly Claude spend correct. The kept row holds no text.
 - In the review month (`ASSISTANT_REVIEW=true`), an account asks only after it agrees to the review on the Ask page. `consent_records` keeps an `assistant_review` row with the time and the policy version.
 - The maintainer reads a sample of questions and answers with `pnpm --filter @mediwise/api assistant:review`. The sample holds only questions asked after the account agreed. The command never shows a profile name or an email.
 - Each verdict is a row in `assistant_reviews` with the question id, the verdict and the time. Account deletion removes the consent and keeps the verdict, which holds no text. The data download includes the consent.
 - Questions go to Anthropic, the same as report text. MediWise is built to follow the DPDP Act 2023 and Rules 2025. This note gives no legal advice.
+
+### Retention sweep (MEDI-167)
+
+- The job worker runs the sweep once per hour, inside its poll loop. No cron exists. The sweep runs only where `RUN_WORKER=true`.
+- `jobs`: a done or failed job goes 30 days after its last update. A job of the current calendar month stays until the month ends, because the Claude spend cap counts it. A queued, running or paused job never goes.
+- `jobs.error`: the sweep removes the text 7 days after the last update of the job. The error can quote report content.
+- `assistant_questions`: see Assistant questions.
+- `deletion_log`: see Deletion log.
+- Each sweep writes one log line with the four counts: `retention sweep jobs=<n> job_errors=<n> questions=<n> deletion_log=<n>`.
+
+### Jobs and account deletion (MEDI-167)
+
+- Each job has the owner's user id in `jobs.user_id`. Migration 0031 fills it for older jobs from the payload or the report owner.
+- Account deletion deletes every job of the user, in each status. Before MEDI-167, done and failed jobs stayed.
+- The Claude spend of the current month then leaves out the jobs of a deleted account. The spend cap can let that much more spend through in that month.
+
+### Data download with files (MEDI-167)
+
+- `GET /me/export?files=1` returns the JSON download plus one download link for each original file that the user still has.
+- Each link is a Supabase Storage signed URL that works for 5 minutes. `createSignedDownloadUrls` in `apps/api/src/lib/storage.ts` fixes the time, and no caller can change it.
+- The link saves the file under the name the user uploaded. A file with no stored name keeps its storage name.
+- Settings saves the JSON without the links and lists the files under the download button. To get new links, the user downloads the data again.
+- A file that storage does not have, for example an upload the user did not finish, gets no link.
 
 ## Rule 10 timeline
 
@@ -91,7 +115,7 @@ The checkbox above is the first step. It does not verify who the parent or guard
 3. **An account owner under 18.** Since MEDI-165, sign-up asks the user to confirm an age of 18 or older. The app does not check the age. Decide whether a self-declared age is enough.
 4. **A child who turns 18.** The guardian record stays on the profile. Decide whether the app asks the owner to confirm the person's own permission at 18.
 5. **Unconfirmed profiles.** A profile without a permission time can still get new reports. Decide whether uploads stop until the owner confirms.
-6. **How long the deletion log stays.** The minimum is one year and the app keeps rows with no end date. Decide on a maximum and add a job that deletes older rows.
+6. **How long the deletion log stays.** Decided in MEDI-167: 2 years. The retention sweep deletes older rows (see Deletion log).
 7. **The hash in the deletion log.** A plain SHA-256 lets anyone with a user id find that user's row. Decide whether a keyed hash (a new secret) is needed.
 8. **Removing one family profile.** Only account deletion writes a log row. Decide whether removing one profile also writes a row.
 9. **EU and UK representatives.** GDPR Article 27 and the UK GDPR need a representative for a controller outside the EU and the UK. None is appointed. The policy names none.
