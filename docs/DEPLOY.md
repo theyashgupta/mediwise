@@ -47,7 +47,7 @@ Never commit a secret. Put API values in the Render dashboard only. The web valu
 | `SUPABASE_SERVICE_ROLE_KEY` | yes | Service role key of `mediwise-prod`. Server only. |
 | `ANTHROPIC_API_KEY` | yes | Anthropic key for production. Without it, every report fails. |
 | `ANTHROPIC_USER_SALT` | yes | Random string of 32 or more characters, for example `openssl rand -hex 32`. Server only. Each Claude call sends an HMAC-SHA256 of the user id with this key as `metadata.user_id`. When it is empty, the calls send no user id. Do not change it, because a new value gives each user a new id at Anthropic. |
-| `DATA_KEY_V1` | yes | Master key of the field encryption: 32 random bytes as base64, from `openssl rand -base64 32`. Server only. The API does not start without it. Keep a copy in the password manager: without this key, the encrypted columns cannot be read again. Never change it in place. To rotate, see "Field encryption (MEDI-166)". |
+| `DATA_KEY_V1` | yes, until a rotation ends | Master key of the field encryption: 32 random bytes as base64, from `openssl rand -base64 32`. Server only. The API does not start without it. Keep a copy in the password manager: without this key, the encrypted columns cannot be read again. Never change it in place. To rotate, see "Field encryption (MEDI-166)". |
 | `DATA_KEY_V2` | no | Newer master key during a rotation, same format. When it is set, new user keys are wrapped with it. |
 | `CORS_ORIGINS` | yes | `https://app.mediwise.theyashgupta.me,https://mediwise.pages.dev`, set by `render.yaml`. Origins that CORS allows, separated by commas. The first one is the main app origin, and Cashfree sends the buyer back there. |
 | `WEB_ORIGIN` | no | Old name for one CORS origin. The API reads it only when `CORS_ORIGINS` is empty. Remove it after one release. |
@@ -486,22 +486,22 @@ The API encrypts the free text and identity columns with AES-256-GCM: profile na
 
 Migration `0032_encrypt_columns` adds `user_keys` and changes JSON and date columns to text. It needs `0031_job_owner` of MEDI-167 first. The API before MEDI-166 cannot read the summary of an episode from a text column, so its assistant answers fail until the new API runs. Do these steps in this order on `mediwise-prod`, one after the other:
 
-1. Make the master key with `openssl rand -base64 32`. Put it in the password manager. Set it as `DATA_KEY_V1` on the Render service `mediwise-api`, without a deploy. Never put it in the repository, a log or a ticket.
+1. Make the master key with `openssl rand -base64 32`. Put it in the password manager. Set it as `DATA_KEY_V1` on the Render service `mediwise-api`, without a deploy. Add the same line to `apps/api/.env.prod`. Never put it in the repository, a log, a ticket or a command line.
 2. Apply migration `0032`. Its timestamp is later than `0031`, so Drizzle applies it after `0031` also on a database that already has `0031`.
 3. Deploy the API and the web at once. From now on, every write to an encrypted column is ciphertext. A row written before stays plaintext and the API still reads it.
 4. Encrypt the existing rows:
 
    ```sh
    cd apps/api
-   (set -a; . ./.env.prod; set +a; DATA_KEY_V1=<the key> pnpm db:encrypt-backfill)
+   (set -a; . ./.env.prod; set +a; pnpm db:encrypt-backfill)
    ```
 
-   It encrypts 500 rows at a time and logs one line for each table with the number of rows. It skips each value that starts with `v1:`, so you can run it again after a failure.
+   It encrypts 500 rows at a time and logs one line for each table with the number of rows. It skips each value that is already ciphertext, so you can run it again after a failure. The command reads no `.env` file. If `.env.prod` has no `DATA_KEY_V1`, it stops at the start.
 
 5. Make sure that no plaintext is left:
 
    ```sh
-   (set -a; . ./.env.prod; set +a; DATA_KEY_V1=<the key> pnpm db:encrypt-backfill count)
+   (set -a; . ./.env.prod; set +a; pnpm db:encrypt-backfill count)
    ```
 
    Each line must end in `=0`, and the command must exit 0. It exits 1 while a plaintext value is left. Then run step 4 again.
@@ -510,9 +510,9 @@ Do the same steps on `mediwise-dev` with its own key. Do not use the key of `med
 
 To rotate the master key:
 
-1. Make a new key and set it as `DATA_KEY_V2`. Keep `DATA_KEY_V1`. Deploy.
-2. Run `pnpm db:rewrap-keys` with both keys. It wraps each user key again with `DATA_KEY_V2` and logs the number of keys. It changes no encrypted row. Run it again until it logs 0.
-3. Remove `DATA_KEY_V1` only after step 2 logs 0. A user key wrapped by a master key that the API does not have cannot be read. The API then answers 500 for that user and shows no data.
+1. Make a new key and set it as `DATA_KEY_V2` on Render and in `.env.prod`. Keep `DATA_KEY_V1`. Deploy.
+2. Run `(set -a; . ./.env.prod; set +a; pnpm db:rewrap-keys)`. It wraps each user key again with `DATA_KEY_V2` and logs the number of keys. It changes no encrypted row. It refuses to run without `DATA_KEY_V2`. Run it again until it logs 0.
+3. Remove `DATA_KEY_V1` only after step 2 logs 0. The API starts with `DATA_KEY_V2` alone. A user key wrapped by a master key that the API does not have cannot be read. The API then answers 500 for that user and shows no data.
 
 ## Roll back
 
@@ -521,7 +521,7 @@ To rotate the master key:
 - API: Render, `mediwise-api`, Events. Open the last good deploy, click Rollback.
 - Database: Drizzle has no down migrations. Write a new migration that reverses the change, then apply it. Before a risky migration, take a manual backup (see Backups).
 - A rollback of the API does not undo a migration. Keep migrations additive, so the previous API version still runs on the new schema.
-- Do not roll the API back to a version before MEDI-166 after the encryption backfill ran. That version cannot read the encrypted columns.
+- Do not roll the API back to a version before MEDI-166 after its deploy (step 3 of "Field encryption"). From that deploy on, every write is ciphertext, and the old version cannot read it.
 
 ## Backups
 
@@ -587,8 +587,8 @@ Run these from `apps/api` with the target environment loaded.
 | `pnpm db:reread-reports` | Reads every `done` report again with Claude. It classifies the pages of every file again (one Haiku call per file) and stores the new classes. Add `--keep-classes` to use the stored classes. One Claude extraction and one narrative call per report. A report that fails stays `done` with its old data. |
 | `pnpm db:backfill-titles` | Sets the title of every `done` report from the title rule: the dates, then the blood panel and the study types. It does not change a title that the user wrote. It makes no Claude call. |
 | `pnpm db:claim-dev-data <user-id>` | Moves every profile of `DEV_USER_ID` to a Supabase user, and encrypts the moved text again with the key of that user. Dev only. |
-| `pnpm db:encrypt-backfill` | Encrypts each plaintext value of the encrypted columns, 500 rows at a time. It skips values that start with `v1:`. Add `count` to only count the plaintext values left. It exits 1 while a value is left. |
-| `pnpm db:rewrap-keys` | Wraps each user key again with the newest master key (`DATA_KEY_V2` when it is set). It changes no encrypted row. |
+| `pnpm db:encrypt-backfill` | Encrypts each plaintext value of the encrypted columns, 500 rows at a time. It skips values that are already ciphertext. Add `count` to only count the plaintext values left. It exits 1 while a value is left. It reads no `.env` file. |
+| `pnpm db:rewrap-keys` | Wraps each user key again with `DATA_KEY_V2`. It changes no encrypted row. It refuses to run without `DATA_KEY_V2`. It reads no `.env` file. |
 
 ## Logs
 
