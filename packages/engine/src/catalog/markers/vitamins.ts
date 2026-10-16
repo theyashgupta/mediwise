@@ -76,7 +76,7 @@ export const vitaminMarkers: Marker[] = [
     precision: 0,
     description: "A vitamin for nerves and red blood cells, found in animal foods.",
     whatItIs:
-      "The body needs vitamin B12 to make red blood cells and to keep nerves healthy. It comes almost only from animal foods such as milk, curd, eggs, fish and meat.",
+      "The body needs vitamin B12 to make red blood cells and to keep nerves healthy. It comes almost only from animal foods such as milk, yogurt (curd), eggs, fish and meat.",
     whyItMatters:
       "Low B12 causes tiredness, tingling, memory problems and large-cell anaemia, and nerve damage can become permanent. The BSH treats under 200 pg/mL as likely deficient and 200 to 300 as a grey zone.",
     whatMovesIt:

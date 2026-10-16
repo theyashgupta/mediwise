@@ -1,6 +1,6 @@
 {
-  "id": "de20adc0-ff83-4b19-a592-1c8f16b5a914",
-  "prevId": "0b042f6d-2586-4a04-8e46-5eec3c308605",
+  "id": "fbac931d-fb92-4c12-bf48-83c98417dbf3",
+  "prevId": "9663957d-e435-4c59-86ca-75ceca01fca5",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -147,8 +147,12 @@
           "name": "assistant_questions_profile_id_profiles_id_fk",
           "tableFrom": "assistant_questions",
           "tableTo": "profiles",
-          "columnsFrom": ["profile_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "profile_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -156,8 +160,12 @@
           "name": "assistant_questions_focus_report_id_reports_id_fk",
           "tableFrom": "assistant_questions",
           "tableTo": "reports",
-          "columnsFrom": ["focus_report_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "focus_report_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -210,8 +218,12 @@
           "name": "assistant_reviews_question_id_assistant_questions_id_fk",
           "tableFrom": "assistant_reviews",
           "tableTo": "assistant_questions",
-          "columnsFrom": ["question_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "question_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -221,7 +233,9 @@
         "assistant_reviews_question_id_unique": {
           "name": "assistant_reviews_question_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["question_id"]
+          "columns": [
+            "question_id"
+          ]
         }
       },
       "policies": {},
@@ -443,8 +457,12 @@
           "name": "credits_ledger_payment_order_id_payment_orders_id_fk",
           "tableFrom": "credits_ledger",
           "tableTo": "payment_orders",
-          "columnsFrom": ["payment_order_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "payment_order_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -454,7 +472,9 @@
         "credits_ledger_payment_ref_unique": {
           "name": "credits_ledger_payment_ref_unique",
           "nullsNotDistinct": false,
-          "columns": ["payment_ref"]
+          "columns": [
+            "payment_ref"
+          ]
         }
       },
       "policies": {},
@@ -549,7 +569,7 @@
         },
         "summary": {
           "name": "summary",
-          "type": "text",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },
@@ -583,8 +603,12 @@
           "name": "episodes_profile_id_profiles_id_fk",
           "tableFrom": "episodes",
           "tableTo": "profiles",
-          "columnsFrom": ["profile_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "profile_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -593,6 +617,10 @@
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {
+        "episodes_note_length": {
+          "name": "episodes_note_length",
+          "value": "char_length(\"episodes\".\"note\") <= 200"
+        },
         "episodes_dates": {
           "name": "episodes_dates",
           "value": "\"episodes\".\"ended_on\" is null or \"episodes\".\"ended_on\" >= \"episodes\".\"started_on\""
@@ -682,8 +710,12 @@
           "name": "findings_report_id_reports_id_fk",
           "tableFrom": "findings",
           "tableTo": "reports",
-          "columnsFrom": ["report_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "report_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -755,8 +787,12 @@
           "name": "follow_ups_report_id_reports_id_fk",
           "tableFrom": "follow_ups",
           "tableTo": "reports",
-          "columnsFrom": ["report_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "report_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -783,6 +819,12 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "payload": {
           "name": "payload",
@@ -866,6 +908,21 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "jobs_user_id_idx": {
+          "name": "jobs_user_id_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {},
@@ -924,8 +981,12 @@
           "name": "marker_alias_suggestions_report_marker_id_report_markers_id_fk",
           "tableFrom": "marker_alias_suggestions",
           "tableTo": "report_markers",
-          "columnsFrom": ["report_marker_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "report_marker_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1021,7 +1082,9 @@
         "payment_orders_provider_payment_id_unique": {
           "name": "payment_orders_provider_payment_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["provider_payment_id"]
+          "columns": [
+            "provider_payment_id"
+          ]
         }
       },
       "policies": {},
@@ -1059,7 +1122,7 @@
         },
         "date_of_birth": {
           "name": "date_of_birth",
-          "type": "text",
+          "type": "date",
           "primaryKey": false,
           "notNull": false
         },
@@ -1103,7 +1166,7 @@
         },
         "year_review_intro": {
           "name": "year_review_intro",
-          "type": "text",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },
@@ -1256,8 +1319,12 @@
           "name": "report_files_report_id_reports_id_fk",
           "tableFrom": "report_files",
           "tableTo": "reports",
-          "columnsFrom": ["report_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "report_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1360,8 +1427,12 @@
           "name": "report_links_earlier_report_id_reports_id_fk",
           "tableFrom": "report_links",
           "tableTo": "reports",
-          "columnsFrom": ["earlier_report_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "earlier_report_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1369,8 +1440,12 @@
           "name": "report_links_later_report_id_reports_id_fk",
           "tableFrom": "report_links",
           "tableTo": "reports",
-          "columnsFrom": ["later_report_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "later_report_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1518,8 +1593,12 @@
           "name": "report_markers_report_id_reports_id_fk",
           "tableFrom": "report_markers",
           "tableTo": "reports",
-          "columnsFrom": ["report_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "report_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1527,8 +1606,12 @@
           "name": "report_markers_report_file_id_report_files_id_fk",
           "tableFrom": "report_markers",
           "tableTo": "report_files",
-          "columnsFrom": ["report_file_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "report_file_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1586,8 +1669,12 @@
           "name": "report_share_opens_share_id_report_shares_id_fk",
           "tableFrom": "report_share_opens",
           "tableTo": "report_shares",
-          "columnsFrom": ["share_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "share_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1669,8 +1756,12 @@
           "name": "report_shares_report_id_reports_id_fk",
           "tableFrom": "report_shares",
           "tableTo": "reports",
-          "columnsFrom": ["report_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "report_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1680,7 +1771,9 @@
         "report_shares_token_hash_unique": {
           "name": "report_shares_token_hash_unique",
           "nullsNotDistinct": false,
-          "columns": ["token_hash"]
+          "columns": [
+            "token_hash"
+          ]
         }
       },
       "policies": {},
@@ -1875,8 +1968,12 @@
           "name": "reports_profile_id_profiles_id_fk",
           "tableFrom": "reports",
           "tableTo": "profiles",
-          "columnsFrom": ["profile_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "profile_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1884,8 +1981,12 @@
           "name": "reports_episode_id_episodes_id_fk",
           "tableFrom": "reports",
           "tableTo": "episodes",
-          "columnsFrom": ["episode_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "episode_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -2019,8 +2120,12 @@
           "name": "studies_report_id_reports_id_fk",
           "tableFrom": "studies",
           "tableTo": "reports",
-          "columnsFrom": ["report_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "report_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2028,8 +2133,12 @@
           "name": "studies_report_file_id_report_files_id_fk",
           "tableFrom": "studies",
           "tableTo": "report_files",
-          "columnsFrom": ["report_file_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "report_file_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2037,8 +2146,12 @@
           "name": "studies_film_file_id_report_files_id_fk",
           "tableFrom": "studies",
           "tableTo": "report_files",
-          "columnsFrom": ["film_file_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "film_file_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -2126,8 +2239,12 @@
           "name": "study_measurements_study_id_studies_id_fk",
           "tableFrom": "study_measurements",
           "tableTo": "studies",
-          "columnsFrom": ["study_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "study_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2137,99 +2254,88 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
-    },
-    "public.user_keys": {
-      "name": "user_keys",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "key_id": {
-          "name": "key_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "wrapped_key": {
-          "name": "wrapped_key",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "user_keys_user_id_unique": {
-          "name": "user_keys_user_id_unique",
-          "nullsNotDistinct": false,
-          "columns": ["user_id"]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
     }
   },
   "enums": {
     "public.credit_reason": {
       "name": "credit_reason",
       "schema": "public",
-      "values": ["grant", "upload", "refund", "purchase", "questions"]
+      "values": [
+        "grant",
+        "upload",
+        "refund",
+        "purchase",
+        "questions"
+      ]
     },
     "public.follow_up_kind": {
       "name": "follow_up_kind",
       "schema": "public",
-      "values": ["retest", "supplement", "measure"]
+      "values": [
+        "retest",
+        "supplement",
+        "measure"
+      ]
     },
     "public.job_status": {
       "name": "job_status",
       "schema": "public",
-      "values": ["queued", "running", "paused_budget", "done", "failed"]
+      "values": [
+        "queued",
+        "running",
+        "paused_budget",
+        "done",
+        "failed"
+      ]
     },
     "public.marker_status": {
       "name": "marker_status",
       "schema": "public",
-      "values": ["optimal", "watch", "risk"]
+      "values": [
+        "optimal",
+        "watch",
+        "risk"
+      ]
     },
     "public.payment_order_status": {
       "name": "payment_order_status",
       "schema": "public",
-      "values": ["created", "paid", "refunded"]
+      "values": [
+        "created",
+        "paid",
+        "refunded"
+      ]
     },
     "public.report_status": {
       "name": "report_status",
       "schema": "public",
-      "values": ["draft", "queued", "processing", "paused", "done", "failed"]
+      "values": [
+        "draft",
+        "queued",
+        "processing",
+        "paused",
+        "done",
+        "failed"
+      ]
     },
     "public.source_kind": {
       "name": "source_kind",
       "schema": "public",
-      "values": ["pdf", "photos"]
+      "values": [
+        "pdf",
+        "photos"
+      ]
     },
     "public.tier": {
       "name": "tier",
       "schema": "public",
-      "values": ["apex", "platinum", "gold", "silver", "bronze"]
+      "values": [
+        "apex",
+        "platinum",
+        "gold",
+        "silver",
+        "bronze"
+      ]
     }
   },
   "schemas": {},

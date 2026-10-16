@@ -115,6 +115,37 @@ test("the data download holds both consents with the policy version", async () =
   for (const consent of consents) expect(consent.policyVersion).toMatch(/^\d{4}-\d{2}-\d{2}$/);
 });
 
+test("the data download with files gives a 5-minute link that downloads the uploaded PDF", async () => {
+  const { body } = await callApi("GET", "/me/export?files=1");
+  const files = body.files as { name: string; url: string }[];
+  expect(files.map(({ name }) => name)).toEqual(["sample-2025.pdf"]);
+  const token = new URL(files[0]!.url).searchParams.get("token")!;
+  const claims = JSON.parse(Buffer.from(token.split(".")[1]!, "base64url").toString()) as {
+    iat: number;
+    exp: number;
+  };
+  expect(claims.exp - claims.iat).toBe(300);
+  const file = await fetch(files[0]!.url);
+  expect(file.headers.get("content-disposition")).toContain("sample-2025.pdf");
+  expect(
+    Buffer.from(await file.arrayBuffer())
+      .subarray(0, 4)
+      .toString(),
+  ).toBe("%PDF");
+
+  const reportUrl = page.url();
+  await page.goto("/settings");
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    page.getByTestId("export-download").click(),
+  ]);
+  expect(download.suggestedFilename()).toMatch(/^mediwise-export-.*\.json$/);
+  const saved = JSON.parse(await readFile(await download.path(), "utf8")) as object;
+  expect(saved).not.toHaveProperty("files");
+  await expect(page.getByTestId("export-file")).toHaveText(["sample-2025.pdf"]);
+  await page.goto(reportUrl);
+});
+
 test("the report shows the score and the golden marker values", async () => {
   await expect(page.getByTestId("score-value")).toHaveText("89");
   await expect(page.getByTestId("marker-row-vitamin_d")).toContainText("13");

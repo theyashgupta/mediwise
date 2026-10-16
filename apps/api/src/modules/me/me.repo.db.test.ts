@@ -1,19 +1,28 @@
 import { policyVersion } from "@mediwise/shared";
 import { randomUUID } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { eq, or, sql } from "drizzle-orm";
 import { expect, test } from "vitest";
 import { db } from "../../db/client.js";
 import {
   assistantQuestions,
   consentRecords,
   deletionLog,
+  jobs,
   profiles,
+  reportFiles,
+  reports,
   userKeys,
 } from "../../db/schema.js";
 import { giveConsents } from "../consents/index.js";
 import { cipherFor } from "../../lib/user-keys.js";
 import { ensureSelfProfile } from "../profiles/index.js";
-import { deleteAllByOwner, exportByOwner, findSelfName, updateSelfName } from "./me.repo.js";
+import {
+  deleteAllByOwner,
+  exportByOwner,
+  findSelfName,
+  listFilesByOwner,
+  updateSelfName,
+} from "./me.repo.js";
 
 async function ownerWithQuestions(questions: string[]) {
   const userId = randomUUID();
@@ -163,4 +172,68 @@ test("account deletion removes the user's data key, so a leftover copy of the ci
   expect(await db.select().from(userKeys).where(eq(userKeys.userId, userId))).toHaveLength(0);
   const fresh = await cipherFor(userId);
   expect(() => fresh.decrypt(copy)).toThrow("another data key");
+});
+
+test("account deletion leaves no jobs row for the user, in any status, and keeps the jobs of another user", async () => {
+  const owner = await ownerWithQuestions([]);
+  const other = randomUUID();
+  const [profile] = await db
+    .select({ id: profiles.id })
+    .from(profiles)
+    .where(eq(profiles.ownerUserId, owner));
+  const [report] = await db
+    .insert(reports)
+    .values({ profileId: profile!.id, sourceKind: "pdf" })
+    .returning({ id: reports.id });
+  const payload = { reportId: report!.id, userId: owner };
+  await db.insert(jobs).values([
+    ...(["queued", "running", "paused_budget", "done", "failed"] as const).map((status) => ({
+      kind: "process_report",
+      userId: owner,
+      payload,
+      status,
+      error: status === "failed" ? "Claude could not read page 2" : null,
+    })),
+    { kind: "process_report", payload: { reportId: report!.id } },
+    { kind: "process_report", userId: other, payload: { reportId: randomUUID(), userId: other } },
+  ]);
+
+  await deleteAllByOwner(owner, { userIdHash: `hash-${owner}`, files: 0 });
+
+  const left = await db
+    .select({ userId: jobs.userId })
+    .from(jobs)
+    .where(
+      or(
+        eq(jobs.userId, owner),
+        eq(jobs.userId, other),
+        sql`${jobs.payload}->>'reportId' = ${report!.id}`,
+      ),
+    );
+  expect(left).toEqual([{ userId: other }]);
+});
+
+test("the file list of the data download names each file as uploaded, not as stored ciphertext", async () => {
+  const userId = randomUUID();
+  await ensureSelfProfile(userId, "asha@example.com");
+  const cipher = await cipherFor(userId);
+  const [profile] = await db
+    .select({ id: profiles.id })
+    .from(profiles)
+    .where(eq(profiles.ownerUserId, userId));
+  const [report] = await db
+    .insert(reports)
+    .values({ profileId: profile!.id, sourceKind: "pdf", status: "done" })
+    .returning({ id: reports.id });
+  await db.insert(reportFiles).values({
+    reportId: report!.id,
+    storagePath: `${userId}/${report!.id}/0.pdf`,
+    mime: "application/pdf",
+    size: 1,
+    name: cipher.encrypt("asha-cbc.pdf"),
+  });
+
+  expect(await listFilesByOwner(userId)).toEqual([
+    { reportId: report!.id, path: `${userId}/${report!.id}/0.pdf`, name: "asha-cbc.pdf" },
+  ]);
 });

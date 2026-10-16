@@ -5,6 +5,7 @@ import type { AuthEnv } from "../../middleware/auth.js";
 import { assistantEnabled } from "../assistant/index.js";
 import { getConsents, giveConsents } from "../consents/index.js";
 import { takeQuestionPack } from "../credits/index.js";
+import { exportQuerySchema } from "./me.schemas.js";
 import { deleteMe, exportMe, getMe, updateMe } from "./me.service.js";
 
 export const meRoutes = new Hono<AuthEnv>()
@@ -26,8 +27,8 @@ export const meRoutes = new Hono<AuthEnv>()
       201,
     ),
   )
-  .get("/export", async (c) =>
-    c.json(await exportMe(c.var.userId), 200, {
+  .get("/export", validate("query", exportQuerySchema), async (c) =>
+    c.json(await exportMe(c.var.userId, c.req.valid("query").files === "1"), 200, {
       "Content-Disposition": 'attachment; filename="mediwise-export.json"',
     }),
   );

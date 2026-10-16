@@ -81,7 +81,7 @@ export const bloodCountMarkers: Marker[] = [
     whatItIs:
       "The RBC count measures the red blood cells in a microlitre of blood. Red cells carry hemoglobin, so the count sits alongside hemoglobin and the red cell indices.",
     whyItMatters:
-      "A low red cell count usually occurs with anaemia. A high count with small cells can suggest thalassaemia trait. This trait is common in India and worth knowing before planning a family.",
+      "A low red cell count usually occurs with anaemia. A high count with small cells can suggest thalassaemia trait. This trait is common in Asia, Africa and the Mediterranean, and worth knowing before planning a family.",
     whatMovesIt:
       "Iron, B12 and folate status, blood loss, kidney health and bone marrow function move it. Smoking, dehydration and altitude raise it.",
     ranges: [
@@ -348,7 +348,7 @@ export const bloodCountMarkers: Marker[] = [
     whatItIs:
       "Eosinophils are white cells that respond to allergies and parasitic infections. This value is their share of the total white count.",
     whyItMatters:
-      "A high share is common with allergies, asthma, eczema and intestinal worms, which are frequent in India. A very high value needs a doctor's view.",
+      "A high share is common with allergies, asthma, eczema and intestinal worms. Worms are frequent in tropical regions, including South Asia. A very high value needs a doctor's view.",
     whatMovesIt:
       "Allergy season, asthma flares and parasites raise it. Treating worms or allergies lowers it within weeks.",
     ranges: [range(dacie2017, [null, 6], [null, 10])],
@@ -476,7 +476,7 @@ export const bloodCountMarkers: Marker[] = [
     precision: 2,
     description: "The number of eosinophils in your blood.",
     whatItIs:
-      "The AEC is the actual number of eosinophils per microlitre. Indian labs often order it on its own as AEC when a doctor suspects allergy or worms.",
+      "The AEC is the actual number of eosinophils per microlitre. Doctors often order it on its own when they suspect allergy or worms.",
     whyItMatters:
       "A raised count is common with allergy, asthma and parasites. A count above 1,500 per microlitre is hypereosinophilia and needs a doctor's review.",
     whatMovesIt:
@@ -534,7 +534,7 @@ export const bloodCountMarkers: Marker[] = [
     precision: 0,
     description: "The number of clotting cells in your blood.",
     whatItIs:
-      "Platelets are small cell fragments that plug leaks in blood vessels and start clotting. Indian labs often report them in lakhs per cubic millimetre.",
+      "Platelets are small cell fragments that plug leaks in blood vessels and start clotting. Some labs print the count in lakhs per cubic millimetre. One lakh is 100,000.",
     whyItMatters:
       "A low count raises bleeding risk and is a key sign to monitor in dengue. A high count can follow infection, inflammation or iron deficiency.",
     whatMovesIt:

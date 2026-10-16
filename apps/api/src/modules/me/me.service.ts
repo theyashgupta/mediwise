@@ -1,7 +1,7 @@
 import type { UpdateMeInput } from "@mediwise/shared";
 import { createHash } from "node:crypto";
 import { AppError } from "../../common/errors.js";
-import { remove } from "../../lib/storage.js";
+import { createSignedDownloadUrls, remove } from "../../lib/storage.js";
 import { supabase } from "../../lib/supabase.js";
 import { env } from "../../config/env.js";
 import { isReviewRequired } from "../assistant/index.js";
@@ -59,6 +59,24 @@ export async function deleteMe(userId: string) {
 /** SHA-256 of the user id, the only trace of the user that the deletion log keeps. */
 const hashUserId = (userId: string) => createHash("sha256").update(userId).digest("hex");
 
-export async function exportMe(userId: string) {
-  return { exportedAt: new Date().toISOString(), ...(await repo.exportByOwner(userId)) };
+/**
+ * Returns a 5-minute download URL for every original file the user still has.
+ *
+ * @remarks
+ * A file with no stored name, from before file names were kept, is saved under its storage name.
+ */
+async function signFiles(userId: string) {
+  const rows = await repo.listFilesByOwner(userId);
+  const signed = await createSignedDownloadUrls(
+    rows.map((row) => ({ ...row, name: row.name ?? row.path.split("/").at(-1)! })),
+  );
+  return signed.map(({ reportId, name, url }) => ({ reportId, name, url }));
+}
+
+export async function exportMe(userId: string, withFiles = false) {
+  const [data, files] = await Promise.all([
+    repo.exportByOwner(userId),
+    withFiles ? signFiles(userId) : undefined,
+  ]);
+  return { exportedAt: new Date().toISOString(), ...data, ...(files && { files }) };
 }

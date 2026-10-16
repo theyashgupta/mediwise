@@ -1,5 +1,5 @@
 import type { AssistantAnswer, Narrative } from "@mediwise/shared";
-import { and, asc, count, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, count, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import {
   assistantQuestions,
@@ -55,14 +55,29 @@ export async function listStoragePathsByOwner(ownerUserId: string) {
   return rows.map((row) => row.storagePath);
 }
 
+export async function listFilesByOwner(ownerUserId: string) {
+  const [rows, cipher] = await Promise.all([
+    db
+      .select({
+        reportId: reportFiles.reportId,
+        path: reportFiles.storagePath,
+        name: reportFiles.name,
+      })
+      .from(reportFiles)
+      .where(inArray(reportFiles.reportId, ownedReportIds(ownerUserId)))
+      .orderBy(asc(reportFiles.reportId), asc(reportFiles.pageIndex)),
+    cipherFor(ownerUserId),
+  ]);
+  return rows.map((row) => ({ ...row, name: cipher.decrypt(row.name) }));
+}
+
 /**
- * Deletes the owner's unfinished jobs and profiles, and writes one deletion log row with the counts.
+ * Deletes the owner's jobs and profiles, and writes one deletion log row with the counts.
  *
  * @remarks
  * Reports, files, markers and follow-ups go with their profile through `on delete cascade`; jobs have no foreign key.
- * Done and failed jobs stay, and assistant questions stay with their text wiped, because their token counts are this
- * month's Claude spend.
- * The log row is in the same transaction, so a logged deletion always happened.
+ * Jobs also match by report id, because an API older than migration 0031 queues a job with no user id.
+ * Assistant questions stay with their text wiped, because their token counts are this month's Claude spend.
  */
 export async function deleteAllByOwner(
   ownerUserId: string,
@@ -86,16 +101,14 @@ export async function deleteAllByOwner(
       .select({ total: count() })
       .from(consentRecords)
       .where(eq(consentRecords.userId, ownerUserId));
-    if (ids.length > 0) {
-      await tx
-        .delete(jobs)
-        .where(
-          and(
-            inArray(sql`${jobs.payload}->>'reportId'`, ids),
-            inArray(jobs.status, ["queued", "running", "paused_budget"]),
-          ),
-        );
-    }
+    await tx
+      .delete(jobs)
+      .where(
+        or(
+          eq(jobs.userId, ownerUserId),
+          ids.length > 0 ? inArray(sql`${jobs.payload}->>'reportId'`, ids) : undefined,
+        ),
+      );
     await tx.delete(profiles).where(eq(profiles.ownerUserId, ownerUserId));
     await tx.delete(consentRecords).where(eq(consentRecords.userId, ownerUserId));
     await tx
