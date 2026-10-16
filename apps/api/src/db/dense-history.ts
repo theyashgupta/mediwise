@@ -1,5 +1,6 @@
 import fixture from "@mediwise/engine/fixtures/dense-history.json" with { type: "json" };
 import { derived, type EngineProfile, type EngineValue, runEngine } from "@mediwise/engine";
+import { cipherFor } from "../lib/user-keys.js";
 import { db } from "./client.js";
 import { profiles, reportMarkers, reports } from "./schema.js";
 
@@ -62,14 +63,15 @@ export async function insertDenseHistory(
   ownerUserId: string,
   seeded: ReturnType<typeof denseHistoryReports>,
 ) {
+  const cipher = await cipherFor(ownerUserId);
   return db.transaction(async (tx) => {
     const [profile] = await tx
       .insert(profiles)
       .values({
         ownerUserId,
-        name: denseHistoryProfile.name,
+        name: cipher.encrypt(denseHistoryProfile.name),
         relation: "other",
-        dateOfBirth: denseHistoryProfile.dateOfBirth,
+        dateOfBirth: cipher.encrypt(denseHistoryProfile.dateOfBirth),
         sex: "male",
         ancestry: "south_asian",
         permissionConfirmedAt: new Date(),
