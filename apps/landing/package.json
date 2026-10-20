@@ -15,9 +15,9 @@
     "@mediwise/design-tokens": "workspace:*",
     "@mediwise/engine": "workspace:*",
     "@mediwise/shared": "workspace:*",
-    "lucide-react": "1.55.0",
-    "next": "16.3.8",
-    "radix-ui": "1.7.0",
+    "lucide-react": "1.56.0",
+    "next": "16.4.0",
+    "radix-ui": "1.8.1",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },

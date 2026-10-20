@@ -11,7 +11,7 @@
   },
   "devDependencies": {
     "@mediwise/config": "workspace:*",
-    "@playwright/test": "1.63.0",
+    "@playwright/test": "1.64.0",
     "@types/node": "24.19.2",
     "lighthouse": "12.8.2"
   }
