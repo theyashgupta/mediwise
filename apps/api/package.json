@@ -37,18 +37,18 @@
     "review:hindi": "UPDATE_REVIEW=1 vitest run src/eval/hindi-review.test.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "0.133.0",
-    "@hono/node-server": "2.1.4",
+    "@anthropic-ai/sdk": "0.135.0",
+    "@hono/node-server": "2.1.5",
     "@mediwise/engine": "workspace:*",
     "@mediwise/shared": "workspace:*",
-    "@supabase/supabase-js": "2.117.3",
+    "@supabase/supabase-js": "2.118.0",
     "cashfree-pg": "6.0.6",
     "drizzle-orm": "0.45.4",
     "hono": "4.13.13",
-    "jose": "6.2.12",
+    "jose": "6.2.13",
     "postgres": "3.4.9",
     "sharp": "0.35.5",
-    "zod": "4.6.5"
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@mediwise/config": "workspace:*",
