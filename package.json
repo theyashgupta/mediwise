@@ -29,16 +29,16 @@
     "eval:assistant": "pnpm --filter @mediwise/api eval:assistant"
   },
   "devDependencies": {
-    "@commitlint/cli": "21.2.3",
-    "@commitlint/config-conventional": "21.2.3",
+    "@commitlint/cli": "21.2.4",
+    "@commitlint/config-conventional": "21.2.4",
     "@mediwise/config": "workspace:*",
-    "@vitest/coverage-v8": "5.0.3",
+    "@vitest/coverage-v8": "5.0.5",
     "eslint": "9.39.5",
     "husky": "9.1.7",
     "prettier": "3.9.10",
-    "turbo": "2.11.7",
+    "turbo": "2.11.9",
     "typescript": "6.0.3",
-    "vitest": "5.0.3"
+    "vitest": "5.0.5"
   },
   "prettier": "@mediwise/config/prettier"
 }

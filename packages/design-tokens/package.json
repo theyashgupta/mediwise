@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "@mediwise/config": "workspace:*",
-    "style-dictionary": "5.6.0",
+    "style-dictionary": "5.7.0",
     "@types/node": "24.19.2"
   }
 }
