@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@mediwise/engine": "workspace:*",
-    "zod": "4.6.5"
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@mediwise/config": "workspace:*"

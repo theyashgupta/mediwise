@@ -19,7 +19,7 @@
     "coverage": "vitest run --coverage --coverage.include=src/**/*.{ts,tsx} --coverage.reporter=text-summary --coverage.thresholds.statements=93 --coverage.thresholds.branches=88 --coverage.thresholds.functions=97 --coverage.thresholds.lines=94"
   },
   "dependencies": {
-    "zod": "4.6.5"
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@mediwise/config": "workspace:*"
