@@ -1,5 +1,6 @@
 import { PageHeader } from "@/common/components/page-header";
-import { getIntlTag, useT } from "@/common/hooks/use-locale";
+import { useT } from "@/common/hooks/use-locale";
+import { formatDate } from "@/common/utils/date";
 
 type DashboardGreetingProps = {
   firstName?: string;
@@ -13,11 +14,7 @@ export function DashboardGreeting({ firstName, now }: DashboardGreetingProps) {
   return (
     <PageHeader
       title={firstName ? text.named(greeting, firstName) : greeting}
-      description={now.toLocaleDateString(getIntlTag(), {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-      })}
+      description={formatDate(now, { weekday: "long", day: "numeric", month: "long" })}
     />
   );
 }

@@ -9,8 +9,10 @@ import { supabase } from "@/lib/supabase";
  *
  * @remarks
  * The API writes catalog and report text in the `Accept-Language` locale, so the header carries the app choice, not the browser list.
+ * It waits one task first, so the queries a new page starts in its commit run after the tab tap paints.
  */
 async function authHeaders(): Promise<Record<string, string>> {
+  await new Promise((resume) => setTimeout(resume));
   const { data } = await supabase.auth.getSession();
   const language = { "Accept-Language": getLocale() };
   return data.session

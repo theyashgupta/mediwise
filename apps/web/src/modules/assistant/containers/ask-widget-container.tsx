@@ -1,4 +1,4 @@
-import { useRouterState } from "@tanstack/react-router";
+import { useRouter, useRouterState } from "@tanstack/react-router";
 import { lazy, Suspense, useCallback, useState, type ReactNode } from "react";
 import { LoadingState } from "@/common/components/loading-state";
 import { useT } from "@/common/hooks/use-locale";
@@ -17,9 +17,20 @@ type AskWidgetContainerProps = { children: ReactNode };
 export function AskWidgetContainer({ children }: AskWidgetContainerProps) {
   const t = useT().assistant;
   const me = useMe();
+  const router = useRouter();
   const path = useRouterState({ select: (state) => state.location.pathname });
   const [opened, setOpened] = useState<(AskPrefill & { path: string }) | null>(null);
-  const open = useCallback((prefill: AskPrefill = {}) => setOpened({ ...prefill, path }), [path]);
+  /**
+   * Opens the widget on the current page.
+   *
+   * @remarks
+   * It reads the path when called, so its identity stays the same on navigation. A new identity re-rendered every
+   * `useOpenAsk` page inside the tab tap that leaves it.
+   */
+  const open = useCallback(
+    (prefill: AskPrefill = {}) => setOpened({ ...prefill, path: router.state.location.pathname }),
+    [router],
+  );
   const dropReport = useCallback(
     () => setOpened((current) => current && { ...current, report: undefined }),
     [],
