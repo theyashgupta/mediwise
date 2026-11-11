@@ -13,7 +13,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@eslint/js": "9.39.5",
+    "@eslint/js": "10.0.1",
     "eslint-import-resolver-typescript": "4.4.5",
     "eslint-plugin-import": "2.32.0",
     "eslint-plugin-react": "7.37.5",
