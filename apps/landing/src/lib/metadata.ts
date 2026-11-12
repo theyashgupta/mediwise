@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { localePages, locales, messages, type Locale } from "../config/messages";
+import { content } from "./content";
 import { securityPath, siteUrl } from "./site";
 
 export const homePath = (locale: Locale) => localePages[locale].path;
@@ -54,10 +55,10 @@ export function pageMetadata(locale: Locale): Metadata {
 }
 
 export function securityMetadata(locale: Locale): Metadata {
-  const { title, description } = messages[locale].security;
+  const { title, description } = content[locale].pages.security;
   return {
     title,
-    description,
+    description: description ?? undefined,
     alternates: { canonical: securityPath(locale), languages: alternateUrls(securityPath) },
   };
 }

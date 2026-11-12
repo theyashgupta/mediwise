@@ -8,8 +8,6 @@ export const securityPath = (locale: Locale) =>
 
 export const restoreMotion = `document.documentElement.dataset.js="";try{if(localStorage.getItem("motion")==="paused")document.documentElement.dataset.motion="paused"}catch(e){}`;
 
-export const securityPolicyUrl = "https://github.com/theyashgupta/mediwise/blob/main/SECURITY.md";
-
 export const appLinks = {
   signIn: (locale: Locale) => `${appUrl}/login?lang=${locale}`,
   signUp: (locale: Locale) => `${appUrl}/signup?lang=${locale}`,

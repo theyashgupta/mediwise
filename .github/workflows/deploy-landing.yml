@@ -14,6 +14,8 @@ on:
       - packages/**
       - pnpm-lock.yaml
       - .github/workflows/deploy-landing.yml
+  repository_dispatch:
+    types: [cms-published]
   workflow_dispatch:
 
 permissions:
@@ -45,6 +47,7 @@ jobs:
       - name: Build
         run: pnpm turbo run build --filter @mediwise/landing
         env:
+          CMS_URL: ${{ vars.CMS_URL }}
           NEXT_PUBLIC_SITE_URL: https://mediwise.theyashgupta.me
           NEXT_PUBLIC_APP_URL: https://app.mediwise.theyashgupta.me
       # wrangler-action would run `pnpm add` at the workspace root, which pnpm refuses. It uses this global install instead.
