@@ -9,8 +9,8 @@ import {
   GlassDialogContent,
   GlassSurface,
 } from "@/common/components/surface/glass";
+import { Button } from "@/common/components/controls/button";
 import { StatTile } from "@/common/components/surface/stat-tile";
-import { Button } from "@/components/ui/button";
 import {
   CardContent,
   CardDescription,
@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { Mascot, type MascotState } from "@/modules/mascot";
+import { ControlsSpecimen } from "./controls-specimen";
 
 const themes = ["light", "dark"] as const;
 
@@ -70,6 +71,10 @@ function Backdrop({ children, className }: { children: ReactNode; className?: st
 function Specimens() {
   return (
     <div className="space-y-12 @container">
+      <Specimen title="Controls: Button, IconButton, Input, Select, Textarea, Field">
+        <ControlsSpecimen />
+      </Specimen>
+
       <Specimen title="GlassSurface: bar, surface and overlay layers">
         <Backdrop className="grid gap-3 pt-14">
           {(["bar", "surface", "overlay"] as const).map((layer) => (
@@ -225,7 +230,7 @@ export function DesignSystem() {
     <>
       <PageHeader
         title="Design system"
-        description="Glass surfaces and tiles, in both themes. Dev builds only."
+        description="Controls, glass surfaces and tiles, in both themes. Dev builds only."
         actions={
           <Button variant="outline" aria-pressed={solid} onClick={() => setSolid(!solid)}>
             {solid ? "Show glass" : "Show the solid fallback"}
