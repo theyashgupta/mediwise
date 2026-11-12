@@ -13,3 +13,6 @@ playwright-report
 test-results
 **/supabase/.temp/
 **/supabase/.branches/
+
+# Throwaway design previews (MEDI-186), never shipped
+apps/landing/.previews/

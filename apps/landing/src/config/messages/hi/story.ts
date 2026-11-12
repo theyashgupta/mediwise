@@ -20,8 +20,4 @@ export const story: Messages["story"] = {
     body: "तय नियम हर रिपोर्ट को स्कोर करते हैं, इसलिए एक जैसे मानों पर हमेशा एक जैसा स्कोर आता है। फिर MediWise बताता है कि किन मार्कर पर किस क्रम में पहले काम करें।",
     alt: "पहले इन पर काम करें: urine albumin, homocysteine, potassium, mean platelet volume और LDL cholesterol, इसी क्रम में।",
   },
-  questions: {
-    title: "डॉक्टर से पूछने के सवाल",
-    body: "MediWise आपके नतीजों से सवाल लिखता है। उन्हें कॉपी करें और अगली बार डॉक्टर के पास ले जाएँ।",
-  },
 };

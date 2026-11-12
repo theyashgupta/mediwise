@@ -15,8 +15,4 @@ export const story = {
     body: "Fixed rules score each report, so the same values always give the same score. MediWise then puts the markers to work on first in order.",
     alt: "Move first: urine albumin, homocysteine, potassium, mean platelet volume and LDL cholesterol, in order.",
   },
-  questions: {
-    title: "Questions for your doctor",
-    body: "MediWise writes questions from your results. Copy them and take them to your next visit.",
-  },
 };

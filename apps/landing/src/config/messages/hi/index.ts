@@ -1,8 +1,7 @@
-import { bento } from "./bento";
 import { comparison } from "./comparison";
 import { faq } from "./faq";
+import { features } from "./features";
 import { hero } from "./hero";
-import { history } from "./history";
 import { howItWorks } from "./how-it-works";
 import { marquee } from "./marquee";
 import { numbers } from "./numbers";
@@ -18,9 +17,8 @@ export const hi = {
   marquee,
   howItWorks,
   story,
-  history,
   comparison,
-  bento,
+  features,
   numbers,
   trust,
   pricing,
