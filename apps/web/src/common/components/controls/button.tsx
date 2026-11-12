@@ -56,8 +56,8 @@ export function Button({
       className={cn(buttonVariants({ variant, size }), className)}
       {...props}
       disabled={asChild ? undefined : disabled}
-      aria-disabled={blocked || undefined}
-      aria-busy={loading || undefined}
+      aria-disabled={blocked || props["aria-disabled"] || undefined}
+      aria-busy={loading || props["aria-busy"] || undefined}
       tabIndex={asChild && disabled ? -1 : props.tabIndex}
       onClick={(event: MouseEvent<HTMLButtonElement>) => {
         if (blocked) event.preventDefault();

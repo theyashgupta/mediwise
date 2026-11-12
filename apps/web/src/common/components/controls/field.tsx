@@ -5,6 +5,7 @@ import {
   FieldLabel,
   Field as ShadcnField,
 } from "@/components/ui/field";
+import { cn } from "@/lib/utils";
 
 type ControlProps = {
   id?: string;
@@ -29,7 +30,7 @@ export function Field({ label, hint, error, children, className }: FieldProps) {
     [children.props["aria-describedby"], hintId, errorId].filter(Boolean).join(" ") || undefined;
 
   return (
-    <ShadcnField data-invalid={error ? true : undefined} className={className}>
+    <ShadcnField data-invalid={error ? true : undefined} className={cn("w-auto gap-2", className)}>
       <FieldLabel htmlFor={controlId}>{label}</FieldLabel>
       {cloneElement(children, {
         id: controlId,

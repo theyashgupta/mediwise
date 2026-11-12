@@ -18,6 +18,21 @@ test("the label is the accessible name of the icon button", () => {
   expect(screen.getByRole("button", { name: "Share this report" })).toBeTruthy();
 });
 
+test("an icon button with asChild renders its link with the label as the name", () => {
+  render(
+    <TooltipProvider>
+      <IconButton asChild label="Open the year review">
+        <a href="/year-review">
+          <Share aria-hidden />
+        </a>
+      </IconButton>
+    </TooltipProvider>,
+  );
+  const link = screen.getByRole("link", { name: "Open the year review" });
+  expect(link.getAttribute("href")).toBe("/year-review");
+  expect(screen.queryByRole("button")).toBeNull();
+});
+
 /** Compiles only while `label` stays required, so an unnamed icon button fails the typecheck. */
 export function unnamedIconButton() {
   return (

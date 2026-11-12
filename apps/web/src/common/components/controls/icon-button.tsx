@@ -7,7 +7,7 @@ const squares = {
   md: "size-11 px-0 md:size-10",
 } as const;
 
-type IconButtonProps = Omit<ButtonProps, "size" | "aria-label" | "asChild"> & {
+type IconButtonProps = Omit<ButtonProps, "size" | "aria-label"> & {
   label: string;
   size?: keyof typeof squares;
 };
