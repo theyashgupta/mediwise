@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --port 3000",
-    "build": "node scripts/copy-brand.mjs && next build && node scripts/csp-hashes.mjs",
+    "build": "node scripts/copy-brand.mjs && node scripts/pull-content.ts && next build && node scripts/csp-hashes.mjs",
     "typecheck": "next typegen && tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
