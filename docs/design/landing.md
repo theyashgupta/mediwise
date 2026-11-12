@@ -120,6 +120,8 @@ Lighthouse 13.6, mobile, simulated throttling, the static build served with gzip
 | CLS (median) | 0.000 | 0.000 |
 | Accessibility | 1.00 | 1.00 |
 
+The new recorded mobile LCP is 996 ms. The cause is 5 kB of inline SVG for the vignettes. The orchestrator accepted the 24 ms on 2026-11-12, because the ranges overlap and the JavaScript budget is the gate.
+
 The LCP element paints with the first paint in every run. The HTML is 5,037 bytes larger gzipped (46,160 to 51,197): 2,256 bytes of markup and CSS, and 2,730 bytes for the copy of the same tree that Next writes into the page payload. At the simulated 1.6 Mbps, 5 kB costs about 25 ms, which matches the 24 ms difference in the median. One after run had a CLS of 0.039 from a hero blob (`div.hero-blob`), not from the vignettes.
 
 Bundle: the landing first load is 147,779 bytes gzipped, up 240 bytes from 147,539. Only `loopVignettes` is new JavaScript. The inline SVG is in the HTML, which the 150,000 byte limit in `scripts/bundle-size.mjs` does not count.
