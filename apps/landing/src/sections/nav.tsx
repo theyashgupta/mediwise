@@ -1,4 +1,4 @@
-import { Logo } from "../../../web/src/common/components/brand/logo";
+import { Logo } from "@/components/logo";
 import { LanguageSwitch } from "@/components/language-switch";
 import { localePages, messages, type Locale } from "@/config/messages";
 import { appLinks } from "@/lib/site";

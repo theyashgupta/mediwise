@@ -12,9 +12,9 @@ import {
   maxFiles,
   maxProfilesPerUser,
   maxTotalBytes,
+  paymentPacks,
   reportMimes,
 } from "@mediwise/shared";
-import { paymentPacks } from "../../../api/src/modules/payments/payments.config";
 import type { Locale } from "../config/messages";
 
 /**

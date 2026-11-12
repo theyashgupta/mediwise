@@ -1,8 +1,6 @@
 @import "tailwindcss";
 @import "@mediwise/design-tokens/tokens.css";
 
-@source "../../../web/src/common/components/brand";
-
 @custom-variant dark {
   &:where([data-theme="dark"] *) {
     @slot;

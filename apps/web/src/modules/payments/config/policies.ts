@@ -1,13 +1,7 @@
 import { sanitizeHtml } from "@/common/utils/sanitize-html";
 import snapshot from "../../../../content/legal.en.json";
 
-export const contact = {
-  brand: "MediWise",
-  businessName: "Codegenix",
-  proprietor: "Yash Anil Gupta",
-  email: "yashguptaab66@gmail.com",
-  phone: "+91 94044 12694",
-};
+export { contact } from "@mediwise/shared";
 
 export const washingtonSectionId = "washington";
 

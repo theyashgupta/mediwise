@@ -5,6 +5,10 @@ import { defineConfig } from "eslint/config";
 const modules = readdirSync(new URL("./src/modules", import.meta.url), { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
   .map((entry) => entry.name);
+const crossAppImports = {
+  regex: "(^|/)(apps|\\.\\.)/(web|landing|api|cms)/src/",
+  message: "Never import another app's source. Move the shared code to a package.",
+};
 const moduleIndexes = modules.map((name) => `./modules/${name}/index.ts`);
 
 export default defineConfig(
@@ -57,6 +61,7 @@ export default defineConfig(
             name: `@/components/ui/${name}`,
             message: "Use the control layer in @/common/components/controls.",
           })),
+          patterns: [crossAppImports],
         },
       ],
     },

@@ -1,6 +1,6 @@
-import { Logo } from "../../../web/src/common/components/brand/logo";
-import { contact } from "../../../web/src/modules/payments/config/policies";
+import { contact } from "@mediwise/shared";
 import { LanguageSwitch } from "@/components/language-switch";
+import { Logo } from "@/components/logo";
 import { messages, type Locale } from "@/config/messages";
 import { appLinks, buttonStyles, securityPath } from "@/lib/site";
 

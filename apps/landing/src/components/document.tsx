@@ -1,9 +1,9 @@
 import { Inter, JetBrains_Mono } from "next/font/google";
+import { contact } from "@mediwise/shared";
 import type { ReactNode } from "react";
 import { localePages, type Locale } from "@/config/messages";
 import { restoreMotion, siteUrl } from "@/lib/site";
 import { cn } from "@/lib/utils";
-import { contact } from "../../../web/src/modules/payments/config/policies";
 import "../app/globals.css";
 
 const inter = Inter({
