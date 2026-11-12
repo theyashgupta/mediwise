@@ -152,6 +152,18 @@ Screenshots on 2026-10-13, web dev server, no data loaded:
 | App shell, phone | [light](design/logo/shell-light-phone.jpg) | [dark](design/logo/shell-dark-phone.jpg) |
 | Link preview | [og-image.png](../apps/web/public/og-image.png) | |
 
+## Control layer (MEDI-191)
+
+Every page uses the controls in `apps/web/src/common/components/controls`. They wrap the shadcn and Radix primitives and use tokens only. The decisions and the measured values are in [component-layer.md](research/component-layer.md).
+
+- **Button.** Variants primary, secondary, outline, ghost, destructive and link. Sizes sm (32 px), md (40 px) and lg (48 px). `loading` keeps the width and blocks a second press.
+- **IconButton.** The required `label` is the `aria-label` and the tooltip. It is 44 px under `md`.
+- **Input, Textarea, Select and Field.** Field links the label, the hint and the error to its control.
+- **Lint.** `pnpm lint` fails when a file imports `@/components/ui/button`, `input`, `select` or `textarea`. Only the layer and `components/ui` may import them.
+- **Forms.** A react-hook-form field keeps `FormItem`, `FormLabel` and `FormMessage`. The layer control goes inside `FormControl`. A label and a control without react-hook-form use Field.
+- **Overlays.** `globals.css` sets the radius of shadcn dialog content (24 px), menus (16 px) and menu items (12 px). The CLI files stay as generated.
+- **Screenshots.** Every page is in `design/pages` at 390 and 1280 px, in both themes. The names start with `before-medi-191-` and `after-medi-191-`. [medi-191-pair-review.md](design/medi-191-pair-review.md) has the review of each pair. To take them again, run `SWEEP_LABEL=<label> pnpm --filter @mediwise/e2e sweep` against the dev server.
+
 ## Primitives and libraries
 
 The primitives in `src/components/ui` come from the shadcn CLI with the `vega` preset (`pnpm dlx shadcn@latest apply vega`): Lucide icons, Inter, the classic density. We did not install the preset's `@fontsource-variable/inter` package because the web serves its own font files. To regenerate a component, run `pnpm dlx shadcn@latest add <name> --overwrite` from `apps/web`.
