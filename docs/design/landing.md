@@ -139,6 +139,10 @@ The LCP element paints with the first paint in every run. The HTML is 5,037 byte
 
 Bundle: the landing first load is 147,779 bytes gzipped, up 240 bytes from 147,539. Only `loopVignettes` is new JavaScript. The inline SVG is in the HTML, which the 150,000 byte limit in `scripts/bundle-size.mjs` does not count.
 
+## Measurements (MEDI-187, 2026-11-12)
+
+Bundle: the landing first load is 148,733 bytes gzipped, up 954 bytes from 147,779. The story stepper and the phone frame classes are the new JavaScript. The frame CSS is inlined in the HTML, which the 150,000 byte limit does not count. Lighthouse was not run for this change.
+
 ## Browser checks
 
 - Story stepper (MEDI-187, Playwright Chromium, static build): the steps changed at 4.52, 9.03, 13.56, 18.08, 22.59 and 27.13 s, from step 6 back to step 1. A click on step 3 at 29.16 s selected it, and step 4 followed at 33.67 s. Halfway through a turn the phone transform is `rotateY` at about 88 degrees, and after the turn it is `none`. Scrolled to the top, the step did not change in 6 s. With Pause motion the step did not change in 6 s, a click still selected a step, the phone had no animation and only the selected screen showed. With reduced motion the step stayed at 1 after 6 s. Tab, then Enter or Space, selected a step. At 1280 and 1920 px every body line is one line in both languages. At 200% text size nothing in the section passes the window edge at 1280, 390 and 320 px.
