@@ -2,7 +2,7 @@ export const story = {
   body: "Every screen on this page is from the MediWise app. The person and the values are made up.",
   alert: {
     title: "A line for your doctor",
-    body: "When a scan report names a nodule or a mass, MediWise shows that line first and tells you to ask your doctor.",
+    body: "A scan line that names a nodule or a mass comes first. Ask your doctor about it.",
     alt: "Findings: the ultrasound line about a 6 mm thyroid nodule comes first. It tells you to ask your doctor.",
   },
   findings: {

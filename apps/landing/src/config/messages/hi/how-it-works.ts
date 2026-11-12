@@ -14,7 +14,7 @@ export const howItWorks: Messages["howItWorks"] = {
   },
   understand: {
     title: "समझें",
-    body: review("MediWise हर मार्कर आसान भाषा में समझाता है और दिखाता है कि आपका मान रेंज में कहाँ है।"),
+    body: review("MediWise हर मार्कर आसान भाषा में समझाता है और उसकी रेंज दिखाता है।"),
     alt: "Vitamin B12 का पेज: मार्कर क्या है, उसका मान, और रेंज में उसकी जगह।",
   },
   track: {

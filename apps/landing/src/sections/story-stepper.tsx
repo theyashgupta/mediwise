@@ -5,7 +5,13 @@ import { useStill } from "@/components/motion";
 import { Phone, Screen, type ScreenName } from "@/components/phone";
 import { cn } from "@/lib/utils";
 
-export type StoryStep = { label: string; title: string; body: string; screen: ScreenName; alt: string };
+export type StoryStep = {
+  label: string;
+  title: string;
+  body: string;
+  screen: ScreenName;
+  alt: string;
+};
 
 export const stepMs = 4500;
 
@@ -50,7 +56,7 @@ export function StoryStepper({ steps }: { steps: StoryStep[] }) {
   return (
     <div
       ref={ref}
-      className="mt-10 grid items-center gap-8 lg:mt-14 lg:grid-cols-[300px_minmax(0,36rem)] lg:gap-16"
+      className="mt-10 grid items-center gap-8 lg:mt-14 lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-16"
     >
       <div className="mx-auto w-full max-w-[220px] perspective-distant lg:max-w-none">
         <div className="story-phone" data-turn={turns ? turns % 2 : undefined}>
@@ -74,11 +80,15 @@ export function StoryStepper({ steps }: { steps: StoryStep[] }) {
               type="button"
               aria-current={index === active ? "step" : undefined}
               onClick={() => go(index)}
-              className="relative w-full overflow-hidden rounded-xl px-4 py-3 text-left transition-colors hover:bg-card focus-visible:outline-2 aria-[current]:bg-card aria-[current]:ring-1 aria-[current]:ring-border"
+              className="relative w-full overflow-hidden rounded-xl px-4 py-2.5 text-left transition-colors hover:bg-card focus-visible:outline-2 aria-[current]:bg-card aria-[current]:ring-1 aria-[current]:ring-border"
             >
               <span className="block font-mono text-xs text-primary">{step.label}</span>
-              <span className="mt-1 block text-lg font-semibold tracking-tight">{step.title}</span>
-              <span className="mt-1 block text-muted-foreground">{step.body}</span>
+              <span className="mt-0.5 block font-semibold tracking-tight lg:text-lg">
+                {step.title}
+              </span>
+              <span className="mt-0.5 block text-sm text-muted-foreground lg:text-base">
+                {step.body}
+              </span>
               {running && index === active && (
                 <span
                   aria-hidden

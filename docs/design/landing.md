@@ -7,7 +7,7 @@ The landing page tells one story: a lab report becomes a plain-language explanat
 | # | Section | Layout | Motion |
 |---|---|---|---|
 | 1 | Hero | Text left, phone right. Callout band below. | Three colour blobs drift behind the content (24, 32 and 38 s loops). A marker trend line draws itself once above the callout band. |
-| 2 | Story (How it works) | Six step rows. From 1024 px each row is two columns, text and a 300 px phone, with the text centred on the phone and the sides alternating (text left on odd rows). Below 1024 px each row stacks: number, title, body, then a 260 px phone. 96 px between rows on a desktop, 64 px on a phone. | Reveal on each row. |
+| 2 | Story (How it works) | One stepper (MEDI-187). From 1024 px, a 300 px phone on the left and the list of six steps on the right, centred on the phone. Each step shows "Step n", the title and one body line. Below 1024 px the 220 px phone sits above the list. | The steps advance on their own, one every 4.5 s, from step 6 back to step 1. On each advance the phone turns on the Y axis and shows the screen of the next step. A bar under the active step fills in 4.5 s. |
 | 3 | Numbers | Full-width primary band, four large numbers. | The numbers count up once. |
 | 4 | Comparison | Two columns: a printed lab PDF and MediWise. Rows align through subgrid. | Reveal. |
 | 5 | Features (MEDI-186) | 8 illustrated vignettes, each with a 3 to 6 word title and one sentence. 4 columns from 1280 px, 2 from 768 px, 1 on a phone. | Each scene plays once on reveal and loops on mouse hover. |
@@ -21,14 +21,16 @@ The order follows the argument: what MediWise is (hero), how it works (story), h
 
 ## Story steps
 
-| Step | Copy | Screen |
-|---|---|---|
-| 01 | Upload | upload |
-| 02 | Your score, and what to move first | move-first |
-| 03 | Understand | marker |
-| 04 | What changed since your last visit | findings |
-| 05 | A line for your doctor | alert |
-| 06 | Track | trends |
+| Step | Copy | Body line | Screen |
+|---|---|---|---|
+| 1 | Upload | Add your report as a PDF or as photos, up to 20 files. | upload |
+| 2 | Your score, and what to move first | Fixed rules score each report and put the markers to work on first in order. | move-first |
+| 3 | Understand | MediWise explains each marker in plain words and shows its range. | marker |
+| 4 | What changed since your last visit | See which markers improved and which became worse since your last report. | findings |
+| 5 | A line for your doctor | A scan line that names a nodule or a mass comes first. Ask your doctor about it. | alert |
+| 6 | Track | See how each marker changes from one visit to the next. | trends |
+
+The owner described five steps. The stepper keeps six, because each step has its own screen and a merge of two steps removes one screen (MEDI-187).
 
 The questions, settled, episode and Hindi screens left the page (orchestrator decision, 2026-10-16). Their copy is in the features vignettes.
 
@@ -38,7 +40,10 @@ The questions, settled, episode and Hindi screens left the page (orchestrator de
 - Every reveal element is visible by default. The observer hides only an element that starts below the window, and shows it again when it scrolls in. Without JavaScript, with motion paused and with reduced motion, every element is visible.
 - There is no scroll or resize listener on the page, and no section pins.
 - The hero blobs pause when the hero leaves the window, when the tab is hidden, with the Pause motion button and with reduced motion. The hero phone, heading and paragraph never animate, because they hold the LCP element.
-- `will-change` is on the hero blobs only. The story section has `content-visibility: auto` with an intrinsic size of 5200 px below 1024 px and 4550 px from 1024 px. Measured (MEDI-184): 4984 to 5384 px at 320 and 390 px, and 4528 to 4554 px at 1280 px, both languages.
+- `will-change` is on the hero blobs only. The story section has `content-visibility: auto` with an intrinsic size of 1550 px below 1024 px and 1000 px from 1024 px. Measured (MEDI-187): 1420 to 1582 px at 320 and 390 px, 1330 to 1356 px at 1023 px, and 985 to 1011 px at 1280 and 1920 px, both languages.
+- The story stepper (MEDI-187) is the one client component that changes state on a timer. `sections/story-stepper.tsx` sets `aria-current` on the active step and `data-turn` on the phone. CSS turns the phone edge-on in 350 ms, swaps the screen with a 350 ms opacity delay, then turns the phone back in 350 ms. Two copies of the keyframes (`turn-a`, `turn-b`) alternate, so each change starts the turn again.
+- The stepper advances only while at least 25% of it is in the window. With the Pause motion button or reduced motion it does not advance, the phone does not turn, the screen changes with a cut and the progress bar is not shown. A click or a key press on a step still selects it. Without JavaScript, step 1 is active and all six steps are readable.
+- A click, Enter or Space on a step selects it and starts the 4.5 s count again from that step.
 
 ## Feature vignettes (MEDI-186)
 
@@ -70,6 +75,14 @@ Motion:
 - Without JavaScript, with motion paused and with reduced motion, each vignette shows its final frame.
 - `loopVignettes` in `components/motion.tsx` plays a scene again when a mouse enters it, and again after each 900 ms rest while the mouse stays. It only rewinds the CSS animations. It does not run on a device that cannot hover.
 - The vignette classes are not scoped under the section, because a selector with an ancestor does not match the copies inside a `<use>` element.
+
+## Phone frame (MEDI-187)
+
+The owner asked for a phone that looks like a real iPhone, black and silver, with a bezel round the screen (2026-11-12). `components/phone.tsx` and the `.phone` rules in `globals.css` draw it in CSS only: a silver titanium rim with a light gradient and an inner highlight, a black bezel, rounded screen corners, the Dynamic Island, the action and volume buttons on the left, the side button on the right, and a soft shadow. The frame is the same in light and dark. The hero and the story use the same component.
+
+## Why the story stepper replaced the rows (MEDI-187)
+
+The six alternating rows of MEDI-184 made the section about 4,550 px tall on a desktop. The owner asked for one section that shows all steps at once, with a phone on the left that turns to each screen. The section is now about 1,000 px tall on a desktop and fits in one 1920x1080 window with the list and the phone in view.
 
 ## Why the story no longer pins (MEDI-184)
 
@@ -128,6 +141,8 @@ Bundle: the landing first load is 147,779 bytes gzipped, up 240 bytes from 147,5
 
 ## Browser checks
 
+- Story stepper (MEDI-187, Playwright Chromium, static build): the steps changed at 4.52, 9.03, 13.56, 18.08, 22.59 and 27.13 s, from step 6 back to step 1. A click on step 3 at 29.16 s selected it, and step 4 followed at 33.67 s. Halfway through a turn the phone transform is `rotateY` at about 88 degrees, and after the turn it is `none`. Scrolled to the top, the step did not change in 6 s. With Pause motion the step did not change in 6 s, a click still selected a step, the phone had no animation and only the selected screen showed. With reduced motion the step stayed at 1 after 6 s. Tab, then Enter or Space, selected a step. At 1280 and 1920 px every body line is one line in both languages. At 200% text size nothing in the section passes the window edge at 1280, 390 and 320 px.
+
 - Vignettes (MEDI-186, Playwright Chromium): at 1280, 1920 and 390 px, light and dark, all 8 vignettes reveal and end on their final frame. A mouse on a vignette plays it again and loops it, and after the mouse leaves the scene stops on its final frame. On the Hindi page at 1280 px with reduced motion, no vignette animation runs, every scene shows its final frame and the page has no sideways scroll.
 
 - Story (MEDI-184, Playwright Chromium): at 1024, 1280, 1920 and 2560 px, light and dark, every row is 611 px tall (the phone height), the text centre sits on the phone centre, the phone alternates right, left, right, and the rows are 96 px apart. At 390 and 1023 px the rows stack, 64 px apart. No element in the section is sticky. A scroll and a nav jump to How it works reveal each row as it enters the window.
@@ -144,5 +159,7 @@ Bundle: the landing first load is 147,779 bytes gzipped, up 240 bytes from 147,5
 `docs/design/screenshots/medi-168-<section>-<width>-<theme>.png` for hero, numbers, comparison, features and trust, at 1280 and 390 px, light and dark.
 
 `docs/design/screenshots/medi-184-how-it-works-<width>-<theme>.png` for the story rows at 1280, 1920, 2560 and 390 px, light and dark. `medi-184-full-page-1920-dark.png` is the full page at 1920 px in dark mode, and `medi-184-how-it-works-2000x1300-dark-viewport.png` is the window from the owner's report.
+
+`docs/design/screenshots/medi-187-how-it-works-<width>-<theme>.png` for the stepper at 390, 1280 and 1920 px, light and dark. `medi-187-how-it-works-1920x1300-<theme>-viewport.png` is a tall window. `medi-187-hero-<width>-<theme>.png` shows the new phone frame in the hero at 1280 and 390 px. `medi-187-auto-advance.webm` records 30 s of the auto-advance at 1280 px, then a click on step 5.
 
 `docs/design/screenshots/medi-185-final-<width>-<theme>.png` for the features section at 1280, 1920 and 390 px, light and dark, each scene on its final frame.

@@ -383,6 +383,76 @@
   display: none;
 }
 
+/* An iPhone drawn in CSS: titanium rim, black bezel, Dynamic Island, side buttons. */
+.phone {
+  border-radius: 17.5% / 8.6%;
+  padding: 1.2%;
+  background: linear-gradient(
+    140deg,
+    #f3f4f6,
+    #a4a8af 22%,
+    #e6e8eb 38%,
+    #8b9098 58%,
+    #d4d7db 78%,
+    #9a9ea5
+  );
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.6),
+    inset 0 0 0 2px rgb(0 0 0 / 0.12),
+    0 0 0 1px rgb(255 255 255 / 0.06),
+    0 32px 64px -28px rgb(0 0 0 / 0.5),
+    0 14px 28px -16px rgb(0 0 0 / 0.35);
+}
+
+.phone::before,
+.phone::after {
+  content: "";
+  position: absolute;
+  width: 1.1%;
+  border-radius: 2px;
+  background: #a2a6ad;
+}
+
+/* One strip draws the action button and both volume buttons. */
+.phone::before {
+  left: -0.7%;
+  top: 17%;
+  height: 22%;
+  background: linear-gradient(
+    #a2a6ad 0 15%,
+    transparent 15% 32%,
+    #a2a6ad 32% 62%,
+    transparent 62% 72%,
+    #a2a6ad 72%
+  );
+}
+
+.phone::after {
+  right: -0.7%;
+  top: 26%;
+  height: 11%;
+}
+
+.phone-bezel {
+  position: relative;
+  height: 100%;
+  padding: 2.4%;
+  border-radius: 16.4% / 8%;
+  background: #050506;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08);
+}
+
+.phone-island {
+  position: absolute;
+  top: 2.5%;
+  left: 50%;
+  width: 30%;
+  height: 3.6%;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: #000;
+}
+
 /*
  * The story phone turns edge-on, the screen swaps at the half-way point, then the phone turns back.
  * Two copies of the turn alternate, because a new animation name restarts the animation.
@@ -419,12 +489,12 @@
 
 .story-section {
   content-visibility: auto;
-  contain-intrinsic-size: auto 5200px;
+  contain-intrinsic-size: auto 1550px;
 }
 
 @media (width >= 64rem) {
   .story-section {
-    contain-intrinsic-size: auto 4550px;
+    contain-intrinsic-size: auto 1000px;
   }
 }
 
