@@ -9,7 +9,7 @@ The landing page tells one story: a lab report becomes a plain-language explanat
 | 1 | Hero | Text left, phone right. Callout band below. | Three colour blobs drift behind the content (24, 32 and 38 s loops). Lab glassware floats around the content (MEDI-185). A marker trend line draws itself once above the callout band. |
 | 2 | Story (How it works) | One stepper (MEDI-187). From 1024 px, a 300 px phone on the left and the list of six steps on the right, centred on the phone. Each step shows "Step n", the title and one body line. Below 1024 px the 220 px phone sits above the list. | The steps advance on their own, one every 4.5 s, from step 6 back to step 1. On each advance the phone turns on the Y axis and shows the screen of the next step. A bar under the active step fills in 4.5 s. |
 | 3 | Numbers | Full-width primary band, four large numbers. | The numbers count up once. |
-| 4 | Comparison | Two columns: a printed lab PDF and MediWise. Rows align through subgrid. | Reveal. |
+| 4 | Comparison (MEDI-189) | One table: a row per dimension, a column for a standard lab PDF and a tinted column for MediWise. Below 768 px each row stacks, with the lab PDF value first and MediWise last. | Reveal. |
 | 5 | Features (MEDI-186) | 8 illustrated vignettes, each with a 3 to 6 word title and one sentence. 4 columns from 1280 px, 2 from 768 px, 1 on a phone. | Each scene plays once on reveal and loops on mouse hover. |
 | 6 | Marker marquee | Two rows of marker names that scroll sideways. | Marquee. |
 | 7 | Trust | One narrow column, one row for each item with its icon. | Reveal on the heading. |
@@ -117,6 +117,17 @@ The owner picked B (2026-11-12).
 - Containment (MEDI-183): the layer is inside the hero, which clips it. The items anchor to the content column. The right items stop at least 8 px before the window edge, so a 1024 px window does not cut them. From 1600 px the round flask and the pipette move into the left side space, and the conical flask grows to 170 px. No item touches the top or bottom edge of the hero.
 - Phone (below 1024 px): only the conical flask, the round flask and two drops show. The rack and the pipette would cover the text.
 
+## Comparison table (MEDI-189)
+
+The owner found the two side-by-side cards read as two lists (2026-11-12). Research: `docs/research/landing-compare.md`.
+
+- One `<table>` with a hidden caption, three column heads (Feature, A standard lab PDF, MediWise) and six rows: Explained, Scored, Tracked, Family, Flags for your doctor, Cost.
+- The MediWise column has the primary tint and border. From 768 px it is one rounded column. Below 768 px each MediWise value is a tinted box.
+- The lab PDF value has a red cross (`text-destructive`). The MediWise value has a green check (`text-optimal`). Each icon is `role="img"` with the label "Yes" or "No" ("हाँ" or "नहीं"), and the short text stays next to it. Without colour, the cross and the check differ by shape and by label.
+- The Cost row has no mark on either side. Its text lines up with the text of the marked rows above it.
+- Below 768 px the table cells change to `display: block`. Each cell shows its column name above the value, hidden from screen readers. Explicit ARIA table roles keep the table, row, header and cell semantics after the display change.
+- No new JavaScript. The landing JS first load stays at 148.7 kB.
+
 ## Measurements (2026-10-16)
 
 Lighthouse 13, mobile, simulated throttling. The static build was served with gzip, as Cloudflare Pages serves it. Five runs each, before and after taken in turn, median shown. Other work ran on the same Mac, so the numbers move with its load. Two sets were taken.
@@ -195,6 +206,7 @@ The HTML is 2,322 bytes larger gzipped (51,044 to 53,366), and the Hindi page is
 - Reveals: no element is hidden at load inside the window. Every element is visible after it is centred, and nothing is hidden with motion paused, with reduced motion or without JavaScript. Chrome sends no observer entry for a section skipped by `content-visibility`, so after a pause and a jump to the bottom, story steps above the window keep their hidden state until they scroll back in, and then reveal.
 - The nav links to How it works, Pricing and FAQ land on their headings in both languages, with no drift after 3 s.
 - Comparison rows stay aligned at 1280, 1024, 768, 640, 639, 390 and 320 px in both languages.
+- Comparison table (MEDI-189, Playwright Chromium, static build): at 390, 768, 1024, 1280 and 1920 px, light and dark, both languages, the section has no sideways scroll. The marks take the destructive and optimal token colours in both themes. At 390 px the accessibility tree still shows a table with column heads, row heads and cells, and each cell reads as "No" or "Yes" followed by its text. At 320 px only the Hindi nav button passes the window edge, as on main.
 - At 320 px the nav "Read my report" button is wider than the window (by 37 px in English, 22 px in Hindi). Main has the same overflow, and this change does not touch the nav.
 - At 200% text size, every section this change restyled (hero, story, numbers, comparison, features, trust) fits at 1280, 390 and 320 px. The nav overflows from 390 px down, and the pricing cards and the FAQ overflow at 320 px, as they do on main (this change only adds a reveal attribute to pricing).
 - Playwright WebKit does not move keyboard focus to links with Tab (the macOS default), so the tab order was checked in Chromium. In WebKit, four PageDown presses from a hash link moved the page 860 px against 3120 px in Chromium; the screen still matched the centred step.
@@ -211,3 +223,5 @@ The HTML is 2,322 bytes larger gzipped (51,044 to 53,366), and the Hindi page is
 `docs/design/screenshots/medi-185-final-<width>-<theme>.png` for the features section at 1280, 1920 and 390 px, light and dark, each scene on its final frame.
 
 `docs/design/screenshots/medi-185-hero-option-{a,b,c}-<width>-<theme>.png` are the three hero background previews at 1280 and 390 px. `medi-185-hero-final-<width>-<theme>.png` is the built glassware at 1280, 1920, 2560 and 390 px, light and dark.
+
+`docs/design/screenshots/medi-189-compare-<width>-<theme>.png` for the comparison table at 390, 1280 and 1920 px, light and dark.
