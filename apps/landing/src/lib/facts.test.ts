@@ -1,7 +1,6 @@
 import { derived, markers, repeatStudyDays } from "@mediwise/engine";
-import { maxFiles } from "@mediwise/shared";
+import { maxFiles, paymentPacks } from "@mediwise/shared";
 import { expect, test } from "vitest";
-import { paymentPacks } from "../../../api/src/modules/payments/payments.config";
 import { facts, marqueeRows, packs, rupees } from "./facts";
 
 test("rupees writes paise only when the amount has them", () => {

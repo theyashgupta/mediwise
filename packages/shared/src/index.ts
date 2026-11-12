@@ -271,6 +271,20 @@ export const deleteMeSchema = z.object({
   confirm: z.literal("DELETE", 'Type "DELETE" to confirm'),
 });
 
+export const contact = {
+  brand: "MediWise",
+  businessName: "Codegenix",
+  proprietor: "Yash Anil Gupta",
+  email: "yashguptaab66@gmail.com",
+  phone: "+91 94044 12694",
+} as const;
+
+export const paymentPacks = [
+  { id: "pack_1", credits: 1, amount: 4900, label: "1 report credit" },
+  { id: "pack_5", credits: 5, amount: 19900, label: "5 report credits" },
+  { id: "pack_20", credits: 20, amount: 59900, label: "20 report credits" },
+] as const;
+
 export const policyVersion = "2026-10-15";
 
 export const consentKinds = ["terms", "health_data", "assistant_review"] as const;
