@@ -6,6 +6,8 @@ export const comparison: Messages["comparison"] = {
   caption: "आम लैब PDF और MediWise की तुलना",
   feature: "सुविधा",
   pdf: "आम लैब PDF",
+  yes: "हाँ",
+  no: "नहीं",
   rows: {
     explained: {
       label: "जानकारी",

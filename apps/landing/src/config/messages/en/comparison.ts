@@ -4,6 +4,8 @@ export const comparison = {
   caption: "A standard lab PDF compared with MediWise",
   feature: "Feature",
   pdf: "A standard lab PDF",
+  yes: "Yes",
+  no: "No",
   rows: {
     explained: {
       label: "Explained",
