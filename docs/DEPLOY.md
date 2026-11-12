@@ -87,7 +87,7 @@ The orchestrator sets these. Use the exact names. A workflow never prints a secr
 | `VITE_SUPABASE_ANON_KEY` | secret | yes | Anon (publishable) key of `mediwise-prod`. |
 | `VITE_PAYMENTS_ENABLED` | variable | no | Default `false`. `true` shows the credit packs and the Buy button. Set it with `PAYMENTS_ENABLED=true` on the API, never alone. |
 | `VITE_CASHFREE_MODE` | variable | no | `sandbox` (default) or `production`. Must match `CASHFREE_ENV`. |
-| `CMS_URL` | variable | no | Public URL of `mediwise-cms`, with no trailing slash. The landing build reads the FAQ and the security page from it. Empty means the build uses the committed snapshot. |
+| `CMS_URL` | variable | no | Public URL of `mediwise-cms`, with no trailing slash. The landing build reads the FAQ and the security page from it. The web build reads the legal pages from it. Empty means each build uses its committed snapshot. |
 
 The workflows also set the public origins in plain text, because they are not secret: `VITE_APP_ORIGIN` and `VITE_LANDING_URL` for the web, `NEXT_PUBLIC_SITE_URL` and `NEXT_PUBLIC_APP_URL` for the landing page. See Custom domains.
 
@@ -464,6 +464,10 @@ The CMS sends one `repository_dispatch` with event type `cms-published` to `they
 - Render free stops the service after 15 minutes with no request. The first request after that can take up to a minute.
 - The 5 s wait is in memory. If the service stops inside it, no dispatch goes. Publish again.
 - `next build` peaks at about 1.2 GB of memory. It needs no database and no secret. The server uses about 100 MB after a sign-in and an export. If the Render build stops with exit code 137, the build ran out of memory.
+
+### Web legal pages (MEDI-194)
+
+The web build runs `apps/web/scripts/pull-content.ts` before `vite build`. The script reads `<CMS_URL>/api/content/export?locale=en` and writes terms, privacy, refunds and contact to `apps/web/content/legal.en.json`. `CMS_URL` is a repository variable, with no trailing slash. When `CMS_URL` is empty, or the CMS fails or sends a bad export, the build prints one warning and uses the committed snapshot. The build does not stop. `deploy-web.yml` also runs on the `cms-published` dispatch, so a publish deploys the web again. The policy page removes all HTML that the allowlist in `apps/web/src/common/utils/sanitize-html.ts` does not name. The date "Last change" comes from `updatedAt` in the export. The version and the consent records come from `policyVersion` in `packages/shared`, and a CMS edit does not change it. For a material change to the privacy policy or the terms, also increase `policyVersion` in a code change. The app then asks each user for the health data consent again. To update the committed snapshot, run `CMS_URL=<CMS URL> node apps/web/scripts/pull-content.ts` and commit the file.
 
 ## Custom domains
 
