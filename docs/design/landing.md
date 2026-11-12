@@ -19,6 +19,8 @@ The landing page tells one story: a lab report becomes a plain-language explanat
 
 The order follows the argument: what MediWise is (hero), how it works (story), how much it knows (numbers), what it adds to a lab PDF (comparison), what else it does (features), how wide the catalog is (marquee), how it handles data (trust), what it costs (pricing), questions (FAQ), then the call to action.
 
+The FAQ questions and answers and the whole security page come from the CMS (MEDI-193). The build reads `apps/landing/content/<locale>.json`, a committed snapshot of the CMS export, so the page never fetches at run time. The answers keep the tokens `{maxFiles}`, `{fileMb}`, `{totalMb}`, `{markers}`, `{maxProfiles}` and `{disclaimer}`, and `lib/content.ts` fills them from the code. It also keeps only headings, paragraphs, lists, links, strong and em from the HTML. The FAQ heading and eyebrow stay in the message files. The security page shows the CMS text as one column, with no icon for each control. To change this text, publish it in the CMS. See Deploy the landing page in `docs/DEPLOY.md` to refresh the snapshot.
+
 The sections carry no line about how the page was made, such as when the numbers were counted or that a screen uses sample data (MEDI-188). The footer says "Screens show sample data." after the medical disclaimer.
 
 ## Story steps

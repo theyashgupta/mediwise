@@ -87,6 +87,7 @@ The orchestrator sets these. Use the exact names. A workflow never prints a secr
 | `VITE_SUPABASE_ANON_KEY` | secret | yes | Anon (publishable) key of `mediwise-prod`. |
 | `VITE_PAYMENTS_ENABLED` | variable | no | Default `false`. `true` shows the credit packs and the Buy button. Set it with `PAYMENTS_ENABLED=true` on the API, never alone. |
 | `VITE_CASHFREE_MODE` | variable | no | `sandbox` (default) or `production`. Must match `CASHFREE_ENV`. |
+| `CMS_URL` | variable | no | Public URL of `mediwise-cms`, with no trailing slash. The landing build reads the FAQ and the security page from it. Empty means the build uses the committed snapshot. |
 
 The workflows also set the public origins in plain text, because they are not secret: `VITE_APP_ORIGIN` and `VITE_LANDING_URL` for the web, `NEXT_PUBLIC_SITE_URL` and `NEXT_PUBLIC_APP_URL` for the landing page. See Custom domains.
 
@@ -369,6 +370,7 @@ The first line builds with the production variables. It sets `VITE_API_URL` on t
 `.github/workflows/deploy-landing.yml` deploys the landing page with the same steps as the web. These are the differences:
 
 - It starts on a push to `main` that changes `apps/landing`, `packages`, `pnpm-lock.yaml`, `apps/api/src/modules/payments/payments.config.ts` or the brand files in `apps/web/public` (favicons, `apple-touch-icon.png`, `og-image.png`).
+- It also starts on a `repository_dispatch` of type `cms-published`, which the CMS sends after a publish.
 - It uploads `apps/landing/out` to the project `mediwise-landing`, branch `main`.
 - The last step loads `https://mediwise.theyashgupta.me` and fails when the page has no `MediWise` title.
 
@@ -387,6 +389,8 @@ npx wrangler pages deploy apps/landing/out --project-name mediwise-landing --bra
 - The prices come from `apps/api/src/modules/payments/payments.config.ts` and the counts come from the engine catalog when the page builds. After a change to either file, build and deploy the landing page again.
 - The links to the app (Sign in, Read my report, the policy pages) point to `NEXT_PUBLIC_APP_URL`. Without the two variables, every link and the canonical URL name `localhost`.
 - The project `mediwise-landing` exists. Do not create it again. A deploy with `--branch` set to any name other than `main` is a preview.
+
+The FAQ and the security page come from the CMS. Before `next build`, `apps/landing/scripts/pull-content.ts` reads `GET $CMS_URL/api/content/export` for `en` and `hi` and writes `apps/landing/content/en.json` and `hi.json`. When `CMS_URL` is empty, the CMS does not answer in 90 s, or the export has no security page or no FAQ items, the script keeps the committed snapshot, prints one warning and the build continues. To refresh the committed snapshot, run `CMS_URL=<CMS URL> node apps/landing/scripts/pull-content.ts`, check the diff and commit both files.
 
 To check a build before you deploy it, serve `apps/landing/out` with a static server that compresses, such as `npx serve apps/landing/out`. Python's `http.server` does not compress, so Lighthouse scores it too low.
 
