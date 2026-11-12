@@ -195,8 +195,9 @@
   animation-duration: 32s;
 }
 
+/* Bottom 0 keeps the whole gradient inside the hero, so the clip at the section edge never shows as a line. */
 .hero-blob-3 {
-  bottom: -20rem;
+  bottom: 0;
   left: 30%;
   background: radial-gradient(
     closest-side,
