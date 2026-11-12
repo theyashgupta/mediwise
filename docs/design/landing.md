@@ -19,6 +19,8 @@ The landing page tells one story: a lab report becomes a plain-language explanat
 
 The order follows the argument: what MediWise is (hero), how it works (story), how much it knows (numbers), what it adds to a lab PDF (comparison), what else it does (features), how wide the catalog is (marquee), how it handles data (trust), what it costs (pricing), questions (FAQ), then the call to action.
 
+The sections carry no line about how the page was made, such as when the numbers were counted or that a screen uses sample data (MEDI-188). The footer says "Screens show sample data." after the medical disclaimer.
+
 ## Story steps
 
 | Step | Copy | Body line | Screen |

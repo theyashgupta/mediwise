@@ -5,6 +5,7 @@ export const site = {
   skipToContent: "Skip to content",
   disclaimer:
     "MediWise is for information, not diagnosis. It does not replace a doctor. MediWise is not a medical device.",
+  sampleData: "Screens show sample data.",
   readReport: "Read my report",
   signIn: "Sign in",
   pauseMotion: "Pause motion",

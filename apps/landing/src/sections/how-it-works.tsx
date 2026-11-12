@@ -27,7 +27,6 @@ export function HowItWorks({ locale }: { locale: Locale }) {
       <SectionHeader id="how-title" eyebrow={how.eyebrow} title={how.title}>
         {how.body}
       </SectionHeader>
-      <p className="mt-3 max-w-2xl text-sm text-muted-foreground">{story.body}</p>
       <StoryStepper steps={steps.map((step, index) => ({ ...step, label: how.step(index + 1) }))} />
     </section>
   );

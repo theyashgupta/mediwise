@@ -2,7 +2,6 @@ import type { Messages } from "..";
 import { review } from "../review";
 
 export const story: Messages["story"] = {
-  body: "इस पेज की हर स्क्रीन अंग्रेज़ी वाले MediWise ऐप से है। स्क्रीन पर दिखे व्यक्ति और मान काल्पनिक हैं।",
   alert: {
     title: "डॉक्टर के लिए एक लाइन",
     body: review(

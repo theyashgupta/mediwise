@@ -27,7 +27,6 @@ test("the stepper lists six numbered steps in the agreed order with a screen eac
     }
     expect(html).toContain(`alt="${t.howItWorks.upload.alt(facts.maxFiles)}"`);
     expect(html).toContain(`alt="${t.story.alert.alt}"`);
-    expect(html).toContain(t.story.body);
     expect(html.match(/<button type="button"/g)).toHaveLength(6);
   }
 });
