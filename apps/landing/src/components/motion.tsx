@@ -114,9 +114,66 @@ export function watchMotion() {
   };
 }
 
+/**
+ * Rewinds every CSS animation of one vignette when all of them have finished, and returns whether it did.
+ *
+ * @remarks
+ * A rewind during a play would restart the scene in the middle, so it waits for the final frame.
+ */
+export function rewindFinished(vignette: Pick<Element, "getAnimations">) {
+  const animations = vignette.getAnimations({ subtree: true });
+  if (animations.some((animation) => animation.playState !== "finished")) return false;
+  for (const animation of animations) animation.currentTime = 0;
+  return true;
+}
+
+/** Returns the revealed vignette that holds the event target, if there is one. */
+function vignetteOf(target: EventTarget | null) {
+  return target instanceof Element ? target.closest('[data-vignette][data-reveal="shown"]') : null;
+}
+
+/**
+ * Plays a feature vignette again when a mouse enters it, and again after each 900 ms rest while it stays.
+ *
+ * @remarks
+ * It only rewinds the CSS animations. On a touch screen the hover state sticks after a tap, so the loop runs only where the device can hover.
+ */
+export function loopVignettes() {
+  if (!matchMedia("(hover: hover)").matches) return () => {};
+  const timers = new WeakMap<Element, ReturnType<typeof setTimeout>>();
+  const onOver = (event: PointerEvent) => {
+    const vignette = vignetteOf(event.target);
+    if (vignette && !vignette.contains(event.relatedTarget as Node | null))
+      rewindFinished(vignette);
+  };
+  const onEnd = (event: AnimationEvent) => {
+    const vignette = vignetteOf(event.target);
+    if (!vignette?.matches(":hover")) return;
+    clearTimeout(timers.get(vignette));
+    timers.set(
+      vignette,
+      setTimeout(() => vignette.matches(":hover") && rewindFinished(vignette), 900),
+    );
+  };
+  document.addEventListener("pointerover", onOver);
+  document.addEventListener("animationend", onEnd);
+  return () => {
+    document.removeEventListener("pointerover", onOver);
+    document.removeEventListener("animationend", onEnd);
+  };
+}
+
 export function MotionObservers() {
   const still = useStill();
-  useEffect(() => (still ? undefined : watchMotion()), [still]);
+  useEffect(() => {
+    if (still) return;
+    const stopWatch = watchMotion();
+    const stopLoop = loopVignettes();
+    return () => {
+      stopWatch();
+      stopLoop();
+    };
+  }, [still]);
   return null;
 }
 

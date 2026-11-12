@@ -83,3 +83,36 @@ Most copy-in libraries depend on Motion: Magic UI (Dot Pattern, Retro Grid, Blur
 - gsap.com/pricing, github.com/darkroomengineering/lenis, github.com/flackr/scroll-timeline
 - superdesign.dev/blog/fix-generic-ai-landing-page
 - mobbin.com/pricing, magicui.design/docs, github.com/DavidHDev/react-bits, github.com/ibelick/motion-primitives, ui.aceternity.com/licence, tailwindcss.com/plus/license
+
+## Feature vignettes (MEDI-186, 2026-11-12)
+
+Method: the home page HTML of each site was fetched with curl and searched for animation devices (lottie, .riv, .mp4 and .webm, video tags, @keyframes, stroke-dasharray, canvas). One line per site gives the device in the feature or how-it-works area. Lovable returned a 5 kB client shell, so its device is not known.
+
+| Site | Device in the feature area | Evidence |
+|---|---|---|
+| Function Health | Lottie players in the three-column how-it-works cards, MP4 loops elsewhere | `lottie-player threecol_card-lottie` (30 matches), 16 MP4 files |
+| Superpower | CSS keyframe scenes over static WebP product parts: a tap ripple, a note that drops in, chips that pop | `@keyframes hiws-tap`, `hiws-note`, `hiws-pop` on `hiws-*.webp` images |
+| Levels | Static product screenshots, one MP4 loop behind the hero | `hero-background.mp4`, JPG and WebP screenshots |
+| Oura | Product film and photography, no vignettes | four MP4 and two WebM files, slider photos |
+| Zoe | Photography and static images, no animation | 6 inline SVGs, no keyframes, no video |
+| Linear | Inline SVG illustrations with dot-matrix animations, opacity only | 150 generated `@keyframes grid-dot-*`, dashed SVG strokes |
+| Raycast | Pre-rendered raster art (ribbons, a glass cube) | WebP and PNG renders, no video, no keyframes |
+| Resend | One looped 3D render as video | `cube.mp4` |
+| Cal.com | Inline SVG product mockups and canvas | 266 inline SVGs, 15 canvas tags, SVG ring charts with stroke-dasharray |
+| Lovable | Not known | 5 kB client shell, no server HTML |
+
+Findings:
+
+- No site of the nine uses a character or a mascot in its feature area. A character makes the MediWise page different from all of them.
+- The health sites use photography, screenshots, video and one Lottie set. The data tools use inline SVG or CSS scenes made of product parts.
+- Superpower and Linear show that CSS keyframes on transform and opacity are enough for small scenes. They need no Lottie runtime and no video bytes.
+- A Lottie player adds a runtime and one JSON file for each scene. The vignettes in MEDI-186 use inline SVG and the shared keyframes in `globals.css` instead.
+
+Motion model for the vignettes:
+
+- The base style of each part is the final frame. Without JavaScript, with motion paused and with reduced motion, the finished scene shows.
+- The existing reveal attribute starts the scene once: `[data-reveal="shown"]` applies the animation. Each part animates from an offset to its base through four shared keyframes (`in`, `hop`, `swing`, `draw`) and custom properties for the offset, the delay and the duration.
+- The hover loop rewinds the CSS animations of one vignette after a rest of 900 ms while the pointer stays on it. It moves nothing itself.
+- Custom properties inherit. A nested animated part must reset them, or it takes the hop of its parent.
+
+Sources: functionhealth.com, superpower.com, levels.com, ouraring.com, zoe.com, linear.app, raycast.com, resend.com, cal.com, lovable.dev (home pages fetched 2026-11-12).
