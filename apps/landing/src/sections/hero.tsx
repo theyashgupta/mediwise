@@ -11,6 +11,78 @@ const tags = [
   { name: heroMarkers[2], left: "90%", top: "18%" },
 ];
 
+const wave = "M-60 0q7.5-5 15 0t15 0 15 0 15 0 15 0 15 0 15 0 15 0 15 0 15 0 15 0 15 0V200H-60Z";
+
+const drop = "M12 2C12 2 4 12 4 17a8 8 0 0 0 16 0C20 12 12 2 12 2Z";
+
+const tubes = [24, 62, 100];
+
+function Liquid({ clip, x = 0, y }: { clip: string; x?: number; y: number }) {
+  return (
+    <g clipPath={`url(#${clip})`}>
+      <g transform={`translate(${x} ${y})`}>
+        <g className="hero-lab-rise">
+          <path className="hero-lab-liquid hero-lab-wave" d={wave} />
+        </g>
+      </g>
+    </g>
+  );
+}
+
+function Vessel({ name, viewBox, outline }: { name: string; viewBox: string; outline: string }) {
+  const clip = `hero-lab-${name}`;
+  return (
+    <svg viewBox={viewBox} className={`hero-lab-item hero-lab-${name}`}>
+      <clipPath id={clip}>
+        <path d={outline} />
+      </clipPath>
+      <Liquid clip={clip} y={92} />
+      <path className="hero-lab-glass" d={outline} />
+    </svg>
+  );
+}
+
+function HeroGlassware() {
+  return (
+    <div className="hero-lab absolute inset-0 mx-auto max-w-content">
+      <Vessel
+        name="flask"
+        viewBox="0 0 120 150"
+        outline="M46 10h28M50 10v42L14 128a10 10 0 0 0 9 14h74a10 10 0 0 0 9-14L70 52V10"
+      />
+      <Vessel name="round" viewBox="0 0 110 140" outline="M45 8h20M48 8v42a38 38 0 1 0 14 0V8" />
+      <svg viewBox="0 0 150 130" className="hero-lab-item hero-lab-rack">
+        {tubes.map((x, index) => (
+          <g key={x}>
+            <clipPath id={`hero-lab-tube-${index}`}>
+              <path d={`M${x} 6v86a13 13 0 0 0 26 0V6Z`} />
+            </clipPath>
+            <Liquid clip={`hero-lab-tube-${index}`} x={x - 30} y={40 + index * 14} />
+            <path className="hero-lab-glass" d={`M${x - 4} 6h34M${x} 6v86a13 13 0 0 0 26 0V6`} />
+          </g>
+        ))}
+        <path className="hero-lab-glass" d="M8 70h134M14 70v52M136 70v52M8 122h134" />
+      </svg>
+      <svg viewBox="0 0 40 120" className="hero-lab-item hero-lab-pipette">
+        <path className="hero-lab-glass" d="M14 4h12v30l-3 56-3 14-3-14-3-56V4Z" />
+        <path className="hero-lab-liquid" d="M15.6 60h8.8l-1.4 30-3 12-3-12Z" />
+        <g transform="translate(14 104) scale(0.5)">
+          <path className="hero-lab-liquid hero-lab-drip" d={drop} />
+        </g>
+      </svg>
+      {[1, 2, 3, 4].map((index) => (
+        <svg
+          key={index}
+          viewBox="0 0 24 28"
+          className={`hero-lab-item hero-lab-drop hero-lab-drop-${index}`}
+        >
+          <path className="hero-lab-liquid hero-lab-glass" d={drop} />
+        </svg>
+      ))}
+    </div>
+  );
+}
+
 function HeroMotion() {
   return (
     <div
@@ -20,6 +92,7 @@ function HeroMotion() {
       <div className="hero-blob hero-blob-1" />
       <div className="hero-blob hero-blob-2" />
       <div className="hero-blob hero-blob-3" />
+      <HeroGlassware />
     </div>
   );
 }

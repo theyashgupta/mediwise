@@ -11,6 +11,21 @@ test("the hero motion layer is hidden from assistive technology", () => {
   expect(html.match(/<div aria-hidden="true" class="hero-motion /g)).toHaveLength(2);
 });
 
+test("the lab glassware sits in the hidden motion layer and adds no text", () => {
+  const layer = html.slice(
+    html.indexOf('<div aria-hidden="true" class="hero-motion'),
+    html.indexOf('<div class="mx-auto grid'),
+  );
+  expect(layer).toContain('class="hero-lab ');
+  expect(layer.replace(/<[^>]+>/g, "").trim()).toBe("");
+});
+
+test("every glassware clip path has its own id", () => {
+  const ids = [...html.matchAll(/<clipPath id="([^"]+)"/g)].map((match) => match[1]);
+  expect(ids.length).toBe(5);
+  expect(new Set(ids).size).toBe(ids.length);
+});
+
 test("the hero image, heading and paragraph carry no reveal and no animation class", () => {
   const content = html.slice(html.indexOf('<div class="mx-auto grid'), html.indexOf("<dl"));
   expect(content.replace(/<div aria-hidden="true" class="hero-motion[\s\S]*$/, "")).not.toMatch(
