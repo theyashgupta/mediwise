@@ -4,5 +4,4 @@ export const numbers = {
   patterns: "patterns that link two or more markers",
   sources: "published sources behind the ranges",
   lowestPrice: "the lowest price for one report",
-  note: "Counted from the MediWise catalog and price list when this page was built.",
 };

@@ -33,7 +33,6 @@ export function Numbers({ locale }: { locale: Locale }) {
             </div>
           ))}
         </dl>
-        <p className="mt-12 text-xs">{t.note}</p>
       </div>
     </section>
   );

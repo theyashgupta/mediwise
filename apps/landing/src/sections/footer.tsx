@@ -63,7 +63,9 @@ export function Footer({ locale }: { locale: Locale }) {
             </ul>
           </nav>
         </div>
-        <p className="text-sm text-muted-foreground">{t.disclaimer}</p>
+        <p className="text-sm text-muted-foreground">
+          {t.disclaimer} {t.sampleData}
+        </p>
         <div className="flex flex-wrap items-center justify-between gap-4 text-xs text-muted-foreground">
           <p>{t.footer.legal(new Date().getFullYear(), contact.businessName)}</p>
           <LanguageSwitch current={locale} className="text-sm" />

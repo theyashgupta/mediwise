@@ -1,5 +1,4 @@
 export const story = {
-  body: "Every screen on this page is from the MediWise app. The person and the values are made up.",
   alert: {
     title: "A line for your doctor",
     body: "A scan line that names a nodule or a mass comes first. Ask your doctor about it.",

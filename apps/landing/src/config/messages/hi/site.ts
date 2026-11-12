@@ -9,6 +9,7 @@ export const site: Messages["site"] = {
   disclaimer: review(
     "MediWise जानकारी के लिए है, निदान के लिए नहीं। यह डॉक्टर की जगह नहीं लेता। MediWise कोई मेडिकल डिवाइस नहीं है।",
   ),
+  sampleData: review("स्क्रीन पर नमूना डेटा दिखाया गया है।"),
   readReport: "मेरी रिपोर्ट समझें",
   signIn: "साइन इन",
   pauseMotion: "एनिमेशन रोकें",
