@@ -266,6 +266,19 @@
   --shadow-flat: 0 0 0 0 transparent;
 }
 
+/* Unlayered on purpose: these beat every Tailwind rounded-* utility, so a radius set on dialog or menu content is ignored. */
+[data-slot="dialog-content"] {
+  border-radius: var(--radius-2xl);
+}
+
+[data-slot="dropdown-menu-content"] {
+  border-radius: var(--radius-xl);
+}
+
+[data-slot="dropdown-menu-item"] {
+  border-radius: var(--radius-lg);
+}
+
 [data-theme="light"] {
   color-scheme: light;
 }
