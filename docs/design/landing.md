@@ -6,7 +6,7 @@ The landing page tells one story: a lab report becomes a plain-language explanat
 
 | # | Section | Layout | Motion |
 |---|---|---|---|
-| 1 | Hero | Text left, phone right. Callout band below. | Three colour blobs drift behind the content (24, 32 and 38 s loops). A marker trend line draws itself once above the callout band. |
+| 1 | Hero | Text left, phone right. Callout band below. | Three colour blobs drift behind the content (24, 32 and 38 s loops). Lab glassware floats around the content (MEDI-185). A marker trend line draws itself once above the callout band. |
 | 2 | Story (How it works) | One stepper (MEDI-187). From 1024 px, a 300 px phone on the left and the list of six steps on the right, centred on the phone. Each step shows "Step n", the title and one body line. Below 1024 px the 220 px phone sits above the list. | The steps advance on their own, one every 4.5 s, from step 6 back to step 1. On each advance the phone turns on the Y axis and shows the screen of the next step. A bar under the active step fills in 4.5 s. |
 | 3 | Numbers | Full-width primary band, four large numbers. | The numbers count up once. |
 | 4 | Comparison | Two columns: a printed lab PDF and MediWise. Rows align through subgrid. | Reveal. |
@@ -39,7 +39,7 @@ The questions, settled, episode and Hindi screens left the page (orchestrator de
 - JavaScript moves nothing itself. `components/motion.tsx` sets data attributes and CSS animates transform and opacity (the trend line animates its dash offset).
 - Every reveal element is visible by default. The observer hides only an element that starts below the window, and shows it again when it scrolls in. Without JavaScript, with motion paused and with reduced motion, every element is visible.
 - There is no scroll or resize listener on the page, and no section pins.
-- The hero blobs pause when the hero leaves the window, when the tab is hidden, with the Pause motion button and with reduced motion. The hero phone, heading and paragraph never animate, because they hold the LCP element.
+- The hero blobs and the lab glassware pause when the hero leaves the window, when the tab is hidden, with the Pause motion button and with reduced motion. The hero phone, heading and paragraph never animate, because they hold the LCP element.
 - `will-change` is on the hero blobs only. The story section has `content-visibility: auto` with an intrinsic size of 1550 px below 1024 px and 1000 px from 1024 px. Measured (MEDI-187): 1420 to 1582 px at 320 and 390 px, 1330 to 1356 px at 1023 px, and 985 to 1011 px at 1280 and 1920 px, both languages.
 - The story stepper (MEDI-187) is the one client component that changes state on a timer. `sections/story-stepper.tsx` sets `aria-current` on the active step and `data-turn` on the phone. CSS turns the phone edge-on in 350 ms, swaps the screen with a 350 ms opacity delay, then turns the phone back in 350 ms. Two copies of the keyframes (`turn-a`, `turn-b`) alternate, so each change starts the turn again.
 - The stepper advances only while at least 25% of it is in the window. With the Pause motion button or reduced motion it does not advance, the phone does not turn, the screen changes with a cut and the progress bar is not shown. A click or a key press on a step still selects it. Without JavaScript, step 1 is active and all six steps are readable.
@@ -103,7 +103,19 @@ The owner asked for a hero background that says doctor and lab, without a stetho
 | B | Thin line glassware floats: a flask, a round flask, a tube rack, a pipette and drops, in the primary outline and the droplet fill. The liquid level rises and falls and its surface moves. | +2,559 / +2,488 bytes | 0 bytes |
 | C | Two blurred report sheets behind the phone. A soft light band sweeps across the front sheet every 9 s. CSS gradients only. | +1,244 / +1,100 bytes | 0 bytes |
 
-All three use inline SVG or CSS only and animate transform and opacity (A also draws its lines with the dash offset). Each one stops when the hero leaves the window, when the tab is hidden, with the Pause motion button and with reduced motion, and then shows its final frame. The LCP element is the hero phone image in all three, and it does not animate.
+All three use inline SVG or CSS only and animate transform and opacity (A also draws its lines with the dash offset). Each one stops when the hero leaves the window, when the tab is hidden, with the Pause motion button and with reduced motion, and then shows its final frame. At 1280 px the LCP element is the hero phone image in all three. It does not animate.
+
+The owner picked B (2026-11-12).
+
+## Hero lab glassware (MEDI-185)
+
+`HeroGlassware` in `sections/hero.tsx` draws a conical flask, a round flask, a rack of three tubes, a pipette and four drops as inline SVG in the hero motion layer. The rules are in `globals.css` under "Lab glassware".
+
+- Style: the glass is a 2 px primary outline, and the liquid is the droplet fill (primary mixed into `--ambient-1`). This is the line style of the feature vignettes. There is no text, no stethoscope and no medical symbol.
+- Motion: each item floats on a 8 to 12 s loop. The liquid level rises and falls, and its surface moves sideways. The pipette lets a drop fall every 3.6 s. The keyframes move transform and opacity only.
+- Pause: the glassware stops when the hero leaves the window, when the tab is hidden, with the Pause motion button and with reduced motion. The rest frame is the base style.
+- Containment (MEDI-183): the layer is inside the hero, which clips it. The items anchor to the content column. The right items stop at least 8 px before the window edge, so a 1024 px window does not cut them. From 1600 px the round flask and the pipette move into the left side space, and the conical flask grows to 170 px. No item touches the top or bottom edge of the hero.
+- Phone (below 1024 px): only the conical flask, the round flask and two drops show. The rack and the pipette would cover the text.
 
 ## Measurements (2026-10-16)
 
@@ -155,7 +167,25 @@ Bundle: the landing first load is 147,779 bytes gzipped, up 240 bytes from 147,5
 
 Bundle: the landing first load is 148,733 bytes gzipped, up 954 bytes from 147,779. The story stepper and the phone frame classes are the new JavaScript. The frame CSS is inlined in the HTML, which the 150,000 byte limit does not count. Lighthouse was not run for this change.
 
+## Measurements (MEDI-185, 2026-11-12)
+
+Lighthouse 13.5, mobile, simulated throttling, headless Chrome for Testing, the static build served with gzip by a copy of `apps/e2e/perf/serve.ts`. Ten runs each, before and after taken in turn, median shown (range in brackets). This set measured a higher LCP than the MEDI-186 set, so compare before and after within this set only.
+
+| Metric | Before (main, 377089e) | After (MEDI-185) |
+|---|---|---|
+| LCP | 3,917 ms (3,753 to 4,010) | 3,809 ms (3,726 to 4,295) |
+| CLS (median) | 0.000 | 0.000 |
+| TBT | 73 ms | 53 ms |
+| Performance | 0.87 | 0.88 |
+| Accessibility | 1.00 | 1.00 |
+
+The LCP element is the hero paragraph in both builds. One before run had a CLS of 0.039 and one after run had a CLS of 0.091. Both came from a hero blob (`div.hero-blob`), not from the glassware.
+
+The HTML is 2,322 bytes larger gzipped (51,044 to 53,366), and the Hindi page is 2,325 bytes larger (54,824 to 57,149). The JavaScript chunks are byte for byte the same, so the landing first load does not change. The glassware is server rendered and has no client code.
+
 ## Browser checks
+
+- Glassware (MEDI-185, Playwright Chromium): at 1024, 1280, 1920, 2560 and 390 px, light and dark, both languages, the page has no sideways scroll and no item is cut by the window or the hero edge. With the Pause motion button, with reduced motion and with the hero off the window, no glassware animation runs.
 
 - Story stepper (MEDI-187, Playwright Chromium, static build): the steps changed at 4.52, 9.03, 13.56, 18.08, 22.59 and 27.13 s, from step 6 back to step 1. A click on step 3 at 29.16 s selected it, and step 4 followed at 33.67 s. Halfway through a turn the phone transform is `rotateY` at about 88 degrees, and after the turn it is `none`. Scrolled to the top, the step did not change in 6 s. With Pause motion the step did not change in 6 s, a click still selected a step, the phone had no animation and only the selected screen showed. With reduced motion the step stayed at 1 after 6 s. Tab, then Enter or Space, selected a step. At 1280 and 1920 px every body line is one line in both languages. At 200% text size nothing in the section passes the window edge at 1280, 390 and 320 px.
 
@@ -179,3 +209,5 @@ Bundle: the landing first load is 148,733 bytes gzipped, up 954 bytes from 147,7
 `docs/design/screenshots/medi-187-how-it-works-<width>-<theme>.png` for the stepper at 390, 1280 and 1920 px, light and dark. `medi-187-how-it-works-1920x1300-<theme>-viewport.png` is a tall window. `medi-187-hero-<width>-<theme>.png` shows the new phone frame in the hero at 1280 and 390 px. `medi-187-auto-advance.webm` records 30 s of the auto-advance at 1280 px, then a click on step 5.
 
 `docs/design/screenshots/medi-185-final-<width>-<theme>.png` for the features section at 1280, 1920 and 390 px, light and dark, each scene on its final frame.
+
+`docs/design/screenshots/medi-185-hero-option-{a,b,c}-<width>-<theme>.png` are the three hero background previews at 1280 and 390 px. `medi-185-hero-final-<width>-<theme>.png` is the built glassware at 1280, 1920, 2560 and 390 px, light and dark.
