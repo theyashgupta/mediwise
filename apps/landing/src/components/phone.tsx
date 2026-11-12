@@ -6,16 +6,13 @@ export type ScreenName =
 
 export function Phone({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div
-      className={cn(
-        "relative aspect-[433/882] w-full rounded-[18%/8.8%] bg-input p-[3.2%] ring-1 ring-border",
-        className,
-      )}
-    >
-      <div className="relative size-full overflow-hidden rounded-[14.5%/6.7%] bg-background">
-        {children}
+    <div className={cn("phone relative aspect-[433/882] w-full", className)}>
+      <div className="phone-bezel">
+        <div className="relative size-full overflow-hidden rounded-[14%/6.6%] bg-background">
+          {children}
+        </div>
+        <div className="phone-island" />
       </div>
-      <div className="absolute top-[4%] left-1/2 h-[2.9%] w-[27%] -translate-x-1/2 rounded-full bg-neutral-950" />
     </div>
   );
 }

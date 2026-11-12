@@ -34,8 +34,8 @@ test("paused motion, reduced motion and print show every hidden reveal", () => {
   expect(css).toMatch(/@media print \{\s*\[data-reveal="hidden"\] \{\s*opacity: 1;/);
 });
 
-test("the story has no pin, step switching or scroll timeline rules and skips rendering offscreen", () => {
-  expect(css).not.toMatch(/view-timeline|timeline-scope|sticky|data-step|story-screen|story-phone/);
+test("the story has no pin or scroll timeline rules and skips rendering offscreen", () => {
+  expect(css).not.toMatch(/view-timeline|timeline-scope|sticky/);
   expect(css).toMatch(
     /\.story-section \{\s*content-visibility: auto;\s*contain-intrinsic-size: auto \d+px/,
   );
@@ -78,4 +78,21 @@ test("the feature vignettes move transform and opacity only", () => {
     expect(properties.size).toBeGreaterThan(0);
     expect([...properties].filter((p) => p !== "opacity" && p !== "transform")).toEqual([]);
   }
+});
+
+test("the story phone turns on the Y axis only and the screen swaps at the half-way point", () => {
+  const bodies = keyframes();
+  for (const name of ["turn-a", "turn-b"]) {
+    expect(bodies[name]?.match(/[\w-]+(?=:)/g)).toEqual(["transform", "transform"]);
+    expect(bodies[name]).toMatch(/50% \{\s*transform: rotateY\(90deg\);/);
+  }
+  expect(css).toMatch(/\.story-phone\[data-turn="0"\] \{\s*animation: turn-a 700ms/);
+  expect(css).toMatch(/\.story-phone\[data-turn="1"\] \{\s*animation: turn-b 700ms/);
+  expect(css).toMatch(/\.story-screen \{\s*transition: opacity 0s 350ms;/);
+});
+
+test("the phone frame is drawn in CSS with no image", () => {
+  const frame = css.slice(css.indexOf(".phone {"), css.indexOf(".phone-island"));
+  expect(frame).toMatch(/linear-gradient/);
+  expect(frame).not.toMatch(/url\(/);
 });
