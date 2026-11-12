@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useT } from "@/common/hooks/use-locale";
 import { PageHeader } from "@/common/components/page-header";
 import { ProblemError } from "@/common/utils/problem-error";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import { creditsLeftLabel } from "@/modules/credits";
 import { useSession } from "@/modules/auth";
 import { ConsentGateContainer, useMe, useRefreshConsents } from "@/modules/me";

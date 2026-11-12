@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { LogOut, Monitor, Moon, Settings, Sun, User } from "lucide-react";
 import { useT } from "@/common/hooks/use-locale";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import { initial } from "@/common/utils/initial";
 import {
   DropdownMenu,
@@ -38,8 +38,7 @@ export function UserMenu({
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          size="icon"
-          className="rounded-full"
+          className="size-10 rounded-full px-0"
           aria-label={t.me.menu.open}
           data-testid="user-menu"
         >

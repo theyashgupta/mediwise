@@ -2,7 +2,7 @@ import { maxFiles, maxTotalBytes } from "@mediwise/shared";
 import { CircleCheck, Info, X } from "lucide-react";
 import { useCallback } from "react";
 import { useT } from "@/common/hooks/use-locale";
-import { Button } from "@/components/ui/button";
+import { IconButton } from "@/common/components/controls/icon-button";
 import { Progress } from "@/components/ui/progress";
 import { megabytes } from "../config/files";
 import { type PhotoFlags, photoWarnings } from "../config/photo-check";
@@ -100,14 +100,12 @@ export function FilePreviewList({
                   />
                 )
               ) : (
-                <Button
-                  variant="ghost"
-                  size="icon"
+                <IconButton
                   onClick={() => onRemove(index)}
-                  aria-label={t.reports.upload.remove(file.name)}
+                  label={t.reports.upload.remove(file.name)}
                 >
                   <X aria-hidden />
-                </Button>
+                </IconButton>
               )}
             </li>
           );

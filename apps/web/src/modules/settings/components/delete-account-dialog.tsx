@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useT } from "@/common/hooks/use-locale";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import {
   Dialog,
   DialogClose,
@@ -10,8 +10,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Field } from "@/common/components/controls/field";
+import { Input } from "@/common/components/controls/input";
 
 type DeleteAccountDialogProps = {
   open: boolean;
@@ -47,15 +47,14 @@ export function DeleteAccountDialog({
           <DialogTitle>{copy.title}</DialogTitle>
           <DialogDescription>{copy.description}</DialogDescription>
         </DialogHeader>
-        <div className="space-y-2">
-          <Label htmlFor="confirm-delete">{copy.confirm(confirmWord)}</Label>
+        <Field label={copy.confirm(confirmWord)}>
           <Input
             id="confirm-delete"
             autoComplete="off"
             value={typed}
             onChange={(event) => setTyped(event.target.value)}
           />
-        </div>
+        </Field>
         {error && (
           <p role="alert" className="text-sm text-destructive">
             {error}

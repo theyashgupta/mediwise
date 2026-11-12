@@ -48,7 +48,7 @@ export function ProfileSwitcher({ profiles, active, placement, onSelect }: Profi
       aria-label={placement === "sidebar-collapsed" ? t.profiles.switcher.label(name) : undefined}
       data-testid={`profile-switcher-${placement}`}
       className={cn(
-        "flex items-center gap-2 rounded-md text-left outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 data-[state=open]:bg-accent",
+        "flex items-center gap-2 rounded-lg text-left outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 data-[state=open]:bg-accent",
         placement === "sidebar" && "h-11 w-full px-2",
         placement === "sidebar-collapsed" && "size-10 justify-center",
         placement === "inline" && "h-8 max-w-full min-w-0 px-1.5",

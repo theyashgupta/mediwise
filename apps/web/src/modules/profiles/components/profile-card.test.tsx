@@ -1,5 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { expect, test } from "vitest";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import type { Profile } from "../types";
 import { ProfileCard } from "./profile-card";
 
@@ -20,13 +21,15 @@ const profile: Profile = {
 
 function render(card: Profile) {
   return renderToStaticMarkup(
-    <ProfileCard
-      profile={card}
-      onEdit={() => {}}
-      onRemove={() => {}}
-      downloading={false}
-      onDownload={() => {}}
-    />,
+    <TooltipProvider>
+      <ProfileCard
+        profile={card}
+        onEdit={() => {}}
+        onRemove={() => {}}
+        downloading={false}
+        onDownload={() => {}}
+      />
+    </TooltipProvider>,
   );
 }
 

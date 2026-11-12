@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useT } from "@/common/hooks/use-locale";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import type { Me } from "../types";
 
 type OutOfQuestionsProps = {

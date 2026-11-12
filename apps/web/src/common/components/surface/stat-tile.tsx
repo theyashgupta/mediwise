@@ -12,7 +12,7 @@ type StatTileProps = {
 
 export function StatTile({ label, value, unit, status, className }: StatTileProps) {
   return (
-    <div className={cn("min-w-0 rounded-lg border bg-card px-4 py-3", className)}>
+    <div className={cn("min-w-0 rounded-xl border bg-card px-4 py-3", className)}>
       <dt className="flex items-center gap-1.5 truncate text-sm text-muted-foreground">
         {status && (
           <span className={cn("size-1.5 shrink-0 rounded-full", statusStyles[status].mark)} />

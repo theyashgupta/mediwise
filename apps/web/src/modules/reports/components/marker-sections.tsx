@@ -2,7 +2,7 @@ import { ChevronDown } from "lucide-react";
 import { type ReactNode, useLayoutEffect, useRef } from "react";
 import { useT } from "@/common/hooks/use-locale";
 import type { Status } from "@/common/utils/status";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import { markerFilters } from "../config/report";
 import type { MarkerFilter, MarkerRow as MarkerRowData, ReportDetail } from "../types";
 import { MarkerRow } from "./marker-row";

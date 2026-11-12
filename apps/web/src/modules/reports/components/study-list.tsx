@@ -71,7 +71,7 @@ function StudyCard({ study, alert }: { study: Study; alert: boolean }) {
           </dl>
         )}
         {study.measurements.length > 0 && (
-          <ul className="divide-y rounded-lg border" aria-label={t.report.studies.measurements}>
+          <ul className="divide-y rounded-xl border" aria-label={t.report.studies.measurements}>
             {study.measurements.map((measurement) => (
               <li
                 key={measurement.key}

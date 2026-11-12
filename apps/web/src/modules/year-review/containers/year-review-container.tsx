@@ -6,7 +6,7 @@ import { LoadingState } from "@/common/components/loading-state";
 import { PageHeader } from "@/common/components/page-header";
 import { useInFlight } from "@/common/hooks/use-in-flight";
 import { useT } from "@/common/hooks/use-locale";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import { useActiveProfile } from "@/modules/profiles";
 import { YearReviewView } from "../components/year-review-view";
 import { formatReviewDate } from "../config/year-review";

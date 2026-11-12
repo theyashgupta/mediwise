@@ -9,8 +9,8 @@ import {
   GlassDialogContent,
   GlassSurface,
 } from "@/common/components/surface/glass";
+import { Button } from "@/common/components/controls/button";
 import { StatTile } from "@/common/components/surface/stat-tile";
-import { Button } from "@/components/ui/button";
 import {
   CardContent,
   CardDescription,
@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { Mascot, type MascotState } from "@/modules/mascot";
+import { ControlsSpecimen } from "./controls-specimen";
 
 const themes = ["light", "dark"] as const;
 
@@ -70,10 +71,14 @@ function Backdrop({ children, className }: { children: ReactNode; className?: st
 function Specimens() {
   return (
     <div className="space-y-12 @container">
+      <Specimen title="Controls: Button, IconButton, Input, Select, Textarea, Field">
+        <ControlsSpecimen />
+      </Specimen>
+
       <Specimen title="GlassSurface: bar, surface and overlay layers">
         <Backdrop className="grid gap-3 pt-14">
           {(["bar", "surface", "overlay"] as const).map((layer) => (
-            <GlassSurface key={layer} layer={layer} className="rounded-lg border px-4 py-3">
+            <GlassSurface key={layer} layer={layer} className="rounded-xl border px-4 py-3">
               <p className="font-mono text-sm">layer=&quot;{layer}&quot;</p>
               <p className="text-sm text-muted-foreground">Muted text passes 4.5:1 on this tint.</p>
             </GlassSurface>
@@ -90,7 +95,7 @@ function Specimens() {
                   <li
                     key={label}
                     className={cn(
-                      "flex h-8 items-center gap-2.5 rounded-md px-3 text-sm text-muted-foreground",
+                      "flex h-8 items-center gap-2.5 rounded-lg px-3 text-sm text-muted-foreground",
                       active && "bg-primary/10 font-medium text-primary",
                     )}
                   >
@@ -225,7 +230,7 @@ export function DesignSystem() {
     <>
       <PageHeader
         title="Design system"
-        description="Glass surfaces and tiles, in both themes. Dev builds only."
+        description="Controls, glass surfaces and tiles, in both themes. Dev builds only."
         actions={
           <Button variant="outline" aria-pressed={solid} onClick={() => setSolid(!solid)}>
             {solid ? "Show glass" : "Show the solid fallback"}

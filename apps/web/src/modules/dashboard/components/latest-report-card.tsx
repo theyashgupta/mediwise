@@ -5,7 +5,7 @@ import { StatTile } from "@/common/components/surface/stat-tile";
 import { useT } from "@/common/hooks/use-locale";
 import { formatPlainDate } from "@/common/utils/date";
 import { statusStyles } from "@/common/utils/status";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import { cn } from "@/lib/utils";
 import { scoreChange } from "../config/score-change";
 import type { LatestReport } from "../types";

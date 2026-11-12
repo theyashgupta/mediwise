@@ -7,7 +7,7 @@ import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
 import { PageHeader } from "@/common/components/page-header";
 import { useT } from "@/common/hooks/use-locale";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import { EpisodeSettings } from "../components/episode-settings";
 import { EpisodeView } from "../components/episode-view";
 import { formatEpisodeDate } from "../config/episodes";

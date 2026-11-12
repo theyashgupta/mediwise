@@ -1,6 +1,6 @@
 import { Copy, LoaderCircle, MessageCircle } from "lucide-react";
 import { useT } from "@/common/hooks/use-locale";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/common/components/controls/input";
 import { whatsAppLink } from "../config/share";
 
 type ShareDialogProps = {

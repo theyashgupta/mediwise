@@ -2,8 +2,8 @@ import { maxReportTitleLength } from "@mediwise/shared";
 import { Pencil } from "lucide-react";
 import { useState } from "react";
 import { getIntlTag, useT } from "@/common/hooks/use-locale";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/common/components/controls/button";
+import { Input } from "@/common/components/controls/input";
 
 type ReportTitleProps = {
   title: string;

@@ -5,7 +5,7 @@ import { EmptyState } from "@/common/components/empty-state";
 import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
 import { PageHeader } from "@/common/components/page-header";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import { useActiveProfile } from "@/modules/profiles";
 import { ReportList } from "../components/report-list";
 import { useReports } from "../hooks/use-reports";

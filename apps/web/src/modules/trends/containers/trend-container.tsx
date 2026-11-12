@@ -7,7 +7,7 @@ import { LoadingState } from "@/common/components/loading-state";
 import { PageHeader } from "@/common/components/page-header";
 import { useT } from "@/common/hooks/use-locale";
 import { ValueChart } from "@/common/components/value-chart";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import { cn } from "@/lib/utils";
 import { useActiveProfile } from "@/modules/profiles";
 import { formatReportDate } from "@/modules/reports";

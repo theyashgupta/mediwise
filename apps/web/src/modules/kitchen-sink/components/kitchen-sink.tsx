@@ -22,7 +22,9 @@ import { SourceList } from "@/common/components/source-list";
 import { StatusBadge } from "@/common/components/status-badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
+import { Field } from "@/common/components/controls/field";
+import { IconButton } from "@/common/components/controls/icon-button";
 import {
   Card,
   CardContent,
@@ -58,16 +60,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Input } from "@/common/components/controls/input";
 import { Progress } from "@/components/ui/progress";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectItem } from "@/common/components/controls/select";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
@@ -228,13 +223,12 @@ function Specimens() {
           <Button disabled>Disabled</Button>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button size="xs">Extra small</Button>
           <Button size="sm">Small</Button>
           <Button>Default</Button>
           <Button size="lg">Large</Button>
-          <Button size="icon" variant="outline" aria-label="Add">
+          <IconButton variant="outline" label="Add">
             <Plus aria-hidden />
-          </Button>
+          </IconButton>
         </div>
       </Specimen>
 
@@ -252,31 +246,22 @@ function Specimens() {
 
       <Specimen title="Input, Label and Select">
         <div className="grid gap-4 @lg:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor={`${id}-email`}>Email</Label>
+          <Field label="Email">
             <Input id={`${id}-email`} type="email" placeholder="you@example.com" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor={`${id}-invalid`}>Invalid</Label>
+          </Field>
+          <Field label="Invalid">
             <Input id={`${id}-invalid`} aria-invalid defaultValue="not an email" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor={`${id}-disabled`}>Disabled</Label>
+          </Field>
+          <Field label="Disabled">
             <Input id={`${id}-disabled`} disabled defaultValue="Locked" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor={`${id}-relation`}>Relation</Label>
-            <Select defaultValue="parent">
-              <SelectTrigger id={`${id}-relation`} className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="self">Self</SelectItem>
-                <SelectItem value="parent">Parent</SelectItem>
-                <SelectItem value="child">Child</SelectItem>
-              </SelectContent>
+          </Field>
+          <Field label="Relation">
+            <Select defaultValue="parent" id={`${id}-relation`} className="w-full">
+              <SelectItem value="self">Self</SelectItem>
+              <SelectItem value="parent">Parent</SelectItem>
+              <SelectItem value="child">Child</SelectItem>
             </Select>
-          </div>
+          </Field>
         </div>
       </Specimen>
 

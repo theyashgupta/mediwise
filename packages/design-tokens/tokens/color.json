@@ -44,6 +44,12 @@
           "components": [0.99, 0.002, 80]
         }
       },
+      "primary-hover": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.43, 0.072, 195]
+        }
+      },
       "secondary": {
         "$value": {
           "colorSpace": "oklch",
@@ -89,8 +95,11 @@
       "input": {
         "$value": {
           "colorSpace": "oklch",
-          "components": [0.87, 0.007, 75]
+          "components": [0.64, 0.008, 70]
         }
+      },
+      "field": {
+        "$value": "{color.light.card}"
       },
       "ring": {
         "$value": {
@@ -262,6 +271,12 @@
           "components": [0.205, 0.004, 70]
         }
       },
+      "primary-hover": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.83, 0.075, 195]
+        }
+      },
       "secondary": {
         "$value": {
           "colorSpace": "oklch",
@@ -307,7 +322,13 @@
       "input": {
         "$value": {
           "colorSpace": "oklch",
-          "components": [0.35, 0.005, 70]
+          "components": [0.54, 0.006, 70]
+        }
+      },
+      "field": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [0.25, 0.004, 70]
         }
       },
       "ring": {

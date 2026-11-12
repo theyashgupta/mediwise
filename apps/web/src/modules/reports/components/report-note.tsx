@@ -1,5 +1,6 @@
 import { maxReportNoteLength } from "@mediwise/shared";
 import { useState } from "react";
+import { Textarea } from "@/common/components/controls/textarea";
 import { getIntlTag, useT } from "@/common/hooks/use-locale";
 import { cn } from "@/lib/utils";
 import { changedNote, noteStatus } from "../config/note";
@@ -26,7 +27,7 @@ export function ReportNote({ note, saving, saved, failed, onSave }: ReportNotePr
       <p id="report-note-help" className="text-sm text-muted-foreground">
         {t.report.note.help}
       </p>
-      <textarea
+      <Textarea
         id="report-note"
         value={draft}
         maxLength={maxReportNoteLength}
@@ -38,7 +39,7 @@ export function ReportNote({ note, saving, saved, failed, onSave }: ReportNotePr
           const next = changedNote(draft, note);
           if (next !== undefined && !saving) onSave(next);
         }}
-        className="field-sizing-content min-h-20 w-full rounded-md border border-input bg-transparent px-2.5 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30"
+        className="min-h-20"
       />
       <div className="flex justify-between gap-4 text-sm">
         <p

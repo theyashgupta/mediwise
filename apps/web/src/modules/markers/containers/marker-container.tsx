@@ -7,7 +7,7 @@ import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
 import { Section } from "@/common/components/section";
 import { SourceList } from "@/common/components/source-list";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import { FollowUpList, formatReportDate } from "@/modules/reports";
 import { MarkerHeader } from "../components/marker-header";
 import { MarkerKnowledge } from "../components/marker-knowledge";

@@ -3,8 +3,8 @@ import { SendHorizontal } from "lucide-react";
 import { useState } from "react";
 import { useInFlight } from "@/common/hooks/use-in-flight";
 import { useT } from "@/common/hooks/use-locale";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/common/components/controls/button";
+import { Textarea } from "@/common/components/controls/textarea";
 
 type AskInputProps = {
   value: string;

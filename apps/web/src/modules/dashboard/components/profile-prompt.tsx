@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { UserRound } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 
 type ProfilePromptProps = {
   title: string;

@@ -1,7 +1,7 @@
 import { RotateCcw } from "lucide-react";
 import { Section } from "@/common/components/section";
 import { formatPlainDate } from "@/common/utils/date";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import { errorClassLabels } from "../config/admin";
 import type { FailedReport } from "../types";
 

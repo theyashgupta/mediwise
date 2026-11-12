@@ -4,7 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { useInFlight } from "@/common/hooks/use-in-flight";
 import { useT } from "@/common/hooks/use-locale";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import {
   Form,
   FormControl,
@@ -14,7 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { CheckboxField } from "@/common/components/checkbox-field";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/common/components/controls/input";
 import { ConsentLabel } from "@/modules/me";
 import { type SignUpValues, signInSchema, signUpSchema } from "../config/schemas";
 import { FormError } from "./form-error";

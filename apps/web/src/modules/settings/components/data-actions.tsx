@@ -1,6 +1,6 @@
 import { Download, Trash2 } from "lucide-react";
 import { useT } from "@/common/hooks/use-locale";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 
 type DataActionsProps = {
   downloading: boolean;

@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { StatusBadge } from "@/common/components/status-badge";
 import { useT } from "@/common/hooks/use-locale";
 import { formatBounds } from "@/common/utils/range-scale";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { MarkerDetail } from "@/modules/markers";
 import { formatReportDate, MarkerValue } from "@/modules/reports";

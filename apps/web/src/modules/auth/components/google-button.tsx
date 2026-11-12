@@ -1,5 +1,5 @@
 import { useT } from "@/common/hooks/use-locale";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import { FormError } from "./form-error";
 
 type GoogleButtonProps = {

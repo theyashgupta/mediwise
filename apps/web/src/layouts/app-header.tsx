@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { LogoMark } from "@/common/components/brand/logo";
 import { useT } from "@/common/hooks/use-locale";
 import { ThemeToggle } from "@/common/components/theme-toggle";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import { cn } from "@/lib/utils";
 import { UserMenuContainer } from "@/modules/me";
 import { ProfileSwitcherContainer } from "@/modules/profiles";

@@ -13,37 +13,37 @@
     "$type": "dimension",
     "base": {
       "$value": {
-        "value": 0.5,
+        "value": 0.75,
         "unit": "rem"
       }
     },
     "sm": {
       "$value": {
-        "value": 0.25,
+        "value": 0.5,
         "unit": "rem"
       }
     },
     "md": {
       "$value": {
-        "value": 0.375,
+        "value": 0.625,
         "unit": "rem"
       }
     },
     "lg": {
       "$value": {
-        "value": 0.5,
+        "value": 0.75,
         "unit": "rem"
       }
     },
     "xl": {
       "$value": {
-        "value": 0.75,
+        "value": 1,
         "unit": "rem"
       }
     },
     "2xl": {
       "$value": {
-        "value": 1,
+        "value": 1.5,
         "unit": "rem"
       }
     }

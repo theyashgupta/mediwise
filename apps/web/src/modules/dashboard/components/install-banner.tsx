@@ -1,6 +1,6 @@
 import { Smartphone } from "lucide-react";
 import { useT } from "@/common/hooks/use-locale";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 
 type InstallBannerProps = { onInstall: () => void; onDismiss: () => void };
 

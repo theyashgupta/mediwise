@@ -4,7 +4,7 @@ import { Section } from "@/common/components/section";
 import { StatusBadge } from "@/common/components/status-badge";
 import { StatTile } from "@/common/components/surface/stat-tile";
 import { getIntlTag, useT } from "@/common/hooks/use-locale";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import { cn } from "@/lib/utils";
 import { MarkerValue } from "@/modules/reports";
 import { formatReviewDate } from "../config/year-review";

@@ -5,7 +5,7 @@ import { ErrorState } from "@/common/components/error-state";
 import { LoadingState } from "@/common/components/loading-state";
 import { useT } from "@/common/hooks/use-locale";
 import { downloadFile } from "@/common/utils/download";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import { useOpenAsk } from "@/modules/assistant";
 import { EpisodeCardContainer } from "@/modules/episodes";
 import { useMe } from "@/modules/me";

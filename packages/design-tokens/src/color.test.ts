@@ -42,6 +42,26 @@ test.each(themes)("every text token passes 4.5:1 on its surfaces in %s", (theme)
   expect(failures).toEqual([]);
 });
 
+const controlPairs: [string, string, number][] = [
+  ...["background", "card", "popover", "field"].flatMap((surface): [string, string, number][] => [
+    ["ring", surface, 3],
+    ["input", surface, 3],
+  ]),
+  ["primary-foreground", "primary-hover", 4.5],
+  ["foreground", "field", 4.5],
+  ["muted-foreground", "field", 4.5],
+];
+
+test.each(themes)("the focus ring, the control edge and the field text pass AA in %s", (theme) => {
+  const failures = controlPairs
+    .map(([mark, surface, needed]) => {
+      const ratio = contrast(toSrgb(token(theme, mark)), toSrgb(token(theme, surface)));
+      return ratio < needed ? `${mark} on ${surface}: ${ratio.toFixed(2)}` : undefined;
+    })
+    .filter(Boolean);
+  expect(failures).toEqual([]);
+});
+
 const worstBackdrop: Record<Theme, Rgb> = { light: [0, 0, 0], dark: [1, 1, 1] };
 const glassTints = ["glass-tint-surface", "glass-tint-bar", "glass-tint-overlay"];
 

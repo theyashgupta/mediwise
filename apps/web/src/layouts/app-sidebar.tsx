@@ -53,7 +53,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
                   activeOptions={{ exact: to === "/" }}
                   aria-label={collapsed ? t.shell.nav[name] : undefined}
                   className={cn(
-                    "flex h-8 items-center gap-2.5 rounded-md px-3 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground data-[status=active]:bg-primary/10 data-[status=active]:font-medium data-[status=active]:text-primary",
+                    "flex h-8 items-center gap-2.5 rounded-lg px-3 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground data-[status=active]:bg-primary/10 data-[status=active]:font-medium data-[status=active]:text-primary",
                     focusRing,
                   )}
                 >
@@ -83,7 +83,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
             aria-label={collapsed ? t.shell.expandSidebar : t.shell.collapseSidebar}
             aria-expanded={!collapsed}
             className={cn(
-              "flex h-8 items-center gap-2.5 rounded-md px-3 text-sm text-muted-foreground hover:bg-accent hover:text-foreground",
+              "flex h-8 items-center gap-2.5 rounded-lg px-3 text-sm text-muted-foreground hover:bg-accent hover:text-foreground",
               collapsed ? "w-10 justify-center px-0" : "w-full",
               focusRing,
             )}

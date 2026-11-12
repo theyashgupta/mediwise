@@ -8,7 +8,7 @@ import { LoadingState } from "@/common/components/loading-state";
 import { PageHeader } from "@/common/components/page-header";
 import { useT } from "@/common/hooks/use-locale";
 import { EpisodesSectionContainer } from "@/modules/episodes";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import { ProfileCard } from "../components/profile-card";
 import { ProfileSheet } from "../components/profile-sheet";
 import { RemoveProfileDialog } from "../components/remove-profile-dialog";

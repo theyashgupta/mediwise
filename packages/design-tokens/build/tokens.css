@@ -23,11 +23,11 @@
   --text-display--letter-spacing: -0.01em;
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --spacing: 0.25rem;
-  --radius-sm: 0.25rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
-  --radius-2xl: 1rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
 }
 
 /* The build polyfills light-dark() with variables that resolve where a token is declared, so a nested [data-theme] redeclares every token. */
@@ -41,6 +41,7 @@
   --popover-foreground: var(--foreground);
   --primary: light-dark(oklch(0.48 0.075 195), oklch(0.78 0.08 195));
   --primary-foreground: light-dark(oklch(0.99 0.002 80), oklch(0.205 0.004 70));
+  --primary-hover: light-dark(oklch(0.43 0.072 195), oklch(0.83 0.075 195));
   --secondary: light-dark(oklch(0.955 0.005 75), oklch(0.27 0.004 70));
   --secondary-foreground: var(--foreground);
   --muted: light-dark(oklch(0.955 0.005 75), oklch(0.265 0.004 70));
@@ -49,7 +50,8 @@
   --accent-foreground: var(--foreground);
   --destructive: light-dark(oklch(0.52 0.17 25), oklch(0.72 0.15 25));
   --border: light-dark(oklch(0.9 0.006 75), oklch(0.31 0.005 70));
-  --input: light-dark(oklch(0.87 0.007 75), oklch(0.35 0.005 70));
+  --input: light-dark(oklch(0.64 0.008 70), oklch(0.54 0.006 70));
+  --field: light-dark(oklch(0.997 0.002 80), oklch(0.25 0.004 70));
   --ring: light-dark(oklch(0.58 0.085 195), oklch(0.68 0.08 195));
   --sidebar: light-dark(oklch(0.97 0.005 75), oklch(0.185 0.004 70));
   --chart-1: light-dark(oklch(0.48 0.075 195), oklch(0.78 0.08 195));
@@ -77,7 +79,7 @@
   --shadow-overlay: 0 12px 32px -8px light-dark(oklch(0.25 0.01 60 / 14%), oklch(0 0 0 / 55%));
   --shadow-glass: inset 0 1px 0 0 light-dark(oklch(1 0 0 / 60%), oklch(1 0 0 / 6%)), 0 1px 2px 0 light-dark(oklch(0.25 0.01 60 / 6%), oklch(0 0 0 / 30%)), 0 16px 40px -20px light-dark(oklch(0.25 0.01 60 / 18%), oklch(0 0 0 / 60%));
   --shadow-control: inset 0 1px 0 0 light-dark(oklch(1 0 0 / 18%), oklch(1 0 0 / 25%)), 0 1px 2px 0 light-dark(oklch(0.25 0.01 60 / 18%), oklch(0 0 0 / 45%));
-  --radius: 0.5rem;
+  --radius: 0.75rem;
   --blur-glass-bar: 12px;
   --blur-glass-surface: 16px;
 }

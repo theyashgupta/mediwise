@@ -32,7 +32,7 @@ export function ValueTooltip({ date, value, lab, sameDay = [], unit, episode }: 
     : [];
   if (episode) rows.push([chart.episode, episode]);
   return (
-    <div className="grid min-w-48 gap-1.5 rounded-lg border bg-background px-3 py-2 text-xs shadow-xl">
+    <div className="grid min-w-48 gap-1.5 rounded-xl border bg-background px-3 py-2 text-xs shadow-xl">
       <p className="font-medium">{date}</p>
       <p className="font-mono text-sm font-medium">{withUnit(value)}</p>
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">

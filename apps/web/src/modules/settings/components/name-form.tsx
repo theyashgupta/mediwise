@@ -3,7 +3,7 @@ import { type UpdateMeInput, updateMeSchema } from "@mediwise/shared";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { getT, useT } from "@/common/hooks/use-locale";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import {
   Form,
   FormControl,
@@ -12,8 +12,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Field } from "@/common/components/controls/field";
+import { Input } from "@/common/components/controls/input";
 
 /**
  * The shared name schema with its messages read from the active locale.
@@ -61,10 +61,9 @@ export function NameForm({ email, name, submitting, error, onSubmit }: NameFormP
             </FormItem>
           )}
         />
-        <div className="space-y-2">
-          <Label htmlFor="account-email">{copy.email}</Label>
+        <Field label={copy.email}>
           <Input id="account-email" value={email} readOnly disabled />
-        </div>
+        </Field>
         {error && (
           <p role="alert" className="text-sm text-destructive">
             {error}

@@ -10,7 +10,7 @@ import {
 } from "recharts";
 import { useState } from "react";
 import { type ChartConfig, ChartContainer, ChartTooltip } from "@/components/ui/chart";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import { getIntlTag, useT } from "@/common/hooks/use-locale";
 import { cn } from "@/lib/utils";
 import { chartDomain } from "../utils/chart-domain";

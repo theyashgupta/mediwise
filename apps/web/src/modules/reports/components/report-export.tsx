@@ -5,7 +5,7 @@ import { Disclaimer } from "@/common/components/disclaimer";
 import { IconAction } from "@/common/components/icon-action";
 import { useT } from "@/common/hooks/use-locale";
 import { formatPlainDate } from "@/common/utils/date";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import { cn } from "@/lib/utils";
 import {
   changeMark,

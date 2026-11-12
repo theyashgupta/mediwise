@@ -9,7 +9,7 @@ type CitationChipProps = {
 };
 
 const chipClass =
-  "inline-flex min-h-11 max-w-full items-center rounded-md border bg-card px-3 py-1.5 text-left text-sm wrap-anywhere";
+  "inline-flex min-h-11 max-w-full items-center rounded-lg border bg-card px-3 py-1.5 text-left text-sm wrap-anywhere";
 const tappable = "hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/50 outline-none";
 
 export function CitationChip({ cite, onFact }: CitationChipProps) {

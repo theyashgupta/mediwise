@@ -1,7 +1,7 @@
 import { maxEpisodeNoteLength } from "@mediwise/shared";
 import { getIntlTag, useT } from "@/common/hooks/use-locale";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Field } from "@/common/components/controls/field";
+import { Input } from "@/common/components/controls/input";
 
 type EpisodeFieldsProps = {
   id: string;
@@ -15,8 +15,7 @@ export function EpisodeFields({ id, name, note, onNameChange, onNoteChange }: Ep
   const t = useT().episodes.fields;
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <div className="space-y-2">
-        <Label htmlFor={`${id}-name`}>{t.name}</Label>
+      <Field label={t.name}>
         <Input
           id={`${id}-name`}
           data-testid={`${id}-name`}
@@ -26,24 +25,26 @@ export function EpisodeFields({ id, name, note, onNameChange, onNoteChange }: Ep
           placeholder={t.namePlaceholder}
           onChange={(event) => onNameChange(event.target.value)}
         />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor={`${id}-note`}>{t.note}</Label>
+      </Field>
+      <Field
+        label={t.note}
+        hint={
+          <>
+            {t.noteHelp}{" "}
+            {t.characters(
+              note.length.toLocaleString(getIntlTag()),
+              maxEpisodeNoteLength.toLocaleString(getIntlTag()),
+            )}
+          </>
+        }
+      >
         <Input
           id={`${id}-note`}
           value={note}
           maxLength={maxEpisodeNoteLength}
-          aria-describedby={`${id}-note-help`}
           onChange={(event) => onNoteChange(event.target.value)}
         />
-        <p id={`${id}-note-help`} className="text-xs text-muted-foreground">
-          {t.noteHelp}{" "}
-          {t.characters(
-            note.length.toLocaleString(getIntlTag()),
-            maxEpisodeNoteLength.toLocaleString(getIntlTag()),
-          )}
-        </p>
-      </div>
+      </Field>
     </div>
   );
 }
