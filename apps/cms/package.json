@@ -1,0 +1,35 @@
+{
+  "name": "@mediwise/cms",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "scripts": {
+    "dev": "NODE_OPTIONS=--no-deprecation next dev --port 3002",
+    "build": "NODE_OPTIONS=--no-deprecation next build",
+    "start": "NODE_OPTIONS=--no-deprecation next start --port 3002",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "payload": "NODE_OPTIONS=--no-deprecation payload",
+    "generate": "payload generate:types && payload generate:importmap",
+    "seed": "NODE_OPTIONS=--no-deprecation payload run src/seed/run.ts"
+  },
+  "dependencies": {
+    "@payloadcms/db-postgres": "3.91.0",
+    "@payloadcms/next": "3.91.0",
+    "@payloadcms/richtext-lexical": "3.91.0",
+    "@payloadcms/ui": "3.91.0",
+    "graphql": "16.15.0",
+    "next": "16.4.4",
+    "payload": "3.91.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@mediwise/config": "workspace:*",
+    "@payloadcms/db-sqlite": "3.91.0",
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0"
+  }
+}

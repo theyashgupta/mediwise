@@ -8,3 +8,7 @@ apps/api/src/db/migrations/meta
 README.md
 CONTRIBUTING.md
 packages/design-tokens/build
+apps/cms/src/payload-types.ts
+apps/cms/src/migrations
+apps/cms/src/app/(payload)/admin/importMap.js
+.next
