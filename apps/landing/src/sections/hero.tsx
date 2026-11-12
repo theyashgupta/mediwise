@@ -28,16 +28,18 @@ function HeroTrend() {
   return (
     <div
       aria-hidden
-      className="hero-motion pointer-events-none absolute bottom-[calc(100%-1rem)] left-1/2 -z-10 h-28 w-screen -translate-x-1/2"
+      className="hero-motion pointer-events-none absolute inset-x-0 bottom-[calc(100%-1rem)] -z-10 h-28 overflow-hidden"
     >
-      <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="size-full">
-        <rect x="0" y="28" width="1200" height="50" className="fill-optimal-soft opacity-60" />
+      <svg
+        viewBox="0 0 1200 120"
+        preserveAspectRatio="none"
+        className="size-full bg-linear-to-b from-transparent via-optimal-soft/60 to-transparent [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]"
+      >
         <path
           d="M0 94 C120 84 160 74 216 70 S480 56 624 50 S960 28 1080 22 S1160 18 1200 16"
           pathLength={1}
           fill="none"
           strokeWidth="2"
-          vectorEffect="non-scaling-stroke"
           className="hero-line stroke-primary opacity-60"
         />
       </svg>
@@ -65,7 +67,7 @@ export function Hero({ locale }: { locale: Locale }) {
   return (
     <section id="top" aria-labelledby="hero-title" className="relative isolate overflow-x-clip">
       <HeroMotion />
-      <div className="mx-auto grid max-w-content items-center gap-12 px-4 pt-10 pb-12 md:px-8 lg:grid-cols-[1.15fr_0.85fr] lg:pt-16">
+      <div className="mx-auto grid max-w-content items-center gap-12 px-4 pt-10 pb-12 md:px-8 lg:grid-cols-[1.15fr_0.85fr] lg:pt-16 lg:pb-24">
         <div>
           <p className="font-mono text-xs tracking-wider text-primary uppercase">{t.eyebrow}</p>
           <h1 id="hero-title" className="mt-4 font-display text-hero text-balance">

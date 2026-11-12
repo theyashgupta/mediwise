@@ -19,6 +19,12 @@ test("the hero image, heading and paragraph carry no reveal and no animation cla
   expect(content).toContain('fetchPriority="high"');
 });
 
+test("the trend line spans the content column and draws its full length at every width", () => {
+  const trend = html.slice(html.lastIndexOf('class="hero-motion'), html.indexOf("<dl"));
+  expect(trend).not.toMatch(/w-screen|vector-effect|<rect/);
+  expect(trend).toMatch(/^class="hero-motion [^"]*\binset-x-0\b[^"]*\boverflow-hidden\b/);
+});
+
 test("the trend line tags name catalog markers and show no values or dates", () => {
   const catalog = new Set(markers.map((marker) => marker.name));
   expect(heroMarkers).toEqual(["Vitamin B12", "LDL cholesterol", "Urine albumin"]);
