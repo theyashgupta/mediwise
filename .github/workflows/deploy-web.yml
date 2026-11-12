@@ -10,6 +10,8 @@ on:
       - packages/**
       - pnpm-lock.yaml
       - .github/workflows/deploy-web.yml
+  repository_dispatch:
+    types: [cms-published]
   workflow_dispatch:
 
 permissions:
@@ -41,6 +43,7 @@ jobs:
       - name: Build
         run: pnpm turbo run build --filter @mediwise/web
         env:
+          CMS_URL: ${{ vars.CMS_URL }}
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}

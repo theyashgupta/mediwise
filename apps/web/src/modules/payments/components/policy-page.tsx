@@ -24,7 +24,7 @@ export function PolicyPage({ page }: PolicyPageProps) {
     month: "long",
     year: "numeric",
     timeZone: "UTC",
-  }).format(new Date(policyVersion));
+  }).format(new Date(policy.updatedAt));
   return (
     <div className="mx-auto flex min-h-svh max-w-measure flex-col gap-10 px-4 py-12 md:px-8">
       <Link to="/" className="w-fit">
@@ -45,16 +45,10 @@ export function PolicyPage({ page }: PolicyPageProps) {
             </a>
           </p>
         )}
-        <div className="space-y-10">
-          {policy.sections.map((section) => (
-            <section key={section.heading} id={section.id} className="scroll-mt-6 space-y-3">
-              <h2 className="text-xl font-semibold">{section.heading}</h2>
-              {section.body.map((line) => (
-                <p key={line}>{line}</p>
-              ))}
-            </section>
-          ))}
-        </div>
+        <div
+          className="space-y-3 [&_[id]]:scroll-mt-6 [&_a]:font-medium [&_a]:underline [&_a]:underline-offset-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6 [&>h2]:pt-7 [&>h2]:text-xl [&>h2]:font-semibold [&>h2:first-child]:pt-0"
+          dangerouslySetInnerHTML={{ __html: policy.html }}
+        />
       </main>
       <footer className="mt-auto space-y-4 border-t pt-6">
         <nav aria-label={t.payments.policy.nav}>

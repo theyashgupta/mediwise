@@ -1,5 +1,42 @@
+/** @vitest-environment jsdom */
 import { expect, test } from "vitest";
-import { contact, policies, washingtonSectionId } from "./policies";
+import { sanitizeHtml } from "@/common/utils/sanitize-html";
+import snapshot from "../../../../content/legal.en.json";
+import { contact, policies as loaded, washingtonSectionId } from "./policies";
+
+type Section = { id?: string; heading: string; body: string[] };
+
+/** Splits the policy HTML into one section per h2, with the text of each block below it. */
+function sections(html: string) {
+  const blocks = new DOMParser().parseFromString(html, "text/html").body.children;
+  const result: Section[] = [];
+  for (const block of blocks) {
+    const text = block.textContent ?? "";
+    if (block.tagName === "H2") {
+      result.push({ id: block.querySelector("span[id]")?.id, heading: text, body: [] });
+    } else result.at(-1)?.body.push(text);
+  }
+  return result;
+}
+
+const policies = Object.fromEntries(
+  Object.entries(loaded).map(([page, policy]) => [
+    page,
+    { title: policy.title, sections: sections(policy.html) },
+  ]),
+) as Record<keyof typeof loaded, { title: string; sections: Section[] }>;
+
+test("the snapshot holds only HTML that the allowlist keeps", () => {
+  for (const page of Object.values(snapshot.pages)) {
+    expect(sanitizeHtml(page.html)).toBe(page.html);
+  }
+});
+
+test("each policy has a last-change date from the CMS", () => {
+  for (const policy of Object.values(loaded)) {
+    expect(Number.isNaN(Date.parse(policy.updatedAt)), policy.title).toBe(false);
+  }
+});
 
 const sentences = Object.values(policies).flatMap((policy) =>
   policy.sections.flatMap((section) => section.body.flatMap((line) => line.split(/(?<=\.) /))),

@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import type { TypedLocale } from "payload";
 import { messages } from "../../../landing/src/config/messages";
-import { policies } from "../../../web/src/modules/payments/config/policies";
+import { policies } from "./legal";
 
 type LexicalNode = { type: string; version: number; [key: string]: unknown };
 
@@ -76,7 +76,7 @@ type SeedFaqItem = {
 };
 
 /**
- * Builds the five pages for one locale from the web policies and the landing security messages.
+ * Builds the five pages for one locale from the legal source text and the landing security messages.
  *
  * @remarks
  * The policies exist in English only, so Hindi gets the security page alone and the rest falls back to English.

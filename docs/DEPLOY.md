@@ -461,6 +461,10 @@ The CMS sends one `repository_dispatch` with event type `cms-published` to `they
 - The 5 s wait is in memory. If the service stops inside it, no dispatch goes. Publish again.
 - `next build` peaks at about 1.2 GB of memory. It needs no database and no secret. The server uses about 100 MB after a sign-in and an export. If the Render build stops with exit code 137, the build ran out of memory.
 
+### Web legal pages (MEDI-194)
+
+The web build runs `apps/web/scripts/pull-content.ts` before `vite build`. The script reads `<CMS_URL>/api/content/export?locale=en` and writes terms, privacy, refunds and contact to `apps/web/content/legal.en.json`. `CMS_URL` is a repository variable, with no trailing slash. When `CMS_URL` is empty, or the CMS fails or sends a bad export, the build prints one warning and uses the committed snapshot. The build does not stop. `deploy-web.yml` also runs on the `cms-published` dispatch, so a publish deploys the web again. The policy page removes all HTML that the allowlist in `apps/web/src/common/utils/sanitize-html.ts` does not name. The date "Last change" comes from `updatedAt` in the export. The version and the consent records come from `policyVersion` in `packages/shared`, and a CMS edit does not change it. For a material change to the privacy policy or the terms, also increase `policyVersion` in a code change. The app then asks each user for the health data consent again. To update the committed snapshot, run `CMS_URL=<CMS URL> node apps/web/scripts/pull-content.ts` and commit the file.
+
 ## Custom domains
 
 The landing page is at `https://mediwise.theyashgupta.me`. The app is at `https://app.mediwise.theyashgupta.me`. The pages.dev addresses stay live as aliases. A sign-in on an alias returns to that alias, because the web sends `window.location.origin` as the redirect.
