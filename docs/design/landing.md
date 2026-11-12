@@ -93,6 +93,18 @@ MEDI-168 pinned the phone beside tall steps and switched its screen with the ste
 
 Each step is now a plain row with its own screen. There is no `position: sticky`, no `data-step` switching and no step observer. The first screen loads at once and the other five load lazily. Every row uses the same reveal as the other sections.
 
+## Hero background concepts (MEDI-185)
+
+The owner asked for a hero background that says doctor and lab, without a stethoscope as the main motif (2026-11-12). Three previews were built as throwaway code. Previews: `docs/design/screenshots/medi-185-hero-option-{a,b,c}-{1280,390}-{light,dark}.png`.
+
+| Option | Scene | HTML cost, gzipped (en / hi) | JavaScript |
+|---|---|---|---|
+| A | A printed report draws in line by line, behind the phone. Three values lift off as marker chips, settle at the right and float. | +2,487 / +2,403 bytes | 0 bytes |
+| B | Thin line glassware floats: a flask, a round flask, a tube rack, a pipette and drops, in the primary outline and the droplet fill. The liquid level rises and falls and its surface moves. | +2,559 / +2,488 bytes | 0 bytes |
+| C | Two blurred report sheets behind the phone. A soft light band sweeps across the front sheet every 9 s. CSS gradients only. | +1,244 / +1,100 bytes | 0 bytes |
+
+All three use inline SVG or CSS only and animate transform and opacity (A also draws its lines with the dash offset). Each one stops when the hero leaves the window, when the tab is hidden, with the Pause motion button and with reduced motion, and then shows its final frame. The LCP element is the hero phone image in all three, and it does not animate.
+
 ## Measurements (2026-10-16)
 
 Lighthouse 13, mobile, simulated throttling. The static build was served with gzip, as Cloudflare Pages serves it. Five runs each, before and after taken in turn, median shown. Other work ran on the same Mac, so the numbers move with its load. Two sets were taken.
