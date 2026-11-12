@@ -19,24 +19,13 @@ test("the story shows six steps in the agreed order with an inline screen each, 
     const positions = titles.map((title) => html.indexOf(`>${title}</h3>`));
     expect(positions.every((position) => position > 0)).toBe(true);
     expect(positions).toEqual([...positions].sort((a, b) => a - b));
-    expect(html.match(/data-story-step=/g)).toHaveLength(6);
     for (const screen of ["upload", "move-first", "marker", "findings", "alert", "trends"]) {
       expect(html).toContain(`/screens/${screen}-light.webp`);
     }
     expect(html).toContain(`alt="${t.howItWorks.upload.alt(facts.maxFiles)}"`);
     expect(html).toContain(`alt="${t.story.alert.alt}"`);
     expect(html).toContain(t.story.body);
-    expect(html).toContain(`<p class="sr-only hidden js:lg:block">${t.story.alert.alt}</p>`);
   }
-});
-
-test("the server renders step 0 and one sticky phone with six decorative screens hidden from assistive technology", () => {
-  const html = renderToStaticMarkup(<HowItWorks locale="en" />);
-  expect(html).toContain('data-step="0"');
-  expect(html.match(/data-screen=/g)).toHaveLength(6);
-  expect(html.match(/<div aria-hidden="true"/g)).toHaveLength(1);
-  expect(html.match(/alt=""/g)).toHaveLength(6);
-  expect(html).toContain('id="how-it-works"');
 });
 
 test("the story title does not count the steps", () => {
@@ -44,18 +33,28 @@ test("the story title does not count the steps", () => {
   expect(messages.hi.howItWorks.title).not.toMatch(/तीन|3/);
 });
 
-test("the steps pin beside the phone only when JavaScript runs on a large screen", () => {
+test("each step is one revealed row with its own screen, sides alternating from 1024 px, and nothing pins", () => {
   const html = renderToStaticMarkup(<HowItWorks locale="en" />);
-  expect(html).toMatch(/class="story js:lg:grid js:lg:grid-cols-2/);
-  expect(html.match(/mx-auto mt-8 max-w-\[260px\] js:lg:hidden"/g)).toHaveLength(6);
-  expect(html).toContain('class="hidden js:lg:order-first js:lg:block"');
+  expect(
+    html.match(/<li data-reveal="" class="lg:grid lg:grid-cols-2 lg:items-center/g),
+  ).toHaveLength(6);
+  expect(html.match(/class="lg:order-last"/g)).toHaveLength(3);
+  expect(html).not.toMatch(/sticky|data-step|data-screen|aria-hidden/);
+  expect(html.match(/max-w-\[260px\] lg:mt-0 lg:max-w-\[300px\]/g)).toHaveLength(6);
 });
 
-test("the pinned phone stays inside the window: tall steps, half a window of space at each end, a sticky column under the nav", () => {
+test("the first screen loads at once and the other five load lazily, each with its alt text", () => {
   const html = renderToStaticMarkup(<HowItWorks locale="en" />);
-  expect(html).toContain('class="js:lg:pt-[calc(50vh-3.5rem)] js:lg:pb-[50vh]"');
-  expect(html.match(/js:lg:min-h-\[75vh\]/g)).toHaveLength(6);
-  expect(html).toContain(
-    'class="sticky top-14 flex h-[calc(100vh-3.5rem)] items-center justify-center"',
-  );
+  const images = [...html.matchAll(/<img [^>]*>/g)].map((match) => match[0]);
+  expect(images).toHaveLength(6);
+  expect(images.map((image) => /loading="(\w+)"/.exec(image)?.[1])).toEqual([
+    "eager",
+    "lazy",
+    "lazy",
+    "lazy",
+    "lazy",
+    "lazy",
+  ]);
+  expect(images.every((image) => /alt="[^"]+"/.test(image))).toBe(true);
+  expect(html).not.toContain('fetchPriority="high"');
 });

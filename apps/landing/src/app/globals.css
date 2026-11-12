@@ -3,8 +3,6 @@
 
 @source "../../../web/src/common/components/brand";
 
-@custom-variant js (&:where([data-js] *));
-
 @custom-variant dark {
   &:where([data-theme="dark"] *) {
     @slot;
@@ -241,32 +239,13 @@
 
 .story-section {
   content-visibility: auto;
-  contain-intrinsic-size: auto 5300px;
+  contain-intrinsic-size: auto 5200px;
 }
 
 @media (width >= 64rem) {
-  :root[data-js] .story-section {
-    contain-intrinsic-size: auto calc(550vh + 180px);
+  .story-section {
+    contain-intrinsic-size: auto 4550px;
   }
-}
-
-.story-phone {
-  width: min(300px, calc((100vh - 8rem) * 433 / 882));
-}
-
-/* components/story.tsx writes data-step from an IntersectionObserver; CSS only shows the matching screen. */
-.story-screen {
-  opacity: 0;
-  transition: opacity 400ms var(--ease-standard);
-}
-
-.story[data-step="0"] [data-screen="0"],
-.story[data-step="1"] [data-screen="1"],
-.story[data-step="2"] [data-screen="2"],
-.story[data-step="3"] [data-screen="3"],
-.story[data-step="4"] [data-screen="4"],
-.story[data-step="5"] [data-screen="5"] {
-  opacity: 1;
 }
 
 /* Visible by default. components/motion.tsx sets "hidden" only on elements below the viewport, then clears it. */

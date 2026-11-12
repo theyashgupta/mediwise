@@ -34,8 +34,8 @@ test("paused motion, reduced motion and print show every hidden reveal", () => {
   expect(css).toMatch(/@media print \{\s*\[data-reveal="hidden"\] \{\s*opacity: 1;/);
 });
 
-test("the story has no scroll timeline rules and skips rendering offscreen", () => {
-  expect(css).not.toMatch(/view-timeline|timeline-scope/);
+test("the story has no pin, step switching or scroll timeline rules and skips rendering offscreen", () => {
+  expect(css).not.toMatch(/view-timeline|timeline-scope|sticky|data-step|story-screen|story-phone/);
   expect(css).toMatch(
     /\.story-section \{\s*content-visibility: auto;\s*contain-intrinsic-size: auto \d+px/,
   );
@@ -61,17 +61,6 @@ test("the hero drift pauses offscreen and on a hidden tab", () => {
   );
 });
 
-test("each story step index shows only its own screen", () => {
-  for (let step = 0; step < 6; step++) {
-    expect(css).toContain(`.story[data-step="${step}"] [data-screen="${step}"]`);
-  }
-  expect(css).toMatch(/\.story-screen \{\s*opacity: 0;\s*transition: opacity/);
-});
-
-test("the pinned layout variant needs the JavaScript flag from the head script", () => {
-  expect(css).toContain("@custom-variant js (&:where([data-js] *));");
-});
-
 test("paused motion and reduced motion stop every animation and transition", () => {
   expect(css).toMatch(
     /:root\[data-motion="paused"\] :not\(\.marquee-track\),[\s\S]*?\{\s*animation: none !important;\s*transition: none !important;/,
@@ -80,11 +69,4 @@ test("paused motion and reduced motion stop every animation and transition", () 
   expect(reduced).toMatch(
     /\*,\s*::before,\s*::after \{\s*animation: none !important;\s*transition: none !important;/,
   );
-});
-
-test("the story phone height has a cap below the window height and the desktop size estimate follows the step layout", () => {
-  expect(css).toMatch(
-    /\.story-phone \{\s*width: min\(300px, calc\(\(100vh - 8rem\) \* 433 \/ 882\)\);/,
-  );
-  expect(css).toContain("contain-intrinsic-size: auto calc(550vh + 180px);");
 });
