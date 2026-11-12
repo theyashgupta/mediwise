@@ -1,0 +1,46 @@
+{
+  "pages": {
+    "security": {
+      "title": "How MediWise protects your data",
+      "description": "The controls that protect your reports in MediWise, and how to report a vulnerability.",
+      "html": "<p>This page lists the controls that protect your reports and your account.</p><h2>Encryption</h2><p>Your data goes over an encrypted connection (TLS). Supabase encrypts the database and the files at rest.</p><h2>Private storage</h2><p>Your files are in private storage. Only a short-lived link from the MediWise API opens a file.</p><h2>No trackers</h2><p>MediWise uses no analytics, no advertising trackers and no third-party cookies.</p><h2>Deletion</h2><p>When you delete your account, MediWise deletes your files, your data and your sign-in. Payment records stay for tax law.</p><h2>Hashed share links</h2><p>A share link uses a long random code. MediWise keeps only a one-way code of it. Each link has an end date.</p><h2>Supply-chain scan</h2><p>On each change and each day, a scan checks the code and its packages for signs of known supply-chain worms.</p><h2>Report a vulnerability</h2><p>Do not open a public issue. Follow the steps in SECURITY.md to report the problem in private.</p><p><a href=\"https://github.com/theyashgupta/mediwise/blob/main/SECURITY.md\">Read SECURITY.md</a></p>"
+    }
+  },
+  "faq": [
+    {
+      "key": "upload",
+      "question": "What can I upload?",
+      "html": "<p>Upload a PDF, or photos in JPG, PNG, HEIC or WebP. You can add up to {maxFiles} files in one report.</p><p>Each file can be up to {fileMb} MB. All the files together can be up to {totalMb} MB.</p>"
+    },
+    {
+      "key": "labs",
+      "question": "Which labs does MediWise read?",
+      "html": "<p>MediWise reads reports from any lab. It matches each printed test name to the {markers} markers in its catalog.</p><p>A test name that it does not know shows as not recognised.</p>"
+    },
+    {
+      "key": "accuracy",
+      "question": "How accurate is it?",
+      "html": "<p>An AI model copies the values from your report. Fixed rules then score them, so the same values always give the same score.</p><p>Each range cites a published source, such as guidelines from ADA, KDIGO, WHO and national bodies.</p><p>MediWise can misread a value. Compare each value with your printed report.</p>"
+    },
+    {
+      "key": "diagnosis",
+      "question": "Is this a diagnosis?",
+      "html": "<p>No. {disclaimer}</p><p>Take your report and the questions from MediWise to your doctor.</p>"
+    },
+    {
+      "key": "data",
+      "question": "How do you store my data?",
+      "html": "<p>Your reports and results are encrypted in transit and at rest. They are private to your account.</p><p>We store them on Supabase servers in Mumbai, India.</p><p>To read a report, MediWise sends its pages to an AI model made by Anthropic.</p><p>MediWise removes pages with identity documents, such as passports or national ID cards, when it reads your files. You can delete a report or your account at any time.</p>"
+    },
+    {
+      "key": "refund",
+      "question": "Can I get a refund?",
+      "html": "<p>Yes, for a credit that you did not use. Ask for the refund within 7 days of the payment.</p><p>We do not refund a credit that MediWise used to read a report.</p>"
+    },
+    {
+      "key": "family",
+      "question": "Can I add my family?",
+      "html": "<p>Yes. Make a profile for each person, up to {maxProfiles} profiles.</p><p>Each profile has its own age, sex and ancestry, so each person gets their own ranges.</p>"
+    }
+  ]
+}
