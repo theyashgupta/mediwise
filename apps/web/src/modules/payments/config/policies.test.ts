@@ -24,10 +24,11 @@ const allText = JSON.stringify(policies);
 
 test("the privacy policy sections come in the agreed order", () => {
   expect(privacy.map((section) => section.heading)).toEqual([
+    "Who this policy covers",
     "What we collect",
     "Why we use it",
     "Who receives your data",
-    "Where we store it",
+    "Where your data goes",
     "How long we keep it",
     "Your rights",
     "Consent and how to withdraw it",
@@ -35,14 +36,18 @@ test("the privacy policy sections come in the agreed order", () => {
     "Cookies",
     "Security",
     "Breaches",
-    "International users: EU and UK",
-    "Washington state consumer health data",
+    "Where you live",
+    "India",
+    "EU, EEA and UK",
+    "United States",
+    "All other countries",
     "Changes to this policy",
-    "Contact and grievance officer",
+    "Contact",
   ]);
-  expect(privacy.find((section) => section.id === washingtonSectionId)?.heading).toBe(
-    "Washington state consumer health data",
-  );
+  const unitedStates = privacy.find((section) => section.id === washingtonSectionId);
+  expect(unitedStates?.heading).toBe("United States");
+  expect(unitedStates?.body.join(" ")).toContain("My Health My Data Act");
+  expect(unitedStates?.body.join(" ")).toContain("California");
 });
 
 test("the privacy policy names each receiver with its country", () => {
@@ -60,7 +65,7 @@ test("the privacy policy names each receiver with its country", () => {
   expect(privacyText).toContain("Mumbai, India");
 });
 
-test("the privacy policy states retention, rights, breach notice and the age rule", () => {
+test("the privacy policy states retention, rights, transfers, breach notice, regional notices and the age rule", () => {
   for (const fact of [
     "until you delete them or you delete your account",
     "tax law requires them",
@@ -74,6 +79,12 @@ test("the privacy policy states retention, rights, breach notice and the age rul
     "data protection authority of your country",
     "We do not sell consumer health data.",
     "The grievance officer is Yash Anil Gupta.",
+    "Digital Personal Data Protection Act, 2023",
+    "GDPR and the UK GDPR",
+    "Representative in the EU and the UK: not appointed yet.",
+    "Anthropic processes the content of your reports in the United States.",
+    "Each transfer goes over an encrypted connection (TLS).",
+    "applies to every MediWise user in every country",
   ]) {
     expect(privacyText).toContain(fact);
   }
@@ -85,6 +96,8 @@ test("the terms say MediWise is not a medical device and keep the age and price 
   expect(terms).toContain("It does not diagnose, treat or monitor a disease.");
   expect(terms).toContain("You must be 18 or older to make an account.");
   expect(terms).toContain("Prices are in Indian rupees.");
+  expect(terms).toContain("You can use MediWise from any country.");
+  expect(terms).toContain("The tax on each payment depends on your country.");
 });
 
 test("no policy claims a certification or compliance, or uses an em dash", () => {

@@ -37,6 +37,7 @@ export const policies: Record<PolicyPage, Policy> = {
         heading: "What MediWise does",
         body: [
           "MediWise reads your lab reports and explains each marker.",
+          "You can use MediWise from any country.",
           "MediWise is for information, not diagnosis. It does not replace a doctor.",
           "Speak to a doctor before you make a decision about your health.",
         ],
@@ -67,7 +68,8 @@ export const policies: Record<PolicyPage, Policy> = {
       {
         heading: "Payments",
         body: [
-          "Prices are in Indian rupees.",
+          "Prices are in Indian rupees. Your bank converts the price to your currency.",
+          "The tax on each payment depends on your country.",
           "Cashfree Payments processes each payment. MediWise does not see or keep your card or bank details.",
           "Refunds follow the refund policy.",
         ],
@@ -84,6 +86,14 @@ export const policies: Record<PolicyPage, Policy> = {
   privacy: {
     title: "Privacy policy",
     sections: [
+      {
+        heading: "Who this policy covers",
+        body: [
+          "This policy applies to every MediWise user in every country.",
+          "It tells you what MediWise does with your data.",
+          "The section \"Where you live\" adds a short notice for some regions.",
+        ],
+      },
       {
         heading: "What we collect",
         body: [
@@ -103,6 +113,8 @@ export const policies: Record<PolicyPage, Policy> = {
           "We use your data to read your reports, to show your trends and to answer your questions.",
           "We use your email address to sign you in and to send you account emails.",
           "We use payment records to count your report credits and to obey tax law.",
+          "We use your health data only with your explicit consent.",
+          "We use your account data to give you the service that you ask for.",
           "We do not sell your data. We do not show advertisements.",
         ],
       },
@@ -121,11 +133,15 @@ export const policies: Record<PolicyPage, Policy> = {
         ],
       },
       {
-        heading: "Where we store it",
+        heading: "Where your data goes",
         body: [
           "Your files and the database are on Supabase servers in Mumbai, India.",
           "The MediWise API runs on Render servers in Singapore.",
           "Anthropic processes the content of your reports in the United States.",
+          "When you live outside these countries, your data goes out of your country.",
+          "Each transfer goes over an encrypted connection (TLS).",
+          "The data processing terms of each receiver limit how it can use your data.",
+          "Each receiver gets only the data that it needs for its task.",
         ],
       },
       {
@@ -145,12 +161,15 @@ export const policies: Record<PolicyPage, Policy> = {
       {
         heading: "Your rights",
         body: [
-          "You can see your data in the app.",
-          "You can download a copy of your data as a JSON file. Go to Settings.",
-          "You can correct your data. Edit it in the app.",
-          "You can delete your data. Go to Settings and delete your account.",
-          "You can withdraw your consent. To do this, delete your account.",
-          "You can also send a request to the email address below. We answer each request within 30 days.",
+          "These rights apply to every user in every country.",
+          "Access: you can see your data in the app.",
+          "Export: you can download a copy of your data as a JSON file. Go to Settings.",
+          "Correction: you can edit your data in the app.",
+          "Deletion: you can delete your account in Settings. This deletes your data.",
+          "Withdrawal of consent: delete your account in Settings. The next section tells you more.",
+          "Complaint: send an email to the address below.",
+          "You can also complain to the data protection authority of your country.",
+          "You can send each request to the email address below. We answer each request within 30 days.",
         ],
       },
       {
@@ -202,24 +221,47 @@ export const policies: Record<PolicyPage, Policy> = {
         ],
       },
       {
-        heading: "International users: EU and UK",
+        heading: "Where you live",
         body: [
-          "This section is for users in the European Union and the United Kingdom.",
+          "The notices below add details for some regions.",
+          "The rest of this policy applies to you in every region.",
+        ],
+      },
+      {
+        heading: "India",
+        body: [
+          "MediWise is built to follow the Digital Personal Data Protection Act, 2023 (DPDP Act).",
+          `The grievance officer is ${contact.proprietor}. Send a complaint to ${contact.email}.`,
+          "We answer each complaint within 30 days.",
+          "You can also complain to the Data Protection Board of India.",
+        ],
+      },
+      {
+        heading: "EU, EEA and UK",
+        body: [
+          "MediWise is built to follow the GDPR and the UK GDPR.",
           "Your explicit consent is the legal basis for the use of your health data.",
+          "Our contract with you is the legal basis for the use of your account data.",
+          "Tax law is the legal basis for the payment records that we keep.",
           "Transfers of your data out of your country use the standard contractual clauses.",
-          "You can complain to the data protection authority of your country.",
+          "Representative in the EU and the UK: not appointed yet.",
         ],
       },
       {
         id: washingtonSectionId,
-        heading: "Washington state consumer health data",
+        heading: "United States",
         body: [
-          "This section is for consumers in Washington state in the United States.",
-          "What we collect: your reports, the values in them, your profiles and your questions to the assistant.",
-          "Why we collect it: to read your reports, to show your trends and to answer your questions.",
-          "Who receives it: Supabase, Render, Anthropic and Cloudflare, as this policy shows above.",
-          "We do not sell consumer health data.",
-          "How to withdraw your consent: delete your account in Settings, or send an email to the address below.",
+          "MediWise treats your reports and their values as consumer health data in every state.",
+          "We do not sell consumer health data. We do not use it for advertising.",
+          "Washington: this policy is our consumer health data policy under the My Health My Data Act.",
+          "California and other states with health data laws: you can use every right in this policy.",
+        ],
+      },
+      {
+        heading: "All other countries",
+        body: [
+          "This policy applies to you in full.",
+          "When your local law gives you more rights, send a request to the email address below.",
         ],
       },
       {
@@ -229,14 +271,7 @@ export const policies: Record<PolicyPage, Policy> = {
           "When we change this policy, we ask for your health data consent again before your next upload.",
         ],
       },
-      {
-        heading: "Contact and grievance officer",
-        body: [
-          ...contactLines,
-          `The grievance officer is ${contact.proprietor}. Send a complaint or a request to the email address above.`,
-          "We answer each complaint within 30 days.",
-        ],
-      },
+      contactSection,
     ],
   },
   refunds: {
