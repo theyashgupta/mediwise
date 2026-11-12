@@ -12,7 +12,7 @@ import type { z } from "zod";
 import { getT, useT } from "@/common/hooks/use-locale";
 import { Badge } from "@/components/ui/badge";
 import { CheckboxField } from "@/common/components/checkbox-field";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import {
   Form,
   FormControl,
@@ -22,14 +22,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Input } from "@/common/components/controls/input";
+import { Select, SelectItem } from "@/common/components/controls/select";
 import { messages } from "@/config/messages";
 
 type ProfileFormValues = z.input<typeof profileInputSchema>;
@@ -89,13 +83,14 @@ function SelectField({
   testId: string;
 }) {
   return (
-    <Select value={value ?? ""} onValueChange={onChange}>
-      <FormControl>
-        <SelectTrigger className="w-full" data-testid={testId}>
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
-      </FormControl>
-      <SelectContent>
+    <FormControl>
+      <Select
+        value={value ?? ""}
+        onValueChange={onChange}
+        placeholder={placeholder}
+        className="w-full"
+        data-testid={testId}
+      >
         {options.map((option) => (
           <SelectItem
             key={option.value}
@@ -105,8 +100,8 @@ function SelectField({
             {option.label}
           </SelectItem>
         ))}
-      </SelectContent>
-    </Select>
+      </Select>
+    </FormControl>
   );
 }
 

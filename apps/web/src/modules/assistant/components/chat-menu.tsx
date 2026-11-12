@@ -1,6 +1,6 @@
 import { Ellipsis } from "lucide-react";
 import { useT } from "@/common/hooks/use-locale";
-import { GlassButton } from "@/common/components/surface/glass";
+import { IconAction } from "@/common/components/icon-action";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,14 +18,9 @@ export function ChatMenu({ canClear, onClear }: ChatMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <GlassButton
-          data-testid="assistant-menu"
-          size="icon"
-          className="size-11"
-          aria-label={t.label}
-        >
+        <IconAction data-testid="assistant-menu" label={t.label}>
           <Ellipsis aria-hidden />
-        </GlassButton>
+        </IconAction>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem

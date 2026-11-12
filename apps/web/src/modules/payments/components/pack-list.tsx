@@ -1,5 +1,5 @@
 import { useT } from "@/common/hooks/use-locale";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatRupees } from "../config/payments";
 import type { PaymentPack } from "../types";

@@ -26,7 +26,7 @@ export function NewSinceStrip({ since, reports }: NewSinceStripProps) {
         </h2>
         <p className="text-sm text-muted-foreground">{text.body(sinceDate)}</p>
       </div>
-      <ul className="divide-y overflow-hidden rounded-lg border bg-background">
+      <ul className="divide-y overflow-hidden rounded-xl border bg-background">
         {reports.map((report) => (
           <li key={report.id} data-testid="new-since-row">
             <Link

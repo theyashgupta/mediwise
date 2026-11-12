@@ -1,12 +1,6 @@
+import { Field } from "@/common/components/controls/field";
+import { Select, SelectItem } from "@/common/components/controls/select";
 import { useT } from "@/common/hooks/use-locale";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 type ThemeSelectProps = {
   theme: string;
@@ -18,20 +12,14 @@ const options = ["light", "dark", "system"] as const;
 export function ThemeSelect({ theme, onThemeChange }: ThemeSelectProps) {
   const t = useT();
   return (
-    <div className="space-y-2">
-      <Label htmlFor="theme">{t.settings.theme.label}</Label>
-      <Select value={theme} onValueChange={onThemeChange}>
-        <SelectTrigger id="theme" className="w-full sm:w-60">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {options.map((option) => (
-            <SelectItem key={option} value={option}>
-              {t.settings.theme[option]}
-            </SelectItem>
-          ))}
-        </SelectContent>
+    <Field label={t.settings.theme.label}>
+      <Select id="theme" value={theme} onValueChange={onThemeChange} className="w-full sm:w-60">
+        {options.map((option) => (
+          <SelectItem key={option} value={option}>
+            {t.settings.theme[option]}
+          </SelectItem>
+        ))}
       </Select>
-    </div>
+    </Field>
   );
 }

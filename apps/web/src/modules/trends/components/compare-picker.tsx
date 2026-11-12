@@ -1,12 +1,6 @@
+import { Field } from "@/common/components/controls/field";
+import { Select, SelectItem } from "@/common/components/controls/select";
 import { useT } from "@/common/hooks/use-locale";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { reportLabels } from "../config/trends";
 import type { ReportHeader } from "../types";
 
@@ -39,26 +33,27 @@ export function ComparePicker({ reports, a, b, onChange }: ComparePickerProps) {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       {pickers.map((picker) => (
-        <div key={picker.id} className="min-w-0 space-y-2">
-          <Label htmlFor={picker.id}>{picker.label}</Label>
-          <Select value={picker.value ?? ""} onValueChange={picker.set}>
-            <SelectTrigger id={picker.id} className="w-full" data-testid={picker.id}>
-              <SelectValue placeholder={t.trends.compare.select} />
-            </SelectTrigger>
-            <SelectContent>
-              {reports.toReversed().map((report) => (
-                <SelectItem
-                  key={report.id}
-                  value={report.id}
-                  disabled={report.id === picker.other}
-                  data-testid={`${picker.id}-option`}
-                >
-                  {labels.get(report.id)}
-                </SelectItem>
-              ))}
-            </SelectContent>
+        <Field key={picker.id} label={picker.label} className="min-w-0">
+          <Select
+            id={picker.id}
+            value={picker.value ?? ""}
+            onValueChange={picker.set}
+            placeholder={t.trends.compare.select}
+            className="w-full"
+            data-testid={picker.id}
+          >
+            {reports.toReversed().map((report) => (
+              <SelectItem
+                key={report.id}
+                value={report.id}
+                disabled={report.id === picker.other}
+                data-testid={`${picker.id}-option`}
+              >
+                {labels.get(report.id)}
+              </SelectItem>
+            ))}
           </Select>
-        </div>
+        </Field>
       ))}
     </div>
   );

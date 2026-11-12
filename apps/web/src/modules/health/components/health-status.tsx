@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import type { HealthState } from "../types";
 
 type HealthStatusProps = {

@@ -6,7 +6,7 @@ import { StatusBadge } from "@/common/components/status-badge";
 import { useT } from "@/common/hooks/use-locale";
 import { formatPlainDate } from "@/common/utils/date";
 import { statusStyles } from "@/common/utils/status";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import { cn } from "@/lib/utils";
 import { formatDelta } from "@/modules/markers";
 import { MarkerValue, markerLink, studiesLink } from "@/modules/reports";

@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import { useT } from "@/common/hooks/use-locale";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 
 export function TrendsLink() {
   const text = useT().dashboard;

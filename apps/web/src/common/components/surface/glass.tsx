@@ -1,10 +1,13 @@
 import { Slot } from "radix-ui";
 import type { ComponentProps } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import { Card } from "@/components/ui/card";
 import { DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+
+export const glassControl =
+  "bg-transparent hover:bg-foreground/5 active:bg-foreground/10 dark:hover:bg-foreground/8 dark:active:bg-foreground/12";
 
 const layers = {
   bar: "bg-glass-bar glass-blur-bar",
@@ -41,16 +44,7 @@ export function GlassButton({
   className,
   ...props
 }: Omit<ComponentProps<typeof Button>, "variant">) {
-  return (
-    <Button
-      variant="outline"
-      className={cn(
-        "bg-transparent hover:bg-foreground/5 active:bg-foreground/10 dark:hover:bg-foreground/8 dark:active:bg-foreground/12",
-        className,
-      )}
-      {...props}
-    />
-  );
+  return <Button variant="outline" className={cn(glassControl, className)} {...props} />;
 }
 
 export function GlassBadge({ className, ...props }: Omit<ComponentProps<typeof Badge>, "variant">) {

@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { SearchX } from "lucide-react";
 import { useT } from "@/common/hooks/use-locale";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import { EmptyState } from "./empty-state";
 
 export function NotFoundState() {

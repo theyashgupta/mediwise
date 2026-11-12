@@ -3,15 +3,9 @@ import { Link2 } from "lucide-react";
 import { useState } from "react";
 import { useT } from "@/common/hooks/use-locale";
 import { formatPlainDate } from "@/common/utils/date";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Button } from "@/common/components/controls/button";
+import { Field } from "@/common/components/controls/field";
+import { Select, SelectItem } from "@/common/components/controls/select";
 import { dateOptions } from "../config/export";
 import type { LinkKind, ReportLink } from "../types";
 
@@ -105,36 +99,29 @@ export function ReportLinks({
             if (otherId) onLink(otherId, kind);
           }}
         >
-          <div className="grid gap-2">
-            <Label htmlFor="link-report">{text.otherReport}</Label>
-            <Select value={otherId} onValueChange={setOtherId}>
-              <SelectTrigger id="link-report" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {candidates.map((candidate) => (
-                  <SelectItem key={candidate.id} value={candidate.id}>
-                    {candidate.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
+          <Field label={text.otherReport}>
+            <Select id="link-report" value={otherId} onValueChange={setOtherId} className="w-full">
+              {candidates.map((candidate) => (
+                <SelectItem key={candidate.id} value={candidate.id}>
+                  {candidate.label}
+                </SelectItem>
+              ))}
             </Select>
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="link-kind">{text.kind}</Label>
-            <Select value={kind} onValueChange={(value) => setKind(value as LinkKind)}>
-              <SelectTrigger id="link-kind" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {kinds.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {text.kinds[option]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
+          </Field>
+          <Field label={text.kind}>
+            <Select
+              id="link-kind"
+              value={kind}
+              onValueChange={(value) => setKind(value as LinkKind)}
+              className="w-full"
+            >
+              {kinds.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {text.kinds[option]}
+                </SelectItem>
+              ))}
             </Select>
-          </div>
+          </Field>
           <Button
             type="submit"
             variant="outline"

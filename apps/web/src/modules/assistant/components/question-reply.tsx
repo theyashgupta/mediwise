@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { useT } from "@/common/hooks/use-locale";
 import { Flag } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import type { FactTarget, Question } from "../types";
 import { CitationChip } from "./citation-chip";
 
@@ -9,7 +9,7 @@ type UserBubbleProps = { label?: string; children: ReactNode };
 
 export function UserBubble({ label, children }: UserBubbleProps) {
   return (
-    <p className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-br-md bg-primary/10 px-4 py-2.5 wrap-anywhere">
+    <p className="ml-auto w-fit max-w-[85%] rounded-xl rounded-br-md bg-primary/10 px-4 py-2.5 wrap-anywhere">
       {label && <span className="sr-only">{label}: </span>}
       {children}
     </p>
@@ -29,7 +29,7 @@ export function QuestionReply({ item, flagging, onFact, onFlag }: QuestionReplyP
     <article data-testid="assistant-item" className="space-y-3">
       <UserBubble label={t.you}>{item.question}</UserBubble>
       {(item.sentences.length > 0 || item.copy) && (
-        <div className="max-w-[92%] space-y-3 rounded-2xl rounded-bl-md border bg-card px-4 py-3">
+        <div className="max-w-[92%] space-y-3 rounded-xl rounded-bl-md border bg-card px-4 py-3">
           {item.sentences.length > 0 && (
             <div data-testid="assistant-answer" className="space-y-3 wrap-anywhere">
               {item.sentences.map((sentence, index) => (

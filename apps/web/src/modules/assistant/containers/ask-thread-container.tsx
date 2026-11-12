@@ -221,8 +221,7 @@ export function AskThreadContainer({
           </div>
           <GlassButton
             asChild
-            size="icon"
-            className="ml-auto size-11 sm:ml-0"
+            className="ml-auto size-11 px-0 sm:ml-0"
             aria-label={t.widget.fullPage}
           >
             <Link to="/ask" search={{ report: reportId, q: draft || undefined }}>
@@ -233,8 +232,7 @@ export function AskThreadContainer({
           <SheetClose asChild>
             <GlassButton
               data-testid="ask-close"
-              size="icon"
-              className="size-11"
+              className="size-11 px-0"
               aria-label={t.widget.close}
             >
               <X aria-hidden />
@@ -273,14 +271,14 @@ export function AskThreadContainer({
           <GlassSurface
             asChild
             layer="bar"
-            className="sticky bottom-[calc(--spacing(22)+env(safe-area-inset-bottom))] z-20 mt-8 -mx-4 border-t px-4 py-3 md:bottom-0 md:mx-0 md:rounded-2xl md:border"
+            className="sticky bottom-[calc(--spacing(22)+env(safe-area-inset-bottom))] z-20 mt-8 -mx-4 border-t px-4 py-3 md:bottom-0 md:mx-0 md:rounded-xl md:border"
           >
             <div>{composer}</div>
           </GlassSurface>
         </section>
         {wide && (
           <aside aria-label={t.fact.title}>
-            <div className="sticky top-24 rounded-2xl border bg-card p-6">
+            <div className="sticky top-24 rounded-xl border bg-card p-6">
               {fact ? (
                 <FactCardContainer target={fact} />
               ) : (

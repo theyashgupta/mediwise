@@ -51,7 +51,7 @@ export function PageHeader({
   );
   if (!glass) return <header className={className}>{content}</header>;
   return (
-    <GlassSurface asChild className={cn(className, "rounded-2xl border p-5 sm:p-8")}>
+    <GlassSurface asChild className={cn(className, "rounded-xl border p-5 sm:p-8")}>
       <header>{content}</header>
     </GlassSurface>
   );

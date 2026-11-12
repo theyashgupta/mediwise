@@ -3,7 +3,7 @@ import { ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { getIntlTag, useT } from "@/common/hooks/use-locale";
 import { CheckboxLine } from "@/common/components/checkbox-line";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 
 type ConsentPromptProps = {
   permissionNames: string[];

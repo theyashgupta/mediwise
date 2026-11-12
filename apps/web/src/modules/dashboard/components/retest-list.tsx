@@ -2,7 +2,7 @@ import { CalendarPlus } from "lucide-react";
 import { Section } from "@/common/components/section";
 import { useT } from "@/common/hooks/use-locale";
 import { formatPlainDate } from "@/common/utils/date";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import { isPastDue } from "../config/calendar-file";
 import type { RetestDate, RetestRow } from "../types";
 import { SuggestionDisclaimer } from "./suggestion-disclaimer";

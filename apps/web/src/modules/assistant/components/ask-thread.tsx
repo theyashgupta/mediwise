@@ -34,7 +34,7 @@ export function AskThread({ items, pending, error, flagging, onFact, onFlag }: A
           <UserBubble>{pending}</UserBubble>
           <p
             role="status"
-            className="w-fit rounded-2xl rounded-bl-md border bg-card px-4 py-2.5 text-muted-foreground"
+            className="w-fit rounded-xl rounded-bl-md border bg-card px-4 py-2.5 text-muted-foreground"
           >
             {t.writing}
           </p>

@@ -3,16 +3,10 @@ import { Layers } from "lucide-react";
 import { useState } from "react";
 import { Section } from "@/common/components/section";
 import { useT } from "@/common/hooks/use-locale";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Button } from "@/common/components/controls/button";
+import { Field } from "@/common/components/controls/field";
+import { Input } from "@/common/components/controls/input";
+import { Select, SelectItem } from "@/common/components/controls/select";
 import type { EpisodeItem } from "../types";
 
 type ReportEpisodeProps = {
@@ -74,25 +68,23 @@ export function ReportEpisode({
             else onAdd(choice);
           }}
         >
-          <div className="grid gap-2">
-            <Label htmlFor="report-episode-choice">{text.episode}</Label>
-            <Select value={choice} onValueChange={setChoice}>
-              <SelectTrigger id="report-episode-choice" className="w-full sm:w-64">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {episodes.map((episode) => (
-                  <SelectItem key={episode.id} value={episode.id}>
-                    {episode.name}
-                  </SelectItem>
-                ))}
-                <SelectItem value={newEpisode}>{text.newEpisode}</SelectItem>
-              </SelectContent>
+          <Field label={text.episode}>
+            <Select
+              id="report-episode-choice"
+              value={choice}
+              onValueChange={setChoice}
+              className="w-full sm:w-64"
+            >
+              {episodes.map((episode) => (
+                <SelectItem key={episode.id} value={episode.id}>
+                  {episode.name}
+                </SelectItem>
+              ))}
+              <SelectItem value={newEpisode}>{text.newEpisode}</SelectItem>
             </Select>
-          </div>
+          </Field>
           {creating && (
-            <div className="grid gap-2">
-              <Label htmlFor="report-episode-name">{t.fields.name}</Label>
+            <Field label={t.fields.name}>
               <Input
                 id="report-episode-name"
                 value={name}
@@ -102,7 +94,7 @@ export function ReportEpisode({
                 className="w-full sm:w-64"
                 onChange={(event) => setName(event.target.value)}
               />
-            </div>
+            </Field>
           )}
           <Button
             type="submit"

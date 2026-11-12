@@ -18,7 +18,7 @@ export function TrendPoints({ markerKey, category, points, unit, precision }: Tr
     .toReversed()
     .flatMap((point) => [point, ...point.sameDay.map((other) => ({ ...other, date: point.date }))]);
   return (
-    <div className="overflow-x-auto rounded-lg border bg-card">
+    <div className="overflow-x-auto rounded-xl border bg-card">
       <table className="w-full text-left">
         <thead className="border-b text-sm text-muted-foreground">
           <tr>

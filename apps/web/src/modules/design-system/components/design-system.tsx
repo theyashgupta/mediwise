@@ -78,7 +78,7 @@ function Specimens() {
       <Specimen title="GlassSurface: bar, surface and overlay layers">
         <Backdrop className="grid gap-3 pt-14">
           {(["bar", "surface", "overlay"] as const).map((layer) => (
-            <GlassSurface key={layer} layer={layer} className="rounded-lg border px-4 py-3">
+            <GlassSurface key={layer} layer={layer} className="rounded-xl border px-4 py-3">
               <p className="font-mono text-sm">layer=&quot;{layer}&quot;</p>
               <p className="text-sm text-muted-foreground">Muted text passes 4.5:1 on this tint.</p>
             </GlassSurface>
@@ -95,7 +95,7 @@ function Specimens() {
                   <li
                     key={label}
                     className={cn(
-                      "flex h-8 items-center gap-2.5 rounded-md px-3 text-sm text-muted-foreground",
+                      "flex h-8 items-center gap-2.5 rounded-lg px-3 text-sm text-muted-foreground",
                       active && "bg-primary/10 font-medium text-primary",
                     )}
                   >

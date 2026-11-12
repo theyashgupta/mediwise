@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, CalendarRange } from "lucide-react";
 import { useT } from "@/common/hooks/use-locale";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import { formatReviewDate } from "../config/year-review";
 import type { YearReview } from "../types";
 import { wrapLabel } from "@/common/utils/wrap-label";

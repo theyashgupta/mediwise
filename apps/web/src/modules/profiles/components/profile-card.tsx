@@ -3,7 +3,8 @@ import { CalendarRange, Pencil, Trash2 } from "lucide-react";
 import { useT } from "@/common/hooks/use-locale";
 import { ageOn } from "@/common/utils/age";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
+import { IconButton } from "@/common/components/controls/icon-button";
 import type { Profile } from "../types";
 import { ProfileCsvButton } from "./profile-csv-button";
 import { initial } from "@/common/utils/initial";
@@ -56,7 +57,7 @@ export function ProfileCard({
         </div>
         <div className="flex shrink-0 gap-1">
           {profile.reportCount >= 2 && (
-            <Button variant="ghost" size="icon" asChild>
+            <Button variant="ghost" className="size-11 px-0 md:size-10" asChild>
               <Link
                 to="/year-review"
                 search={{ profileId: profile.id }}
@@ -66,19 +67,17 @@ export function ProfileCard({
               </Link>
             </Button>
           )}
-          <Button variant="ghost" size="icon" onClick={onEdit} aria-label={text.edit(profile.name)}>
+          <IconButton onClick={onEdit} label={text.edit(profile.name)}>
             <Pencil aria-hidden />
-          </Button>
+          </IconButton>
           {!profile.isSelf && (
-            <Button
-              variant="ghost"
-              size="icon"
+            <IconButton
               className="ml-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
               onClick={onRemove}
-              aria-label={text.remove(profile.name)}
+              label={text.remove(profile.name)}
             >
               <Trash2 aria-hidden />
-            </Button>
+            </IconButton>
           )}
         </div>
       </div>

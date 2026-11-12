@@ -1,7 +1,7 @@
 import { Layers } from "lucide-react";
 import { useState } from "react";
 import { useT } from "@/common/hooks/use-locale";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 import { formatEpisodeDate } from "../config/episodes";
 import type { Proposal } from "../types";
 import { EpisodeFields } from "./episode-fields";

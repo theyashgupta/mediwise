@@ -1,6 +1,6 @@
 import { applyUpdate, useUpdateAvailable } from "@/common/hooks/use-app-update";
 import { useT } from "@/common/hooks/use-locale";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/common/components/controls/button";
 
 export function UpdateLine() {
   const t = useT();
@@ -10,7 +10,7 @@ export function UpdateLine() {
     <div
       role="status"
       data-testid="shell-update"
-      className="mb-4 flex items-center justify-between gap-3 rounded-lg border bg-card px-4 py-2 text-sm print:hidden"
+      className="mb-4 flex items-center justify-between gap-3 rounded-xl border bg-card px-4 py-2 text-sm print:hidden"
     >
       <span>{t.shell.update.available}</span>
       <Button size="sm" variant="outline" onClick={applyUpdate}>

@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/common/components/controls/button";
+import { Field } from "@/common/components/controls/field";
+import { Input } from "@/common/components/controls/input";
 import type { CreditFilter } from "../types";
 
 type CreditFiltersProps = {
@@ -14,8 +14,7 @@ export function CreditFilters({ filter, onChange }: CreditFiltersProps) {
     onChange({ ...filter, [key]: value || undefined });
   return (
     <div className="flex flex-wrap items-end gap-3" data-testid="admin-filters">
-      <div className="space-y-1.5">
-        <Label htmlFor="admin-from">From</Label>
+      <Field label="From">
         <Input
           id="admin-from"
           type="date"
@@ -24,9 +23,8 @@ export function CreditFilters({ filter, onChange }: CreditFiltersProps) {
           value={filter.from ?? ""}
           onChange={(event) => set("from", event.target.value)}
         />
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="admin-to">To</Label>
+      </Field>
+      <Field label="To">
         <Input
           id="admin-to"
           type="date"
@@ -35,7 +33,7 @@ export function CreditFilters({ filter, onChange }: CreditFiltersProps) {
           value={filter.to ?? ""}
           onChange={(event) => set("to", event.target.value)}
         />
-      </div>
+      </Field>
       {filter.userId && (
         <Button
           variant="outline"
