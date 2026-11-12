@@ -70,3 +70,12 @@ test("paused motion and reduced motion stop every animation and transition", () 
     /\*,\s*::before,\s*::after \{\s*animation: none !important;\s*transition: none !important;/,
   );
 });
+
+test("the feature vignettes move transform and opacity only", () => {
+  const bodies = keyframes();
+  for (const name of ["vignette-in", "vignette-swing"]) {
+    const properties = new Set(bodies[name]?.match(/[\w-]+(?=:)/g));
+    expect(properties.size).toBeGreaterThan(0);
+    expect([...properties].filter((p) => p !== "opacity" && p !== "transform")).toEqual([]);
+  }
+});

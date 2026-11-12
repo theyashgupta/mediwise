@@ -54,7 +54,7 @@ function strings(tree: object, prefix = ""): [string, string][] {
   });
 }
 
-const moved = ["hero", "howItWorks", "story", "history", "comparison", "bento", "numbers", "trust"];
+const moved = ["hero", "howItWorks", "story", "comparison", "features", "numbers", "trust"];
 
 test("every plain string of the content sections renders on the landing, in both languages", () => {
   for (const locale of ["en", "hi"] as const) {

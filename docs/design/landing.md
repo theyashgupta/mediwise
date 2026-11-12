@@ -10,7 +10,7 @@ The landing page tells one story: a lab report becomes a plain-language explanat
 | 2 | Story (How it works) | Six step rows. From 1024 px each row is two columns, text and a 300 px phone, with the text centred on the phone and the sides alternating (text left on odd rows). Below 1024 px each row stacks: number, title, body, then a 260 px phone. 96 px between rows on a desktop, 64 px on a phone. | Reveal on each row. |
 | 3 | Numbers | Full-width primary band, four large numbers. | The numbers count up once. |
 | 4 | Comparison | Two columns: a printed lab PDF and MediWise. Rows align through subgrid. | Reveal. |
-| 5 | Features index | Text list in up to three columns, items split by hairline rules. No cards, no icons. | Staggered reveal. |
+| 5 | Features (MEDI-186) | 8 illustrated vignettes, each with a 3 to 6 word title and one sentence. 4 columns from 1280 px, 2 from 768 px, 1 on a phone. | Each scene plays once on reveal and loops on mouse hover. |
 | 6 | Marker marquee | Two rows of marker names that scroll sideways. | Marquee. |
 | 7 | Trust | One narrow column, one row for each item with its icon. | Reveal on the heading. |
 | 8 | Pricing | Three pack cards. | Staggered reveal. |
@@ -30,7 +30,7 @@ The order follows the argument: what MediWise is (hero), how it works (story), h
 | 05 | A line for your doctor | alert |
 | 06 | Track | trends |
 
-The questions, settled, episode and Hindi screens left the page (orchestrator decision, 2026-10-16). Their copy is in the features index.
+The questions, settled, episode and Hindi screens left the page (orchestrator decision, 2026-10-16). Their copy is in the features vignettes.
 
 ## Motion rules
 
@@ -39,6 +39,37 @@ The questions, settled, episode and Hindi screens left the page (orchestrator de
 - There is no scroll or resize listener on the page, and no section pins.
 - The hero blobs pause when the hero leaves the window, when the tab is hidden, with the Pause motion button and with reduced motion. The hero phone, heading and paragraph never animate, because they hold the LCP element.
 - `will-change` is on the hero blobs only. The story section has `content-visibility: auto` with an intrinsic size of 5200 px below 1024 px and 4550 px from 1024 px. Measured (MEDI-184): 4984 to 5384 px at 320 and 390 px, and 4528 to 4554 px at 1280 px, both languages.
+
+## Feature vignettes (MEDI-186)
+
+The owner found the text index of 13 items too much to read (2026-11-12) and asked for animation. He picked option B, a cartoon doctor, from three previews: the droplet mascot (A), the doctor (B) and abstract scenes (C). Previews: `medi-185-option-{a,b,c}-<width>-<theme>.png`. Research: `docs/research/landing-motion.md`, Feature vignettes.
+
+| # | Vignette | Scene |
+|---|---|---|
+| 1 | Up to 20 files per report | Two sheets fly onto a report card. The doctor taps the card and a clip closes the stack. |
+| 2 | ECG, ultrasound and X-ray reports | The doctor points at the printed lines under an ECG trace. The lines highlight one by one. The trace stays plain. |
+| 3 | Profiles for your family | Four people pop into a row. Each gets a range bar with its own band. One more line names the Hindi setting. |
+| 4 | A summary for your doctor | A page comes out of a printer and moves to the doctor's hand. |
+| 5 | Questions for your doctor | Two question bubbles open and their lines draw. The doctor reads. |
+| 6 | Repeat scans can settle a line | A link draws from the earlier report to the later one. The alert line of the earlier report fades. |
+| 7 | One episode for one workup | Three report cards move into date order under one bracket. |
+| 8 | Trends across visits | The optimal band opens and the trend line draws. The doctor's pen follows it. |
+
+Cost per report left this section. Pricing shows it.
+
+Rules for the doctor:
+
+- A drawn figure only: dot eyes, a teal hair cap, no realistic face, no real person. The face and the hair use the same tokens in light and dark, so the figure does not change between themes.
+- The doctor never stamps, approves or signs a report. MediWise does not have a doctor review reports, so a stamp or a check mark would add a claim.
+- The doctor, the arm, a sheet and a person are drawn once in `VignetteDefs` and reused with `<use>`.
+
+Motion:
+
+- `components/vignettes.tsx` draws each scene as inline SVG. The base style of every part is its final frame.
+- `[data-reveal="shown"]` starts the scene. Each `.vg-cue` part animates from the offsets in its custom properties through `vignette-in` or `vignette-swing`, and each `.vg-draw` path through `draw`. The keyframes move transform and opacity only.
+- Without JavaScript, with motion paused and with reduced motion, each vignette shows its final frame.
+- `loopVignettes` in `components/motion.tsx` plays a scene again when a mouse enters it, and again after each 900 ms rest while the mouse stays. It only rewinds the CSS animations. It does not run on a device that cannot hover.
+- The vignette classes are not scoped under the section, because a selector with an ancestor does not match the copies inside a `<use>` element.
 
 ## Why the story no longer pins (MEDI-184)
 
@@ -79,7 +110,25 @@ TBT moved from 32 to 824 ms between runs of the same build, because other work r
 
 Bundle: the landing first load is 147,539 bytes gzipped, down 908 bytes from 148,447. The step observer and the story component left the client bundle.
 
+## Measurements (MEDI-186, 2026-11-12)
+
+Lighthouse 13.6, mobile, simulated throttling, the static build served with gzip. Ten runs each, before and after taken in turn, median shown.
+
+| Metric | Before (main, 029399e) | After (MEDI-186) |
+|---|---|---|
+| LCP | 972 ms (958 to 1006) | 996 ms (956 to 1109) |
+| CLS (median) | 0.000 | 0.000 |
+| Accessibility | 1.00 | 1.00 |
+
+The new recorded mobile LCP is 996 ms. The cause is 5 kB of inline SVG for the vignettes. The orchestrator accepted the 24 ms on 2026-11-12, because the ranges overlap and the JavaScript budget is the gate.
+
+The LCP element paints with the first paint in every run. The HTML is 5,037 bytes larger gzipped (46,160 to 51,197): 2,256 bytes of markup and CSS, and 2,730 bytes for the copy of the same tree that Next writes into the page payload. At the simulated 1.6 Mbps, 5 kB costs about 25 ms, which matches the 24 ms difference in the median. One after run had a CLS of 0.039 from a hero blob (`div.hero-blob`), not from the vignettes.
+
+Bundle: the landing first load is 147,779 bytes gzipped, up 240 bytes from 147,539. Only `loopVignettes` is new JavaScript. The inline SVG is in the HTML, which the 150,000 byte limit in `scripts/bundle-size.mjs` does not count.
+
 ## Browser checks
+
+- Vignettes (MEDI-186, Playwright Chromium): at 1280, 1920 and 390 px, light and dark, all 8 vignettes reveal and end on their final frame. A mouse on a vignette plays it again and loops it, and after the mouse leaves the scene stops on its final frame. On the Hindi page at 1280 px with reduced motion, no vignette animation runs, every scene shows its final frame and the page has no sideways scroll.
 
 - Story (MEDI-184, Playwright Chromium): at 1024, 1280, 1920 and 2560 px, light and dark, every row is 611 px tall (the phone height), the text centre sits on the phone centre, the phone alternates right, left, right, and the rows are 96 px apart. At 390 and 1023 px the rows stack, 64 px apart. No element in the section is sticky. A scroll and a nav jump to How it works reveal each row as it enters the window.
 - Reveals: no element is hidden at load inside the window. Every element is visible after it is centred, and nothing is hidden with motion paused, with reduced motion or without JavaScript. Chrome sends no observer entry for a section skipped by `content-visibility`, so after a pause and a jump to the bottom, story steps above the window keep their hidden state until they scroll back in, and then reveal.
@@ -95,3 +144,5 @@ Bundle: the landing first load is 147,539 bytes gzipped, down 908 bytes from 148
 `docs/design/screenshots/medi-168-<section>-<width>-<theme>.png` for hero, numbers, comparison, features and trust, at 1280 and 390 px, light and dark.
 
 `docs/design/screenshots/medi-184-how-it-works-<width>-<theme>.png` for the story rows at 1280, 1920, 2560 and 390 px, light and dark. `medi-184-full-page-1920-dark.png` is the full page at 1920 px in dark mode, and `medi-184-how-it-works-2000x1300-dark-viewport.png` is the window from the owner's report.
+
+`docs/design/screenshots/medi-185-final-<width>-<theme>.png` for the features section at 1280, 1920 and 390 px, light and dark, each scene on its final frame.

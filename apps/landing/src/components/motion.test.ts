@@ -1,5 +1,5 @@
 import { afterEach, expect, test, vi } from "vitest";
-import { formatTicker, revealEntries, watchMotion } from "./motion";
+import { formatTicker, revealEntries, rewindFinished, watchMotion } from "./motion";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -102,4 +102,27 @@ test("the ticker writes Indian digit grouping, fixed decimals and the prefix", (
   expect(formatTicker(123456, 0)).toBe("1,23,456");
   expect(formatTicker(29.95, 2, "₹")).toBe("₹29.95");
   expect(formatTicker(29.9, 2, "₹")).toBe("₹29.90");
+});
+
+/**
+ * Builds a vignette whose animations are in the given play states.
+ */
+function vignette(...states: AnimationPlayState[]) {
+  const animations = states.map((playState) => ({ playState, currentTime: 1200 }));
+  return {
+    animations,
+    getAnimations: () => animations as unknown as Animation[],
+  };
+}
+
+test("a finished vignette rewinds every animation to the start", () => {
+  const scene = vignette("finished", "finished");
+  expect(rewindFinished(scene)).toBe(true);
+  expect(scene.animations.map((animation) => animation.currentTime)).toEqual([0, 0]);
+});
+
+test("a vignette that still plays is not rewound", () => {
+  const scene = vignette("finished", "running");
+  expect(rewindFinished(scene)).toBe(false);
+  expect(scene.animations.map((animation) => animation.currentTime)).toEqual([1200, 1200]);
 });
