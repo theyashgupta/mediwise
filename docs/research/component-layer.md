@@ -4,7 +4,7 @@
 
 ## Verdict
 
-- **Radius:** a named scale of control 10 px, card 14 px, sheet 20 px. The Tailwind steps move up with it, so every shadcn primitive gets the rounder scale.
+- **Radius:** a named scale of control 12 px, card 16 px, sheet 24 px. The Tailwind steps move up with it, so every shadcn primitive gets the rounder scale. The maintainer compared it with a 10, 14, 20 scale on 2026-11-12 and picked this one.
 - **Control heights:** 32, 40 and 48 px, and 44 px for a touch target under `md`. Buttons, inputs and selects share the heights, so a row of controls lines up.
 - **Focus ring:** a solid 2 px outline in `--ring` with a 2 px offset, on every control.
 - **Colour:** one theme, teal and warm stone. `--input` becomes the 3:1 control edge. Two new roles: `field` (control fill) and `primary-hover`.
@@ -60,10 +60,10 @@ The ring fails today in both themes, and the input edge is close to invisible on
 
 What we take from them:
 
-- **The stock look is 8 px on 36 px.** tweakcn's most common preset is 0.5rem, which is the value the app has now. A 10 px radius on a 40 px control reads as one deliberate shape, not a default.
-- **Rounder is not pill.** Radix "large" multiplies the scale by 1.5. Our 10, 14, 20 sits at that level. Pills stay for badges and the avatar only.
+- **The stock look is 8 px on 36 px.** tweakcn's most common preset is 0.5rem, which is the value the app has now. A 12 px radius on a 40 px control reads as one deliberate shape, not a default.
+- **Rounder is not pill.** Radix "large" multiplies the scale by 1.5. Our 12, 16, 24 sits just above that level. Pills stay for badges and the avatar only.
 - **A solid ring with an offset** is what Radix and Vercel do, and it is what WCAG 2.4.13 names as the simplest pass.
-- **Nested radius:** outer radius equals inner radius plus the gap (jakub.kr, "concentric border radius"). A 14 px card with controls 4 px inside would need 10 px controls. Our cards have 24 px padding, so the rule does not bind there, but a menu (popover 14 px, item padding 4 px) gets 10 px items.
+- **Nested radius:** outer radius equals inner radius plus the gap (jakub.kr, "concentric border radius"). A 16 px card with controls 4 px inside would need 12 px controls. Our cards have 24 px padding, so the rule does not bind there, but a menu (popover 16 px, item padding 4 px) gets 12 px items.
 
 ## Decisions
 
@@ -71,12 +71,12 @@ What we take from them:
 
 | Role | Value | Tailwind | Use |
 | - | - | - | - |
-| Control | 10 px | `rounded-lg` | Button, IconButton, Input, Select trigger, Textarea, menu items |
-| Card | 14 px | `rounded-xl` | Card, panel, popover, select list, empty state |
-| Sheet | 20 px | `rounded-2xl` | Dialog, sheet, the phone tab bar |
-| `--radius` (base) | 10 px | | shadcn reads it |
+| Control | 12 px | `rounded-lg` | Button, IconButton, Input, Select trigger, Textarea, menu items |
+| Card | 16 px | `rounded-xl` | Card, panel, popover, select list, empty state |
+| Sheet | 24 px | `rounded-2xl` | Dialog, sheet, the phone tab bar |
+| `--radius` (base) | 12 px | | shadcn reads it |
 
-The Tailwind steps move with the scale: `sm` 6, `md` 8, `lg` 10, `xl` 14, `2xl` 20. A primitive that uses `rounded-lg` or `rounded-xl` gets the control or card radius with no edit. Badges and avatars keep `rounded-full`. There are no named aliases such as `rounded-control`: `cn` merges only Tailwind's own names, and a caller's `rounded-md` must replace the control radius, not sit next to it.
+The Tailwind steps move with the scale: `sm` 8, `md` 10, `lg` 12, `xl` 16, `2xl` 24. A primitive that uses `rounded-lg` or `rounded-xl` gets the control or card radius with no edit. Badges and avatars keep `rounded-full`. There are no named aliases such as `rounded-control`: `cn` merges only Tailwind's own names, and a caller's `rounded-md` must replace the control radius, not sit next to it.
 
 ### Control heights
 

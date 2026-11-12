@@ -264,12 +264,12 @@ export const tokens = {
     "base": 4
   },
   "radius": {
-    "base": 10,
-    "sm": 6,
-    "md": 8,
-    "lg": 10,
-    "xl": 14,
-    "2xl": 20
+    "base": 12,
+    "sm": 8,
+    "md": 10,
+    "lg": 12,
+    "xl": 16,
+    "2xl": 24
   },
   "blur": {
     "glassBar": 12,

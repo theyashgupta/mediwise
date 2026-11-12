@@ -75,7 +75,7 @@ Why these choices:
 - Prose blocks use `max-w-measure` (72ch). Do not use `max-w-prose`, Tailwind fixes it at 65ch.
 - Auth column width `max-w-auth` (420 px). On a phone the column is full width with 16 px gutters.
 - The side navigation is 240 px, or 56 px when collapsed, from `md`. Below `md`, a bottom tab bar replaces it. See [Navigation](#navigation).
-- Radius scale (MEDI-191, see [component-layer.md](research/component-layer.md)): `rounded-lg` (10 px) for buttons, inputs, selects and menu items, `rounded-xl` (14 px) for cards, panels, popovers and empty states, `rounded-2xl` (20 px) for dialogs and sheets. `sm` is 6 and `md` is 8. Badges and avatars keep `rounded-full`. Use the step names: `cn` merges only Tailwind's own names, so a named alias would not replace a caller's class.
+- Radius scale (MEDI-191, see [component-layer.md](research/component-layer.md)): `rounded-lg` (12 px) for buttons, inputs, selects and menu items, `rounded-xl` (16 px) for cards, panels, popovers and empty states, `rounded-2xl` (24 px) for dialogs and sheets. `sm` is 8 and `md` is 10. Badges and avatars keep `rounded-full`. Use the step names: `cn` merges only Tailwind's own names, so a named alias would not replace a caller's class.
 - Control heights: `h-8` (32 px), `h-10` (40 px, the default), `h-12` (48 px, one main action), `size-11` (44 px, the smallest target under `md`).
 - Focus: a solid 2 px outline in `--ring` with a 2 px offset on every control. The ring passes 3:1 on every surface in both themes.
 

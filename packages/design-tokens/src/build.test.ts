@@ -14,10 +14,10 @@ test.each(["css", "native"])(
 test("the css output carries the rounder radius steps", async () => {
   const [file] = await createDictionary().formatPlatform("css");
   for (const line of [
-    "--radius: 0.625rem;",
-    "--radius-lg: 0.625rem;",
-    "--radius-xl: 0.875rem;",
-    "--radius-2xl: 1.25rem;",
+    "--radius: 0.75rem;",
+    "--radius-lg: 0.75rem;",
+    "--radius-xl: 1rem;",
+    "--radius-2xl: 1.5rem;",
   ]) {
     expect(String(file!.output)).toContain(line);
   }
