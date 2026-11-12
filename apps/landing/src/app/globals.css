@@ -229,6 +229,202 @@
   animation-play-state: paused;
 }
 
+/*
+ * Lab glassware (sections/hero.tsx). The base style of every part is its rest frame, so paused motion
+ * and reduced motion show still glassware. Items on the right anchor their left edge to the content
+ * column and stop 8 to 20 px before the window edge, so a narrow window never cuts them.
+ */
+@keyframes lab-float {
+  50% {
+    transform: translateY(-10px) rotate(-2deg);
+  }
+}
+
+@keyframes lab-wave {
+  to {
+    transform: translateX(30px);
+  }
+}
+
+@keyframes lab-rise {
+  from {
+    transform: translateY(14px);
+  }
+}
+
+@keyframes lab-drip {
+  0%,
+  40% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.4);
+  }
+  55% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(70px);
+  }
+}
+
+.hero-lab-item {
+  position: absolute;
+  height: auto;
+  overflow: visible;
+  animation: lab-float 10s ease-in-out infinite;
+}
+
+.hero-lab-glass {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.hero-lab-liquid {
+  fill: color-mix(in oklch, var(--primary) 22%, var(--ambient-1));
+}
+
+.hero-lab-wave {
+  animation: lab-wave 3.2s linear infinite;
+}
+
+.hero-lab-rise {
+  animation: lab-rise 9s ease-in-out infinite alternate;
+}
+
+.hero-lab-rack > g:nth-child(2) .hero-lab-rise {
+  animation-duration: 11s;
+}
+
+.hero-lab-rack > g:nth-child(3) .hero-lab-rise {
+  animation-duration: 7s;
+}
+
+.hero-lab-drip {
+  transform-box: fill-box;
+  animation: lab-drip 3.6s ease-in infinite;
+}
+
+.hero-lab-flask {
+  top: 1rem;
+  right: 0.25rem;
+  width: 4.5rem;
+}
+
+.hero-lab-round {
+  top: 70%;
+  right: 0.25rem;
+  width: 4.75rem;
+  animation-duration: 12s;
+}
+
+.hero-lab-drop-1 {
+  top: 58%;
+  left: 0.5rem;
+  width: 1rem;
+  animation-duration: 9s;
+}
+
+.hero-lab-drop-2 {
+  top: 76%;
+  left: 1rem;
+  width: 0.75rem;
+  animation-duration: 11s;
+}
+
+.hero-lab-rack,
+.hero-lab-pipette,
+.hero-lab-drop-3,
+.hero-lab-drop-4 {
+  display: none;
+}
+
+@media (width >= 64rem) {
+  .hero-lab-item {
+    display: block;
+    inset: auto;
+  }
+
+  .hero-lab-flask {
+    top: 2.5rem;
+    left: min(calc(100% - 90px), calc(50% + 50vw - 140px));
+    width: clamp(130px, 8vw, 170px);
+  }
+
+  .hero-lab-round {
+    top: 470px;
+    left: min(calc(100% - 80px), calc(50% + 50vw - 120px));
+    width: 110px;
+  }
+
+  .hero-lab-pipette {
+    top: 368px;
+    left: min(calc(100% - 38px), calc(50% + 50vw - 78px));
+    width: 26px;
+    animation-duration: 9s;
+  }
+
+  .hero-lab-rack {
+    top: 1.25rem;
+    left: 47%;
+    width: 150px;
+    animation-duration: 11s;
+  }
+
+  .hero-lab-drop-1 {
+    top: 300px;
+    left: 58%;
+    width: 18px;
+  }
+
+  .hero-lab-drop-2 {
+    top: 300px;
+    left: min(calc(100% - 60px), calc(50% + 50vw - 24px));
+    width: 14px;
+  }
+
+  .hero-lab-drop-3 {
+    top: 520px;
+    left: 60%;
+    width: 16px;
+    animation-duration: 8s;
+  }
+
+  .hero-lab-drop-4 {
+    top: 220px;
+    left: -60px;
+    width: 20px;
+    animation-duration: 12s;
+  }
+}
+
+/* From 1600 px the round flask and its pipette fill the left side space, so the glassware stays balanced. */
+@media (width >= 100rem) {
+  .hero-lab-round {
+    top: 420px;
+    left: -230px;
+    width: 130px;
+  }
+
+  .hero-lab-pipette {
+    top: 318px;
+    left: -178px;
+  }
+
+  .hero-lab-drop-4 {
+    top: 180px;
+    left: -140px;
+  }
+}
+
+#top[data-offscreen="true"] .hero-lab *,
+:root[data-tab="hidden"] .hero-lab * {
+  animation-play-state: paused;
+}
+
 .marquee {
   --gap: 0.75rem;
   mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);

@@ -61,6 +61,21 @@ test("the hero drift pauses offscreen and on a hidden tab", () => {
   );
 });
 
+test("the lab glassware moves transform and opacity only", () => {
+  const bodies = keyframes();
+  for (const name of ["lab-float", "lab-wave", "lab-rise", "lab-drip"]) {
+    const properties = new Set(bodies[name]?.match(/[\w-]+(?=:)/g));
+    expect(properties.size).toBeGreaterThan(0);
+    expect([...properties].filter((p) => p !== "opacity" && p !== "transform")).toEqual([]);
+  }
+});
+
+test("the lab glassware pauses offscreen and on a hidden tab", () => {
+  expect(css).toMatch(
+    /#top\[data-offscreen="true"\] \.hero-lab \*,\s*:root\[data-tab="hidden"\] \.hero-lab \* \{\s*animation-play-state: paused;/,
+  );
+});
+
 test("paused motion and reduced motion stop every animation and transition", () => {
   expect(css).toMatch(
     /:root\[data-motion="paused"\] :not\(\.marquee-track\),[\s\S]*?\{\s*animation: none !important;\s*transition: none !important;/,
