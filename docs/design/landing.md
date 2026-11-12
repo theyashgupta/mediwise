@@ -7,7 +7,7 @@ The landing page tells one story: a lab report becomes a plain-language explanat
 | # | Section | Layout | Motion |
 |---|---|---|---|
 | 1 | Hero | Text left, phone right. Callout band below. | Three colour blobs drift behind the content (24, 32 and 38 s loops). A marker trend line draws itself once above the callout band. |
-| 2 | Story (How it works) | Desktop: sticky phone left, tall steps right, the mirror of the hero. Phone: text above the screen in each step. | The phone screen crossfades to the step at the centre of the window. |
+| 2 | Story (How it works) | Six step rows. From 1024 px each row is two columns, text and a 300 px phone, with the text centred on the phone and the sides alternating (text left on odd rows). Below 1024 px each row stacks: number, title, body, then a 260 px phone. 96 px between rows on a desktop, 64 px on a phone. | Reveal on each row. |
 | 3 | Numbers | Full-width primary band, four large numbers. | The numbers count up once. |
 | 4 | Comparison | Two columns: a printed lab PDF and MediWise. Rows align through subgrid. | Reveal. |
 | 5 | Features index | Text list in up to three columns, items split by hairline rules. No cards, no icons. | Staggered reveal. |
@@ -36,21 +36,18 @@ The questions, settled, episode and Hindi screens left the page (orchestrator de
 
 - JavaScript moves nothing itself. `components/motion.tsx` sets data attributes and CSS animates transform and opacity (the trend line animates its dash offset).
 - Every reveal element is visible by default. The observer hides only an element that starts below the window, and shows it again when it scrolls in. Without JavaScript, with motion paused and with reduced motion, every element is visible.
-- The story uses one IntersectionObserver with a thin band at the centre of the window. It writes `data-step` on the story, and CSS shows the matching screen. There is no scroll or resize listener on the page.
-- The pinned layout applies only when the head script set `data-js`. Without JavaScript, each step shows its own screen.
+- There is no scroll or resize listener on the page, and no section pins.
 - The hero blobs pause when the hero leaves the window, when the tab is hidden, with the Pause motion button and with reduced motion. The hero phone, heading and paragraph never animate, because they hold the LCP element.
-- `will-change` is on the hero blobs only. The story section has `content-visibility: auto` with an intrinsic size of 5300 px on a phone and `550vh + 180px` on a desktop. Measured: 5040 to 5440 px on a phone (320 and 390 px, both languages), and 5116 to 5142 px at 1280x900 on a desktop.
+- `will-change` is on the hero blobs only. The story section has `content-visibility: auto` with an intrinsic size of 5200 px below 1024 px and 4550 px from 1024 px. Measured (MEDI-184): 4984 to 5384 px at 320 and 390 px, and 4528 to 4554 px at 1280 px, both languages.
 
-## The story break before MEDI-168
+## Why the story no longer pins (MEDI-184)
 
-Test: Playwright Chromium and WebKit, light and dark, with motion on, paused through the button, with OS reduced motion, and with the scroll-timeline rules deleted.
+MEDI-168 pinned the phone beside tall steps and switched its screen with the step at the centre of the window. The owner removed the pin on 2026-11-12 for two reasons:
 
-- The screen switch worked in all 16 combinations.
-- The layout broke in all of them. The steps were 172 to 298 px tall and the phone 611 px, so the phone was pinned for about 20% of the story and cut off for about 70% of it. With step 1 at the centre, the bottom of the phone was below the fold. With step 4 at the centre, the top was under the nav.
-- On windows under about 720 px tall, such as Safari with its toolbar on a laptop, the sticky offset put the top of the phone under the 56 px nav at all times.
-- With the timeline rules on, the screen could differ from the step at the centre.
+- Empty space on tall windows. At 2000x1300 in dark mode, the header was followed by about 500 px of nothing, then the pinned phone low on the left with no step text in view. The half-window spacers that kept the phone pinned grow with the window height.
+- The scroll feel. The owner does not like the pinned scroll behaviour of the section.
 
-After MEDI-168 the steps are 75% of the window tall, the phone height has a cap of the window height minus 8 rem, and the step column has half a window of space at each end, so the phone is already pinned when the first step reaches the centre and stays pinned until the last step leaves it. With each step at the centre, the phone is fully inside the window and below the nav, and it shows that step's screen, at 1280x900, 1440x760 and 1024x700, in Chromium and WebKit, with motion on, paused and reduced.
+Each step is now a plain row with its own screen. There is no `position: sticky`, no `data-step` switching and no step observer. The first screen loads at once and the other five load lazily. Every row uses the same reveal as the other sections.
 
 ## Measurements (2026-10-16)
 
@@ -68,9 +65,23 @@ The LCP element on a phone is the hero paragraph in both builds. It does not ani
 
 Bundle: the landing first load is 146,510 bytes gzipped, up 382 bytes from 146,128. The budget for this change was 4,000 bytes, and the hard limit in `scripts/bundle-size.mjs` is 150,000 bytes. `pnpm size` passes.
 
+## Measurements (MEDI-184, 2026-11-12)
+
+Lighthouse 13.6, mobile, simulated throttling, the static build served with gzip. Five runs each, before and after taken in turn, median shown. This set measured a lower LCP than the 2026-10-16 set on the same page, so compare before and after within one set only.
+
+| Metric | Before (main, 0fb0838) | After (MEDI-184) |
+|---|---|---|
+| LCP | 978 ms | 974 ms |
+| CLS | 0.000 | 0.000 |
+| TBT | 235 ms | 389 ms |
+
+TBT moved from 32 to 824 ms between runs of the same build, because other work ran on the same Mac. The page loads less JavaScript after the change.
+
+Bundle: the landing first load is 147,539 bytes gzipped, down 908 bytes from 148,447. The step observer and the story component left the client bundle.
+
 ## Browser checks
 
-- Story: Chromium and WebKit (Playwright), 1280x900, 1440x760 and 1024x700, light and dark, with motion on, paused and reduced: 36 of 36 runs show the right screen for each centred step, with the phone inside the window and below the nav. Google Chrome 155 at 1280x900: 6 of 6 steps. A 40 px scroll sweep through the story found no sample with the phone cut off, no blank phone and no two screens at once. At 1023 px the steps stack; from 1024 px the phone pins.
+- Story (MEDI-184, Playwright Chromium): at 1024, 1280, 1920 and 2560 px, light and dark, every row is 611 px tall (the phone height), the text centre sits on the phone centre, the phone alternates right, left, right, and the rows are 96 px apart. At 390 and 1023 px the rows stack, 64 px apart. No element in the section is sticky. A scroll and a nav jump to How it works reveal each row as it enters the window.
 - Reveals: no element is hidden at load inside the window. Every element is visible after it is centred, and nothing is hidden with motion paused, with reduced motion or without JavaScript. Chrome sends no observer entry for a section skipped by `content-visibility`, so after a pause and a jump to the bottom, story steps above the window keep their hidden state until they scroll back in, and then reveal.
 - The nav links to How it works, Pricing and FAQ land on their headings in both languages, with no drift after 3 s.
 - Comparison rows stay aligned at 1280, 1024, 768, 640, 639, 390 and 320 px in both languages.
@@ -78,8 +89,9 @@ Bundle: the landing first load is 146,510 bytes gzipped, up 382 bytes from 146,1
 - At 200% text size, every section this change restyled (hero, story, numbers, comparison, features, trust) fits at 1280, 390 and 320 px. The nav overflows from 390 px down, and the pricing cards and the FAQ overflow at 320 px, as they do on main (this change only adds a reveal attribute to pricing).
 - Playwright WebKit does not move keyboard focus to links with Tab (the macOS default), so the tab order was checked in Chromium. In WebKit, four PageDown presses from a hash link moved the page 860 px against 3120 px in Chromium; the screen still matched the centred step.
 - Real Safari was not automated (remote automation is off). Playwright WebKit stands in for it.
-- Story section height, used for `contain-intrinsic-size`: 5040 to 5440 px on a phone (320 and 390 px, both languages) and 5116 to 5142 px at 1280x900.
 
 ## Screenshots
 
-`docs/design/screenshots/medi-168-<section>-<width>-<theme>.png` for hero, story (step 4 at the centre), numbers, comparison, features and trust, at 1280 and 390 px, light and dark.
+`docs/design/screenshots/medi-168-<section>-<width>-<theme>.png` for hero, numbers, comparison, features and trust, at 1280 and 390 px, light and dark.
+
+`docs/design/screenshots/medi-184-how-it-works-<width>-<theme>.png` for the story rows at 1280, 1920, 2560 and 390 px, light and dark. `medi-184-full-page-1920-dark.png` is the full page at 1920 px in dark mode, and `medi-184-how-it-works-2000x1300-dark-viewport.png` is the window from the owner's report.

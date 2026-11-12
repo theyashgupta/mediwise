@@ -24,11 +24,13 @@ export function Screen({
   name,
   alt,
   priority = false,
+  loading = priority ? "eager" : "lazy",
   className,
 }: {
   name: ScreenName;
   alt: string;
   priority?: boolean;
+  loading?: "eager" | "lazy";
   className?: string;
 }) {
   return (
@@ -39,7 +41,7 @@ export function Screen({
         alt={alt}
         width={600}
         height={1298}
-        loading={priority ? "eager" : "lazy"}
+        loading={loading}
         fetchPriority={priority ? "high" : "auto"}
         decoding={priority ? undefined : "async"}
         className={cn("absolute inset-x-0 top-[5.5%] h-auto w-full", className)}
