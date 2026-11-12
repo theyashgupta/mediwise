@@ -40,3 +40,24 @@ services:
         value: "sandbox"
       - key: PAYMENTS_WEBHOOK_URL
         sync: false
+  - type: web
+    name: mediwise-cms
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./apps/cms/Dockerfile
+    dockerContext: .
+    autoDeploy: false
+    envVars:
+      - key: DATABASE_URI
+        sync: false
+      - key: PAYLOAD_SECRET
+        sync: false
+      - key: CMS_ADMIN_EMAIL
+        sync: false
+      - key: CMS_ADMIN_PASSWORD
+        sync: false
+      - key: GITHUB_DISPATCH_TOKEN
+        sync: false
+      - key: NEXT_PUBLIC_SERVER_URL
+        sync: false
