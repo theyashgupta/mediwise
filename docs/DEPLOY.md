@@ -1,12 +1,13 @@
 # Deploy
 
-Production costs zero until users arrive. It runs in three places:
+Production costs zero until users arrive. It runs in these places:
 
 | Part | Where | Source |
 |---|---|---|
 | Web (`apps/web`) | Cloudflare Pages project `mediwise`, `https://app.mediwise.theyashgupta.me` (alias `https://mediwise.pages.dev`), static Vite build that GitHub Actions uploads with `wrangler pages deploy` | `apps/web/public/_redirects`, `.github/workflows/deploy-web.yml` |
 | Landing page (`apps/landing`) | Cloudflare Pages project `mediwise-landing`, `https://mediwise.theyashgupta.me` (alias `https://mediwise-landing.pages.dev`), static Next.js export that GitHub Actions uploads with `wrangler pages deploy` | `apps/landing/next.config.ts`, `.github/workflows/deploy-landing.yml` |
 | API and job worker (`apps/api`) | Render free web service `mediwise-api` (`srv-db6atpg473hc73dqkuo0`), `https://mediwise-api-ij2v.onrender.com`, Docker, region Singapore | `apps/api/Dockerfile`, `render.yaml` |
+| CMS (`apps/cms`) | Render free web service `mediwise-cms`, Docker, region Singapore. See CMS (MEDI-192). | `apps/cms/Dockerfile`, `render.yaml` |
 | Postgres, Auth, Storage | Supabase project `mediwise-prod` (ref `adnvhcharmqykmlyrepq`, `ap-south-1` Mumbai) | `apps/api/src/db/migrations` |
 
 CI (`.github/workflows/check.yml`) runs `pnpm check` on every push and pull request. On a push to `main`, `deploy-web.yml` and `deploy-landing.yml` deploy the web and the landing page (see Deploy the web).
@@ -388,6 +389,77 @@ npx wrangler pages deploy apps/landing/out --project-name mediwise-landing --bra
 - The project `mediwise-landing` exists. Do not create it again. A deploy with `--branch` set to any name other than `main` is a preview.
 
 To check a build before you deploy it, serve `apps/landing/out` with a static server that compresses, such as `npx serve apps/landing/out`. Python's `http.server` does not compress, so Lighthouse scores it too low.
+
+## CMS (MEDI-192)
+
+Payload 3 in `apps/cms` holds the text that the maintainer edits. That is terms, privacy, refunds, contact, the security page and the FAQ. The landing page and the web app read it at build time through one export endpoint. They never read it at run time.
+
+| Part | Value |
+|---|---|
+| Service | Render free web service `mediwise-cms`, Docker, region Singapore, `autoDeploy: false` until the first manual deploy |
+| Admin | `<CMS URL>/admin`, one admin user |
+| Export | `GET <CMS URL>/api/content/export?locale=en` or `?locale=hi` |
+| Database | Schema `cms` in the Supabase database. Payload migrations in `apps/cms/src/migrations` create the tables. |
+
+### Environment variables (Render service `mediwise-cms`)
+
+`render.yaml` declares every variable with `sync: false`. Keep a local copy in `apps/cms/.env.prod` in the main checkout. Git ignores it.
+
+| Variable | Required | Value in production |
+|---|---|---|
+| `DATABASE_URI` | yes | Supabase session pooler URI (port 5432) for a role that owns schema `cms`. The CMS runs its migrations at boot with this URI. |
+| `PAYLOAD_SECRET` | yes | Random string of 32 or more characters, from `openssl rand -hex 32`. Server only. A new value signs out the admin. |
+| `CMS_ADMIN_EMAIL` | yes | Email of the one admin user. The seed reads it. |
+| `CMS_ADMIN_PASSWORD` | yes | Password of the one admin user. The seed uses it only when it creates the user. |
+| `GITHUB_DISPATCH_TOKEN` | no | Fine-grained GitHub token for `theyashgupta/mediwise` only, with the Contents permission (read and write). Empty means that a publish sends no dispatch. |
+| `NEXT_PUBLIC_SERVER_URL` | yes | Public URL of the CMS, with no trailing slash. Next.js writes it into the build, so deploy again after you change it. |
+
+Render sets `PORT`. The Dockerfile sets `NODE_ENV=production`, `HOSTNAME=0.0.0.0`, `PORT=3000`, `NO_COLOR=1` and `NEXT_TELEMETRY_DISABLED=1`.
+
+### Export
+
+`GET /api/content/export?locale=en|hi` returns one JSON object. It needs no sign-in. It sends `Cache-Control: public, max-age=60`. Any other locale returns 400.
+
+- `pages`: one entry per published page, keyed by slug (`terms`, `privacy`, `refunds`, `contact`, `security`), with `title`, `description`, `html` and `updatedAt`.
+- `faq`: the published FAQ items in `order`, each with `key`, `question` and `html`.
+- When a Hindi field is empty, the export uses the English text.
+- The privacy HTML has `<span id="washington"></span>` in the "United States" heading. The web app links to `#washington`.
+- FAQ HTML keeps these tokens. The landing build replaces them with the values from the code: `{maxFiles}`, `{fileMb}`, `{totalMb}`, `{markers}`, `{maxProfiles}`, `{disclaimer}`.
+- `title`, `description` and `question` are plain text and the export does not escape them. Escape them before they go into HTML. Only the `html` fields are HTML.
+
+### Publish hook
+
+The CMS sends one `repository_dispatch` with event type `cms-published` to `theyashgupta/mediwise`. It sends it after a publish, an unpublish, or the delete of a published page or FAQ item. A draft save sends nothing. The CMS waits 5 s after the last change, so a burst of saves sends one dispatch. The server log shows `Sent the cms-published dispatch` or `The cms-published dispatch failed (HTTP <status>)`. The workflows that listen to the event come in MEDI-193 (landing) and MEDI-194 (web).
+
+### First deploy (orchestrator)
+
+1. Run this query in the SQL editor of `mediwise-prod` as the role of `DATABASE_URI`: `select has_database_privilege(current_user, current_database(), 'CREATE');`
+2. If the result is `false`, run this as `postgres`: `create schema if not exists cms authorization <role>;`
+3. Make the GitHub token (fine-grained, repository `theyashgupta/mediwise` only, Contents read and write).
+4. From a local checkout of `main`, apply the migrations: `(set -a; . apps/cms/.env.prod; set +a; pnpm --filter @mediwise/cms payload migrate)`.
+5. Seed from the same checkout before the first deploy: `(set -a; . apps/cms/.env.prod; set +a; pnpm --filter @mediwise/cms seed)`. The seed creates the admin user, the five pages and the seven FAQ items when they are missing. It never changes a document that exists. Seed first, because the admin lets anyone make the first user while no user exists.
+6. Create the service from the Blueprint, or sync `render.yaml`. Fill each value in the table above, then start a manual deploy.
+7. Sign in at `<CMS URL>/admin`. Open `<CMS URL>/api/content/export?locale=hi` and check that it has 5 pages and 7 FAQ items.
+8. Set `autoDeploy` to true on the service.
+
+### Change the CMS schema
+
+1. Change a collection in `apps/cms/src/collections`.
+2. Run `pnpm --filter @mediwise/cms payload migrate:create <name>`.
+3. In the new migration file, import `MigrateUpArgs` and `MigrateDownArgs` with `type`, and keep only `{ db }` in each function. The generated file fails the typecheck without this change.
+4. Run `pnpm --filter @mediwise/cms payload migrate` on `mediwise-dev`, then `pnpm --filter @mediwise/cms generate`.
+5. Production applies the migration at the next boot.
+
+### Limits
+
+- Payload stays on 3.91. Version 3.92 and later need Node 24.22.1, and the repository runs Node 24.18.1.
+- The CMS has no email adapter, so "Forgot password" sends no email. To set a new password, change `CMS_ADMIN_PASSWORD` in `apps/cms/.env.prod`. Then run `delete from cms.users where email = '<CMS_ADMIN_EMAIL>';` in the SQL editor and run the seed again. The seed makes the admin user again. Pages and FAQ items stay.
+- After 5 failed sign-ins, the admin account locks for 10 minutes.
+- `GITHUB_DISPATCH_TOKEN` has Contents write access, so it can also push. Keep branch protection on `main`.
+- Use a custom URL for each link in the editor. The export writes an internal link as `#`.
+- Render free stops the service after 15 minutes with no request. The first request after that can take up to a minute.
+- The 5 s wait is in memory. If the service stops inside it, no dispatch goes. Publish again.
+- `next build` peaks at about 1.2 GB of memory. It needs no database and no secret. The server uses about 100 MB after a sign-in and an export. If the Render build stops with exit code 137, the build ran out of memory.
 
 ## Custom domains
 
