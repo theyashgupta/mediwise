@@ -15,18 +15,20 @@ self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(shellCache).then((cache) => cache.addAll(build.files)));
 });
 
-/** Deletes the shell of every earlier build, so no cache outlives a deploy. */
+/**
+ * Deletes the shell of every build except this one and the one before it.
+ *
+ * @remarks
+ * The new worker takes over a tab that still runs the build before, so that tab reads its route files from the kept shell. Cache Storage lists names in creation order, so the last earlier name is the build before.
+ */
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((names) =>
-        Promise.all(
-          names
-            .filter((name) => name.startsWith(shellPrefix) && name !== shellCache)
-            .map((name) => caches.delete(name)),
-        ),
-      )
+      .then((names) => {
+        const earlier = names.filter((name) => name.startsWith(shellPrefix) && name !== shellCache);
+        return Promise.all(earlier.slice(0, -1).map((name) => caches.delete(name)));
+      })
       .then(() => self.clients.claim()),
   );
 });
@@ -42,7 +44,7 @@ self.addEventListener("message", (event) => {
 });
 
 /**
- * Answers the share target POST and the shell files, and lets the browser handle every other request.
+ * Answers the share target POST and the files of each kept shell, and lets the browser handle every other request.
  *
  * @remarks
  * Only files of the build list go into the shell cache. API responses never enter Cache Storage, so health data from the API never stays in the browser cache.
@@ -59,6 +61,8 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(fetch(event.request).catch(() => fromShell("/")));
   } else if (build.files.includes(url.pathname)) {
     event.respondWith(fromShell(url.pathname).then((kept) => kept ?? fetch(event.request)));
+  } else if (url.pathname.startsWith("/assets/")) {
+    event.respondWith(caches.match(url.pathname).then((kept) => kept ?? fetch(event.request)));
   }
 });
 

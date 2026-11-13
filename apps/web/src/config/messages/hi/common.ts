@@ -3,6 +3,7 @@ import { review } from "../review";
 
 export const common: Messages["common"] = {
   retry: "फिर से कोशिश करें",
+  newVersion: review("MediWise का नया संस्करण आ गया है।"),
   loading: "लोड हो रहा है",
   disclaimer: review("MediWise जानकारी के लिए है, निदान के लिए नहीं। यह डॉक्टर की जगह नहीं लेता।"),
   status: {
