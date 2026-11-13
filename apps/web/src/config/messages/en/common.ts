@@ -1,5 +1,6 @@
 export const common = {
   retry: "Try again",
+  newVersion: "MediWise has a new version.",
   loading: "Loading",
   disclaimer: "MediWise is for information, not diagnosis. It does not replace a doctor.",
   status: { optimal: "Optimal", watch: "Watch", risk: "Risk", unknown: "Unknown" },

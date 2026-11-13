@@ -319,7 +319,7 @@ To see Cache Storage, connect the phone with USB and open `chrome://inspect` on 
 
 ## Install and offline on a phone
 
-`sw.js` keeps the app shell of one build in the cache `mediwise-shell-<version>`: `/` and the content-hashed files in `/assets`. It never keeps an API response. The build writes the version and the file list at the top of `sw.js`, so each deploy that changes a file gives a new worker and a new cache. The new worker waits until the user selects "Update". Then it deletes the caches of earlier builds.
+`sw.js` keeps the app shell of one build in the cache `mediwise-shell-<version>`: `/` and the content-hashed files in `/assets`. It never keeps an API response. The build writes the version and the file list at the top of `sw.js`, so each deploy that changes a file gives a new worker and a new cache. The new worker waits until the user selects "Update". Then it deletes the caches of earlier builds, except the cache of the build before it.
 
 Do this test on an Android phone after each deploy that changes `sw.js`, the manifest or `index.html`:
 
@@ -353,6 +353,18 @@ On an iPhone, open the app in Safari on two different days. On the second visit,
 - A newer push cancels a deploy that is still running.
 - The job summary shows the production URL and the URL of this deploy.
 - The last step loads `https://app.mediwise.theyashgupta.me` and fails when the page has no `MediWise` title.
+
+### A tab that runs an earlier build
+
+Each deploy changes the names of the files in `/assets`. Cloudflare Pages serves only the latest deploy, so a file of an earlier build is not on the server. `_redirects` then sends `index.html`, and the browser cannot load it as code. A tab that was open before the deploy asks for these old files when the user opens a page that the tab has not loaded yet.
+
+The web recovers in this order:
+
+1. The worker reads the old file from the shell of the build before, if the browser still keeps it. The tab continues on its build.
+2. Vite sends `vite:preloadError`. `src/common/utils/reload-new-build.ts` reloads the page one time. The reload gets the new `index.html` and the new files.
+3. The reload is one time for each build in each tab. When the same build fails again, for example during a Cloudflare outage, the page shows "MediWise has a new version." with an Update button that reloads the page. The page does not reload in a loop. Other page errors keep the TanStack Router error screen.
+
+To test it, build the web two times with one changed string, serve the first `dist` with the `/* /index.html 200` fallback, open `/login`, put the second `dist` in its place, then sign in. Make sure that the page reloads one time and shows Home.
 
 ### Manual fallback
 

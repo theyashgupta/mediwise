@@ -39,6 +39,12 @@ function loadWorker({ build, online = true }: { build?: typeof shell; online?: b
         match: async (key: string) => cache.get(key)?.clone(),
       };
     },
+    match: async (key: string) => {
+      for (const cache of stored.values()) {
+        const kept = cache.get(key);
+        if (kept) return kept.clone();
+      }
+    },
     keys: async () => [...stored.keys()],
     delete: async (name: string) => stored.delete(name),
   };
@@ -127,7 +133,6 @@ test("install keeps only the build files, and API calls never enter Cache Storag
     new Request(`${origin}/api/reports`),
     new Request(`${origin}/api/reports`, { method: "POST" }),
     new Request(`${origin}/share-target`),
-    new Request(`${origin}/assets/unknown-999.js`),
   ];
 
   expect(requests.map((request) => worker.request(request))).toEqual(requests.map(() => undefined));
@@ -156,13 +161,35 @@ test("a page loads from the network online and from the kept shell offline", asy
   expect(await offline?.text()).toBe(`network ${origin}/`);
 });
 
-test("activate deletes the shell of every earlier build and keeps the shared files", async () => {
+test("activate keeps this shell, the shell before it and the shared files", async () => {
   const worker = loadWorker({ build: shell });
   worker.stored.set("mediwise-share", new Map());
+  worker.stored.set("mediwise-shell-v1b", new Map());
   await worker.lifecycle("install");
   await worker.lifecycle("activate");
 
-  expect([...worker.stored.keys()].sort()).toEqual(["mediwise-share", "mediwise-shell-v2"]);
+  expect([...worker.stored.keys()].sort()).toEqual([
+    "mediwise-share",
+    "mediwise-shell-v1b",
+    "mediwise-shell-v2",
+  ]);
+});
+
+test("a tab of the build before gets its route file from the kept shell after an update", async () => {
+  const worker = loadWorker({ build: shell });
+  const oldRoute = new Response("route of v1");
+  worker.stored.get("mediwise-shell-v1")?.set("/assets/dashboard-old111.js", oldRoute);
+  await worker.lifecycle("install");
+  await worker.lifecycle("activate");
+  worker.setOnline(false);
+
+  const kept = await worker.request(new Request(`${origin}/assets/dashboard-old111.js`));
+  expect(await kept?.text()).toBe("route of v1");
+
+  worker.setOnline(true);
+  const missing = await worker.request(new Request(`${origin}/assets/unknown-999.js`));
+  expect(await missing?.text()).toBe(`network ${origin}/assets/unknown-999.js`);
+  expect(cachedKeys(worker.stored)).not.toContain("/assets/unknown-999.js");
 });
 
 test("a new build waits until the page sends skip-waiting", async () => {
