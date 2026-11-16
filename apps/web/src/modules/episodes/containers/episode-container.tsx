@@ -8,6 +8,7 @@ import { LoadingState } from "@/common/components/loading-state";
 import { PageHeader } from "@/common/components/page-header";
 import { useT } from "@/common/hooks/use-locale";
 import { Button } from "@/common/components/controls/button";
+import { useEntityProfile } from "@/modules/profiles";
 import { EpisodeSettings } from "../components/episode-settings";
 import { EpisodeView } from "../components/episode-view";
 import { formatEpisodeDate } from "../config/episodes";
@@ -34,6 +35,7 @@ export function EpisodeContainer() {
   const text = t.episodes;
   const episode = useEpisode(episodeId);
   const { update, remove } = useEpisodeMutations();
+  useEntityProfile(episode.data?.profileId);
   useCrumbLabel(`/episodes/${episodeId}`, episode.data?.name);
 
   if (episode.isPending) return <LoadingState variant="page" />;

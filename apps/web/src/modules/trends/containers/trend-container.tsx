@@ -1,4 +1,5 @@
-import { getRouteApi, Link } from "@tanstack/react-router";
+import { getRouteApi, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { ArrowLeft, Lightbulb, TrendingUp } from "lucide-react";
 import { useCrumbLabel } from "@/common/hooks/use-crumb-label";
 import { EmptyState } from "@/common/components/empty-state";
@@ -37,8 +38,21 @@ export function TrendContainer() {
   const trend = useTrend(profile?.id, markerKey);
   useCrumbLabel(`/trends/${markerKey}`, trend.data?.name);
   const t = useT();
+  const navigate = useNavigate();
+  const [shownFor, setShownFor] = useState(profile?.id);
+  const [switched, setSwitched] = useState(false);
+  if (profile && profile.id !== shownFor) {
+    setShownFor(profile.id);
+    setSwitched(shownFor !== undefined);
+  }
+  if (switched && trend.data) setSwitched(false);
+  const switchedAway = switched && trend.data === null;
 
-  if (!profile || trend.isPending) return <LoadingState variant="page" />;
+  useEffect(() => {
+    if (switchedAway) void navigate({ to: "/trends", replace: true });
+  }, [switchedAway, navigate]);
+
+  if (!profile || trend.isPending || switchedAway) return <LoadingState variant="page" />;
   if (trend.isError) {
     return <ErrorState message={t.trends.detail.loadError} onRetry={() => trend.refetch()} />;
   }

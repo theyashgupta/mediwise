@@ -3,18 +3,19 @@ import { cleanup, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { messages } from "@/config/messages";
-import { fakeNetwork, me, renderApp, resetApp, selfProfile } from "@/test/render-app";
+import {
+  fakeNetwork,
+  me,
+  memberProfile,
+  renderApp,
+  resetApp,
+  selfProfile,
+  switchProfile,
+  switcherText,
+} from "@/test/render-app";
 
 /** Each test renders the whole app, and the first one loads its route, which can pass 5 s on a loaded 8 GB Mac. */
 vi.setConfig({ testTimeout: 15_000 });
-
-const member = {
-  ...selfProfile,
-  id: "00000000-0000-4000-8000-0000000000b2",
-  name: "Ravi Rao",
-  relation: "parent" as const,
-  isSelf: false,
-};
 
 const report = {
   id: "00000000-0000-4000-8000-0000000000c1",
@@ -72,10 +73,10 @@ const meOn = {
 function network(assistantMe: object) {
   return fakeNetwork({
     "GET /me": () => assistantMe,
-    "GET /profiles": () => [selfProfile, member],
+    "GET /profiles": () => [selfProfile, memberProfile],
     [`GET /reports/${report.id}`]: () => report,
     "GET /reports": () => ({ items: [], nextCursor: null }),
-    [`GET /profiles/${member.id}/questions`]: () => [],
+    [`GET /profiles/${memberProfile.id}/questions`]: () => [],
   });
 }
 
@@ -119,7 +120,7 @@ describe.each(["en", "hi"] as const)("the report header in %s", (locale) => {
   });
 });
 
-test("asking about a family member's report switches to that profile and opens its chat", async () => {
+test("asking about a family family member's report switches to that profile and opens its chat", async () => {
   const requests = network(meOn);
   await renderApp(`/reports/${report.id}`);
 
@@ -135,9 +136,29 @@ test("asking about a family member's report switches to that profile and opens i
     ),
   ).toBeTruthy();
   await waitFor(() =>
-    expect(requests.some(({ path }) => path === `/profiles/${member.id}/questions`)).toBe(true),
+    expect(requests.some(({ path }) => path === `/profiles/${memberProfile.id}/questions`)).toBe(
+      true,
+    ),
   );
   expect(requests.some(({ path }) => path === `/profiles/${selfProfile.id}/questions`)).toBe(false);
+});
+
+test("opening a family family member's report makes that memberProfile the active profile", async () => {
+  network(me);
+  await renderApp(`/reports/${report.id}`);
+
+  await waitFor(() => expect(switcherText()).toContain(memberProfile.name), { timeout: 10_000 });
+});
+
+test("switching profile on a family family member's report opens the new profile's reports", async () => {
+  network(me);
+  await renderApp(`/reports/${report.id}`);
+  await waitFor(() => expect(switcherText()).toContain(memberProfile.name), { timeout: 10_000 });
+
+  await switchProfile(/Asha Rao/);
+
+  await waitFor(() => expect(window.location.pathname).toBe("/reports"));
+  expect(switcherText()).toContain(selfProfile.name);
 });
 
 test("a fold the reader opens stays open the next time a report renders", async () => {
@@ -176,7 +197,7 @@ test("a marker filter keeps each matching group mounted and opens it, so no grou
   });
   fakeNetwork({
     "GET /me": () => me,
-    "GET /profiles": () => [selfProfile, member],
+    "GET /profiles": () => [selfProfile, memberProfile],
     [`GET /reports/${report.id}`]: () => ({
       ...report,
       categories: [

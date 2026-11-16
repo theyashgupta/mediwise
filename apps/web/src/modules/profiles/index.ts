@@ -4,5 +4,6 @@ export { ProfileSwitcherContainer } from "./containers/profile-switcher-containe
 export { ProfilesContainer } from "./containers/profiles-container";
 export { SelfProfileContainer } from "./containers/self-profile-container";
 export { useActiveProfile } from "./hooks/use-active-profile";
+export { useEntityProfile } from "./hooks/use-entity-profile";
 export { useProfiles } from "./hooks/use-profiles";
 export type { Profile } from "./types";
