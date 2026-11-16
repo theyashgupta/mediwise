@@ -112,6 +112,8 @@ Screenshots on 2026-10-15, web dev server on `mediwise-dev`, the demo account. A
 
 **Large text and the crumb (MEDI-177).** The Trends list switches to its wide columns by the width of the list, not the width of the screen, so 200 percent text gets the phone layout. Header action rows wrap. A marker name stays whole in the crumb at 390 px, and the report title truncates. Screenshots on 2026-10-16, web dev server on `mediwise-dev`, the demo account: [marker page at 390 px](design/screenshots/medi-177-marker-crumb-390-light.png), [Trends at 390 px with Improving and Risk](design/screenshots/medi-177-trends-improving-risk-390-light.png).
 
+**Profile switch is a workspace switch (MEDI-199).** A report, marker or episode page makes its own profile the active profile, so the switcher always names the profile of the page. A switch on one of these pages opens the reports of the new profile, or home when it has no reports. A list page stays and shows the new profile. Screenshots on 2026-11-16, web dev server on `mediwise-dev`, the demo account, on a marker page of Meera Mehta: [switcher open at 390 px](design/screenshots/medi-199-switch-marker-390-light.png), [after the switch at 1280 px](design/screenshots/medi-199-switch-landed-1280-light.png), dark versions beside them.
+
 ## Brand
 
 The mark is a drop with a reading line: a blood sample and the value read from it. The maintainer chose it on 2026-10-13 from three candidates, see the [renders](design/logo/candidates/).
