@@ -582,7 +582,7 @@ export async function getMarkerDetail(
       collectedAt: report.collectedAt,
       createdAt: report.createdAt,
     },
-    profile: { sex: profile.sex, ancestry: profile.ancestry },
+    profile: { id: profile.id, sex: profile.sex, ancestry: profile.ancestry },
     marker,
     watchRange: range ? toRange(range.watch[0], range.watch[1]) : null,
     calibratedSource: range

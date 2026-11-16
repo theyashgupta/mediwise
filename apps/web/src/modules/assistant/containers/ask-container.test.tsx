@@ -313,10 +313,11 @@ test("a suggested question from the address fills the input and sends nothing", 
   expect(requests.some(({ method }) => method === "POST")).toBe(false);
 });
 
-test("switching profile drops the open report and shows the other profile's chat", async () => {
+test("switching profile drops the open report and the draft, and shows the other profile's chat", async () => {
   const requests = network([answered], { "GET /profiles": () => [selfProfile, member] });
   await renderApp(`/ask?report=${reportId}`);
   expect(await screen.findByText(answered.question)).toBeTruthy();
+  await userEvent.type(screen.getByRole("textbox"), "Is my TSH fine?");
 
   const [trigger] = screen.getAllByRole("button", { name: /Asha Rao/ });
   await userEvent.click(trigger!);
@@ -327,6 +328,7 @@ test("switching profile drops the open report and shows the other profile's chat
   ).toBeTruthy();
   await waitFor(() => expect(window.location.search).toBe(""));
   expect(screen.queryByText(answered.question)).toBeNull();
+  expect((screen.getByRole("textbox") as HTMLTextAreaElement).value).toBe("");
   expect(requests.some(({ path }) => path === `/profiles/${member.id}/questions`)).toBe(true);
 });
 

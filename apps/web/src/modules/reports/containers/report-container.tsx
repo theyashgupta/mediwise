@@ -23,7 +23,7 @@ import type { Status } from "@/common/utils/status";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { ReportEpisodeContainer } from "@/modules/episodes";
 import { useMe } from "@/modules/me";
-import { useActiveProfile } from "@/modules/profiles";
+import { useEntityProfile } from "@/modules/profiles";
 import { DeleteReportDialog } from "../components/delete-report-dialog";
 import { DoctorQuestions } from "../components/doctor-questions";
 import { FindingList } from "../components/finding-list";
@@ -83,8 +83,7 @@ export function ReportContainer() {
   const links = useReportLinks();
   const siblings = useReports(report.data?.profileId);
   const assistantOn = useMe().data?.assistant.enabled ?? false;
-  const { setActiveProfileId } = useActiveProfile();
-  const profileId = report.data?.profileId;
+  useEntityProfile(report.data?.profileId);
   const translation = useReportTranslation(reportId, report.data?.translation);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const sections = useOpenSections();
@@ -333,12 +332,7 @@ export function ReportContainer() {
             )}
             {status === "done" && assistantOn && (
               <GlassButton asChild className="h-auto min-h-9 max-w-full py-1.5 whitespace-normal">
-                <Link
-                  to="/ask"
-                  search={{ report: reportId }}
-                  data-testid="report-ask-link"
-                  onClick={() => profileId && setActiveProfileId(profileId)}
-                >
+                <Link to="/ask" search={{ report: reportId }} data-testid="report-ask-link">
                   <MessagesSquare aria-hidden />
                   {t.assistant.askReport}
                 </Link>

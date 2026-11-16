@@ -8,6 +8,7 @@ import { LoadingState } from "@/common/components/loading-state";
 import { Section } from "@/common/components/section";
 import { SourceList } from "@/common/components/source-list";
 import { Button } from "@/common/components/controls/button";
+import { useEntityProfile } from "@/modules/profiles";
 import { FollowUpList, formatReportDate } from "@/modules/reports";
 import { MarkerHeader } from "../components/marker-header";
 import { MarkerKnowledge } from "../components/marker-knowledge";
@@ -23,6 +24,7 @@ export function MarkerContainer() {
   const { reportId, markerKey } = route.useParams();
   const query = useMarker(reportId, markerKey);
   const t = useT();
+  useEntityProfile(query.data?.profile.id);
   useCrumbLabel(`/reports/${reportId}`, query.data?.report.title);
   useCrumbLabel(
     `/reports/${reportId}/markers/${markerKey}`,

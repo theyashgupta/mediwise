@@ -1,5 +1,6 @@
 import { RouterProvider } from "@tanstack/react-router";
-import { act, cleanup, configure, render } from "@testing-library/react";
+import { act, cleanup, configure, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import type { InferResponseType } from "hono/client";
 import type { ReactNode } from "react";
 import { toast } from "sonner";
@@ -33,6 +34,14 @@ export const selfProfile: InferResponseType<typeof api.profiles.$get, 200>[numbe
   guardianConfirmedAt: null,
   reportCount: 3,
   valueCount: 72,
+};
+
+export const memberProfile: typeof selfProfile = {
+  ...selfProfile,
+  id: "00000000-0000-4000-8000-0000000000b2",
+  name: "Ravi Rao",
+  relation: "parent",
+  isSelf: false,
 };
 
 export const me: InferResponseType<typeof api.me.$get, 200> = {
@@ -105,6 +114,27 @@ export function fakeNetwork(handlers: Record<string, Handler>) {
     return reply instanceof Response ? reply : Response.json(reply);
   });
   return requests;
+}
+
+/** Serves the user, the self and member profiles and an empty reports list, plus `handlers`. */
+export function familyNetwork(handlers: Record<string, Handler> = {}) {
+  return fakeNetwork({
+    "GET /me": () => me,
+    "GET /profiles": () => [selfProfile, memberProfile],
+    "GET /reports": () => ({ items: [], nextCursor: null }),
+    ...handlers,
+  });
+}
+
+/** Reads the name and relation that the sidebar profile switcher shows. */
+export function switcherText() {
+  return screen.getByTestId("profile-switcher-sidebar").textContent;
+}
+
+/** Picks a profile in the sidebar switcher, as a user does. */
+export async function switchProfile(name: RegExp) {
+  await userEvent.click(screen.getByTestId("profile-switcher-sidebar"));
+  await userEvent.click(await screen.findByRole("menuitemradio", { name }));
 }
 
 /**
