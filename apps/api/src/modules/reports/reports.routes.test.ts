@@ -923,7 +923,7 @@ test("a report from abroad shows the printed unit beside the canonical one, HbA1
   );
 });
 
-test("a marker page returns the row, its South Asian watch band and source, history, copy, follow-ups and neighbours", async () => {
+test("a marker page returns its profile id, the row, its South Asian watch band and source, history, copy, follow-ups and neighbours", async () => {
   const { body } = await create([pdf]);
   const report = store.reports.find((r) => r.id === body.id);
   if (report) report.status = "done";
@@ -976,7 +976,7 @@ test("a marker page returns the row, its South Asian watch band and source, hist
   const res = await call("GET", `/reports/${body.id}/markers/ldl_cholesterol`);
 
   expect(await res.json()).toMatchObject({
-    profile: { ancestry: "south_asian", sex: "male" },
+    profile: { id: aliceProfile, ancestry: "south_asian", sex: "male" },
     marker: {
       markerKey: "ldl_cholesterol",
       value: 140,
