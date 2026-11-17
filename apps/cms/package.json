@@ -19,7 +19,7 @@
     "@payloadcms/next": "3.91.0",
     "@payloadcms/richtext-lexical": "3.91.0",
     "@payloadcms/ui": "3.91.0",
-    "graphql": "16.15.0",
+    "graphql": "17.1.0",
     "next": "16.4.4",
     "payload": "3.91.0",
     "react": "19.3.1",
