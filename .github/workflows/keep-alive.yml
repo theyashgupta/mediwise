@@ -1,0 +1,62 @@
+name: Keep-alive
+
+# The Supabase free plan pauses a project after about a week with no database request, and
+# GitHub disables a scheduled workflow after 60 days with no repository activity. This job
+# sends a real query to each project and to both Render services, then re-enables the
+# scheduled workflows. See docs/DEPLOY.md, "Keep the free projects awake".
+on:
+  schedule:
+    - cron: "17 5 * * *"
+    - cron: "47 17 * * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # The anon role has no grant on any public table, so PostgREST answers 401 for every
+      # table. The Storage bucket list runs a select on storage.buckets as anon and answers
+      # 200 with an empty list.
+      - name: Ping Supabase, the CMS and the API
+        env:
+          PROD_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          PROD_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          DEV_URL: ${{ secrets.DEV_SUPABASE_URL }}
+          DEV_KEY: ${{ secrets.DEV_SUPABASE_ANON_KEY }}
+        run: |
+          failed=0
+          ping() {
+            local name=$1 must=$2 max=$3 url=$4 key=${5:-} code
+            local args=(--silent --output /dev/null --write-out '%{http_code}' --fail --retry 3 --max-time "$max")
+            if [ -n "$key" ]; then args+=(--header "apikey: $key" --header "Authorization: Bearer $key"); fi
+            code=$(curl "${args[@]}" "$url") || true
+            if [ "$code" = 200 ]; then
+              echo "- $name: 200" >> "$GITHUB_STEP_SUMMARY"
+            elif [ "$must" = yes ]; then
+              echo "::error::$name answered ${code:-no response}"
+              echo "- $name: FAILED (${code:-no response})" >> "$GITHUB_STEP_SUMMARY"
+              failed=1
+            else
+              echo "::warning::$name answered ${code:-no response}"
+              echo "- $name: warning (${code:-no response})" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          }
+          ping "mediwise-prod" yes 30 "$PROD_URL/storage/v1/bucket" "$PROD_KEY"
+          ping "mediwise-dev" yes 30 "$DEV_URL/storage/v1/bucket" "$DEV_KEY"
+          ping "CMS export" no 90 "https://cms.mediwise.theyashgupta.me/api/content/export?locale=en"
+          ping "API health" no 90 "https://mediwise-api-ij2v.onrender.com/health"
+          exit "$failed"
+
+      # Enabling a workflow resets its 60-day inactivity timer, so no dummy commit is needed.
+      - name: Re-enable the scheduled workflows
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh workflow enable keep-alive.yml
+          gh workflow enable supply-chain-scan.yml
