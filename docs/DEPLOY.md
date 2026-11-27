@@ -796,9 +796,11 @@ Alerts: the worker checks two alerts every 15 minutes: spend at 80% of the month
 
 ## Payments (Cashfree)
 
-Users buy report credits through Cashfree Payment Gateway. The packs and prices are in `apps/api/src/modules/payments/payments.config.ts`. The amount comes from that file, never from the web.
+Users buy report credits through Cashfree Payment Gateway. The packs and prices are in `paymentPacks` in `packages/shared/src/index.ts`. The API reads them through `apps/api/src/modules/payments/payments.config.ts`, and the web app and the landing page read the same list. The API takes the amount from that list, never from the web.
 
-The policy pages `/terms`, `/privacy`, `/refunds` and `/contact` are public. Cashfree checks them before it approves the account. The legal details are in the `contact` object in `apps/web/src/modules/payments/config/policies.ts`: brand, company (Codegenix), proprietor, email and phone. Cashfree needs only the email, the phone and the registered business name, so the pages show no postal address and no GSTIN. Each of the four pages shows all of these values in its Contact section. The footers of the app, the policy pages and the landing page, and the auth emails in `supabase/templates`, show the line "MediWise is a brand of Codegenix." To change a value, edit the `contact` object and set `policyUpdated` to the date of the change.
+The policy pages `/terms`, `/privacy`, `/refunds` and `/contact` are public. Cashfree checks them before it approves the account. The text of the four pages comes from the CMS (see Web legal pages (MEDI-194)). The web build writes it to `apps/web/content/legal.en.json`. To change the text, edit the page in the CMS and publish it. The `contact` object in `packages/shared/src/index.ts` holds brand, company (Codegenix), proprietor, email and phone for the footers, the landing page and the app. It does not change the policy pages. When you change a value, change it in the CMS and in the `contact` object. Each of the four pages shows the business name, the proprietor, the email and the phone. No page shows a postal address or a GSTIN. The footers of the app, the policy pages and the landing page, and the auth emails in `supabase/templates`, show the line "MediWise is a brand of Codegenix."
+
+The web CSP in `apps/web/public/_headers` names the Cashfree hosts. `form-action` must name `https://sandbox.cashfree.com` and `https://api.cashfree.com`, because the checkout sends a form to one of them. Without them the checkout opens empty.
 
 ### Before you merge MEDI-33
 
@@ -806,10 +808,10 @@ Apply migrations `0013_payment_orders` and `0014_one_purchase_per_order` to `med
 
 ### Payments go-live checklist
 
-Do the steps in this order. Do not set a flag to `true` before step 5 is complete.
+Do the steps in this order. Do not set a flag to `true` before step 6 is complete.
 
-1. Policy pages. Open `/terms`, `/privacy`, `/refunds` and `/contact`. Make sure that each page shows the legal name of the proprietor, the email, the phone in the +91 form and the postal address. Make sure that no square brackets show.
-2. Prices. Set the real packs in `apps/api/src/modules/payments/payments.config.ts`. The amount is in paise. The current packs are placeholders: 1 credit 4900, 5 credits 19900, 20 credits 59900.
+1. Policy pages. Open `/terms`, `/privacy`, `/refunds` and `/contact` on `https://app.mediwise.theyashgupta.me`. Make sure that the contact page shows the legal name of the proprietor, the email and the phone in the +91 form. Make sure that no square brackets show. No page shows a postal address. If Cashfree asks for one, add it to the contact page in the CMS and publish it.
+2. Prices. The packs are 1 credit for 4900 paise, 5 credits for 19900 and 20 credits for 59900. The landing page and the credits page show ₹49, ₹199 and ₹599 from the same list. To change a price, edit `paymentPacks` in `packages/shared/src/index.ts` and deploy the API, the web app and the landing page.
 3. Production keys. In the Cashfree production dashboard, go to Developers, API Keys. On the Render service, set these variables:
    - `CASHFREE_APP_ID`: the production app id.
    - `CASHFREE_SECRET_KEY`: the production secret key.
@@ -822,10 +824,11 @@ Do the steps in this order. Do not set a flag to `true` before step 5 is complet
    4. Save.
 
    Without this step, a refund does not remove credits. `PAYMENTS_WEBHOOK_URL` sends payment events only.
-5. Database. Make sure that `0013` and `0014` are on `mediwise-prod` (see Before you merge MEDI-33).
-6. API flag. On the Render service, set `PAYMENTS_ENABLED=true`. Restart the service.
-7. Web flag. In GitHub, Settings, Secrets and variables, Actions, Variables, set `VITE_PAYMENTS_ENABLED` to `true` and `VITE_CASHFREE_MODE` to `production`. Run the deploy again: Actions, `deploy-web`, Run workflow.
-8. Check. Sign in on `https://app.mediwise.theyashgupta.me/credits`. Buy the 1-credit pack with a real payment. Make sure that the balance increases by 1. Refund the payment in the Cashfree dashboard. Make sure that the balance decreases by 1. Call `GET /admin/spend` and make sure that `purchases` is 1.
+5. Checkout name. In the Cashfree production dashboard, set the business name and the logo that the checkout shows. The sandbox checkout shows "Business Name" and the letter B. The checkout also shows the phone +91 9999999999, because MediWise sends one placeholder phone with each order.
+6. Database. Make sure that `0013` and `0014` are on `mediwise-prod` (see Before you merge MEDI-33).
+7. API flag. On the Render service, set `PAYMENTS_ENABLED=true`. Restart the service.
+8. Web flag. In GitHub, Settings, Secrets and variables, Actions, Variables, set `VITE_PAYMENTS_ENABLED` to `true` and `VITE_CASHFREE_MODE` to `production`. Run the deploy again: Actions, `deploy-web`, Run workflow.
+9. Check. Sign in on `https://app.mediwise.theyashgupta.me/credits`. Buy the 1-credit pack with a real payment. Make sure that the browser console shows no Content Security Policy error. Make sure that the balance increases by 1. Refund the payment in the Cashfree dashboard. Make sure that the balance decreases by 1. Call `GET /admin/spend` and make sure that `purchases` is 1.
 
 To turn off payments, set both flags to `false`. A payment that arrives while the API flag is `false` gets a 404. Cashfree retries it 3 times in about 45 minutes and then stops. Give those credits with `credits:grant`.
 
