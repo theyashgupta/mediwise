@@ -1,6 +1,6 @@
 # Payments go-live readiness (MEDI-201)
 
-Check date: 2026-11-28, on `main` at `c1c048d`. Sandbox only. No production key, no production flag, no real payment.
+Check date: 2026-11-28, on `main` at `68dc45f`. The later merge of MEDI-200 changes only `.github/workflows`. Sandbox only. No production key, no production flag, no real payment.
 
 ## Setup
 
