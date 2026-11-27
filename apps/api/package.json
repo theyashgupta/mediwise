@@ -37,7 +37,7 @@
     "review:hindi": "UPDATE_REVIEW=1 vitest run src/eval/hindi-review.test.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "0.133.0",
+    "@anthropic-ai/sdk": "1.7.0",
     "@hono/node-server": "2.1.6",
     "@mediwise/engine": "workspace:*",
     "@mediwise/shared": "workspace:*",
