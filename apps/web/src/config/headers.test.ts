@@ -17,6 +17,13 @@ test("the CSP allows each inline script of index.html by its hash", () => {
   }
 });
 
+test("the CSP lets Cashfree checkout send its payment form in sandbox and production", () => {
+  const formAction = csp.match(/form-action ([^;]+)/)?.[1].split(" ") ?? [];
+  expect(formAction).toEqual(
+    expect.arrayContaining(["'self'", "https://sandbox.cashfree.com", "https://api.cashfree.com"]),
+  );
+});
+
 test("the CSP loads no font from Google and blocks framing", () => {
   expect(csp).not.toMatch(/googleapis|gstatic/);
   expect(csp).toContain("font-src 'self'");
