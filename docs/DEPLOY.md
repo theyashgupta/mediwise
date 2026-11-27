@@ -35,6 +35,24 @@ Never commit a secret. Put API values in the Render dashboard only. The web valu
 - A job cut off by a stop is claimed again after 10 minutes.
 - The rate limits count in memory, so a stop resets them (see Production limits in the API).
 
+## Keep the free projects awake
+
+The Supabase free plan pauses a project after about one week with no database request. `.github/workflows/keep-alive.yml` runs every day at 05:17 and 17:47 UTC, and on demand (Actions, Keep-alive, Run workflow).
+
+- It sends `GET <project URL>/storage/v1/bucket` with the anon key to `mediwise-prod` (secrets `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) and to `mediwise-dev` (secrets `DEV_SUPABASE_URL`, `DEV_SUPABASE_ANON_KEY`). Storage runs a select on `storage.buckets` and returns 200 with an empty list. The REST tables are not used: the anon role has no grant on them, so PostgREST returns 401.
+- It sends `GET https://cms.mediwise.theyashgupta.me/api/content/export?locale=en` (90 s limit, this also queries schema `cms`) and `GET https://mediwise-api-ij2v.onrender.com/health`.
+- Each call uses `curl --fail --retry 3`. A Supabase call that does not return 200 fails the job, and GitHub sends an email to the owner. A CMS or API failure shows only as a warning.
+- The job summary has one line for each target.
+- GitHub disables a scheduled workflow after 60 days with no repository activity. The last step runs `gh workflow enable` for `keep-alive.yml` and `supply-chain-scan.yml`, and this resets the 60-day count. It runs also when a ping fails.
+
+To check it, open the Actions tab, select Keep-alive and read the summary of the last run.
+
+If a project pauses:
+
+1. Restore the project in the Supabase dashboard.
+2. Start a manual deploy of `mediwise-api` and `mediwise-cms` in Render, so that both services connect to the database again.
+3. Run Keep-alive by hand and make sure that each line shows 200.
+
 ## Environment variables
 
 ### API (Render service, Environment)
