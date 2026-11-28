@@ -14,7 +14,9 @@ const password = "e2e-Password-1";
 const debugPort = 9333;
 const runs = 3;
 const referenceBenchmark = 2000;
+const referenceRunner = 3100;
 const maxInpMs = 250;
+const maxRunMs = 400;
 
 const appBudget = { accessibility: 100, "best-practices": 95, seo: 58 };
 const landingBudget = { performance: 75, accessibility: 100, "best-practices": 95, seo: 95 };
@@ -25,17 +27,28 @@ let reportPath: string;
 let cpuSlowdown: number;
 
 /**
- * Returns the Lighthouse CPU slowdown that makes this machine as slow as the reference phone.
+ * Returns the best of 3 Lighthouse benchmark index samples of this machine.
  *
  * @remarks
- * Lighthouse simulates CPU time as the real CPU time times the slowdown, so a slower CI runner scores lower with a fixed 4x.
- * Scaling 4x by the benchmark index (4x at 2000) gives the same phone on every machine. The best of 3 samples ignores a moment of load.
+ * The best sample ignores a moment of load.
  */
-async function calibratedSlowdown() {
+async function benchmarkIndex() {
   let benchmark = 0;
   for (let sample = 0; sample < 3; sample++) {
     benchmark = Math.max(benchmark, await page.evaluate(pageFunctions.computeBenchmarkIndex));
   }
+  return benchmark;
+}
+
+/**
+ * Returns the Lighthouse CPU slowdown that makes this machine as slow as the reference phone.
+ *
+ * @remarks
+ * Lighthouse simulates CPU time as the real CPU time times the slowdown, so a slower CI runner scores lower with a fixed 4x.
+ * Scaling 4x by the benchmark index (4x at 2000) gives the same phone on every machine.
+ */
+async function calibratedSlowdown() {
+  const benchmark = await benchmarkIndex();
   process.stdout.write(
     `benchmark index ${benchmark}, CPU slowdown ${((4 * benchmark) / referenceBenchmark).toFixed(2)}x\n`,
   );
@@ -184,6 +197,37 @@ for (const { name, url, budget } of [
 type Interaction = { duration: number; event: string; target: string };
 
 /**
+ * Measures an interaction `runs` times at 4x the CPU of the median CI runner and checks the median and the worst run.
+ *
+ * @remarks
+ * With a fixed 4x the tab tap followed the runner, from 120 ms at benchmark index 4774 to 296 ms at 2545, and INP times the index stayed within 11%.
+ * Scaling 4x by the index over 3100, the median index of the CI runners, measures the same device on every machine, so a slow runner no longer fails a fast tap.
+ * The worst-run ceiling fails a regression that shows in only one run of three, which the median hides.
+ */
+async function expectInpWithinBudget(name: string, measureRun: () => Promise<Interaction>) {
+  const rate = (4 * (await benchmarkIndex())) / referenceRunner;
+  const cdp = await context.newCDPSession(page);
+  await cdp.send("Emulation.setCPUThrottlingRate", { rate });
+  const all: Interaction[] = [];
+  for (let run = 0; run < runs; run++) all.push(await measureRun());
+  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
+
+  const sorted = all.toSorted((a, b) => a.duration - b.duration);
+  const inp = sorted[Math.floor(runs / 2)]!;
+  const worst = sorted.at(-1)!;
+  process.stdout.write(
+    `inp ${name}: ${inp.duration} ms, CPU slowdown ${rate.toFixed(2)}x, runs ${all.map((i) => `${i.duration} (${i.target})`).join(" ")}\n`,
+  );
+  expect
+    .soft(inp.duration, `INP ${inp.duration} ms, ${inp.event} on ${inp.target}`)
+    .toBeLessThan(maxInpMs);
+  expect(
+    worst.duration,
+    `worst run ${worst.duration} ms, ${worst.event} on ${worst.target}`,
+  ).toBeLessThan(maxRunMs);
+}
+
+/**
  * Loads trends, clicks every category, direction and status chip and both sort buttons twice, and returns the slowest
  * interaction.
  *
@@ -222,19 +266,7 @@ for (const viewport of [
 ]) {
   test(`INP on trends at ${viewport.width} px stays under ${maxInpMs} ms with a 4x CPU throttle`, async () => {
     await page.setViewportSize(viewport);
-    const cdp = await context.newCDPSession(page);
-    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
-    const all: Interaction[] = [];
-    for (let run = 0; run < runs; run++) all.push(await slowestInteraction());
-    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
-
-    const inp = all.toSorted((a, b) => a.duration - b.duration)[Math.floor(runs / 2)]!;
-    process.stdout.write(
-      `inp trends ${viewport.width} px: ${inp.duration} ms, runs ${all.map((i) => `${i.duration} (${i.target})`).join(" ")}\n`,
-    );
-    expect(inp.duration, `INP ${inp.duration} ms, ${inp.event} on ${inp.target}`).toBeLessThan(
-      maxInpMs,
-    );
+    await expectInpWithinBudget(`trends ${viewport.width} px`, slowestInteraction);
   });
 }
 
@@ -269,17 +301,5 @@ async function slowestTabTap() {
 
 test(`a tab tap at 390 px stays under ${maxInpMs} ms with a 4x CPU throttle`, async () => {
   await page.setViewportSize({ width: 390, height: 844 });
-  const cdp = await context.newCDPSession(page);
-  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
-  const all: Interaction[] = [];
-  for (let run = 0; run < runs; run++) all.push(await slowestTabTap());
-  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
-
-  const inp = all.toSorted((a, b) => a.duration - b.duration)[Math.floor(runs / 2)]!;
-  process.stdout.write(
-    `inp tab tap 390 px: ${inp.duration} ms, runs ${all.map((i) => `${i.duration} (${i.target})`).join(" ")}\n`,
-  );
-  expect(inp.duration, `INP ${inp.duration} ms, ${inp.event} on ${inp.target}`).toBeLessThan(
-    maxInpMs,
-  );
+  await expectInpWithinBudget("tab tap 390 px", slowestTabTap);
 });
